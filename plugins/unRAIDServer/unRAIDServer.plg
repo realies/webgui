@@ -3,10 +3,10 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "unRAIDServer">
 <!ENTITY author    "LimeTech">
-<!ENTITY branch    "master">
-<!ENTITY version   "6.3.0-rc6">
+<!ENTITY branch    "6.3">
+<!ENTITY version   "6.3.0">
 <!ENTITY pluginURL "https://raw.github.com/limetech/webgui/&branch;/plugins/&name;/&name;.plg">
-<!ENTITY category  "next">
+<!ENTITY category  "stable">
 
 <!ENTITY zip       "https://s3.amazonaws.com/dnld.lime-technology.com/&category;/unRAIDServer-&version;-x86_64.zip">
 <!ENTITY md5       "https://s3.amazonaws.com/dnld.lime-technology.com/&category;/unRAIDServer-&version;-x86_64.md5">
@@ -24,6 +24,11 @@
 <![CDATA[
 unRAID Server OS Change Log
 ===========================
+
+Version 6.3.0 2016-12-14
+----------------------
+
+- stable release version
 
 Version 6.3.0-rc6 2016-12-07
 ----------------------------
