@@ -139,11 +139,12 @@ $memory_installed = exec("dmidecode -t 17 | awk -F: '/^\tSize: [0-9]+ MB$/{t+=$2
 // Physical Memory Array (16) usually one of these for a desktop-class motherboard but higher-end xeon motherboards
 // might have two or more of these.  The trick is to filter out any Flash/Bios types by matching on GB
 // Sum up all the Physical Memory Arrays to get the motherboard's total memory capacity
-$memory_maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
-$star = "";
+// Extract error correction type, if none, do not include additional information in the output
+list($memory_maximum, $ecc_support) = array_map("trim", explode("#", exec("dmidecode -t16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2};/^\tError Correction Type:/{e=$2} END{print t\"#\"e}'")));
 // If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
+$star = "";
 if ($memory_maximum < $memory_installed) {$memory_maximum = pow(2,ceil(log($memory_installed)/log(2))); $star = "*";}
-echo "$memory_installed GB (max. installable capacity $memory_maximum GB)$star";
+echo "$memory_installed GB ".($ecc_support == "None" ? "" : "$ecc_support ")."(max. installable capacity $memory_maximum GB)$star";
 ?>
 </div>
 <div><span class="key">Network:</span>
