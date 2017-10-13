@@ -29,6 +29,8 @@
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:15px;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
+.dynamix_back-to-top {background: none;margin: 0;position: fixed;bottom: 30px;right: 0;width: 30px;height: 30px;z-index: 100;display: none;text-decoration: none;color: #ffffff;}
+
 <?
 $banner = '/boot/config/plugins/dynamix/banner.png';
 echo "#header.image{background-image:url(";
