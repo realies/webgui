@@ -295,6 +295,7 @@ $(document).ajaxSend(function(elm, xhr, s){
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
    </div>
   </div>
+  <a href="#" class="dynamix_back-to-top" style="display: none;" title='Back To Top';><i href="#" class="fa fa-arrow-circle-up dynamix_back-to-top" aria-hidden="true" style="color:green;font-size:25px;"></i></a>
 <?
 // Build page menus
 echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
@@ -542,6 +543,22 @@ $(function() {
     $('#statusbar').html(status);
   });
   watchdog.start();
+});
+  
+var backtotopoffset = 250;
+var backtotopduration = 500;
+$(window).scroll(function() {
+	if ($(this).scrollTop() > backtotopoffset) {
+		$('.dynamix_back-to-top').fadeIn(backtotopduration);
+	} else {
+		$('.dynamix_back-to-top').fadeOut(backtotopduration);
+	}
+});
+
+$('.dynamix_back-to-top').click(function(event) {
+	event.preventDefault();
+	$('html, body').animate({scrollTop: 0},backtotopduration);
+	return false;
 });
 </script>
 </body>
