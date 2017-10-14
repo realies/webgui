@@ -31,11 +31,9 @@ if (empty($iommu_groups)) {
     echo "<tr><td>".$iommu_groups[$i++]." ".$strDesc."</td></tr>";
   }
 } else {
-  $spacer = false;
   foreach (explode("\n", $iommu_groups) as $iommu_group) {
     if ($iommu_group[0]=='I') {
-      if ($spacer) echo "<tr><td colspan='2'>&nbsp;</td></tr>"; else $spacer = true;
-      echo "<tr><td>$iommu_group</td><td>";
+      echo "<tr><td colspan='2'>&nbsp;</td></tr><tr><td>$iommu_group</td><td>";
       $append = true;
     } else {
       echo preg_replace("/^\t/",$append?"":"<tr><td></td><td>",$iommu_group)."</td></tr>";
