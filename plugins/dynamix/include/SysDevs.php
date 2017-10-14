@@ -11,7 +11,7 @@
  */
 ?>
 <?
-switch ($_GET['table']) {
+switch ($_POST['table']) {
 case 't1':
   $groups = shell_exec('for group in $(ls /sys/kernel/iommu_groups/ -1|sort -n);do echo "IOMMU group $group"; for device in $(ls -1 "/sys/kernel/iommu_groups/$group"/devices/); do echo -n $\'\t\';lspci -ns "$device"|awk \'BEGIN{ORS=" "}{print "["$3"]"}\';lspci -s "$device"; done; done');
   if (empty($groups)) {

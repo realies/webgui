@@ -22,10 +22,10 @@ table tr td.thin{line-height:8px;height:8px}
 </style>
 <script>
 $(function(){
-  $.get('/webGui/include/SysDevs.php',{table:'t1'},function(data){$('#t1').html(data)});
-  $.get('/webGui/include/SysDevs.php',{table:'t2'},function(data){$('#t2').html(data)});
-  $.get('/webGui/include/SysDevs.php',{table:'t3'},function(data){$('#t3').html(data)});
-  $.get('/webGui/include/SysDevs.php',{table:'t4'},function(data){$('#t4').html(data)});
+  $('#t1').load('/webGui/include/SysDevs.php',{table:'t1'});
+  $('#t2').load('/webGui/include/SysDevs.php',{table:'t2'});
+  $('#t3').load('/webGui/include/SysDevs.php',{table:'t3'});
+  $('#t4').load('/webGui/include/SysDevs.php',{table:'t4'});
 });
 </script>
 
