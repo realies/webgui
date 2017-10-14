@@ -21,30 +21,42 @@ Tag="list"
 <?if (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false):?>
 <p class="notice">Warning: Your system has booted with the PCIe ACS Override setting enabled. The below list doesn't not reflect the way IOMMU would naturally group devices. To see natural IOMMU groups for your hardware, go to the <b><a href="/Settings/VMSettings">VM Settings</a></b> page and set the <b>PCIe ACS Override</b> setting to <b>No</b>.</p>
 <?endif;?>
-<pre><?
-	$iommu_groups = shell_exec('for iommu_group in $(ls /sys/kernel/iommu_groups/ -1 | sort -n);do echo "IOMMU group $iommu_group"; for device in $(ls -1 "/sys/kernel/iommu_groups/$iommu_group"/devices/); do echo -n $\'\t\';lspci -ns "$device" | awk \'BEGIN{ORS=" "}{ print "["$3"]" }\';lspci -s "$device"; done; done');
-	if (empty($iommu_groups)) {
-		$iommu_groups = explode("\n", shell_exec("lspci -n | awk '{ print \"[\"\$3\"]\" }'"));
-		$i = 0;
-		foreach (explode("\n", shell_exec("lspci")) as $strDesc) {
-			$iommu_groups[$i++] .= " $strDesc";
-		}
-		$iommu_groups = implode("\n", $iommu_groups);
-	}
-	echo $iommu_groups;
-?></pre>
+<?
+echo "<pre><table>";
+$iommu_groups = shell_exec('for iommu_group in $(ls /sys/kernel/iommu_groups/ -1|sort -n);do echo "IOMMU group $iommu_group"; for device in $(ls -1 "/sys/kernel/iommu_groups/$iommu_group"/devices/); do echo -n $\'\t\';lspci -ns "$device"|awk \'BEGIN{ORS=" "}{print "["$3"]"}\';lspci -s "$device"; done; done');
+if (empty($iommu_groups)) {
+  $iommu_groups = explode("\n", shell_exec("lspci -n|awk '{print \"[\"\$3\"]\"}'"));
+  $i = 0;
+  foreach (explode("\n", shell_exec("lspci")) as $strDesc) {
+    echo "<tr><td>".$iommu_groups[$i++]." ".$strDesc."</td></tr>";
+  }
+} else {
+  $spacer = false;
+  foreach (explode("\n", $iommu_groups) as $iommu_group) {
+    if ($iommu_group[0]=='I') {
+      if ($spacer) echo "<tr><td colspan='2'>&nbsp;</td></tr>"; else $spacer = true;
+      echo "<tr><td>$iommu_group</td><td>";
+      $append = true;
+    } else {
+      echo preg_replace("/^\t/",$append?"":"<tr><td></td><td>",$iommu_group)."</td></tr>";
+      $append = false;
+    }
+  }
+}
+echo "</table></pre>";
+?>
 
 **CPU Thread Pairings**
 
 > This displays a list of CPU thread pairings.
 
-<pre><?=preg_replace(['/(\d+)[-,](\d+)/','/(\d+)\b/'], ['$1 / $2','cpu $1'], shell_exec("cat /sys/devices/system/cpu/*/topology/thread_siblings_list | sort -nu"))?></pre>
+<pre><?=preg_replace(['/(\d+)[-,](\d+)/','/(\d+)\b/'], ['$1 / $2','cpu $1'], shell_exec("cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu"))?></pre>
 
 **USB Devices**
 
 > This displays the output of the `lsusb` command.  The numeric identifiers are used to configure PCI pass-through.
 
-<pre><?=shell_exec("lsusb | sort")?></pre>
+<pre><?=shell_exec("lsusb|sort")?></pre>
 
 **SCSI Devices**
 
