@@ -99,7 +99,7 @@ function assignment(&$disk) {
 function fs_info(&$disk) {
   global $display;
   if ($disk['fsStatus']=='-') {
-    echo "<td colspan='5'></td>";
+    echo $disk['type']=='Cache' ? "<td>".str_replace('luks:','',$disk['fsType'])."</td><td colspan='3'>Device is part of cache pool</td><td></td>" : "<td colspan='5'></td>";
     return;
   } elseif ($disk['fsStatus']=='Mounted') {
     echo "<td>".str_replace('luks:','',$disk['fsType'])."</td>";
