@@ -13,15 +13,14 @@
 <?
 switch ($_POST['table']) {
 case 't1':
-  $groups = shell_exec('for group in $(ls /sys/kernel/iommu_groups/ -1|sort -n);do echo "IOMMU group $group"; for device in $(ls -1 "/sys/kernel/iommu_groups/$group"/devices/); do echo -n $\'\t\';lspci -ns "$device"|awk \'BEGIN{ORS=" "}{print "["$3"]"}\';lspci -s "$device"; done; done');
+  exec('for group in $(ls /sys/kernel/iommu_groups/ -1|sort -n);do echo "IOMMU group $group";for device in $(ls -1 "/sys/kernel/iommu_groups/$group"/devices/);do echo -n $\'\t\';lspci -ns "$device"|awk \'BEGIN{ORS=" "}{print "["$3"]"}\';lspci -s "$device";done;done',$groups);
   if (empty($groups)) {
-    $iommu = explode("\n", shell_exec("lspci -n|awk '{print \"[\"\$3\"]\"}'"));
+    exec('lspci -n|awk \'{print "["$3"]"}\'',$iommu);
+    exec('lspci',$lspci);
     $i = 0;
-    foreach (explode("\n", shell_exec("lspci")) as $line) {
-      echo "<tr><td>".$iommu[$i++]."</td><td>$line</td></tr>";
-    }
+    foreach ($lspci as $line) echo "<tr><td>".$iommu[$i++]."</td><td>$line</td></tr>";
   } else {
-    foreach (explode("\n", $groups) as $line) {
+    foreach ($groups as $line) {
       if (!$line) continue;
       if ($line[0]=='I') {
         if ($spacer) echo "<tr><td colspan='2' class='thin'></td>"; else $spacer = true;
@@ -35,21 +34,25 @@ case 't1':
   }
   break;
 case 't2':
+  exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu',$pairs);
   $i = 1;
-  foreach (explode("\n", preg_replace(['/(\d+)[-,](\d+)/','/(\d+)\b/'], ['$1 / $2','cpu $1'], shell_exec("cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu"))) as $line) {
+  foreach ($pairs as $line) {
     if (!$line) continue;
-    echo "<tr><td>".(strpos($line,'/')!==false?"Pair ".$i++:"Single").":</td><td>$line</td></tr>";
+    $line = preg_replace(['/(\d+)[-,](\d+)/','/(\d+)\b/'],['$1 / $2','cpu $1'],$line);
+    echo "<tr><td>".(strpos($line,'/')===false?"Single":"Pair ".$i++).":</td><td>$line</td></tr>";
   }
   break;
 case 't3':
-  foreach (explode("\n", shell_exec("lsusb|sort")) as $line) {
+  exec('lsusb|sort',$lsusb);
+  foreach ($lsusb as $line) {
     if (!$line) continue;
     list($bus,$id) = explode(':', $line, 2);
     echo "<tr><td>$bus:</td><td>".trim($id)."</td></tr>";
   }
   break;
 case 't4':
-  foreach (explode("\n", shell_exec("lsscsi -s")) as $line) {
+  exec('lsscsi -s',$lsscsi);
+  foreach ($lsscsi as $line) {
     if (!$line || strpos($line,'/dev/')===false) continue;
     echo "<tr><td>".preg_replace('/\]  +/',']</td><td>',$line)."</td></tr>";
   }
