@@ -29,6 +29,8 @@
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:15px;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
+.dynamix_back-to-top {background: none;margin: 0;position: fixed;bottom: 30px;right: 0;width: 30px;height: 30px;z-index: 100;display: none;text-decoration: none;color: #ffffff;}
+
 <?
 $banner = '/boot/config/plugins/dynamix/banner.png';
 echo "#header.image{background-image:url(";
@@ -295,6 +297,7 @@ $(document).ajaxSend(function(elm, xhr, s){
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
    </div>
   </div>
+  <a href="#" class="dynamix_back-to-top" style="display: none;" title='Back To Top';><i href="#" class="fa fa-arrow-circle-up dynamix_back-to-top" aria-hidden="true" style="color:green;font-size:25px;"></i></a>
 <?
 // Build page menus
 echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
@@ -542,6 +545,22 @@ $(function() {
     $('#statusbar').html(status);
   });
   watchdog.start();
+});
+  
+var backtotopoffset = 250;
+var backtotopduration = 500;
+$(window).scroll(function() {
+	if ($(this).scrollTop() > backtotopoffset) {
+		$('.dynamix_back-to-top').fadeIn(backtotopduration);
+	} else {
+		$('.dynamix_back-to-top').fadeOut(backtotopduration);
+	}
+});
+
+$('.dynamix_back-to-top').click(function(event) {
+	event.preventDefault();
+	$('html, body').animate({scrollTop: 0},backtotopduration);
+	return false;
 });
 </script>
 </body>
