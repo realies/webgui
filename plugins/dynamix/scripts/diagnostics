@@ -180,8 +180,10 @@ exec("ls -l /dev/disk/by-id/[asun]* 2>/dev/null|sed '/-part/d;s|^.*/by-id/[^-]*-
 foreach ($devices as $device) {
   list($name,$dev) = explode(' ',$device);
   $type = '';
+  $diskName = '';
   foreach ($disks as $find) {
     if ($find['device']==$dev) {
+      $diskName = $find['name'];
       $type = isset($find['smType']) ? $find['smType'] : -1;
       if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
       if ($type) {
@@ -198,7 +200,7 @@ foreach ($devices as $device) {
       break;
     }
   }
-  exec("smartctl -a $type ".escapeshellarg("/dev/$dev")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date.txt"));
+  exec("smartctl -a $type ".escapeshellarg("/dev/$dev")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($dev).txt"));
 }
 // create cache pool information
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')) {
