@@ -187,10 +187,10 @@ toggle_diskio(true);
       <tr><td><strong>Unmountable disk<?=$var['fsNumUnmountable']==1?'':'s'?> present:</strong><br>
 <?    foreach ($disks as $disk) if (strpos($disk['fsStatus'],'Unmountable')!==false)
       echo "<span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")<br>";?>
-      </td><td><input type="submit" id="submit" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
+      </td><td><input type="submit" id="btnFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
       <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
 <?    if ($var['mdResync']==0):?>
-      <input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#submit').prop('disabled',!arrayOps.confirmFormat.checked)">
+      <input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
       <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" style="cursor:help" title="All data is permanently lost.&#10;This is not used to recover data."></i></small>
 <?    else:?>
       <small>Disabled -- Parity operation is running</small>
