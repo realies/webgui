@@ -37,7 +37,6 @@ case 't2':
   exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu',$pairs);
   $i = 1;
   foreach ($pairs as $line) {
-    if (!$line) continue;
     $line = preg_replace(['/(\d+)[-,](\d+)/','/(\d+)\b/'],['$1 / $2','cpu $1'],$line);
     echo "<tr><td>".(strpos($line,'/')===false?"Single":"Pair ".$i++).":</td><td>$line</td></tr>";
   }
@@ -45,7 +44,6 @@ case 't2':
 case 't3':
   exec('lsusb|sort',$lsusb);
   foreach ($lsusb as $line) {
-    if (!$line) continue;
     list($bus,$id) = explode(':', $line, 2);
     echo "<tr><td>$bus:</td><td>".trim($id)."</td></tr>";
   }
@@ -53,7 +51,7 @@ case 't3':
 case 't4':
   exec('lsscsi -s',$lsscsi);
   foreach ($lsscsi as $line) {
-    if (!$line || strpos($line,'/dev/')===false) continue;
+    if (strpos($line,'/dev/')===false) continue;
     echo "<tr><td>".preg_replace('/\]  +/',']</td><td>',$line)."</td></tr>";
   }
   break;
