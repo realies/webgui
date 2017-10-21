@@ -23,15 +23,6 @@ function displayTemp($temp) {
   global $display;
   return $display['unit']=='F' ? round($temp*9/5)+32 : $temp;
 }
-function luks_status($luksState) {
-  switch ($luksState) {
-    case 0: return 'Not encrypted'; break;
-    case 1: return 'Encrypted'; break;
-    case 2: return 'Missing encryption key'; break;
-    case 3: return 'Wrong encryption key'; break;
-   default: return 'Unknown error'; break;
-  }
-}
 function maintenance_mode() {
   global $var, $disk;
   return ($var['fsState']=="Started" && $var['startMode']=="Maintenance" && $disk['luksState']<=1);
@@ -102,7 +93,7 @@ Name:
 : <span class='big'><?=htmlspecialchars(my_disk($name))?></span>
 
 Partition size:
-: <?=my_number($disk['size'])?> KB (K=1024)
+: <?=my_number($disk['sizeSb'])?> KB (K=1024)
 
 Partition format:
 : <?=$disk['format']?>
