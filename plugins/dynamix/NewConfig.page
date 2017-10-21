@@ -53,7 +53,7 @@ if it were a fresh new server.
 This is useful when you have added or removed multiple drives and wish to rebuild parity based on
 the new configuration.
 
-Use the *'Retain current configuration'* selection to populate the desired disk slots ***after*** the array has been reset. By default **no** disk slots are populated.
+Use the *'Preserve current assignments'* selection to populate the desired disk slots ***after*** the array has been reset. By default **no** disk slots are populated.
 
 **DO NOT USE THIS UTILITY THINKING IT WILL REBUILD A FAILED DRIVE** - it will have the opposite
 effect of making it ***impossible*** to rebuild an existing failed drive - you have been warned!
@@ -64,7 +64,7 @@ effect of making it ***impossible*** to rebuild an existing failed drive - you h
 <input type="hidden" name="preserveData" value="yes" disabled>
 <input type="hidden" name="preserveCache" value="yes" disabled>
 
-<span class="indent">Retain current configuration:</span>
+<span class="indent">Preserve current assignments:</span>
 <select id="s1" name="preset" size="1" multiple="multiple" style="display:none">
 <option value=''>All</option>
 <?=mk_option_check(0,'parity','Parity slots')?>
