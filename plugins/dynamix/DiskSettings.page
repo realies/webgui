@@ -127,9 +127,9 @@ Default file system:
   <?=mk_option($var['defaultFsType'], "xfs", "xfs");?>
   <?=mk_option($var['defaultFsType'], "btrfs", "btrfs");?>
   <?=mk_option($var['defaultFsType'], "reiserfs", "reiserfs");?>
-  <?=mk_option($var['defaultFsType'], "luks:xfs", "luks:xfs - encrypted");?>
-  <?=mk_option($var['defaultFsType'], "luks:btrfs", "luks:btrfs - encrypted");?>
-  <?=mk_option($var['defaultFsType'], "luks:reiserfs", "luks:reiserfs - encrypted");?>
+  <?=mk_option($var['defaultFsType'], "luks:xfs", "xfs - encrypted");?>
+  <?=mk_option($var['defaultFsType'], "luks:btrfs", "btrfs - encrypted");?>
+  <?=mk_option($var['defaultFsType'], "luks:reiserfs", "reiserfs - encrypted");?>
   </select>
 
 > Defines the default file system type to create when an *unmountable* array device is formatted.
