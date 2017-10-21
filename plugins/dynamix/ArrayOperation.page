@@ -15,7 +15,7 @@ Tag="snowflake-o"
  */
 ?>
 <?
-$stop = ($var['fsEncryption']=='wrong' || ($var['fsEncryption']=='missing' && $var['luksRestricted']=='yes')) ? 'disabled':'';
+$stop = (file_exists($var['luksKeyfile']) && $var['fsEncryption']=='wrong') || ($var['fsEncryption']=='missing' && $var['luksRestricted']=='yes') ? 'disabled':'';
 
 function maintenance_mode() {
   echo "<tr>";
@@ -189,12 +189,8 @@ toggle_diskio(true);
       echo "<span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")<br>";?>
       </td><td><input type="submit" id="btnFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
       <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
-<?    if ($var['mdResync']==0):?>
       <input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
       <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" style="cursor:help" title="All data is permanently lost.&#10;This is not used to recover data."></i></small>
-<?    else:?>
-      <small>Disabled -- Parity operation is running</small>
-<?    endif;?>
       </td></tr>
 <?  endif;
     if (!$parity):
@@ -309,7 +305,7 @@ toggle_diskio(true);
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
 <?    endif;
       maintenance_mode();
-      if ($var['fsEncryption']=='wrong' || $var['fsEncryption']=='missing'):?>
+      if ((file_exists($var['luksKeyfile']) && $var['fsEncryption']=='wrong') || $var['fsEncryption']=='missing'):?>
       <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$var['fsEncryption']=='wrong'?'Wrong key':'Missing key'?></span></td></tr>
       <tr><td></td><td class="gap">Encryption input:</td><td><select name="input" size="1" onchange="selectInput(this.form)"><?=mk_option(1,"text","Passphrase")?><?=mk_option(1,"file","Keyfile")?></select></td></tr>
       <tr id="text"><td></td><td class="gap">Passphrase:</td><td><input type="password" name="text" maxlength="512" value="" onkeyup="toggleStart(this.value)"><input type="checkbox" onchange="showPass(this.checked)">show passphrase</td></tr>
