@@ -80,14 +80,13 @@ function base_net($route) {
 select.mask{min-width:0;margin:0 10px 0 4px}
 select.net{min-width:0;margin:0 4px 0 0}
 select option.hide{display:none}
+input.net{width:146px;margin:0 4px 0 0}
 span.net{margin-right:8px}
-span.net6{margin-right:8px}
 <?if (strstr('white,azure',$display['theme'])):?>
 span.disabled{color:#B0B0B0}
 <?else:?>
 span.disabled{color:#404040}
 <?endif;?>
-input.net6{width:146px;margin:0 4px 0 0}
 </style>
 <span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
 
@@ -277,8 +276,8 @@ DHCPv6 pool of custom network <?=$network?> (optional):
   $mask_user = $dhcp ? explode('/',$dhcp)[1] : $mask;
 ?>
 : <input type="checkbox" id="<?=$docker_dhcp6?>_edit" onchange="changeEdit6(this.id)"<?=$dhcp?'checked':''?>>
-  <span id="<?=$docker_dhcp6?>_net" class="net6 <?=$disabled?>"><?=$net?>:</span><?
-  echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net6\" $disabled>/";
+  <span id="<?=$docker_dhcp6?>_net" class="net <?=$disabled?>"><?=$net?>:</span><?
+  echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $disabled>/";
   echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $disabled>";
   for ($m=$mask; $m<=120; $m+=8) echo mk_option($mask_user,$m,$m);
   echo "</select><input type=\"hidden\" name=\"$docker_dhcp6\" value=\"\">";
