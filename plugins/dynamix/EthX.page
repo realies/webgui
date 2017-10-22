@@ -189,7 +189,7 @@ IPv4 address:
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24", $ethX["IPADDR:$i"]?"":"selected");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "25");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "26");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "27");?>
@@ -278,7 +278,7 @@ IPv4 address:
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24", $ethX["IPADDR:$i"]?"":"selected");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "25");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "26");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "27");?>
