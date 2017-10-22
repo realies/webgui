@@ -251,12 +251,12 @@ DHCPv4 pool of custom network <?=$network?> (optional):
   echo "/";
   echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id)\" $disabled>";
   for ($m=$mask; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
-  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">(".($size-2)." hosts)</span>";
+  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">($size hosts)</span>";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
 ?>
 <?elseif ($dockercfg[$docker_dhcp]):?>
 DHCPv4 pool of custom network <?=$network?>:
-: <?=$dockercfg[$docker_dhcp]?>
+: <?=$dockercfg[$docker_dhcp]?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)
 <?endif;?>
 
 <?endforeach;?>
@@ -384,7 +384,7 @@ function changeEdit6(id) {
 function changeMask(id) {
   var mask = Math.pow(2,32-$('#'+id).val());
   id = '#'+id.substr(0,id.length-4);
-  $(id+'size').html('('+(mask-2)+' hosts)');
+  $(id+'size').html('('+mask+' hosts)');
   for (var b=1; b<=3; b++) {
     var cell = id+b;
     switch (b) {
