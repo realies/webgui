@@ -72,7 +72,7 @@ $(function() {
   });
 <?endif;?>
 <?if ($locked || $service):?>
-  disableForm(form,true);
+  disableForm(form);
 <?endif;?>
 <?if ($no_eth0):?>
   $('input[name="#shut_ethX"]').prop('disabled',true);
@@ -185,43 +185,33 @@ IP address assignment:
 
 <div class="ethX-ipv4-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
-: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of the interface.
-
-IPv4 network mask:
-: <select name="NETMASK:<?=$i?>" size="1">
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "255.255.0.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "255.255.252.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "255.255.254.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "255.255.255.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "255.255.255.128");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "255.255.255.192");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "255.255.255.224");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.240", "255.255.255.240");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.248", "255.255.255.248");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.252", "255.255.255.252");?>
+: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "25");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "26");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "27");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.240", "28");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.248", "29");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.252", "30");?>
   </select>
 
-> Greyed out when using automatic IP assignment. Otherwise specify here the associated network mask, by default 255.255.255.0 is selected.
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address and mask of the interface.
 
 IPv4 default gateway:
 : <input type="text" name="GATEWAY:<?=$i?>" maxlength="15" value="<?=$ethX["GATEWAY:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-  <input type="text" name="METRIC:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC:$i"]?>" class="trim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
+  <input type="text" name="METRIC:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
 <div class="ethX-ipv6-<?=$i?>" style="display:none" markdown="1">
 IPv6 address:
-: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="slim">
 
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the interface.
-
-IPv6 prefix:
-: <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="trim">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the associated prefix value of 1 to 128.
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address and prefix of the interface.
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$ethX["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
@@ -284,43 +274,33 @@ IP address assignment:
 
 <div class="ethX-ipv4-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
-: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-
-> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the IPv4 address of the interface.
-
-IPv4 network mask:
-: <select name="NETMASK:<?=$i?>" size="1">
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "255.255.0.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "255.255.252.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "255.255.254.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "255.255.255.0");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "255.255.255.128");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "255.255.255.192");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "255.255.255.224");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.240", "255.255.255.240");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.248", "255.255.255.248");?>
-  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.252", "255.255.255.252");?>
+: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.128", "25");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.192", "26");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.224", "27");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.240", "28");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.248", "29");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.255.252", "30");?>
   </select>
 
-> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the associated network mask, by default 255.255.255.0 is selected.
+> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the IPv4 address and mask of the interface.
 
 IPv4 default gateway:
 : <input type="text" name="GATEWAY:<?=$i?>" maxlength="15" value="<?=$ethX["GATEWAY:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-  <input type="text" name="METRIC:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC:$i"]?>" class="trim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
+  <input type="text" name="METRIC:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
 <div class="ethX-ipv6-<?=$i?>" style="display:none" markdown="1">
 IPv6 address:
-: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="slim">
 
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the interface.
-
-IPv6 prefix:
-: <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="trim">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the associated prefix value of 1 to 128.
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address and prefix of the interface.
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$ethX["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
@@ -376,43 +356,33 @@ IP address assignment:
 
 <div class="ethX-ipv4-INDEX" style="display:none" markdown="1">
 IPv4 address:
-: <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$ethX["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-
-> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the IPv4 address of the interface.
-
-IPv4 network mask:
-: <select name="NETMASK:INDEX" size="1">
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.0.0", "255.255.0.0");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.252.0", "255.255.252.0");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.254.0", "255.255.254.0");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.0", "255.255.255.0");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.128", "255.255.255.128");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.192", "255.255.255.192");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.224", "255.255.255.224");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.240", "255.255.255.240");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.248", "255.255.255.248");?>
-  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.252", "255.255.255.252");?>
+: <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$ethX["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.252.0", "22");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.254.0", "23");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.0", "24", "selected");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.128", "25");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.192", "26");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.224", "27");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.240", "28");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.248", "29");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.252", "30");?>
   </select>
 
-> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the associated network mask, by default 255.255.255.0 is selected.
+> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the IPv4 address and mask of the interface.
 
 IPv4 default gateway:
 : <input type="text" name="GATEWAY:INDEX" maxlength="15" value="<?=$ethX["GATEWAY:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-  <input type="text" name="METRIC:INDEX" min="1" max="9999" value="<?=$ethX["METRIC:INDEX"]?>" class="trim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
+  <input type="text" name="METRIC:INDEX" min="1" max="9999" value="<?=$ethX["METRIC:INDEX"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
 <div class="ethX-ipv6-INDEX" style="display:none" markdown="1">
 IPv6 address:
-: <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$ethX["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+: <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$ethX["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$ethX["NETMASK6:INDEX"]?>" class="slim">
 
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the interface.
-
-IPv6 prefix:
-: <input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$ethX["NETMASK6:INDEX"]?>" class="trim">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the associated prefix value of 1 to 128.
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address and prefix of the interface.
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:INDEX" maxlength="39" value="<?=$ethX["GATEWAY6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
