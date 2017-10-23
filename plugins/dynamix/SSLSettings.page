@@ -64,9 +64,11 @@ function updateDNS(internalip, keyfile, button) {
 }
 </script>
 <?
-$keyfile = base64_encode(file_get_contents($var['regFILE']));
-$disabled = file_exists("/boot/config/ssl/certs/certificate_bundle.pem") || $var['USE_SSL']!="auto" ? 'disabled' : '';
-$disabled_updatedns = file_exists("/boot/config/ssl/certs/certificate_bundle.pem") ? '' : 'disabled';
+$keyfile = @file_get_contents($var['regFILE']);
+if ($keyfile !== false)
+  $keyfile = @base64_encode($keyfile);
+$disabled = $keyfile===false || file_exists("/boot/config/ssl/certs/certificate_bundle.pem") || $var['USE_SSL']!="auto" ? 'disabled' : '';
+$disabled_updatedns = $keyfile!==false && file_exists("/boot/config/ssl/certs/certificate_bundle.pem") ? '' : 'disabled';
 ?>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 Use SSL/TLS:
@@ -78,12 +80,18 @@ Use SSL/TLS:
 
 > Determines how the webGui responds to HTTP and/or HTTPS protocol.
 >
-> Select **No** to disable HTTPS (but HTTPS is redirected to HTTP).
+> Select **No** to disable HTTPS (but HTTPS is recognized and redirected to HTTP).
 >
 > Select **Yes** to enable HTTPS and redirect HTTP to HTTPS.
 >
-> With **Auto** selected, behaves like **Yes** if a non-self-signed SSL certificate is
-> installed; otherwise, behaves like **No**.
+> With **Auto** selected, behaves like **No** if only a self-signed SSL certificate is present.  If
+> a Lets Encrypt or other user supplied SSL certificate if present, behavies like **Yes**.
+>
+> A self-signed SSL certificate is automatically generated during start-up in the
+> file `/boot/config/ssl/certs/<hostname>_unraid_bundle.pem` if it does not already exist.
+>
+> A Lets Encrypt or other user-generated SSL certificate, must be stored in the
+> file `/boot/config/ssl/csrts/certificate_bundle.pem`.  *nginx* will prefer ths certificate if present.
 
 HTTP port:
 : <input type="number" name="PORT" class="trim" min="0" max="65535" value="<?=htmlspecialchars($var['PORT'])?>">
