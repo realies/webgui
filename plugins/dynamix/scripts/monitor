@@ -16,7 +16,7 @@ $var   = parse_ini_file("/var/local/emhttp/var.ini");
 $devs  = parse_ini_file("/var/local/emhttp/devs.ini",true);
 $disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
 
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Wrappers.php";
 require_once "$docroot/webGui/include/Preselect.php";
 require_once "$docroot/webGui/include/CustomMerge.php";
@@ -31,33 +31,40 @@ $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
 $errors = [];
 
+function getVal(&$ref,$n,$d) {
+  global $var;
+  $val = $ref[$n] ?? -1;
+  return $val!==-1 ? $val : ($var[$n] ?? $d);
+}
 function plus($val,$word,$last) {
   return $val>0 ? (($val||$last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
 function my_temp($value) {
-  global $unraid;
-  $unit = $unraid['display']['unit'];
-  return ($unit=='F' ? round(9/5*$value+32) : str_replace('.', $unraid['display']['number'][0], $value))." $unit";
+  return ($unit=='F' ? round(9/5*$value+32) : $value)." $unit";
 }
 function my_disk($name) {
-  return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
+  return ucfirst(preg_replace('/^(disk|cache|parity)(\d+)/','$1 $2',$name));
 }
-function my_scale($value,&$unit,$precision=NULL) {
+function my_scale($value, &$unit, $decimals=NULL, $scale=NULL) {
   global $unraid;
-  $scale = $unraid['display']['scale'];
+  $scale = $scale ?? $unraid['display']['scale'];
   $number = $unraid['display']['number'];
-  $units = ['B','KB','MB','GB','TB','PB'];
-  if ($scale==0 && $precision===NULL) {
+  $units = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
+  $size = count($units);
+  if ($scale==0 && ($decimals===NULL || $decimals<0)) {
+    $decimals = 0;
     $unit = '';
-    return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
-    $value = round($value/pow(1000, $base), $precision===NULL ? 2 : $precision);
-    if ($value>=1000 && $scale<0) { $value = 1; $base++; }
+    if ($base>$size) $base = $size-1;
+    $value /= pow(1000, $base);
+    if ($decimals===NULL) $decimals = $value>=100 ? 0 : ($value>=10 ? 1 : (round($value*100)%100===0 ? 0 : 2));
+    elseif ($decimals<0) $decimals = $value>=100||round($value*10)%10===0 ? 0 : abs($decimals);
+    if ($scale<0 && round($value,-1)==1000) {$value = 1; $base++;}
     $unit = $units[$base];
-    return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
+  return number_format($value, $decimals, $number[0], $value>=10000 ? $number[1] : '');
 }
 function my_check($time,$speed) {
   if (!$time) return 'unavailable (no parity-check entries logged)';
@@ -92,7 +99,7 @@ function check_temp($name,$temp,$text,$info) {
   $max  = $disk['maxTemp'] ?? $unraid['display']['max'];
   $warn = $temp>=$max && $max>0 ? 'alert' : ($temp>=$hot && $hot>0 ? 'warning' : '');
   $item = 'temp';
-  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+  $last = $saved[$item][$name] ?? 0;
   if ($warn) {
     if ($temp>$last) {
       exec("$notify -e ".escapeshellarg("unRAID $text temperature")." -s ".escapeshellarg(ucfirst($warn)." [$server] - $text ".($warn=='alert'?'overheated (':'is hot (').my_temp($temp).")")." -d ".escapeshellarg("$info")." -i \"$warn\"");
@@ -108,10 +115,10 @@ function check_temp($name,$temp,$text,$info) {
 function check_smart($name,$port,$text,$info) {
   global $var,$disks,$notify,$saved,$server,$numbers;
   $disk = &$disks[$name];
-  $select = $disk['smSelect'] ?? -1; if ($select==-1) $select = $var['smSelect'] ?? 0;
-  $level  = $disk['smLevel'] ?? -1; if ($level==-1) $level = $var['smLevel'] ?? 1;
-  $events = explode('|',$disk['smEvents'] ?? $var['smEvents'] ?? $numbers);
-  $type = $disk['smType'] ?? -1; if ($type==-1) $type = $var['smType'] ?? '';
+  $select = getVal($disk,'smSelect',0);
+  $level  = getVal($disk,'smLevel',1);
+  $events = explode('|',getVal($disk,'smEvents',$numbers));
+  $type = getVal($disk,'smType','');
   if ($type) {
     $ports = [];
     if (!empty($disk['smDevice'])) $port = $disk['smDevice'];
@@ -119,7 +126,7 @@ function check_smart($name,$port,$text,$info) {
     if (!empty($disk['smPort2'])) $ports[] = $disk['smPort2'];
     if (!empty($disk['smPort3'])) $ports[] = $disk['smPort3'];
     if ($ports) {
-      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : ',';
+      $glue = $disk['smGlue'] ?? ',';
       $type .= ','.implode($glue,$ports);
     }
   }
@@ -127,7 +134,7 @@ function check_smart($name,$port,$text,$info) {
   exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' ".escapeshellarg($file)." 2>/dev/null", $codes);
   $item = 'smart';
   foreach ($codes as $code) {
-    if (!$code) continue;
+    if (!$code || !is_numeric($code[0])) continue;
     list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
     $fail = strpos($when,'FAILING_NOW')!==false;
     if (!$fail && !in_array($id,$events)) continue;
@@ -136,7 +143,7 @@ function check_smart($name,$port,$text,$info) {
     switch ($select) {
     case 0:
       $attr = "$name.$id";
-      $last = isset($saved[$item][$attr]) ? $saved[$item][$attr]*$level : 0;
+      $last = ($saved[$item][$attr] ?? 0)*$level;
       if ($raw>0 || $fail) {
         if ($raw>$last) {
           exec("$notify -e ".escapeshellarg("unRAID $text SMART health [$id]")." -s ".escapeshellarg("Warning [$server] - $word is $raw")." -d ".escapeshellarg("$info")." -i \"warning\"");
@@ -153,7 +160,7 @@ function check_smart($name,$port,$text,$info) {
       break;
     case 1:
       $attr = "$name.${id}n";
-      $last = isset($saved[$item][$attr]) ? $saved[$item][$attr] : 255;
+      $last = $saved[$item][$attr] ?? 255;
       if (($thres>0 && $value<=$thres*$level) || $fail) {
         if ($value*($value>$thres?$level:1)<$last) {
           exec("$notify -e ".escapeshellarg("unRAID $text SMART health [$id]")." -s ".escapeshellarg("Warning [$server] - $word is $value")." -d ".escapeshellarg("$info")." -i \"warning\"");
@@ -181,7 +188,7 @@ function check_usage($name,$used,$text,$info) {
   $critical = $disk['critical'] ?? $unraid['display']['critical'];
   $warn = $used>=$critical && $critical>0 ? 'alert' : ($used>=$warning && $warning>0 ? 'warning' : '');
   $item = 'used';
-  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+  $last = $saved[$item][$name] ?? 0;
   if ($warn) {
     if ($used>$last) {
       exec("$notify -e ".escapeshellarg("unRAID $text disk utilization")." -s ".escapeshellarg(ucfirst($warn)." [$server] - $text is ".($warn=='alert'?'low on space':'high on usage')." (${used}%)")." -d ".escapeshellarg("$info")." -i \"$warn\"");
@@ -210,7 +217,7 @@ foreach ($disks as $disk) {
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';
-  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : "";
+  $last = $saved[$item][$name] ?? '';
   switch ($warn) {
   case 'red':
     if ($warn!=$last) {
@@ -255,12 +262,13 @@ foreach ($disks as $disk) {
 }
 
 // check unassigned devices
+$type = $var['smType'] ?? '';
 foreach ($devs as $dev) {
   $name = $dev['device'];
-  if (empty($name)) continue;
   $smart = "/var/local/emhttp/smart/$name";
-  if (!file_exists($smart) || (time()-filectime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A ".escapeshellarg("/dev/$name")." > ".escapeshellarg($smart));
-  $temp = exec("awk '\$1==190||\$1==194{print \$10;exit}' ".escapeshellarg($smart));
+  $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
+  if (!file_exists($smart) || (time()-filectime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart));
+  $temp = exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)." 2>/dev/null");
   $text = "device $name";
   $info = !empty($dev['id']) ? "{$dev['id']} ($name)": "No device identification ($name)";
 // process disk temperature notifications
@@ -272,7 +280,7 @@ foreach ($devs as $dev) {
 // report array read errors
 $item = 'array';
 $name = 'errors';
-$last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+$last = $saved[$item][$name] ?? 0;
 $warn = count($errors);
 $info = "Array has $warn disk".($warn==1 ? "" : "s")." with read errors";
 if ($warn>0) {
@@ -290,7 +298,7 @@ if ($warn>0) {
 
 // process parity check, parity sync and data-rebuild notifications
 $name = 'parity';
-$last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
+$last = $saved[$item][$name] ?? '';
 if ($var['mdResync']>0) {
   if (!$last) {
     if (strstr($var['mdResyncAction'],"recon")) {
@@ -321,7 +329,7 @@ if ($var['mdResync']>0) {
 
 // check read-write status of USB flash drive
 $name = 'flash';
-$last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
+$last = $saved[$item][$name] ?? '';
 $warn = exec("grep -Pom1 '/boot \S+ \K\S{2}' /proc/mounts");
 $info = "{$disks['flash']['id']} ({$disks['flash']['device']})";
 if ($warn!="rw") {
@@ -341,7 +349,7 @@ system('mountpoint -q /var/lib/docker', $retval);
 if ($retval===0) {
   $item = 'system';
   $name = 'docker';
-  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
+  $last = $saved[$item][$name] ?? '';
   if (file_exists("/boot/config/docker.cfg")) {
     $cfg  = parse_ini_file("/boot/config/docker.cfg");
     $info = "Docker utilization of image file {$cfg['DOCKER_IMAGE_FILE']}";
