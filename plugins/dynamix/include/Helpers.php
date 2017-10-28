@@ -50,7 +50,7 @@ function my_temp($value) {
   global $display;
   $unit = $display['unit'];
   $number = $display['number'];
-  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $number[0], $value) : round(9/5*$value+32))." $unit") : $value;
+  return is_numeric($value) ? (($unit=='F' ? round(9/5*$value+32) : str_replace('.', $number[0], $value))." $unit") : $value;
 }
 function my_disk($name) {
   return ucfirst(preg_replace('/^(disk|cache|parity)(\d+)/','$1 $2',$name));
