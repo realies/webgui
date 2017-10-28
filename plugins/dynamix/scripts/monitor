@@ -40,6 +40,8 @@ function plus($val,$word,$last) {
   return $val>0 ? (($val||$last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
 function my_temp($value) {
+  global $unraid;
+  $unit = $unraid['display']['unit'];
   return ($unit=='F' ? round(9/5*$value+32) : $value)." $unit";
 }
 function my_disk($name) {
