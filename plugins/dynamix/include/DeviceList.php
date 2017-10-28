@@ -35,7 +35,7 @@ function in_parity_log($log,$timestamp) {
   return !empty($line);
 }
 function device_info(&$disk,$online) {
-  global $path, $var;
+  global $path, $var, $show;
   $name = $disk['name'];
   $fancyname = $disk['type']=='New' ? $name : my_disk($name);
   $type = $disk['type']=='Flash' || $disk['type']=='New' ? $disk['type'] : 'Device';
@@ -58,14 +58,14 @@ function device_info(&$disk,$online) {
   }
   $status = "$ctrl<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>$help</span></a>";
   $link = (strcmp($disk['status'], 'DISK_NP')!=0 || $disk['name']=="cache") ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
-  switch ($disk['luksState']) {
-    case 0: $luks = ""; break;
-    case 1: $luks = "<i ".($online?"class='padlock fa fa-unlock-alt green-text' title='Encrypted and unlocked'":"class='padlock fa fa-lock grey-text' title='Encrypted and locked'")."></i>"; break;
-    case 2: $luks = "<i class='padlock fa fa-lock red-text' title='Locked: missing encryption key'></i>"; break;
-    case 3: $luks = "<i class='padlock fa fa-lock red-text' title='Locked: wrong encryption key'></i>"; break;
-   default: $luks = "<i class='padlock fa fa-lock red-text' title='Locked: unknown error'></i>"; break;
-  }
-  return $status.$link.$luks;
+  if ($show && $online) switch ($disk['luksState']) {
+    case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
+    case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>Encrypted and unlocked</span></a>"; break;
+    case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: missing encryption key</span></a>"; break;
+    case 3: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: wrong encryption key</span></a>"; break;
+   default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: unknown error</span></a>"; break;
+  } else $luks = '';
+  return $status.$luks.$link;
 }
 function device_browse(&$disk) {
   global $path;
@@ -302,8 +302,10 @@ function cache_slots() {
   $out .= "</select></form>";
   return $out;
 }
+$show = false;
 switch ($_POST['device']) {
 case 'array':
+  foreach ($disks as $disk) if ($disk['type']=='Data') $show |= strpos($disk['fsType'],'luks:')!==false;
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Parity') array_offline($disk);}
     echo "<tr class='tr_last'><td style='height:12px' colspan='11'></td></tr>";
@@ -330,6 +332,7 @@ case 'flash':
   echo "</tr>";
   break;
 case 'cache':
+  foreach ($disks as $disk) if ($disk['type']=='Cache') $show |= strpos($disk['fsType'],'luks:')!==false;
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_offline($disk);}
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots()."</td><td></td></tr>";

@@ -54,11 +54,11 @@ foreach ($file as $row) {
   foreach ($rows as $row) $show |= strpos($disks[$tag.str_replace($tag,'',$row)]['fsType'],'luks:')!==false;
   if ($show) foreach ($rows as $row) {
     switch ($disks[$tag.str_replace($tag,'',$row)]['luksState']) {
-    case 0: $luks .= "<i class='padlock grey-text fa fa-unlock' title='Not encrypted'></i>"; break;
-    case 1: $luks .= "<i class='padlock green-text fa fa-unlock-alt' title='Encrypted and unlocked'></i>"; break;
-    case 2: $luks .= "<i class='padlock red-text fa fa-lock' title='Locked: missing encryption key'></i>"; break;
-    case 3: $luks .= "<i class='padlock red-text fa fa-lock' title='Locked: wrong encryption key'></i>"; break;
-   default: $luks .= "<i class='padlock red-text fa fa-lock' title='Locked: unknown error'></i>"; break;}
+    case 0: $luks = "<a class='info' onclick='return false'><i class='lock fa fa-unlock grey-text'></i><span>Not encrypted</span></a>"; break;
+    case 1: $luks = "<a class='info' onclick='return false'><i class='lock fa fa-unlock-alt green-text'></i><span>Encrypted and unlocked</span></a>"; break;
+    case 2: $luks = "<a class='info' onclick='return false'><i class='lock fa fa-lock red-text'></i><span>Locked: missing encryption key</span></a>"; break;
+    case 3: $luks = "<a class='info' onclick='return false'><i class='lock fa fa-lock red-text'></i><span>Locked: wrong encryption key</span></a>"; break;
+    default: $luks = "<a class='info' onclick='return false'><i class='lock fa fa-lock red-text'></i><span>Locked: unknown error</span></a>"; break;}
   }
   $list[] = [
     'type' => $attr[0],

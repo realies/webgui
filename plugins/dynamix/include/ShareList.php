@@ -53,8 +53,12 @@ function shareInclude($name) {
   return !$include || substr($name,0,4)!='disk' || strpos("$include,", "$name,")!==false;
 }
 
-// Compute all user shares
-if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size ".escapeshellarg($name)." ssz1");
+// Compute all user shares & check encryption
+$show = false;
+foreach ($shares as $name => $share) {
+  if ($compute=='yes') exec("webGui/scripts/share_size ".escapeshellarg($name)." ssz1");
+  $show |= $share['luksStatus']>0;
+}
 
 // global shares include/exclude
 $myDisks = array_filter(array_diff(array_keys($disks), explode(',',$var['shareUserExclude'])), 'globalInclude');
@@ -75,14 +79,14 @@ foreach ($shares as $name => $share) {
     case 'green-on':  $help = 'All files protected'; break;
     case 'yellow-on': $help = 'Some or all files unprotected'; break;
   }
-  switch ($share['luksStatus']) {
-    case 0: $luks = ""; break;
-    case 1: $luks = "<i class='padlock green-text fa fa-unlock-alt' title='All files in share encrypted'></i>"; break;
-    case 2: $luks = "<i class='padlock orange-text fa fa-unlock-alt' title='Some files in share unencrypted'></i>"; break;
-   default: $luks = ""; break;
-  }
+  if ($show) switch ($share['luksStatus']) {
+    case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
+    case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>All files encrypted</span></a>"; break;
+    case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt orange-text'></i><span>Some or all files unencrypted</span></a>"; break;
+   default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Unknown encryption state'</span></a>"; break;
+  } else $luks = "";
   echo "<tr>";
-  echo "<td><a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span style='left:18px'>$help</span></a><a href='$path/Share?name=".urlencode($name)."' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a>$luks</td>";
+  echo "<td><a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span style='left:18px'>$help</span></a>$luks<a href='$path/Share?name=".urlencode($name)."' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a></td>";
   echo "<td>{$share['comment']}</td>";
   echo "<td>".user_share_settings($var['shareSMBEnabled'], $sec[$name])."</td>";
   echo "<td>".user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";

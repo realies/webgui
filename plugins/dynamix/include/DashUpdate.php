@@ -97,10 +97,10 @@ case 'disk':
       if (isset($disk['luksState'])) {
         switch ($disk['luksState']) {
           case 0: $luks = ""; break;
-          case 1: $luks = "<i class='green-text fa fa-unlock-alt'></i>"; break;
-          case 2: $luks = "<i class='red-text fa fa-lock'></i>"; break;
-          case 3: $luks = "<i class='red-text fa fa-lock'></i>"; break;
-         default: $luks = "<i class='red-text fa fa-lock'></i>"; break;
+          case 1: $luks = "<i class='fa fa-unlock-alt green-text'></i>"; break;
+          case 2: $luks = "<i class='fa fa-lock red-text'></i>"; break;
+          case 3: $luks = "<i class='fa fa-lock red-text'></i>"; break;
+         default: $luks = "<i class='fa fa-lock red-text'></i>"; break;
         }
       } else $luks = "";
       my_insert($row1[$n],$luks);
