@@ -13,6 +13,11 @@
 <?
 $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
+function getVal(&$ref,$n,$d) {
+  global $var;
+  $val = $ref[$n] ?? -1;
+  return $val!==-1 ? $val : ($var[$n] ?? $d);
+}
 function normalize($type,$count) {
   $words = explode('_',$type);
   foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(['/^(ct|cnt)$/','/^blk$/'],['count','block'],strtolower($word));
@@ -24,19 +29,19 @@ function my_insert(&$source,$string) {
 function my_smart(&$source,$name,$page) {
   global $var,$disks,$path,$failed,$numbers,$saved;
   $disk   = &$disks[$name];
-  $select = $disk['smSelect'] ?? -1; if ($select==-1) $select = $var['smSelect'] ?? 0;
-  $level  = $disk['smLevel'] ?? -1; if ($level==-1) $level = $var['smLevel'] ?? 1;
-  $events = explode('|',$disk['smEvents'] ?? $var['smEvents'] ?? $numbers);
+  $select = getVal($disk,'smSelect',0);
+  $level  = getVal($disk,'smLevel',1);
+  $events = explode('|',getVal($disk,'smEvents',$numbers));
   $title  = '';
   $thumb  = 'good';
-  $file   = "state/smart/$name";
-  if (file_exists("$file.ssa") && in_array(file_get_contents("$file.ssa"),$failed)) {
+  $smart  = "state/smart/$name";
+  if (file_exists("$smart.ssa") && in_array(file_get_contents("$smart.ssa"),$failed)) {
     $title = "S.M.A.R.T health-check failed\n"; $thumb = 'bad';
   } else {
     if (empty($saved["smart"]["$name.ack"])) {
-      exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' ".escapeshellarg($file)." 2>/dev/null", $codes);
+      exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' ".escapeshellarg($smart)." 2>/dev/null", $codes);
       foreach ($codes as $code) {
-        if (!$code) continue;
+        if (!$code || !is_numeric($code[0])) continue;
         list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
         $fail = strpos($when,'FAILING_NOW')!==false;
         if (!$fail && !in_array($id,$events)) continue;
@@ -52,7 +57,7 @@ function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
 }
 function my_temp($value,$unit) {
-  return ($unit=='C' ? $value : round(9/5*$value+32))." $unit";
+  return ($unit=='F' ? round(9/5*$value+32) : $value)." $unit";
 }
 function my_clock($time) {
   if (!$time) return 'less than a minute';
@@ -87,7 +92,7 @@ case 'disk':
   $row6 = array_fill(0,31,'<td></td>'); my_insert($row6[0],'Heat alarm');
   $row7 = array_fill(0,31,'<td></td>'); my_insert($row7[0],'SMART status');
   $row8 = array_fill(0,31,'<td></td>'); my_insert($row8[0],'Utilization');
-  $funcRenderRow = function($n,$disk) use (&$row1,&$row2,&$row3,&$row4,&$row5,&$row6,&$row7,&$row8,$path) {
+  $diskRow = function($n,$disk) use (&$row1,&$row2,&$row3,&$row4,&$row5,&$row6,&$row7,&$row8,$path) {
     if ($n>0) {
       if (isset($disk['luksState'])) {
         switch ($disk['luksState']) {
@@ -117,8 +122,8 @@ case 'disk':
         my_insert($row5[$n],"<img src=$path/$state.png>");
       break;}
       $temp = $disk['temp'];
-      $hot  = strlen($disk['hotTemp']) ? $disk['hotTemp'] : $_POST['hot'];
-      $max  = strlen($disk['maxTemp']) ? $disk['maxTemp'] : $_POST['max'];
+      $hot  = $disk['hotTemp'] ?? $_POST['hot'];
+      $max  = $disk['maxTemp'] ?? $_POST['max'];
       $heat = $temp>=$max && $max>0 ? 'max' : ($temp>=$hot && $hot>0 ? 'hot' : '');
       if ($heat)
         my_insert($row6[$n],"<span class='heat-img'><img src='$path/$heat.png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
@@ -128,16 +133,27 @@ case 'disk':
       my_usage($row8[$n],($disk['type']!='Parity' && $disk['fsStatus']=='Mounted')?(($disk['fsSize'] ? round((1-$disk['fsFree']/$disk['fsSize'])*100):0).'%'):'');
     }
   };
-  foreach ($disks as $disk) if ($disk['type']=='Parity') $funcRenderRow($i++,$disk);
-  foreach ($disks as $disk) if ($disk['type']=='Data') $funcRenderRow($i++,$disk);
+  $devRow = function($n,$disk) use (&$row4,&$row6,&$row7,$path) {
+    $hot = $_POST['hot'];
+    $max = $_POST['max'];
+    $name = $dev['device'];
+    $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
+    $smart = "state/smart/$name";
+    $state = exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
+    if ($state=='blue-on') my_smart($row7[$n],$name,'New');
+    $temp = file_exists($smart) ? exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)) : '*';
+    $heat = $temp>=$max && $max>0 ? 'max' : ($temp>=$hot && $hot>0 ? 'hot' : '');
+    if ($heat)
+      my_insert($row6[$n],"<span class='heat-img'><img src='$path/$heat.png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
+    else
+      if ($state=='blue-on' && $temp>0) my_insert($row6[$n],"<span class='temp-text'>".my_temp($temp,$_POST['unit'])."</span>");
+    my_insert($row4[$n],"<img src=$path/$state.png>");
+  };
+  foreach ($disks as $disk) if ($disk['type']=='Parity') $diskRow($i++,$disk);
+  foreach ($disks as $disk) if ($disk['type']=='Data') $diskRow($i++,$disk);
   if ($slots <= 30) {
-    foreach ($disks as $disk) if ($disk['type']=='Cache') $funcRenderRow($i++,$disk);
-    foreach ($devs as $dev) {
-      $device = $dev['device'];
-      $state = exec("hdparm -C ".escapeshellarg("/dev/$device")."|grep -Po active") ? 'blue-on' : 'blue-blink';
-      if ($state=='blue-on') my_smart($row7[$i],$device,'New');
-      my_insert($row4[$i++],"<img src=$path/$state.png>");
-    }
+    foreach ($disks as $disk) if ($disk['type']=='Cache') $diskRow($i++,$disk);
+    foreach ($devs as $dev) $devRow($i++,$dev);
   }
   echo "<tr>".implode('',$row1)."</tr>";
   echo "<tr>".implode('',$row2)."</tr>";
@@ -157,13 +173,8 @@ case 'disk':
     $row6 = array_fill(0,31,'<td></td>'); my_insert($row6[0],'Heat alarm');
     $row7 = array_fill(0,31,'<td></td>'); my_insert($row7[0],'SMART status');
     $row8 = array_fill(0,31,'<td></td>'); my_insert($row8[0],'Utilization');
-    foreach ($disks as $disk) if ($disk['type']=='Cache') $funcRenderRow($i++,$disk);
-    foreach ($devs as $dev) {
-      $device = $dev['device'];
-      $state = exec("hdparm -C ".escapeshellarg("/dev/$device")."|grep -Po active") ? 'blue-on' : 'blue-blink';
-      if ($state=='blue-on') my_smart($row7[$i],$device,'New');
-      my_insert($row4[$i++],"<img src=$path/$state.png>");
-    }
+    foreach ($disks as $disk) if ($disk['type']=='Cache') $diskRow($i++,$disk);
+    foreach ($devs as $dev) $devRow($i++,$dev);
     echo "<tr>".implode('',$row1)."</tr>";
     echo "<tr>".implode('',$row2)."</tr>";
     echo "<tr>".implode('',$row3)."</tr>";
@@ -230,7 +241,7 @@ case 'shares':
    case 'smb':
      exec("lsof /mnt/user /mnt/disk* 2>/dev/null|awk '/^smbd/ && $0!~/\.AppleD(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
      $counts = array_count_values($lsof); $count = [];
-     foreach ($names as $name) $count[] =  isset($counts[$name]) ? $counts[$name] : 0;
+     foreach ($names as $name) $count[] =  $counts[$name] ?? 0;
      echo implode('#',$count);
    break;
    case 'afp':
