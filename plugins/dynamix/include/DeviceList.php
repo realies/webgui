@@ -177,7 +177,7 @@ function array_offline(&$disk) {
 function array_online(&$disk) {
   global $sum, $diskio;
   $dev = $disk['device'];
-  $data = isset($diskio[$dev]) ? explode(' ',$diskio[$dev]) : [];
+  $data = explode(' ',$diskio[$dev] ?? '');
   if (is_numeric($disk['temp'])) {
     $sum['count']++;
     $sum['temp'] += $disk['temp'];
@@ -229,16 +229,17 @@ function my_clock($time) {
   $mins = $time%60;
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
-function read_disk($dev, $part) {
+function read_disk($name, $part) {
   global $var;
+  $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
   switch ($part) {
   case 'color':
-    return exec("hdparm -C ".escapeshellarg("/dev/$dev")."|grep -Po active") ? 'blue-on' : 'blue-blink';
+    return exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
   case 'temp':
-    $smart = "/var/local/emhttp/smart/$dev";
-    if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A ".escapeshellarg("/dev/$dev")." >".escapeshellarg($smart)." &");
-    $temp = exec("awk '\$1==190||\$1==194{print \$10;exit}' $smart");
-    return $temp ?: '*';
+    $smart = "/var/local/emhttp/smart/$name";
+    $type = $var['smType'] ?? '';
+    if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart)." &");
+    return exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)." 2>/dev/null");
   }
 }
 function show_totals($text) {
