@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2017, Lime Technology
+ * Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Wrappers.php";
 
 // Helper functions
@@ -50,7 +50,7 @@ function my_temp($value) {
   global $display;
   $unit = $display['unit'];
   $number = $display['number'];
-  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $number[0], $value) : round(9/5*$value+32))." $unit") : $value;
+  return is_numeric($value) ? (($unit=='F' ? round(9/5*$value+32) : str_replace('.', $number[0], $value))." $unit") : $value;
 }
 function my_disk($name) {
   return ucfirst(preg_replace('/^(disk|cache|parity)(\d+)/','$1 $2',$name));

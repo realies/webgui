@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2017, Lime Technology
+ * Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 // Wrapper functions
 function parse_plugin_cfg($plugin, $sections=false) {
@@ -51,5 +51,23 @@ function plugin_update_available($plugin, $os=false) {
     $server = get_plugin_attr('version', "/var/log/plugins/unRAIDServer.plg");
     if (version_compare($server, $unraid, '>=')) return $remote;
   }
+}
+
+function get_value(&$object,$name,$default) {
+  global $var;
+  $value = $object[$name] ?? -1;
+  return $value!==-1 ? $value : ($var[$name] ?? $default);
+}
+
+function get_ctlr_options(&$type, &$disk) {
+  if (!$type) return;
+  $ports = [];
+  if (strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
+  if (strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
+  if (strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
+  $type .= ($ports ?  ','.implode($disk['smGlue'] ?? ',',$ports) : '');
+}
+function port_name($port) {
+  return substr($port,-2)!='n1' ? $port : substr($port,0,-2);
 }
 ?>

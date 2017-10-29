@@ -24,8 +24,8 @@ $compute = $_GET['compute'];
 $path    = $_GET['path'];
 $fill    = $_GET['fill'];
 
-$display           = [];
-$display['scale']  = $_GET['scale'];
+$display = [];
+$display['scale'] = $_GET['scale'];
 $display['number'] = $_GET['number'];
 
 // Display export settings
@@ -46,8 +46,12 @@ function shareInclude($name) {
   return !$include || substr($name,0,4)!='disk' || strpos("$include,", "$name,")!==false;
 }
 
-// Compute all disk shares
-if ($compute=='yes') foreach ($disks as $name => $disk) if ($disk['exportable']=='yes') exec("webGui/scripts/disk_size ".escapeshellarg($name)." ssz2");
+// Compute all disk shares & check encryption
+$show = false;
+foreach ($disks as $name => $disk) {
+  if ($compute=='yes' && $disk['exportable']=='yes') exec("webGui/scripts/disk_size ".escapeshellarg($name)." ssz2");
+  if (strstr('Data,Cache',$disk['type'])) $show |= strpos($disk['fsType'],'luks:')!==false;
+}
 
 // global shares include/exclude
 $myDisks = array_filter(array_diff(array_keys($disks), explode(',',$var['shareUserExclude'])), 'globalInclude');
@@ -62,23 +66,21 @@ else
 // Build table
 $row = 0;
 foreach ($disks as $name => $disk) {
-  if ($disk['type']=='Flash') continue;
-  if ($disk['fsColor']=='grey-off') continue;
-  if ($disk['exportable']=='no') continue;
+  if (!strstr('Data,Cache',$disk['type']) || $disk['fsColor']=='grey-off' || $disk['exportable']=='no') continue;
   $row++;
   $ball = "/webGui/images/{$disk['fsColor']}.png";
   switch ($disk['fsColor']) {
     case 'green-on':  $help = 'All files protected'; break;
     case 'yellow-on': $help = 'All files unprotected'; break;
   }
-  switch ($disk['luksState']) {
-    case 0: $luks = ""; break;
-    case 1: $luks = "<i class='padlock green-text fa fa-unlock-alt' title='All files in share encrypted'></i>"; break;
-    case 2: $luks = "<i class='padlock orange-text fa fa-unlock-alt' title='Some files in share unencrypted'></i>"; break;
-   default: $luks = ""; break;
-  }
+  if ($show) switch ($disk['luksState']) {
+    case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
+    case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>All files encrypted</span></a>"; break;
+    case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt orange-text'></i><span>Some or all files unencrypted</span></a>"; break;
+   default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Unknown encryption state'</span></a>"; break;
+  } else $luks = "";
   echo "<tr>";
-  echo "<td><a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span style='left:18px'>$help</span></a><a href='$path/Disk?name=$name' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a>$luks</td>";
+  echo "<td><a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span style='left:18px'>$help</span></a>$luks<a href='$path/Disk?name=$name' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a></td>";
   echo "<td>{$disk['comment']}</td>";
   echo "<td>".disk_share_settings($var['shareSMBEnabled'], $sec[$name])."</td>";
   echo "<td>".disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";

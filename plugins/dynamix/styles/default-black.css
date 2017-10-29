@@ -9,10 +9,9 @@ a:hover{text-decoration:underline}
 a{color:#486DBA;text-decoration:none}
 a.none{color:#808080}
 a.img{text-decoration:none;border:none}
-a.info{position:relative;z-index:1}
-a.info span{display:none}
-a.info:hover span{display:block;white-space:nowrap;font-variant:small-caps;position:absolute;left:8px;font-size:11px;line-height:20px;color:#FFFFFF;padding:5px 8px;border:1px solid rgba(255,255,255,0.25);border-radius:3px;background-color:rgba(25,25,25,0.95);box-shadow:0 0 3px #505050}
-a.info:hover span.left{left:-182px}
+a.info{position:relative}
+a.info span{display:none;white-space:nowrap;font-variant:small-caps;position:absolute;top:16px;left:12px;font-size:12px;line-height:20px;color:#FFFFFF;padding:5px 8px;border:1px solid rgba(255,255,255,0.25);border-radius:3px;background-color:rgba(25,25,25,0.95);box-shadow:0 0 3px #505050}
+a.info:hover span{display:block;z-index:1}
 a.nohand{cursor:default}
 i.spacing{margin-left:-6px}
 i.icon{margin-right:4px}
@@ -201,7 +200,9 @@ span.two{margin-left:-17px}
 span.three{margin-left:-20px}
 span.tub{margin-right:8px;font-size:24px;cursor:pointer}
 span.score{font-size:11px;color:#F0F0F0;position:absolute}
-i.padlock{margin-left:8px;cursor:help}
+i.padlock{margin-right:8px;cursor:default}
+i.nolock{visibility:hidden;margin-right:8px}
+i.lock{margin-left:8px;cursor:default}
 img.icon{margin:-3px 4px 0 0}
 img.list{width:auto;max-width:48px;height:48px}
 div.content{position:absolute;top:45px;left:0;width:100%;padding-bottom:30px;z-index:-1;clear:both}

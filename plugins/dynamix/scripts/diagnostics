@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2017, Lime Technology
+ * Copyright 2012-2017, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,7 +19,7 @@ $cli = empty($zip);
 $get = "/var/local/emhttp";
 $var = file_exists("$get/var.ini") ? parse_ini_file("$get/var.ini") : [];
 
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $folders = ['/boot','/boot/config','/boot/config/plugins','/boot/extra','/boot/syslinux','/var/log','/var/log/plugins','/var/log/packages','/tmp'];
 
 function anonymize($text,$select) {
@@ -176,31 +176,22 @@ if ($qemu) {
 // create SMART reports (suppress errors)
 $disks = file_exists("$get/disks.ini") ? parse_ini_file("$get/disks.ini", true) : [];
 include_once "$docroot/webGui/include/CustomMerge.php";
+include_once "$docroot/webGui/include/Wrappers.php";
 exec("ls -l /dev/disk/by-id/[asun]* 2>/dev/null|sed '/-part/d;s|^.*/by-id/[^-]*-||;s|-> ../../||;s|:|-|'", $devices);
 foreach ($devices as $device) {
-  list($name,$dev) = explode(' ',$device);
-  $type = '';
-  $diskName = '';
+  list($name,$port) = explode(' ',$device);
+  $diskName = ''; $type = '';
   foreach ($disks as $find) {
-    if ($find['device']==$dev) {
+    if ($find['device']==$port) {
       $diskName = $find['name'];
-      $type = isset($find['smType']) ? $find['smType'] : -1;
-      if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
-      if ($type) {
-        $ports = [];
-        if (isset($find['smDevice']) && strlen($find['smDevice'])) $port = $find['smDevice'];
-        if (isset($find['smPort1']) && strlen($find['smPort1'])) $ports[] = $find['smPort1'];
-        if (isset($find['smPort2']) && strlen($find['smPort2'])) $ports[] = $find['smPort2'];
-        if (isset($find['smPort3']) && strlen($find['smPort3'])) $ports[] = $find['smPort3'];
-        if ($ports) {
-          $glue = isset($find['smGlue']) ? $find['smGlue'] : ',';
-          $type .= ','.implode($glue,$ports);
-        }
-      }
+      $type = get_value($find,'smType','');
+      get_ctlr_options($type, $find);
+      $port = $find['smDevice'] ?? $port;
       break;
     }
   }
-  exec("smartctl -a $type ".escapeshellarg("/dev/$dev")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($dev).txt"));
+  $port = port_name($port);
+  exec("smartctl -a $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port).txt"));
 }
 // create cache pool information
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')) {
