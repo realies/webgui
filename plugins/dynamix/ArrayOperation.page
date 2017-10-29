@@ -15,7 +15,15 @@ Tag="snowflake-o"
  */
 ?>
 <?
-$stop = (file_exists($var['luksKeyfile']) && $var['fsEncryption']=='wrong') || ($var['fsEncryption']=='missing' && $var['luksRestricted']=='yes') ? 'disabled':'';
+$forced  = $var['fsEncryption']=='no';
+$wrong   = $var['fsEncryption']=='wrong';
+$missing = $var['fsEncryption']=='missing';
+$check   = $var['luksRestricted']=='yes';
+$keyfile = file_exists($var['luksKeyfile']);
+$stop    = ($keyfile && $wrong) || ($check && $missing) ? 'disabled':'';
+
+$encrypt = false;
+if ($forced) foreach ($disks as $disk) $encrypt |= strpos($disk['fsType'],'luks:')!==false;
 
 function maintenance_mode() {
   echo "<tr>";
@@ -41,6 +49,7 @@ td.gap{padding-left:26px!important}
 </style>
 <script>
 var ctrl = "<span class='status'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
+var forced = <?=$forced ? 'true':'false'?>;
 
 function tab0() {
   $.removeCookie('one',{path:'/'});
@@ -112,6 +121,7 @@ function prepareInput(form) {
     form.local.disabled = true;
     form.file.disabled = true;
     form.text.disabled = true;
+    form.copy.disabled = true;
     $.post('/update.php',data,function(){form.submit();});
   }
 }
@@ -120,29 +130,38 @@ function selectInput(form) {
     form.file.value = '';
     form.local.value = '';
     $('#text').show();
+    if (forced || $('input[name="luksReformat"]').prop('checked')) $('#copy').show();
     $('#file').hide();
   } else {
     form.text.value = '';
+    form.copy.value = '';
     $('#text').hide();
+    $('#copy').hide();
     $('#file').show();
   }
+  toggleStart(true);
 }
-function toggleStart(data) {
-<?if ($stop):?>
-  $('#cmdStart').prop('disabled',data=='');
-<?endif;?>
+function toggleStart(form) {
+  var disabled = typeof(form)=='boolean' ? form : ((forced || form.luksReformat.checked) ? (form.text.value!=form.copy.value || form.text.value=='') : form.text.value=='');
+  $('#cmdStart').prop('disabled',disabled);
+}
+function toggleApply(checked) {
+  $('input[name="#apply"]').prop('disabled',!checked);
 }
 function showPass(checked) {
-  $('input[name="text"]').attr('type',checked ? 'text':'password');
+  $('input[name="text"],input[name="copy"]').attr('type',checked ? 'text':'password');
+}
+function showCopy(checked) {
+  if ($('select[name="input"]').val()=='file') return;
+  if (forced || checked) $('#copy').show(); else $('#copy').hide();
 }
 function getFileContent(event,form) {
   var input = event.target;
   var reader = new FileReader();
-  reader.onload = function(){form.file.value=reader.result;toggleStart('ok');};
+  reader.onload = function(){form.file.value=reader.result;toggleStart(false);};
   reader.readAsDataURL(input.files[0]);
 }
 parity_status();
-
 <?if ($tabbed):?>
 $('.tabs').append(ctrl);
 if ($.cookie('tab')=='tab0') $('i.toggle').hide();
@@ -171,6 +190,16 @@ reload_page();
 <?endif;?>
 $('.tooltip_diskio').tooltipster({delay:100,trigger:'custom',triggerOpen:{mouseenter:true},triggerClose:{click:false,scroll:true,mouseleave:true}});
 toggle_diskio(true);
+$(function(){
+<?if ($encrypt):?>
+  $('#cmdStart').prop('disabled',true);
+  $('#copy').show();
+<?endif;?>
+<?if ($var['mdState']=='STOPPED' && $wrong):?>
+  $('#copy').hide();
+  $('#perm').show()
+<?endif;?>
+});
 </script>
 <form name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
@@ -305,11 +334,14 @@ toggle_diskio(true);
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
 <?    endif;
       maintenance_mode();
-      if ((file_exists($var['luksKeyfile']) && $var['fsEncryption']=='wrong') || $var['fsEncryption']=='missing'):?>
-      <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$var['fsEncryption']=='wrong'?'Wrong key':'Missing key'?></span></td></tr>
+      if (($keyfile && $wrong) || $missing || $encrypt):?>
+      <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$wrong?'Wrong key':($missing?'Missing key':'Enter new key')?></span></td></tr>
       <tr><td></td><td class="gap">Encryption input:</td><td><select name="input" size="1" onchange="selectInput(this.form)"><?=mk_option(1,"text","Passphrase")?><?=mk_option(1,"file","Keyfile")?></select></td></tr>
-      <tr id="text"><td></td><td class="gap">Passphrase:</td><td><input type="password" name="text" maxlength="512" value="" onkeyup="toggleStart(this.value)"><input type="checkbox" onchange="showPass(this.checked)">show passphrase</td></tr>
+      <tr id="text"><td></td><td class="gap">Passphrase:</td><td><input type="password" name="text" maxlength="512" value="" onkeyup="toggleStart(this.form)"><input type="checkbox" onchange="showPass(this.checked)">show passphrase</td></tr>
+      <tr id="copy" style="display:none"><td></td><td class="gap">Retype passphrase:</td><td><input type="password" name="copy" maxlength="512" value="" onkeyup="toggleStart(this.form)"></td></tr>
       <tr id="file" style="display:none"><td></td><td class="gap">Keyfile:</td><td><input type="file" name="local" onchange="getFileContent(event,this.form)"></td></tr>
+      <tr id="perm" style="display:none"><td></td><td></td><td><input name="luksReformat" type="checkbox" onchange="showCopy(this.checked)">permit reformat</td></tr>
+      <tr><td></td><td></td><td><input type="button" value="Benchmark" onclick="openBox('/webGui/include/CryptoBenchmark.php','Encryption Benchmarking',600,640)"></td></tr>
 <?    endif;
       break;
     case "NEW_ARRAY":
@@ -431,6 +463,15 @@ toggle_diskio(true);
 </table>
 </form>
 <?endif;?>
+<?if ($keyfile):?>
+<form markdown="1" name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="unused">
+<input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
+<table class="array_status">
+ <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><input type="checkbox" onchange="toggleApply(this.checked)">Delete encryption keyfile</td></tr>
+</table>
+</form>
+<?endif;?>
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
@@ -509,4 +550,36 @@ if (isset($display['sleep'])) @include $display['sleep'];
 >
 > Once you have assigned all of your hard drives, refer to the Array Status section below
 > and Start the array.
+
+<?if (($keyfile && $wrong) || $missing || $encrypt):?>
+<div></div>
+> #### Encryption input
+>
+> This keyfile is read during array Start and is used to encrypt/decrypt content of encrypted devices.
+>
+> With array Stopped, the keyfile may be deleted and the user can specify a new encryption key. Note that once a device
+> is formatted with a particular key it may only be opened using that same key. Changing the encryption key requires
+> encrypted devices to be reformatted **resulting in permanent loss of all existing data on those devices.**
+>
+> With array Started, the keyfile may be deleted to ensure there is no encryption key present on the server when
+> the array is online. Note that plugins are installed and may execute before and during the array Start process.
+>
+> #### Passphrase
+>
+> Enter a passphrase of up to 512 characters. It is highly advisable to only use the 95 printable characters from the
+> first 128 characters of the [ASCII table](https://en.wikipedia.org/wiki/ASCII), as they will always have the same binary
+> representation. Other characters may have different encoding depending on system configuration and your passphrase will
+> not work with a different encoding. If you want a longer passphrase or to include binary data, upload a keyfile instead.
+>
+> Please refer to the [cryptsetup FAQ](https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#5-security-aspects)
+> for what constitutes a *secure* passphrase.
+>
+> **Memorize** this passphrase. **IF LOST, ENCRYPTED CONTENT CANNOT BE RECOVERED!**
+>
+> #### Keyfile
+>
+> Select a local keyfile with a stored encryption key or a binary file. The maximum size of the keyfile is 8M (8388608 byte).
+>
+> **Backup** your local keyfile. **IF LOST, ENCRYPTED CONTENT CANNOT BE RECOVERED!**
+<?endif;?>
 <?endif;?>

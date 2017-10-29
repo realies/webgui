@@ -27,9 +27,17 @@ function maintenance_mode() {
   global $var, $disk;
   return ($var['fsState']=="Started" && $var['startMode']=="Maintenance" && $disk['luksState']<=1);
 }
-
-$luks_disabled = file_exists($var['luksKeyfile']) ? '' : 'disabled';
 ?>
+<style>
+input.option{display:none;width:40px}
+span.devtext{display:none;font-weight:bold}
+span.helptext{display:none;font-style:italic}
+<?if (strstr('azure,gray',$display['theme'])):?>
+span.code{display:inline-block;width:186px}
+<?else:?>
+span.code{display:inline-block;width:138px}
+<?endif;?>
+</style>
 <script>
 function doDispatch(form) {
   var fields = {};
@@ -48,28 +56,67 @@ function prepareDeviceInfo(form) {
     form.elements['at'+i].disabled = true;
   }
   var custom = form.smCustom.value.trim();
-  var custom = custom.length ? custom.split(',') : [];
+  custom = custom.length ? custom.split(',') : [];
   for (var i=0; i < custom.length; i++) events.push(custom[i].trim());
   form.smEvents.value = events.join('|');
   if (form.smEvents.value == '<?=implode('|',$events)?>') form.smEvents.value = '';
   if (form.smLevel.value == 1.00) form.smLevel.value = '';
 }
-function setGlue(form) {
-  var data = [{glue:'' ,more:0}, // auto
-              {glue:'' ,more:0}, // ata
-              {glue:'' ,more:0}, // sata
-              {glue:'' ,more:0}, // scsi
-              {glue:',',more:1,min1:0,max1:127}, // 3ware
-              {glue:'/',more:2,min1:1,max1:128,min2:1,max2:8}, // areca
-              {glue:'/',more:3,min1:1,max1:4,min2:1,max2:128,min3:1,max3:4}, // highpoint
-              {glue:'' ,more:0}, // marvell
-              {glue:',',more:1,min1:0,max1:127} // megaraid
-             ];
-  var n = form.smType.selectedIndex > 0 ? form.smType.selectedIndex-1 : <?=isset($var['smIndex'])?$var['smIndex']:0?>;
+function setGlue(form,reset) {
+  var data =
+  [{glue:'' ,more:0,dev:0,type:''},                                                        // auto
+   {glue:'' ,more:0,dev:0,type:''},                                                        // ata
+   {glue:',',more:1,dev:0,type:'input',min1:'',max1:'0xffffffff'},                         // nvme
+   {glue:',',more:2,dev:0,type:'select',min11:'',min12:'auto',min21:'',min22:12,min23:16}, // sat
+   {glue:'' ,more:0,dev:0,type:''},                                                        // scsi
+   {glue:',',more:1,dev:1,type:'',min1:0,max1:127},                                        // 3ware
+   {glue:',',more:3,dev:1,type:'',min1:0,max1:15,min2:0,max2:7,min3:0,max3:7},             // adaptec
+   {glue:',',more:1,dev:1,type:'',min1:1,max1:24},                                         // areca
+   {glue:'/',more:3,dev:1,type:'',min1:1,max1:4,min2:1,max2:128,min3:1,max3:4},            // highpoint
+   {glue:'' ,more:0,dev:0,type:''},                                                        // marvell
+   {glue:',',more:1,dev:1,type:'',min1:0,max1:127}                                         // megaraid
+  ];
+  var n = form.smType.selectedIndex>0 ? form.smType.selectedIndex-1 : <?=$var['smIndex']??0?>;
   var x = data[n]['more'];
-  for (var i=1; i <= x; i++) $('input[name="smPort'+i+'"]').attr('placeholder',data[n]['min'+i]+'..'+data[n]['max'+i]).show();
-  for (var i=x+1; i <= 3; i++) $('input[name="smPort'+i+'"]').val('').hide();
-  if (x > 0) {
+  var t = data[n]['type'];
+  for (var i=1; i <= x; i++) {
+    switch (t) {
+    case 'input':
+      var min = data[n]['min'+i];
+      var max = data[n]['max'+i];
+      var len = max.toString().length;
+      if (reset) $('input[name="smPort'+i+'"]').val('');
+      $('select[name="smPort'+i+'"]').prop('disabled',true).hide();
+      $('input[name="smPort'+i+'"]').css('width',80).attr('maxlength',len).attr('placeholder',min).prop('disabled',false).show();
+      break;
+    case 'select':
+      var options = [];
+      var c = 1;
+      do {
+        var option = data[n]['min'+i+(c++)];
+        if (typeof(option)!='undefined') {
+          var selected = option==$('input[name="smPort'+i+'"]').val() ? ' selected':'';
+          options.push('<option value="'+option+'"'+selected+'>'+option+'</option>');
+        } else break;
+      } while (true);
+      if (reset) $('select[name="smPort'+i+'"]').val('');
+      $('input[name="smPort'+i+'"]').prop('disabled',true).hide();
+      $('select[name="smPort'+i+'"]').html(options.join('')).prop('disabled',false).show();
+      break;
+    default:
+      var min = data[n]['min'+i];
+      var max = data[n]['max'+i];
+      var len = max.toString().length;
+      if (reset) $('input[name="smPort'+i+'"]').val('');
+      $('select[name="smPort'+i+'"]').prop('disabled',true).hide();
+      $('input[name="smPort'+i+'"]').css('width',40).attr('maxlength',len).attr('placeholder',min+'...'+max).prop('disabled',false).show();
+    }
+  }
+  for (var i=x+1; i <= 3; i++) {
+    $('input[name="smPort'+i+'"]').val('').prop('disabled',false).hide();
+    $('select[name="smPort'+i+'"]').prop('disabled',true).hide();
+  }
+  if (data[n]['dev']==1) {
     $('#devtext').show();
     $('input[name="smDevice"]').show();
     $('#helptext').show();
@@ -84,7 +131,7 @@ $(function() {
 <?if (!isset($disk['smType'])):?>
   form.smType.selectedIndex = 0;
 <?endif;?>
-  setGlue(form);
+  setGlue(form,false);
 });
 </script>
 
@@ -104,7 +151,7 @@ Spinup group(s):
 
 <?endif;?>
 Spin down delay:
-: <select name="diskSpindownDelay.<?=$disk['idx']?>" size="1">
+: <select name="diskSpindownDelay.<?=$disk['idx']?>">
   <?=mk_option($disk['spindownDelay'], "-1", "Use default")?>
   <?=mk_option($disk['spindownDelay'], "0",  "Never")?>
   <?=mk_option($disk['spindownDelay'], "15", "15 minutes")?>
@@ -143,14 +190,14 @@ File system status:
 <?$disabled = $var['mdState']=="SWAP_DSBL" ? "disabled" : "";?>
 <?if ($disk['type']=="Data" || $var['SYS_CACHE_SLOTS']==1):?>
 File system type:
-: <select id="diskFsType" name="diskFsType.<?=$disk['idx'];?>" size="1" <?=$disabled?>>
+: <select id="diskFsType" name="diskFsType.<?=$disk['idx'];?>" <?=$disabled?>>
   <?=mk_option($disk['fsType'], "auto", "auto")?>
   <?=mk_option($disk['fsType'], "xfs", "xfs")?>
   <?=mk_option($disk['fsType'], "btrfs", "btrfs")?>
   <?=mk_option($disk['fsType'], "reiserfs", "reiserfs")?>
-  <?=mk_option($disk['fsType'], "luks:xfs", "xfs - encrypted", $luks_disabled)?>
-  <?=mk_option($disk['fsType'], "luks:btrfs", "btrfs - encrypted", $luks_disabled)?>
-  <?=mk_option($disk['fsType'], "luks:reiserfs", "reiserfs - encrypted", $luks_disabled)?>
+  <?=mk_option($disk['fsType'], "luks:xfs", "xfs - encrypted")?>
+  <?=mk_option($disk['fsType'], "luks:btrfs", "btrfs - encrypted")?>
+  <?=mk_option($disk['fsType'], "luks:reiserfs", "reiserfs - encrypted")?>
   </select>
 
 > Enter the desired file system type.  Changing the file system type of a device will permit you to reformat
@@ -160,10 +207,10 @@ File system type:
 
 <?elseif ($var['SYS_CACHE_SLOTS']>1):?>
 File system type:
-: <select id="diskFsType" name="diskFsType.<?=$disk['idx'];?>" size="1" <?=$disabled?>>
+: <select id="diskFsType" name="diskFsType.<?=$disk['idx'];?>" <?=$disabled?>>
   <?=mk_option($disk['fsType'], "auto", "auto")?>
   <?=mk_option($disk['fsType'], "btrfs", "btrfs")?>
-  <?=mk_option($disk['fsType'], "luks:btrfs", "btrfs - encrypted", $luks_disabled)?>
+  <?=mk_option($disk['fsType'], "luks:btrfs", "btrfs - encrypted")?>
   </select>
 
 <?endif;?>
@@ -469,7 +516,7 @@ xfs_repair status:
 <input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smGlue" value="<?=htmlspecialchars($var['smGlue'])?>">
 SMART notification value:
-: <select name="smSelect" size="1">
+: <select name="smSelect">
   <?=mk_option($disk['smSelect'], "-1", "Use default")?>
   <?=mk_option($disk['smSelect'], "0", "Raw")?>
   <?=mk_option($disk['smSelect'], "1", "Normalized")?>
@@ -480,7 +527,7 @@ SMART notification value:
 > Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 SMART notification tolerance level:
-: <select name="smLevel" size="1">
+: <select name="smLevel">
   <?=mk_option($disk['smLevel'], "-1", "Use default")?>
   <?=mk_option($disk['smLevel'], "1.00", "Absolute")?>
   <?=mk_option($disk['smLevel'], "1.05", "5%")?>
@@ -496,22 +543,24 @@ SMART notification tolerance level:
 > Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 SMART controller type:
-: <select name="smType" size="1" onchange="setGlue(this.form)">
+: <select name="smType" onchange="setGlue(this.form,true)">
   <?=mk_option($disk['smType'], "-1", "Use default")?>
   <?=mk_option($disk['smType'], " ", "Automatic")?>
   <?=mk_option($disk['smType'], "-d ata", "ATA")?>
-  <?=mk_option($disk['smType'], "-d sat", "SATA")?>
+  <?=mk_option($disk['smType'], "-d nvme", "NVMe")?>
+  <?=mk_option($disk['smType'], "-d sat", "SAT")?>
   <?=mk_option($disk['smType'], "-d scsi", "SCSI")?>
   <?=mk_option($disk['smType'], "-d 3ware", "3Ware")?>
+  <?=mk_option($disk['smType'], "-d aacraid", "Adaptec")?>
   <?=mk_option($disk['smType'], "-d areca", "Areca")?>
   <?=mk_option($disk['smType'], "-d hpt", "HighPoint")?>
   <?=mk_option($disk['smType'], "-d marvell", "Marvell")?>
   <?=mk_option($disk['smType'], "-d megaraid", "MegaRAID")?>
   </select>
-  <input type="text" name="smPort1" maxlength="3" value="<?=$disk['smPort1']?>" style="display:none;width:32px">
-  <input type="text" name="smPort2" maxlength="3" value="<?=$disk['smPort2']?>" style="display:none;width:32px">
-  <input type="text" name="smPort3" maxlength="3" value="<?=$disk['smPort3']?>" style="display:none;width:32px"><span id="devtext" style="display:none;font-weight:bold">/dev/</span>
-  <input type="text" name="smDevice" value="<?=isset($disk['smDevice'])?$disk['smDevice']:''?>" style="display:none;width:32px" placeholder="<?=htmlspecialchars($disk['device'])?>"><span id="helptext" style="display:none;font-style:italic">enter disk index and device name as applicable to your controller</span>
+  <input type="text" name="smPort1" value="<?=$disk['smPort1']?>" class="option"><select name="smPort1" class="narrow" style="display:none" disabled></select>
+  <input type="text" name="smPort2" value="<?=$disk['smPort2']?>" class="option"><select name="smPort2" class="narrow" style="display:none" disabled></select>
+  <input type="text" name="smPort3" value="<?=$disk['smPort3']?>" class="option"><select name="smPort3" class="narrow" style="display:none" disabled></select><span id="devtext" class="devtext">/dev/</span>
+  <input type="text" name="smDevice" value="<?=$disk['smDevice']??''?>" class="option" placeholder="<?=htmlspecialchars($disk['device'])?>"><span id="helptext" class="helptext">enter disk index and device name as applicable to your controller</span>
 
 > By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.
 > Use this setting to select your controller type and fill-in the specific disk index and device name for your situation. Use the manufacturer's documentation to find the relevant information.
@@ -519,12 +568,12 @@ SMART controller type:
 > Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 SMART attribute notifications:
-: <input type="text" name="smCustom" value="<?=isset($disk['smCustom'])?$disk['smCustom']:$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
+: <input type="text" name="smCustom" value="<?=$disk['smCustom']??$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
 
-  <?for ($x = 0; $x < count($preselect); $x++):?>
+<?for ($x=0; $x < count($preselect); $x++):?>
 &nbsp;
-: <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span style="display:inline-block;width:136px"><?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
-  <?endfor;?>
+: <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span class="code">Attribute = <?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
+<?endfor;?>
 
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
