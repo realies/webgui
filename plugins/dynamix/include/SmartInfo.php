@@ -13,11 +13,6 @@
 <?
 $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
-function getVal(&$ref,$n,$d) {
-  global $var;
-  $val = $ref[$n] ?? -1;
-  return $val!==-1 ? $val : ($var[$n] ?? $d);
-}
 function normalize($text, $glue='_') {
   $words = explode($glue,$text);
   foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(['/^(ct|cnt)$/','/^blk$/'],['count','block'],strtolower($word));
@@ -42,28 +37,24 @@ function append(&$ref, &$info) {
 }
 $disks = []; $var = [];
 require_once "$docroot/webGui/include/CustomMerge.php";
+require_once "$docroot/webGui/include/Wrappers.php";
+require_once "$docroot/webGui/include/Preselect.php";
 $name = $_POST['name'] ?? '';
 $port = $_POST['port'] ?? '';
 if ($name) {
   $disk = &$disks[$name];
-  $type = getVal($disk,'smType','');
-  if ($type) {
-    $ports = [];
-    if (!empty($disk['smDevice'])) $port = $disk['smDevice'];
-    if (!empty($disk['smPort1'])) $ports[] = $disk['smPort1'];
-    if (!empty($disk['smPort2'])) $ports[] = $disk['smPort2'];
-    if (!empty($disk['smPort3'])) $ports[] = $disk['smPort3'];
-    if ($ports) $type .= ','.implode($disk['smGlue'] ?? ',',$ports);
-  }
+  $type = get_value($disk,'smType','');
+  get_ctlr_options($type, $disk);
+} else {
+  $disk = [];
+  $type = '';
 }
-if (substr($port,-2)=='n1') $port = substr($port,0,-2);
+$port = port_name($disk['smDevice'] ?? $port);
 switch ($_POST['cmd']) {
 case "attributes":
-  require_once "$docroot/webGui/include/Wrappers.php";
-  require_once "$docroot/webGui/include/Preselect.php";
-  $select = getVal($disk,'smSelect',0);
-  $level  = getVal($disk,'smLevel',1);
-  $events = explode('|',getVal($disk,'smEvents',$numbers));
+  $select = get_value($disk,'smSelect',0);
+  $level  = get_value($disk,'smLevel',1);
+  $events = explode('|',get_value($disk,'smEvents',$numbers));
   $unraid = parse_plugin_cfg('dynamix',true);
   $max = $disk['maxTemp'] ?? $unraid['display']['max'];
   $hot = $disk['hotTemp'] ?? $unraid['display']['hot'];

@@ -31,11 +31,6 @@ $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
 $errors = [];
 
-function getVal(&$ref,$n,$d) {
-  global $var;
-  $val = $ref[$n] ?? -1;
-  return $val!==-1 ? $val : ($var[$n] ?? $d);
-}
 function plus($val,$word,$last) {
   return $val>0 ? (($val||$last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
@@ -116,22 +111,12 @@ function check_temp($name,$temp,$text,$info) {
 }
 function check_smart($name,$port,$text,$info) {
   global $var,$disks,$notify,$saved,$server,$numbers;
-  $disk = &$disks[$name];
-  $select = getVal($disk,'smSelect',0);
-  $level  = getVal($disk,'smLevel',1);
-  $events = explode('|',getVal($disk,'smEvents',$numbers));
-  $type = getVal($disk,'smType','');
-  if ($type) {
-    $ports = [];
-    if (!empty($disk['smDevice'])) $port = $disk['smDevice'];
-    if (!empty($disk['smPort1'])) $ports[] = $disk['smPort1'];
-    if (!empty($disk['smPort2'])) $ports[] = $disk['smPort2'];
-    if (!empty($disk['smPort3'])) $ports[] = $disk['smPort3'];
-    if ($ports) {
-      $glue = $disk['smGlue'] ?? ',';
-      $type .= ','.implode($glue,$ports);
-    }
-  }
+  $disk   = &$disks[$name];
+  $select = get_value($disk,'smSelect',0);
+  $level  = get_value($disk,'smLevel',1);
+  $events = explode('|',get_value($disk,'smEvents',$numbers));
+  $type   = get_value($disk,'smType','');
+  get_ctlr_options($type, $disk);
   $file = "/var/local/emhttp/smart/$name";
   exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' ".escapeshellarg($file)." 2>/dev/null", $codes);
   $item = 'smart';
@@ -180,7 +165,7 @@ function check_smart($name,$port,$text,$info) {
     }
   }
   $file .= '.ssa';
-  if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H ".escapeshellarg($type)." ".escapeshellarg("/dev/$port")."|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' > ".escapeshellarg($file));
+  if (!file_exists($file) || (time()-filemtime($file)>$var['poll_attributes'])) exec("smartctl -H $type ".escapeshellarg("/dev/$port")."|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' >".escapeshellarg($file));
 }
 function check_usage($name,$used,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
@@ -213,7 +198,7 @@ foreach ($disks as $disk) {
 // process disk temperature notifications
   check_temp($name,$disk['temp'],$text,$info);
 // process disk SMART notifications
-  check_smart($name,$disk['device'],$text,$info);
+  check_smart($name,port_name($disk['smDevice'] ?? $disk['device']),$text,$info);
 // process disk usage notifications
   check_usage($name,($disk['fsSize']?100-round(100*$disk['fsFree']/$disk['fsSize']):-1),$text,$info);
 // process disk operation notifications
@@ -264,19 +249,19 @@ foreach ($disks as $disk) {
 }
 
 // check unassigned devices
-$type = $var['smType'] ?? '';
 foreach ($devs as $dev) {
   $name = $dev['device'];
   $smart = "/var/local/emhttp/smart/$name";
-  $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
-  if (!file_exists($smart) || (time()-filectime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart));
+  $type = $var['smType'] ?? '';
+  $port = port_name($name);
+  if (!file_exists($smart) || (time()-filectime($smart)>$var['poll_attributes'])) exec("smartctl -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart));
   $temp = exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)." 2>/dev/null");
   $text = "device $name";
   $info = !empty($dev['id']) ? "{$dev['id']} ($name)": "No device identification ($name)";
 // process disk temperature notifications
   check_temp($name,$temp,$text,$info);
 // process disk SMART notifications
-  check_smart($name,$dev['device'],$text,$info);
+  check_smart($name,$port,$text,$info);
 }
 
 // report array read errors
