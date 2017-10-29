@@ -154,12 +154,14 @@ function showPass(checked) {
 }
 function showCopy(checked) {
   if ($('select[name="input"]').val()=='file') return;
+  var text = $('input[name="text"]').val();
+  var copy = $('input[name="copy"]').val();
   if (forced || checked) {
     $('#copy').show();
-    toggleStart($('input[name="text"]').val()!=$('input[name="copy"]').val() || $('input[name="text"]').val()=='');
+    toggleStart(text!=copy || text=='');
   }  else {
     $('#copy').hide();
-    toggleStart($('input[name="text"]').val()=='');
+    toggleStart(text=='');
   }
 }
 function getFileContent(event,form) {
