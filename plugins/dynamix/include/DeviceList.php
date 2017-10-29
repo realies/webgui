@@ -96,13 +96,16 @@ function assignment(&$disk) {
     foreach ($devs as $dev) if ($dev['tag']==0) {$out .= "<option value=\"{$dev['id']}\">".device_desc($dev)."</option>";}
   return "$out</select></form>";
 }
+function str_strip($fs) {
+  return str_replace('luks:','',$fs);
+}
 function fs_info(&$disk) {
   global $display;
   if ($disk['fsStatus']=='-') {
-    echo $disk['type']=='Cache' ? "<td>".str_replace('luks:','',$disk['fsType'])."</td><td colspan='3'>Device is part of cache pool</td><td></td>" : "<td colspan='5'></td>";
+    echo $disk['type']=='Cache' ? "<td>".str_strip($disk['fsType'])."</td><td colspan='3'>Device is part of cache pool</td><td></td>" : "<td colspan='5'></td>";
     return;
   } elseif ($disk['fsStatus']=='Mounted') {
-    echo "<td>".str_replace('luks:','',$disk['fsType'])."</td>";
+    echo "<td>".str_strip($disk['fsType'])."</td>";
     echo "<td>".my_scale($disk['fsSize']*1024,$unit,-1)." $unit</td>";
     if ($display['text']%10==0) {
       echo "<td>".my_scale($disk['fsUsed']*1024,$unit)." $unit</td>";
@@ -118,7 +121,7 @@ function fs_info(&$disk) {
     }
     echo "<td>".device_browse($disk)."</td>";
   } else
-    echo "<td>".str_replace('luks:','',$disk['fsType'])."</td><td colspan='4' style='text-align:center'>{$disk['fsStatus']}";
+    echo "<td>".str_strip($disk['fsType'])."</td><td colspan='4' style='text-align:center'>{$disk['fsStatus']}";
 }
 function my_diskio($data) {
   return my_scale($data,$unit,1)." $unit/s";
