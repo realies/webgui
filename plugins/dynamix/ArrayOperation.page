@@ -16,6 +16,7 @@ Tag="snowflake-o"
 ?>
 <?
 $forced  = $var['fsEncryption']=='no';
+$crypto  = $var['fsEncryption']=='yes';
 $wrong   = $var['fsEncryption']=='wrong';
 $missing = $var['fsEncryption']=='missing';
 $check   = $var['luksRestricted']=='yes';
@@ -334,8 +335,8 @@ $(function(){
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
 <?    endif;
       maintenance_mode();
-      if (($keyfile && $wrong) || $missing || $encrypt):?>
-      <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$wrong?'Wrong key':($missing?'Missing key':'Enter new key')?></span></td></tr>
+      if (($keyfile && $wrong) || $missing || $encrypt || (!$keyfile && $crypto)):?>
+      <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$wrong?'Wrong key':(($missing||$crypto)?'Missing key':'Enter new key')?></span></td></tr>
       <tr><td></td><td class="gap">Encryption input:</td><td><select name="input" size="1" onchange="selectInput(this.form)"><?=mk_option(1,"text","Passphrase")?><?=mk_option(1,"file","Keyfile")?></select></td></tr>
       <tr id="text"><td></td><td class="gap">Passphrase:</td><td><input type="password" name="text" maxlength="512" value="" onkeyup="toggleStart(this.form)"><input type="checkbox" onchange="showPass(this.checked)">show passphrase</td></tr>
       <tr id="copy" style="display:none"><td></td><td class="gap">Retype passphrase:</td><td><input type="password" name="copy" maxlength="512" value="" onkeyup="toggleStart(this.form)"></td></tr>
