@@ -154,7 +154,13 @@ function showPass(checked) {
 }
 function showCopy(checked) {
   if ($('select[name="input"]').val()=='file') return;
-  if (forced || checked) $('#copy').show(); else $('#copy').hide();
+  if (forced || checked) {
+    $('#copy').show();
+    toggleStart($('input[name="text"]').val()!=$('input[name="copy"]').val() || $('input[name="text"]').val()=='');
+  }  else {
+    $('#copy').hide();
+    toggleStart($('input[name="text"]').val()=='');
+  }
 }
 function getFileContent(event,form) {
   var input = event.target;
