@@ -1,6 +1,6 @@
 Menu="Main:2"
 Title="Cache Devices"
-Tag="upload"
+Tag="bullseye"
 Cond="($var['fsState']=='Stopped' || $var['cacheSbNumDisks'])"
 ---
 <?PHP

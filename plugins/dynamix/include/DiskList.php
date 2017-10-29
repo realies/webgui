@@ -24,8 +24,8 @@ $compute = $_GET['compute'];
 $path    = $_GET['path'];
 $fill    = $_GET['fill'];
 
-$display           = [];
-$display['scale']  = $_GET['scale'];
+$display = [];
+$display['scale'] = $_GET['scale'];
 $display['number'] = $_GET['number'];
 
 // Display export settings
