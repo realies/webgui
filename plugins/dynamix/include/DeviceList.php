@@ -60,10 +60,10 @@ function device_info(&$disk,$online) {
   $link = (strcmp($disk['status'], 'DISK_NP')!=0 || $disk['name']=="cache") ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
   if ($crypto && $online) switch ($disk['luksState']) {
     case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
-    case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>Encrypted and unlocked</span></a>"; break;
-    case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: missing encryption key</span></a>"; break;
-    case 3: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: wrong encryption key</span></a>"; break;
-   default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Locked: unknown error</span></a>"; break;
+    case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>Device encrypted and unlocked</span></a>"; break;
+    case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Device locked: missing encryption key</span></a>"; break;
+    case 3: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Device locked: wrong encryption key</span></a>"; break;
+   default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Device locked: unknown error</span></a>"; break;
   } else $luks = '';
   return $status.$luks.$link;
 }

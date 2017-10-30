@@ -47,10 +47,10 @@ function shareInclude($name) {
 }
 
 // Compute all disk shares & check encryption
-$show = false;
+$crypto = false;
 foreach ($disks as $name => $disk) {
   if ($compute=='yes' && $disk['exportable']=='yes') exec("webGui/scripts/disk_size ".escapeshellarg($name)." ssz2");
-  if (strstr('Data,Cache',$disk['type'])) $show |= strpos($disk['fsType'],'luks:')!==false;
+  if (strstr('Data,Cache',$disk['type'])) $crypto |= strpos($disk['fsType'],'luks:')!==false;
 }
 
 // global shares include/exclude
@@ -73,7 +73,7 @@ foreach ($disks as $name => $disk) {
     case 'green-on':  $help = 'All files protected'; break;
     case 'yellow-on': $help = 'All files unprotected'; break;
   }
-  if ($show) switch ($disk['luksState']) {
+  if ($crypto) switch ($disk['luksState']) {
     case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
     case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>All files encrypted</span></a>"; break;
     case 2: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt orange-text'></i><span>Some or all files unencrypted</span></a>"; break;
