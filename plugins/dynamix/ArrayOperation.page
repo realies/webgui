@@ -463,7 +463,7 @@ $(function(){
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
 <table class="array_status">
-  <tr><td colspan="3"></td></tr><tr><td></td>
+  <tr><td></td>
 <?if ($mover):?>
   <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Mover is running.</td>
 <?else:?>
