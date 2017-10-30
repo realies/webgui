@@ -457,6 +457,7 @@ $(function(){
   <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
   <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
   <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+  <tr><td></td><td class="line" colspan="2"></td></tr>
 </table>
 </form>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
@@ -473,7 +474,7 @@ $(function(){
 </form>
 <?endif;?>
 <?if ($keyfile):?>
-<form markdown="1" name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
+<form name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
 <table class="array_status">
@@ -560,13 +561,14 @@ if (isset($display['sleep'])) @include $display['sleep'];
 > Once you have assigned all of your hard drives, refer to the Array Status section below
 > and Start the array.
 
-<?if (($keyfile && $wrong) || $missing || $encrypt):?>
+<?if (($keyfile && $wrong) || $missing || $encrypt || (!$keyfile && $crypto)):?>
 <div></div>
 > #### Encryption input
 >
+> Passphrase or file is stored in /root/keyfile.<br>
 > This keyfile is read during array Start and is used to encrypt/decrypt content of encrypted devices.
 >
-> With array Stopped, the keyfile may be deleted and the user can specify a new encryption key. Note that once a device
+> With array Stopped, the user can specify a new encryption key. Note that once a device
 > is formatted with a particular key it may only be opened using that same key. Changing the encryption key requires
 > encrypted devices to be reformatted **resulting in permanent loss of all existing data on those devices.**
 >
