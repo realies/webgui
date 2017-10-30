@@ -39,7 +39,6 @@ function init_row($label) {
 }
 function parity_status() {
   global $var,$disks;
-
   $parity_num_slots = 0;
   $parity_disabled = [];
   $parity_invalid = [];
@@ -54,7 +53,6 @@ function parity_status() {
       }
     }
   }
-
   if ($parity_num_slots == count($parity_disabled)) {
     echo "<tr style='vertical-align:top'><td><span class='red p0'><strong>Parity disk".($parity_num_slots>1?'s':'')." not present</strong></span></td><td id='parity'></td></tr>";
     return;
@@ -71,7 +69,16 @@ function parity_status() {
       return;
     }
     if ($var['sbSynced']==0) {
-      echo "<tr><td><em>Parity has not been checked yet.<em></td><td id='parity'></td></tr>";
+      list($date,$duration,$speed,$status,$error) = last_parity_log();
+      if (!$date) {
+        echo "<tr><td><em>Parity has not been checked yet.<em></td><td id='parity'></td></tr>";
+      } elseif ($status==0) {
+        echo "<tr><td>Last checked on <strong>".my_time($date).day_count($date)."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
+        echo "<br><i class='fa fa-clock-o icon'></i><em>Duration: ".my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
+      } else {
+        echo "<tr><td>Last check incomplete on <strong>".my_time($date).day_count($date)."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
+        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: ".my_error($status)."</em></td><td id='parity'></td></tr>";
+      }
       return;
     }
     if ($var['sbSynced2']==0) {
@@ -82,7 +89,7 @@ function parity_status() {
         echo "<br><i class='fa fa-clock-o icon'></i><em>".($idle ? "Duration: " : "Last result: ").my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
       } else {
         echo "<tr><td>Last check incomplete on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
-        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: $status</em></td><td id='parity'></td></tr>";
+        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: ".my_error($status)."</em></td><td id='parity'></td></tr>";
       }
     } else {
       $status = 0;
