@@ -112,7 +112,7 @@ function my_check($time, $speed) {
 function my_error($code) {
   switch ($code) {
   case -4:
-    return "<em>user abort</em>";
+    return "<em>aborted</em>";
   default:
     return "<strong>$code</strong>";
   }
