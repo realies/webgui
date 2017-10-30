@@ -74,8 +74,9 @@ else
 $row = 0;
 foreach ($shares as $name => $share) {
   $row++;
-  $ball = "/webGui/images/{$share['color']}.png";
-  switch ($share['color']) {
+  $color = $share['color'];
+  $ball = "/webGui/images/$color.png";
+  switch ($color) {
     case 'green-on':  $help = 'All files protected'; break;
     case 'yellow-on': $help = 'Some or all files unprotected'; break;
   }
