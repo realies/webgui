@@ -489,7 +489,7 @@ $(function(){
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile only, device encryption remains functional.<br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
+ <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile, device encryption remains functional.<br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
 </table>
 </form>
 <?endif;?>
