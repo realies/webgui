@@ -238,7 +238,7 @@ function my_clock($time) {
 }
 function read_disk($name, $part) {
   global $var;
-  $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
+  $port = port_name($name);
   switch ($part) {
   case 'color':
     return exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
