@@ -12,12 +12,8 @@
 ?>
 <?
 $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Wrappers.php";
 
-function getVal(&$ref,$n,$d) {
-  global $var;
-  $val = $ref[$n] ?? -1;
-  return $val!==-1 ? $val : ($var[$n] ?? $d);
-}
 function normalize($type,$count) {
   $words = explode('_',$type);
   foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(['/^(ct|cnt)$/','/^blk$/'],['count','block'],strtolower($word));
@@ -29,9 +25,9 @@ function my_insert(&$source,$string) {
 function my_smart(&$source,$name,$page) {
   global $var,$disks,$path,$failed,$numbers,$saved;
   $disk   = &$disks[$name];
-  $select = getVal($disk,'smSelect',0);
-  $level  = getVal($disk,'smLevel',1);
-  $events = explode('|',getVal($disk,'smEvents',$numbers));
+  $select = get_value($disk,'smSelect',0);
+  $level  = get_value($disk,'smLevel',1);
+  $events = explode('|',get_value($disk,'smEvents',$numbers));
   $title  = '';
   $thumb  = 'good';
   $smart  = "state/smart/$name";
@@ -78,9 +74,8 @@ switch ($_POST['cmd']) {
 case 'disk':
   $i = 1;
   $var = [];
-  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
-  $devs  = @parse_ini_file('state/devs.ini',true);
-  $saved = @parse_ini_file('state/monitor.ini',true);
+  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $devs = parse_ini_file('state/devs.ini',true);
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $slots = $_POST['slots'];
@@ -122,9 +117,10 @@ case 'disk':
         my_insert($row5[$n],"<img src=$path/$state.png>");
       break;}
       $temp = $disk['temp'];
-      $hot  = $disk['hotTemp'] ?? $_POST['hot'];
-      $max  = $disk['maxTemp'] ?? $_POST['max'];
-      $heat = $temp>=$max && $max>0 ? 'max' : ($temp>=$hot && $hot>0 ? 'hot' : '');
+      $hot = $disk['hotTemp'] ?? $_POST['hot'];
+      $max = $disk['maxTemp'] ?? $_POST['max'];
+      $top = $_POST['top'] ?? 120;
+      $heat = exceed($temp,$max,$top) ? 'max' : (exceed($temp,$hot,$top) ? 'hot' : '');
       if ($heat)
         my_insert($row6[$n],"<span class='heat-img'><img src='$path/$heat.png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
       else
@@ -136,13 +132,14 @@ case 'disk':
   $devRow = function($n,$disk) use (&$row4,&$row6,&$row7,$path) {
     $hot = $_POST['hot'];
     $max = $_POST['max'];
+    $top = $_POST['top'] ?? 120;
     $name = $dev['device'];
     $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
     $smart = "state/smart/$name";
     $state = exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
     if ($state=='blue-on') my_smart($row7[$n],$name,'New');
     $temp = file_exists($smart) ? exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)) : '*';
-    $heat = $temp>=$max && $max>0 ? 'max' : ($temp>=$hot && $hot>0 ? 'hot' : '');
+    $heat = exceed($temp,$max,$top) ? 'max' : (exceed($temp,$hot,$top) ? 'hot' : '');
     if ($heat)
       my_insert($row6[$n],"<span class='heat-img'><img src='$path/$heat.png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
     else

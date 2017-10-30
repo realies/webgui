@@ -11,7 +11,11 @@
  */
 ?>
 <?
+$disks = []; $var = [];
 $docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/CustomMerge.php";
+require_once "$docroot/webGui/include/Wrappers.php";
+require_once "$docroot/webGui/include/Preselect.php";
 
 function normalize($text, $glue='_') {
   $words = explode($glue,$text);
@@ -35,10 +39,6 @@ function spindownDelay($port) {
 function append(&$ref, &$info) {
   if ($info) $ref .= ($ref ? " " : "").$info;
 }
-$disks = []; $var = [];
-require_once "$docroot/webGui/include/CustomMerge.php";
-require_once "$docroot/webGui/include/Wrappers.php";
-require_once "$docroot/webGui/include/Preselect.php";
 $name = $_POST['name'] ?? '';
 $port = $_POST['port'] ?? '';
 if ($name) {
@@ -58,6 +58,7 @@ case "attributes":
   $unraid = parse_plugin_cfg('dynamix',true);
   $max = $disk['maxTemp'] ?? $unraid['display']['max'];
   $hot = $disk['hotTemp'] ?? $unraid['display']['hot'];
+  $top = $_POST['top'] ?? 120;
   exec("smartctl -A $type ".escapeshellarg("/dev/$port")."|awk 'NR>4'",$output);
   if (strpos($output[0], 'SMART Attributes Data Structure')===0) {
     $output = array_slice($output, 3);
@@ -69,7 +70,7 @@ case "attributes":
       $highlight = strpos($info[8],'FAILING_NOW')!==false || ($select ? $info[5]>0 && $info[3]<=$info[5]*$level : $info[9]>0);
       if (in_array($info[0], $events) && $highlight) $color = " class='warn'";
       elseif (in_array($info[0], [190,194])) {
-        if ($info[9]>=$max && $max>0) $color = " class='alert'"; elseif ($info[9]>=$hot && $hot>0) $color = " class='warn'";
+        if (exceed($info[9],$max,$top)) $color = " class='alert'"; elseif (exceed($info[9],$hot,$top)) $color = " class='warn'";
       }
       if ($info[8]=='-') $info[8] = 'Never';
       if ($info[0]==9 && is_numeric($info[9])) duration($info[9]);
@@ -88,7 +89,7 @@ case "attributes":
       switch ($name) {
       case 'Temperature':
         $temp = strtok($value,' ');
-        if ($temp>=$max && $max>0) $color = " class='alert'"; elseif ($temp>=$hot && $hot>0) $color = " class='warn'";
+        if (exceed($temp,$max)) $color = " class='alert'"; elseif (exceed($temp,$hot)) $color = " class='warn'";
         break;
       case 'Power on hours':
         if (is_numeric($value)) duration($value);

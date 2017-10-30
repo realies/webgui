@@ -21,13 +21,11 @@ function parse_plugin_cfg($plugin, $sections=false) {
   $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : [];
   return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
 }
-
 function parse_cron_cfg($plugin, $job, $text = "") {
   $cron = "/boot/config/plugins/$plugin/$job.cron";
   if ($text) file_put_contents($cron, $text); else @unlink($cron);
   exec("/usr/local/sbin/update_cron");
 }
-
 function agent_fullname($agent, $state) {
   switch ($state) {
     case 'enabled' : return "/boot/config/plugins/dynamix/notifications/agents/$agent";
@@ -35,13 +33,11 @@ function agent_fullname($agent, $state) {
     default        : return $agent;
   }
 }
-
 function get_plugin_attr($attr, $file) {
   global $docroot;
   exec("$docroot/plugins/dynamix.plugin.manager/scripts/plugin ".escapeshellarg($attr)." ".escapeshellarg($file), $result, $error);
   if ($error===0) return $result[0];
 }
-
 function plugin_update_available($plugin, $os=false) {
   $local  = get_plugin_attr('version', "/var/log/plugins/$plugin.plg");
   $remote = get_plugin_attr('version', "/tmp/plugins/$plugin.plg");
@@ -52,13 +48,11 @@ function plugin_update_available($plugin, $os=false) {
     if (version_compare($server, $unraid, '>=')) return $remote;
   }
 }
-
-function get_value(&$object,$name,$default) {
+function get_value(&$object, $name, $default) {
   global $var;
   $value = $object[$name] ?? -1;
   return $value!==-1 ? $value : ($var[$name] ?? $default);
 }
-
 function get_ctlr_options(&$type, &$disk) {
   if (!$type) return;
   $ports = [];
@@ -69,5 +63,8 @@ function get_ctlr_options(&$type, &$disk) {
 }
 function port_name($port) {
   return substr($port,-2)!='n1' ? $port : substr($port,0,-2);
+}
+function exceed($value, $limit, $top=100) {
+  return ($value>$limit && $limit>0 && $value<=$top);
 }
 ?>
