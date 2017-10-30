@@ -454,22 +454,22 @@ $(function(){
 <form name="otherOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=$var['mdState']?>">
 <table class="array_status">
-  <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
-  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
-  <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
-  <tr><td></td><td class="line" colspan="2"></td></tr>
+ <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
+ <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
+ <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+ <tr><td></td><td class="line" colspan="2"></td></tr>
 </table>
 </form>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
 <table class="array_status">
-  <tr><td></td>
+ <tr><td></td>
 <?if ($mover):?>
-  <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Mover is running.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Mover is running.</td>
 <?else:?>
-  <td><input type="submit" name="cmdStartMover" value="Move now"></td><td>Click to invoke the Mover.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now"></td><td>Click to invoke the Mover.</td>
 <?endif;?>
-  </tr>
+ </tr>
 </table>
 </form>
 <?endif;?>
@@ -485,8 +485,8 @@ $(function(){
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
-  <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shut_down(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shut_down(this.form,'shutdown')"></td>
-  <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
+ <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shut_down(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shut_down(this.form,'shutdown')"></td>
+ <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
 </table>
 </form>
 <?
