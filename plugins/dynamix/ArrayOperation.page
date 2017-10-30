@@ -476,9 +476,9 @@ $(function(){
 <table class="array_status">
  <tr><td></td>
 <?if ($mover):?>
- <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Mover is running.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Disabled - Mover is running.</td>
 <?else:?>
- <td><input type="submit" name="cmdStartMover" value="Move now"></td><td>Click to invoke the Mover.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.</td>
 <?endif;?>
  </tr>
 </table>
