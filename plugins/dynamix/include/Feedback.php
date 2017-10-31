@@ -10,6 +10,7 @@
  */
 ?>
 <?
+$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $var = parse_ini_file('state/var.ini');
 $unraid = parse_ini_file('/etc/unraid-version');
 $keyfile = trim(base64_encode(@file_get_contents($var['regFILE'])));
