@@ -227,8 +227,8 @@ $(function(){
       echo "<span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")<br>";?>
       </td><td><input type="submit" id="btnFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
       <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
-      <input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
-      <a class="info none img nohand" onclick="return false"><small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i><span><b>All data is permanently lost !!!<br>This is not used to recover data</b></span></small></a>
+      <a class="info none img nohand"><input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
+      <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i><span><b>All data is permanently lost !!!<br>This is not used to recover data</b></span></small></a>
       </td></tr>
 <?  endif;
     if (!$parity):
