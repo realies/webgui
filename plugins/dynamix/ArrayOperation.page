@@ -56,13 +56,13 @@ function tab0() {
   $.removeCookie('one',{path:'/'});
   $.cookie('tab','tab0',{path:'/'});
 }
-function parity_status() {
+function parityStatus() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'parity'},function(data) {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
 <?if ($tabbed):?>
-    if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parity_status,3000);
+    if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parityStatus,3000);
 <?else:?>
-    setTimeout(parity_status,3000);
+    setTimeout(parityStatus,3000);
 <?endif;?>
     if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel') {
       $('#cancelButton').val('Done').unbind().bind({click:function(){refresh();}});
@@ -71,7 +71,7 @@ function parity_status() {
     }
   });
 }
-function parity_warning(form) {
+function parityWarning(form) {
 <?if (strpos($disks['parity2']['status'],'_NP')===false):?>
   var text = '<i>Dual parity valid</i> requires <b>ALL</b> disks in their original slots';
 <?else:?>
@@ -84,7 +84,7 @@ function parity_warning(form) {
     form.submit();
   }
 }
-function stop_array(form) {
+function stopArray(form) {
   $(form).append('<input type="hidden" name="cmdStop" value="Stop">');
 <?if ($confirm['stop']):?>
   swal({title:'Proceed?',text:'This will stop the array',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmdStop"]').remove();});
@@ -92,7 +92,7 @@ function stop_array(form) {
   form.submit();
 <?endif;?>
 }
-function stop_parity(form,text) {
+function stopParity(form,text) {
   $(form).append('<input type="hidden" name="cmdNoCheck" value="Cancel">');
 <?if ($confirm['stop']):?>
   swal({title:'Proceed?',text:'This will stop the running '+text+' operation',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmdNoCheck"]').remove();});
@@ -100,7 +100,7 @@ function stop_parity(form,text) {
   form.submit();
 <?endif;?>
 }
-function shut_down(form,cmd) {
+function shutdown(form,cmd) {
   $(form).append('<input type="hidden" name="cmd" value="'+cmd+'">');
 <?if ($confirm['down']):?>
   swal({title:'Proceed?',text:'This will '+cmd+' the system',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmd"]').remove();});
@@ -170,11 +170,11 @@ function getFileContent(event,form) {
   reader.onload = function(){form.file.value=reader.result;toggleStart(false);};
   reader.readAsDataURL(input.files[0]);
 }
-parity_status();
+parityStatus();
 <?if ($tabbed):?>
 $('.tabs').append(ctrl);
 if ($.cookie('tab')=='tab0') $('i.toggle').hide();
-$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parity_status(); tab0(); $('i.toggle').hide('slow');}});
+$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parityStatus(); tab0(); $('i.toggle').hide('slow');}});
 <?else:?>
 $('div[id=title]:not(":last, .disable_diskio")').each(function(){$(this).append(ctrl);});
 <?endif;?>
@@ -219,7 +219,7 @@ $(function(){
   switch ($var['fsState']):
   case "Started":?>
     <tr><td><?=status_indicator()?><span class="strong big">Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></span></td>
-    <td><input type="button" value="Stop" onclick="stop_array(this.form)"<?if ($parity||$mover):?> disabled<?endif;?>></td>
+    <td><input type="button" value="Stop" onclick="stopArray(this.form)"<?if ($parity||$mover):?> disabled<?endif;?>></td>
     <td><strong>Stop</strong> will take the array off-line.<?=$parity?"<br>$parity":($mover?"<br>$mover":"")?></td></tr>
 <?  if ($var['fsNumUnmountable']>0):?>
       <tr><td><strong>Unmountable disk<?=$var['fsNumUnmountable']==1?'':'s'?> present:</strong><br>
@@ -275,17 +275,17 @@ $(function(){
       endif;
     else:
       if ($var['mdResyncAction']=="check"):?>
-        <tr><td>Read-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Read-Check')"></td>
+        <tr><td>Read-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Read-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Read-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"check")):?>
-        <tr><td>Parity-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Parity-Check')"></td>
+        <tr><td>Parity-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Parity-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"recon")):?>
-        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Parity-Sync/Data-Rebuild')"></td>
+        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Sync/Data-Rebuild')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Parity-Sync/Data-Rebuild.
         <br>WARNING: canceling may leave the array unprotected!</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
-        <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Clearing')"></td>
+        <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
       <tr><td>Total size:</td><td id="line0"></td><td></td></tr>
@@ -363,7 +363,7 @@ $(function(){
         <td><strong>Start</strong> will record all disk information and bring the array on-line.
         <br>The array will be immediately available, but <strong>unprotected</strong> since <em>parity</em> has not been assigned.</td></tr>
 <?    else:?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" value="Start" onclick="parity_warning(this.form)"></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" value="Start" onclick="parityWarning(this.form)"></td>
         <td><strong>Start</strong> will record all disk information, bring the array on-line, and start Parity-Sync.
         <br>The array will be immediately available, but <strong>unprotected</strong> until Parity-Sync completes.
         <br><input type="checkbox" name="md_invalidslot" value="99">Parity is already valid.</td></tr>
@@ -482,14 +482,15 @@ $(function(){
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile, device encryption remains functional.<br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
+ <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile, device encryption remains functional.
+ <br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
 </table>
 </form>
 <?endif;?>
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
- <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shut_down(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shut_down(this.form,'shutdown')"></td>
+ <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown(this.form,'shutdown')"></td>
  <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
 </table>
 </form>
