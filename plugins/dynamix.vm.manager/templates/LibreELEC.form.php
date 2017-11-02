@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2016, Lime Technology
- * Copyright 2016, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2017, Lime Technology
+ * Copyright 2017, Derek Macias, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
  */
 ?>
 <?
-	$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+	$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
 	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
 	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";

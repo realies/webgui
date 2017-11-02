@@ -30,6 +30,7 @@ $high1  = $unraid['display']['critical'];
 $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
 $errors = [];
+$top    = 120;
 
 function plus($val,$word,$last) {
   return $val>0 ? (($val||$last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
@@ -90,11 +91,11 @@ function read_write_parity_log($epoch,$duration,$speed,$status,$error) {
   return str_replace("\n","",$line);
 }
 function check_temp($name,$temp,$text,$info) {
-  global $notify,$disks,$saved,$unraid,$server;
+  global $notify,$disks,$saved,$unraid,$server,$top;
   $disk = &$disks[$name];
   $hot  = $disk['hotTemp'] ?? $unraid['display']['hot'];
   $max  = $disk['maxTemp'] ?? $unraid['display']['max'];
-  $warn = $temp>=$max && $max>0 ? 'alert' : ($temp>=$hot && $hot>0 ? 'warning' : '');
+  $warn = exceed($temp,$max,$top) ? 'alert' : (exceed($temp,$hot,$top) ? 'warning' : '');
   $item = 'temp';
   $last = $saved[$item][$name] ?? 0;
   if ($warn) {
@@ -103,7 +104,7 @@ function check_temp($name,$temp,$text,$info) {
       $saved[$item][$name] = $max>0 && $temp<=$max ? $max : $temp;
     }
   } else {
-    if ($last) {
+    if ($last && $temp<=$top) {
       exec("$notify -e ".escapeshellarg("unRAID $text message")." -s ".escapeshellarg("Notice [$server] - $text returned to normal temperature")." -d ".escapeshellarg("$info"));
       unset($saved[$item][$name]);
     }
@@ -171,9 +172,9 @@ function check_usage($name,$used,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
   if ($used == -1) return;
   $disk = &$disks[$name];
-  $warning  = $disk['warning'] ?? $unraid['display']['warning'];
+  $warning = $disk['warning'] ?? $unraid['display']['warning'];
   $critical = $disk['critical'] ?? $unraid['display']['critical'];
-  $warn = $used>=$critical && $critical>0 ? 'alert' : ($used>=$warning && $warning>0 ? 'warning' : '');
+  $warn = exceed($used,$critical) ? 'alert' : (exceed($used,$warning) ? 'warning' : '');
   $item = 'used';
   $last = $saved[$item][$name] ?? 0;
   if ($warn) {
@@ -182,7 +183,7 @@ function check_usage($name,$used,$text,$info) {
       $saved[$item][$name] = $critical>0 && $used<=$critical ? $critical : $used;
     }
   } else {
-    if ($last) {
+    if ($last && $used<=100) {
       exec("$notify -e ".escapeshellarg("unRAID $text message")." -s ".escapeshellarg("Notice [$server] - $text returned to normal utilization level")." -d ".escapeshellarg("$info"));
       unset($saved[$item][$name]);
     }

@@ -56,13 +56,13 @@ function tab0() {
   $.removeCookie('one',{path:'/'});
   $.cookie('tab','tab0',{path:'/'});
 }
-function parity_status() {
+function parityStatus() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'parity'},function(data) {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
 <?if ($tabbed):?>
-    if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parity_status,3000);
+    if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parityStatus,3000);
 <?else:?>
-    setTimeout(parity_status,3000);
+    setTimeout(parityStatus,3000);
 <?endif;?>
     if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel') {
       $('#cancelButton').val('Done').unbind().bind({click:function(){refresh();}});
@@ -71,7 +71,7 @@ function parity_status() {
     }
   });
 }
-function parity_warning(form) {
+function parityWarning(form) {
 <?if (strpos($disks['parity2']['status'],'_NP')===false):?>
   var text = '<i>Dual parity valid</i> requires <b>ALL</b> disks in their original slots';
 <?else:?>
@@ -84,7 +84,7 @@ function parity_warning(form) {
     form.submit();
   }
 }
-function stop_array(form) {
+function stopArray(form) {
   $(form).append('<input type="hidden" name="cmdStop" value="Stop">');
 <?if ($confirm['stop']):?>
   swal({title:'Proceed?',text:'This will stop the array',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmdStop"]').remove();});
@@ -92,7 +92,7 @@ function stop_array(form) {
   form.submit();
 <?endif;?>
 }
-function stop_parity(form,text) {
+function stopParity(form,text) {
   $(form).append('<input type="hidden" name="cmdNoCheck" value="Cancel">');
 <?if ($confirm['stop']):?>
   swal({title:'Proceed?',text:'This will stop the running '+text+' operation',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmdNoCheck"]').remove();});
@@ -100,7 +100,7 @@ function stop_parity(form,text) {
   form.submit();
 <?endif;?>
 }
-function shut_down(form,cmd) {
+function shutdown(form,cmd) {
   $(form).append('<input type="hidden" name="cmd" value="'+cmd+'">');
 <?if ($confirm['down']):?>
   swal({title:'Proceed?',text:'This will '+cmd+' the system',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmd"]').remove();});
@@ -170,11 +170,11 @@ function getFileContent(event,form) {
   reader.onload = function(){form.file.value=reader.result;toggleStart(false);};
   reader.readAsDataURL(input.files[0]);
 }
-parity_status();
+parityStatus();
 <?if ($tabbed):?>
 $('.tabs').append(ctrl);
 if ($.cookie('tab')=='tab0') $('i.toggle').hide();
-$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parity_status(); tab0(); $('i.toggle').hide('slow');}});
+$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parityStatus(); tab0(); $('i.toggle').hide('slow');}});
 <?else:?>
 $('div[id=title]:not(":last, .disable_diskio")').each(function(){$(this).append(ctrl);});
 <?endif;?>
@@ -219,7 +219,7 @@ $(function(){
   switch ($var['fsState']):
   case "Started":?>
     <tr><td><?=status_indicator()?><span class="strong big">Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></span></td>
-    <td><input type="button" value="Stop" onclick="stop_array(this.form)"<?if ($parity||$mover):?> disabled<?endif;?>></td>
+    <td><input type="button" value="Stop" onclick="stopArray(this.form)"<?if ($parity||$mover):?> disabled<?endif;?>></td>
     <td><strong>Stop</strong> will take the array off-line.<?=$parity?"<br>$parity":($mover?"<br>$mover":"")?></td></tr>
 <?  if ($var['fsNumUnmountable']>0):?>
       <tr><td><strong>Unmountable disk<?=$var['fsNumUnmountable']==1?'':'s'?> present:</strong><br>
@@ -227,8 +227,8 @@ $(function(){
       echo "<span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")<br>";?>
       </td><td><input type="submit" id="btnFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
       <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
-      <input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
-      <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" style="cursor:help" title="All data is permanently lost.&#10;This is not used to recover data."></i></small>
+      <a class="info none img nohand"><input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
+      <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i><span><b>All data is permanently lost !!!<br>This is not used to recover data</b></span></small></a>
       </td></tr>
 <?  endif;
     if (!$parity):
@@ -242,46 +242,50 @@ $(function(){
 <?      elseif (strstr($var['mdResyncAction'],"check")):?>
           <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
-<?      endif;
-        if ($var['sbSyncExit']!=0):?>
-          <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td>
+<?      endif;?>
+        <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td>
+<?      if ($var['sbSyncExit']!=0):?>
           <td>Last check incomplete on <strong><?=my_time($var['sbSynced2']).day_count($var['sbSynced2'])?></strong><?if ($var['sbSynced2']):?>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.<?endif;?>
           <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=my_error($var['sbSyncExit'])?></small></td></tr>
-<?      elseif ($var['sbSynced']==0):?>
-          <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td><td>Last checked on <strong><?=my_time(0).day_count(0)?></strong>
-          <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check(0,0)?></small></td></tr>
-<?      elseif ($var['sbSynced2']==0):?>
-          <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td>
-<?        list($entry,$duration,$speed,$status,$error) = explode('|', read_parity_log($var['sbSynced']));
+<?      elseif ($var['sbSynced']==0):
+          list($date,$duration,$speed,$status,$error) = last_parity_log();?>
+<?        if ($status==0):?>
+            <td>Last checked on <strong><?=my_time($date).day_count($date)?></strong>, finding <strong><?=$error?></strong> error<?=$error==1?'':'s'?>.
+            <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($duration,$speed)?></small></td></tr>
+<?        else:?>
+            <td>Last check incomplete on <strong><?=my_time($date).day_count($date)?></strong>, finding <strong><?=$error?></strong> error<?=$error==1?'':'s'?>.
+            <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=my_error($status)?></small>
+<?        endif;
+        elseif ($var['sbSynced2']==0):
+          list($date,$duration,$speed,$status,$error) = explode('|', read_parity_log($var['sbSynced']));
           if ($status==0):?>
             <td>Last checked on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$error?></strong> error<?=$error==1?'':'s'?>.
             <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($duration,$speed)?></small>
 <?        else:?>
             <td>Last check incomplete on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$error?></strong> error<?=$error==1?'':'s'?>.
-            <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=$status?></small>
+            <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=my_error($status)?></small>
 <?        endif;?>
           </td></tr>
 <?      else:
           $duration = $var['sbSynced2']-$var['sbSynced'];
           $speed = $duration?my_scale($var['mdResyncSize']*1024/$duration,$unit,1)." $unit/sec":'';?>
-          <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td>
           <td>Last check completed on <strong><?=my_time($var['sbSynced2']).day_count($var['sbSynced2'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
           <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($duration,$speed)?></small></td></tr>
 <?      endif;
       endif;
     else:
       if ($var['mdResyncAction']=="check"):?>
-        <tr><td>Read-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Read-Check')"></td>
+        <tr><td>Read-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Read-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Read-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"check")):?>
-        <tr><td>Parity-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Parity-Check')"></td>
+        <tr><td>Parity-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Parity-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"recon")):?>
-        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Parity-Sync/Data-Rebuild')"></td>
+        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Sync/Data-Rebuild')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Parity-Sync/Data-Rebuild.
         <br>WARNING: canceling may leave the array unprotected!</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
-        <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stop_parity(this.form,'Clearing')"></td>
+        <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
       <tr><td>Total size:</td><td id="line0"></td><td></td></tr>
@@ -359,7 +363,7 @@ $(function(){
         <td><strong>Start</strong> will record all disk information and bring the array on-line.
         <br>The array will be immediately available, but <strong>unprotected</strong> since <em>parity</em> has not been assigned.</td></tr>
 <?    else:?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" value="Start" onclick="parity_warning(this.form)"></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" value="Start" onclick="parityWarning(this.form)"></td>
         <td><strong>Start</strong> will record all disk information, bring the array on-line, and start Parity-Sync.
         <br>The array will be immediately available, but <strong>unprotected</strong> until Parity-Sync completes.
         <br><input type="checkbox" name="md_invalidslot" value="99">Parity is already valid.</td></tr>
@@ -454,38 +458,40 @@ $(function(){
 <form name="otherOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=$var['mdState']?>">
 <table class="array_status">
-  <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
-  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
-  <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+ <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
+ <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
+ <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+ <tr><td></td><td class="line" colspan="2"></td></tr>
 </table>
 </form>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
 <table class="array_status">
-  <tr><td colspan="3"></td></tr><tr><td></td>
+ <tr><td></td>
 <?if ($mover):?>
-  <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Mover is running.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Disabled - Mover is running.</td>
 <?else:?>
-  <td><input type="submit" name="cmdStartMover" value="Move now"></td><td>Click to invoke the Mover.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.</td>
 <?endif;?>
-  </tr>
+ </tr>
 </table>
 </form>
 <?endif;?>
 <?if ($keyfile):?>
-<form markdown="1" name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
+<form name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><input type="checkbox" onchange="toggleApply(this.checked)">Delete encryption keyfile</td></tr>
+ <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile, device encryption remains functional.
+ <br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
 </table>
 </form>
 <?endif;?>
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
-  <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shut_down(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shut_down(this.form,'shutdown')"></td>
-  <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
+ <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown(this.form,'shutdown')"></td>
+ <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
 </table>
 </form>
 <?
@@ -560,13 +566,14 @@ if (isset($display['sleep'])) @include $display['sleep'];
 > Once you have assigned all of your hard drives, refer to the Array Status section below
 > and Start the array.
 
-<?if (($keyfile && $wrong) || $missing || $encrypt):?>
+<?if (($keyfile && $wrong) || $missing || $encrypt || (!$keyfile && $crypto)):?>
 <div></div>
 > #### Encryption input
 >
+> Passphrase or file is stored in /root/keyfile.<br>
 > This keyfile is read during array Start and is used to encrypt/decrypt content of encrypted devices.
 >
-> With array Stopped, the keyfile may be deleted and the user can specify a new encryption key. Note that once a device
+> With array Stopped, the user can specify a new encryption key. Note that once a device
 > is formatted with a particular key it may only be opened using that same key. Changing the encryption key requires
 > encrypted devices to be reformatted **resulting in permanent loss of all existing data on those devices.**
 >

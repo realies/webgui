@@ -112,7 +112,7 @@ function my_check($time, $speed) {
 function my_error($code) {
   switch ($code) {
   case -4:
-    return "<em>user abort</em>";
+    return "<em>aborted</em>";
   default:
     return "<strong>$code</strong>";
   }
@@ -175,6 +175,13 @@ function read_parity_log($epoch, $busy=false) {
     fclose($handle);
   }
   return $line ?: $last ?: '0|0|0|0|0';
+}
+function last_parity_log() {
+  $log = '/boot/config/parity-checks.log';
+  if (!file_exists($log)) return [0,0,0,0,0];
+  list($date,$duration,$speed,$status,$error) = explode('|',exec("tail -1 $log"));
+  list($y,$m,$d,$t) = preg_split('/ +/',$date);
+  return [strtotime("$d-$m-$y $t"), $duration, $speed, $status, $error];
 }
 function urlencode_path($path) {
   return str_replace("%2F", "/", urlencode($path));
