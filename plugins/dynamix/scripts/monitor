@@ -166,7 +166,7 @@ function check_smart($name,$port,$text,$info) {
     }
   }
   $file .= '.ssa';
-  if (!file_exists($file) || (time()-filemtime($file)>$var['poll_attributes'])) exec("smartctl -H $type ".escapeshellarg("/dev/$port")."|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' >".escapeshellarg($file));
+  if (!file_exists($file) || (time()-filemtime($file)>$var['poll_attributes'])) exec("smartctl -n standby -H $type ".escapeshellarg("/dev/$port")."|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' >".escapeshellarg($file));
 }
 function check_usage($name,$used,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
@@ -255,7 +255,7 @@ foreach ($devs as $dev) {
   $smart = "/var/local/emhttp/smart/$name";
   $type = $var['smType'] ?? '';
   $port = port_name($name);
-  if (!file_exists($smart) || (time()-filectime($smart)>$var['poll_attributes'])) exec("smartctl -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart));
+  if (!file_exists($smart) || (time()-filectime($smart)>$var['poll_attributes'])) exec("smartctl -n standby -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart));
   $temp = exec("awk 'BEGIN{t=\"*\"} \$1==190||\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)." 2>/dev/null");
   $text = "device $name";
   $info = !empty($dev['id']) ? "{$dev['id']} ($name)": "No device identification ($name)";
