@@ -144,7 +144,7 @@ function array_offline(&$disk) {
     } else {
       if ($var['mdState']=='NEW_ARRAY') {
         if ($disk['type']=='Parity') $warning = $text;
-      } else {
+      } else if ($var['mdNumInvalid']<=1) {
         if (in_array($disk['status'],['DISK_INVALID','DISK_DSBL_NEW','DISK_WRONG','DISK_NEW'])) $warning = $text;
       }
     }
