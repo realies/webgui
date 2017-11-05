@@ -123,6 +123,11 @@ $slots = count($disks) + count($devs);
 <?if ($slots<30):?>
 <style>
 table.share_status.fixed td:nth-child(<?=$slots+1?>)~td{visibility:hidden}
+<?if ($display['theme']=='white'):?>
+table.share_status.fixed td:nth-child(<?=$slots+1?>){border-right:1px solid #E8E8E8}
+<?elseif ($display['theme']=='black'):?>
+table.share_status.fixed td:nth-child(<?=$slots+1?>){border-right:1px solid #202020}
+<?endif;?>
 </style>
 <?endif;?>
 <table class='share_status fixed'>
