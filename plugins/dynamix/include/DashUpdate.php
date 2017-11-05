@@ -188,9 +188,6 @@ case 'sys':
   $mem = max(round((1-$memory[1]/$memory[0])*100),0);
   echo "{$mem}%#".implode('#',$sys);
 break;
-case 'cpu':
-  echo @file_get_contents('state/cpuload.ini');
-break;
 case 'fan':
   exec("sensors -uA 2>/dev/null|grep -Po 'fan\d_input: \K\d+'",$rpms);
   if ($rpms) echo implode(' RPM#',$rpms).' RPM';

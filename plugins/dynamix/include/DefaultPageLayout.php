@@ -30,7 +30,6 @@
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:15px;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
 .dynamix_back-to-top {background: none;margin: 0;position: fixed;bottom: 30px;right: 0;width: 30px;height: 30px;z-index: 100;display: none;text-decoration: none;color: #ffffff;}
-
 <?
 $banner = '/boot/config/plugins/dynamix/banner.png';
 echo "#header.image{background-image:url(";
@@ -374,10 +373,7 @@ foreach ($pages as $page) {
       echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\">$icon<div class=\"PanelText\">$title</div></a></div>";
     }
   }
-  $text = $page['text'];
-  if (!isset($page['Markdown']) || $page['Markdown'] == 'true') {
-    $text = Markdown($text);
-  }
+  $text = empty($page['Markdown']) || $page['Markdown']=='true' ? Markdown($page['text']) : $page['text'];
   eval("?>$text");
   if ($close) echo "</div></div>";
 }
@@ -399,10 +395,6 @@ default:
 }
 echo "</span></span><span id='countdown'></span><span id='user-notice' class='red-text'></span>";
 echo "<span id='copyright'>unRAID&reg; webGui &copy;2017, Lime Technology, Inc.";
-if (isset($myPage['Author'])) {
-  echo " | Page author: {$myPage['Author']}";
-  if (isset($myPage['Version'])) echo ", version: {$myPage['Version']}";
-}
 echo " <a href='http://lime-technology.com/wiki/index.php/Official_Documentation' target='_blank' title='Online manual'><i class='fa fa-book'></i> manual</a>";
 echo "</span></div>";
 ?>
@@ -411,34 +403,75 @@ echo "</span></div>";
 if (typeof InstallTrigger!=='undefined') $('#nav-block').addClass('mozilla');
 
 function parseINI(data){
-    var regex = {
-        section: /^\s*\[\s*\"*([^\]]*)\s*\"*\]\s*$/,
-        param: /^\s*([^=]+?)\s*=\s*\"*(.*?)\s*\"*$/,
-        comment: /^\s*;.*$/
+  var regex = {
+    section: /^\s*\[\s*\"*([^\]]*)\s*\"*\]\s*$/,
+    param: /^\s*([^=]+?)\s*=\s*\"*(.*?)\s*\"*$/,
+    comment: /^\s*;.*$/
+  };
+  var value = {};
+  var lines = data.split(/[\r\n]+/);
+  var section = null;
+  lines.forEach(function(line) {
+    if (regex.comment.test(line)) {
+      return;
+    } else if (regex.param.test(line)) {
+      var match = line.match(regex.param);
+      if (section) {
+        value[section][match[1]] = match[2];
+      } else {
+        value[match[1]] = match[2];
+      }
+    } else if (regex.section.test(line)) {
+      var match = line.match(regex.section);
+      value[match[1]] = {};
+      section = match[1];
+    } else if (line.length==0 && section) {
+      section = null;
     };
-    var value = {};
-    var lines = data.split(/[\r\n]+/);
-    var section = null;
-    lines.forEach(function(line){
-        if(regex.comment.test(line)){
-            return;
-        }else if(regex.param.test(line)){
-            var match = line.match(regex.param);
-            if(section){
-                value[section][match[1]] = match[2];
-            }else{
-                value[match[1]] = match[2];
-            }
-        }else if(regex.section.test(line)){
-            var match = line.match(regex.section);
-            value[match[1]] = {};
-            section = match[1];
-        }else if(line.length == 0 && section){
-            section = null;
-        };
-    });
-    return value;
+  });
+  return value;
 }
+var watchdog = new NchanSubscriber('/sub/var');
+watchdog.on('message', function(data) {
+  var ini = parseINI(data);
+  var state = ini['fsState'];
+  var progress = ini['fsProgress'];
+  var status;
+  if (state=='Stopped') {
+    status = "<span class='red strong'>Array Stopped</span>";
+  } else if (state=='Started') {
+    status = "<span class='green strong'>Array Started</span>";
+  } else if (state=='Formatting') {
+    status = "<span class='green strong'>Array Started</span>&bullet;<span class='orange strong'>Formatting device(s)</span>";
+  } else {
+    status = "<span class='orange strong'>Array "+state+"</span>";
+  }
+  if (ini['mdResync']>0) {
+    var action;
+    if (ini['mdResyncAction'].indexOf("recon")>=0) action = "Parity-Sync / Data-Rebuild";
+    else if (ini['mdResyncAction'].indexOf("clear")>=0) action = "Clearing";
+    else if (ini['mdResyncAction']=="check") action = "Read-Check";
+    else if (ini['mdResyncAction'].indexOf("check")>=0) action = "Parity-Check";
+    action += " "+(ini['mdResyncPos']/(ini['mdResync']/100+1)).toFixed(1)+" %";
+    status += "&bullet;<span class='orange strong'>"+action.replace('.','<?=$display['number'][0]?>')+"</span>";
+  }
+  if (progress) status += "&bullet;<span class='blue strong'>"+progress+"</span>";
+  $('#statusbar').html(status);
+});
+var backtotopoffset = 250;
+var backtotopduration = 500;
+$(window).scroll(function() {
+  if ($(this).scrollTop() > backtotopoffset) {
+    $('.dynamix_back-to-top').fadeIn(backtotopduration);
+  } else {
+    $('.dynamix_back-to-top').fadeOut(backtotopduration);
+  }
+});
+$('.dynamix_back-to-top').click(function(event) {
+  event.preventDefault();
+  $('html,body').animate({scrollTop:0},backtotopduration);
+  return false;
+});
 $(function() {
 <?if ($notify['entity'] & 1 == 1):?>
   $.post('/webGui/include/Notify.php',{cmd:'init'},function(){timers.notifier = setTimeout(notifier,0);});
@@ -512,55 +545,8 @@ $(function() {
       });
     });
   }
-
   $('form').append($('<input>').attr({type:'hidden', name:'csrf_token', value:'<?=$var['csrf_token']?>'}));
-
-  var watchdog = new NchanSubscriber('/sub/var');
-  watchdog.on('message', function(data){
-    var ini=parseINI(data);
-    var state=ini['fsState'];
-    var progress=ini['fsProgress'];
-    var status;
-
-    if (state=="Stopped") {
-      status="<span class='red strong'>Array Stopped</span>";
-    } else if (state=="Started") {
-      status="<span class='green strong'>Array Started</span>";
-    } else if (state=="Formatting") {
-      status="<span class='green strong'>Array Started</span>&bullet;<span class='orange strong'>Formatting device(s)</span>";
-    } else {
-      status="<span class='orange strong'>Array "+state+"</span>";
-    }
-    if (ini['mdResync'] > 0) {
-      var action;
-      if (ini['mdResyncAction'].indexOf("recon")>=0)      action="Parity-Sync / Data-Rebuild";
-      else if (ini['mdResyncAction'].indexOf("clear")>=0) action="Clearing";
-      else if (ini['mdResyncAction'] == "check")          action="Read-Check";
-      else if (ini['mdResyncAction'].indexOf("check")>=0) action="Parity-Check";
-      action+=" "+(ini['mdResyncPos']/(ini['mdResync']/100+1)).toFixed(1)+" %";
-      status+="&bullet;<span class='orange strong'>"+action.replace('.','<?=$display['number'][0]?>')+"</span>";
-    }
-    if (progress)
-      status+="&bullet;<span class='blue strong'>"+progress+"</span>";
-    $('#statusbar').html(status);
-  });
   watchdog.start();
-});
-  
-var backtotopoffset = 250;
-var backtotopduration = 500;
-$(window).scroll(function() {
-	if ($(this).scrollTop() > backtotopoffset) {
-		$('.dynamix_back-to-top').fadeIn(backtotopduration);
-	} else {
-		$('.dynamix_back-to-top').fadeOut(backtotopduration);
-	}
-});
-
-$('.dynamix_back-to-top').click(function(event) {
-	event.preventDefault();
-	$('html, body').animate({scrollTop: 0},backtotopduration);
-	return false;
 });
 </script>
 </body>
