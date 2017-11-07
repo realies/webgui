@@ -57,7 +57,10 @@ function device_info(&$disk,$online) {
     case 'grey-off': $help = 'Device not present'; break;
   }
   $status = "$ctrl<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>$help</span></a>";
-  $link = (strcmp($disk['status'], 'DISK_NP')!=0 || $disk['name']=="cache") ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
+  $link = ($disk['type']=='Parity' && strpos($disk['status'],'_NP')===false) ||
+          ($disk['type']=='Data' && $disk['status']!='DISK_NP') ||
+          ($disk['type']=='Cache' && $disk['status']!='DISK_NP') ||
+          ($disk['name']=='cache') ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
   if ($crypto && $online) switch ($disk['luksState']) {
     case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
     case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>Device encrypted and unlocked</span></a>"; break;
@@ -183,14 +186,16 @@ function array_offline(&$disk) {
 }
 function array_online(&$disk) {
   global $sum, $diskio;
-  $dev = $disk['device'];
-  $data = explode(' ',$diskio[$dev] ?? '');
+  if ($disk['device']!='') {
+    $dev = $disk['device'];
+    $data = explode(' ',$diskio[$dev] ?? '');
+    $sum['ioReads'] += $data[0];
+    $sum['ioWrites'] += $data[1];
+  }
   if (is_numeric($disk['temp'])) {
     $sum['count']++;
     $sum['temp'] += $disk['temp'];
   }
-  $sum['ioReads'] += $data[0];
-  $sum['ioWrites'] += $data[1];
   $sum['numReads'] += $disk['numReads'];
   $sum['numWrites'] += $disk['numWrites'];
   $sum['numErrors'] += $disk['numErrors'];
