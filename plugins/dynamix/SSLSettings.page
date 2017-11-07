@@ -15,37 +15,62 @@ Tag="expeditedssl"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$keyfile = @file_get_contents($var['regFILE']);
+if ($keyfile !== false)
+  $keyfile = @base64_encode($keyfile);
+$isLEcert = file_exists("/boot/config/ssl/certs/certificate_bundle.pem");
+if ($isLEcert)
+  exec("/usr/bin/openssl x509 -checkend 2592000 -noout -in /etc/ssl/certs/unraid_bundle.pem",$arrout,$retval_expired);
+$provisionlabel = $isLEcert ? 'Renew' : 'Provision';
+$disabled_provision = $keyfile===false || ($isLEcert && $retval_expired===0) || $var['USE_SSL']!="auto" ? 'disabled' : '';
+$disabled_updatedns = $keyfile!==false && $isLEcert ? '' : 'disabled';
+$internalip = $eth0['IPADDR:0'];
+?>
 <script>
-function provisionSSL(internalip, keyfile, button) {
-    $(button).prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\" aria-hidden=\"true\"></i> Provisioning");
+function provisionSSL(button) {
+    var oldlabel = $.trim($(button).text());
+    $(button).prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\" aria-hidden=\"true\"></i> "+oldlabel+"ing");
+
+    var msg = "Your Let's Encrypt SSL Certificate has been provisioned and a DNS record " +
+              "for local IP address <?=$internalip?> has been created on unraid.net.";
 
     var failure = function(data) {
         var status = data.status;
         var obj = data.responseJSON;
-        var msg = "Sorry, an error ("+status+") occurred provisioning your SSL certificate. " +
-                  "The error is: "+obj.error+".";
-        $(button).prop("disabled", false).html("Provision");
+        msg = "Sorry, an error ("+status+") occurred "+oldlabel.toLowerCase()+"ing your SSL certificate. " +
+              "The error is: "+obj.error+".";
+        $(button).prop("disabled", false).html(oldlabel);
         swal("Oops",msg,"error");
     };
 
-    $.post("https://keys.lime-technology.com/account/ssl/provisioncert",{internalip:internalip,keyfile:keyfile},function(data) {
+    var success_provision = function(data) {
         if (data.bundle) {
-            $.get("//"+data.internal_dns+":<?=$var['PORT']?>/dnscheck",function() {
-                $.post("/webGui/include/CertUpload.php",{text:data.bundle,csrf_token:"<?=$var['csrf_token']?>"},function(data) {
-                    var msg = "Your Let's Encrypt SSL Certificate has been provisioned and a DNS record " +
-                              "for local IP address "+internalip+" has been created on unraid.net.";
-                    swal({title:"",text:msg,type:"success",allowEscapeKey:false},function(){button.form.submit();});
-                }).fail(failure);
-            }).fail(function(){
-                failure({"status": 403, "responseJSON": {"error": "Your router or DNS server has DNS rebinding protection enabled, preventing "+data.internal_dns+" "+internalip+" resolution.  See Help for more details and workarounds"}});
-            });
+            if (oldlabel == 'Renew') {
+                msg = "Your Let's Encrypt SSL Certificate has been renewed.";
+                success_rebind_check(data);
+            } else {
+                $.get("//"+data.internal_dns+":<?=$var['PORT']?>/dnscheck",function() {
+                    success_rebind_check(data);
+                }).fail(function(){
+                    failure({"status": 403, "responseJSON": {"error": "Your router or DNS server has DNS rebinding protection enabled, preventing "+data.internal_dns+" <?=$internalip?> resolution.  See Help for more details and workarounds"}});
+                });
+            }
         } else {
             failure({"status": 403, "responseJSON": {"error": "Server was unable to provision SSL certificate"}});
         }
-    }).fail(failure);
+    };
+
+    var success_rebind_check = function(data) {
+        $.post("/webGui/include/CertUpload.php",{text:data.bundle,csrf_token:"<?=$var['csrf_token']?>"},function(data2) {
+            swal({title:"",text:msg,type:"success",allowEscapeKey:false},function(){button.form.submit();});
+        }).fail(failure);
+    };
+
+    $.post("https://keys.lime-technology.com/account/ssl/provisioncert",{internalip:"<?=$internalip?>",keyfile:"<?=$keyfile?>"},success_provision).fail(failure);
 }
 
-function updateDNS(internalip, keyfile, button) {
+function updateDNS(button) {
     $(button).prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\" aria-hidden=\"true\"></i> Updating DNS");
 
     var failure = function(data) {
@@ -57,19 +82,14 @@ function updateDNS(internalip, keyfile, button) {
         swal('Oops',msg,'error');
     };
 
-    $.post("https://keys.lime-technology.com/account/ssl/updatedns",{internalip:internalip,keyfile:keyfile},function(data) {
+    var success = function(data) {
         $(button).prop("disabled", false).html("Update DNS");
-        swal("","Your local IP address "+internalip+" has been updated for unraid.net.","success");
-    }).fail(failure);
+        swal("","Your local IP address <?=$internalip?> has been updated for unraid.net.","success");
+    };
+
+    $.post("https://keys.lime-technology.com/account/ssl/updatedns",{internalip:"<?=$internalip?>",keyfile:"<?=$keyfile?>"},success).fail(failure);
 }
 </script>
-<?
-$keyfile = @file_get_contents($var['regFILE']);
-if ($keyfile !== false)
-  $keyfile = @base64_encode($keyfile);
-$disabled = $keyfile===false || file_exists("/boot/config/ssl/certs/certificate_bundle.pem") || $var['USE_SSL']!="auto" ? 'disabled' : '';
-$disabled_updatedns = $keyfile!==false && file_exists("/boot/config/ssl/certs/certificate_bundle.pem") ? '' : 'disabled';
-?>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 Use SSL/TLS:
 : <select name="USE_SSL" size="1" class="narrow">
@@ -110,13 +130,13 @@ HTTPS port:
 <form markdown="1" name="Provision" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
 Certificate issuer:
-: <?echo shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Issuer: //p'")?>
+: <?=shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Issuer: //p'")?>
 
 Certificate expiration:
-: <?echo shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Not After : //p'")?>
+: <?=shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Not After : //p'")?>
 
 &nbsp;
-: <button type="button" onclick="provisionSSL('<?=$eth0['IPADDR:0']?>', '<?=$keyfile?>', this)" <?=$disabled?>>Provision</button><button type="button" disabled>Renew</button><button type="button" onclick="updateDNS('<?=$eth0['IPADDR:0']?>', '<?=$keyfile?>', this)" <?=$disabled_updatedns?>>Update DNS</button>
+: <button type="button" onclick="provisionSSL(this)" <?=$disabled_provision?>><?=$provisionlabel?></button><button type="button" onclick="updateDNS(this)" <?=$disabled_updatedns?>>Update DNS</button>
 
 > **Provision** may be used to allocate a *free* SSL Certficiate from [Let's Encrypt](https://letsencrypt.org/) and
 > then upload to your server.  Note: We **highly** recommend using a static IP address in this case.
