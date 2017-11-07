@@ -187,6 +187,11 @@ IP address assignment:
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.128.0", "17");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.192.0", "18");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.224.0", "19");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.240.0", "20");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.248.0", "21");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24", $ethX["IPADDR:$i"]?"":"selected");?>
@@ -276,6 +281,11 @@ IP address assignment:
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.128.0", "17");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.192.0", "18");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.224.0", "19");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.240.0", "20");?>
+  <?=mk_option($ethX["NETMASK:$i"], "255.255.248.0", "21");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.252.0", "22");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.254.0", "23");?>
   <?=mk_option($ethX["NETMASK:$i"], "255.255.255.0", "24", $ethX["IPADDR:$i"]?"":"selected");?>
@@ -358,6 +368,11 @@ IP address assignment:
 IPv4 address:
 : <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$ethX["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:INDEX"], "255.255.0.0", "16");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.128.0", "17");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.192.0", "18");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.224.0", "19");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.240.0", "20");?>
+  <?=mk_option($ethX["NETMASK:INDEX"], "255.255.248.0", "21");?>
   <?=mk_option($ethX["NETMASK:INDEX"], "255.255.252.0", "22");?>
   <?=mk_option($ethX["NETMASK:INDEX"], "255.255.254.0", "23");?>
   <?=mk_option($ethX["NETMASK:INDEX"], "255.255.255.0", "24", "selected");?>

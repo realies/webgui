@@ -100,7 +100,7 @@ function stopParity(form,text) {
   form.submit();
 <?endif;?>
 }
-function shutdown(form,cmd) {
+function shutdown_now(form,cmd) {
   $(form).append('<input type="hidden" name="cmd" value="'+cmd+'">');
 <?if ($confirm['down']):?>
   swal({title:'Proceed?',text:'This will '+cmd+' the system',type:'warning',showCancelButton:true},function(p){if (p) form.submit(); else $('input[name="cmd"]').remove();});
@@ -490,7 +490,7 @@ $(function(){
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
- <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown(this.form,'shutdown')"></td>
+ <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown_now(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown_now(this.form,'shutdown')"></td>
  <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
 </table>
 </form>

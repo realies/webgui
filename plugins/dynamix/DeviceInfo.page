@@ -242,7 +242,6 @@ Critical disk utilization threshold (%):
 > A value of zero will disable the critical threshold (including notifications).
 
 <?endif;?>
-
 &nbsp;
 : <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

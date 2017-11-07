@@ -82,7 +82,7 @@ foreach (glob("/var/log/plugins/*.plg",GLOB_NOSORT) as $plugin_link) {
         $status = make_link('install',$plugin_file,'forced');
       } else {
         $latest = plugin('version',$filename);
-        if (strcmp($latest,$version) > 0) {
+        if ($os ? version_compare($latest,$version,'>') : strcmp($latest,$version) > 0) {
           $version .= "<br><span class='red-text'>$latest</span>";
           $status = make_link("update",basename($plugin_file));
           $changes_file = $filename;
