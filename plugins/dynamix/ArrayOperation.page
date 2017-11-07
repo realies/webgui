@@ -15,17 +15,121 @@ Tag="snowflake-o"
  */
 ?>
 <?
-$forced  = $var['fsEncryption']=='no';
-$crypto  = $var['fsEncryption']=='yes';
-$wrong   = $var['fsEncryption']=='wrong';
-$missing = $var['fsEncryption']=='missing';
-$check   = $var['luksRestricted']=='yes';
 $keyfile = file_exists($var['luksKeyfile']);
-$stop    = ($keyfile && $wrong) || ($check && $missing) ? 'disabled':'';
-
 $encrypt = false;
-if ($forced) foreach ($disks as $disk) $encrypt |= strpos($disk['fsType'],'luks:')!==false;
+foreach ($disks as $disk)
+  $encrypt |= strpos((($disk['fsType'] == "auto") ? $var['defaultFsType'] : $disk['fsType']),'luks:')!==false;
 
+/* only one of $forced, $missing, or $wrong will be true, or all will be false */
+$forced = false;
+$missing = false;
+$wrong = false;
+if ($encrypt) {
+  if (!$keyfile) {
+    $forced = $var['fsEncryption']=='no';
+    $missing = !$forced;
+  } else {
+    $wrong = $var['fsEncryption']=='wrong';
+  }
+}
+
+function check_encryption() {
+  global $forced, $missing, $wrong;
+  if ($forced) $status = "Enter new key";
+  elseif ($missing) $status = "Missing key";
+  elseif ($wrong) $status = "Wrong key";
+  else return;
+  echo "<tr><td></td><td class='gap'>Encryption status:</td><td><span class='red-text'>$status</span><span id='perm' style='padding-left:20px;display:none'><input name='luksReformat' type='checkbox' onchange='selectInput(this.form)'>permit reformat</span></td></tr>";
+  echo "<tr><td></td><td class='gap'>Encryption input:</td><td>";
+  echo "<select name='input' size='1' onchange='selectInput(this.form)'>";
+  echo mk_option(1,'text','Passphrase');
+  echo mk_option(1,'file','Keyfile');
+  echo "</select></td></tr>";
+  echo "<tr id='text'><td></td><td class='gap'>Passphrase:</td><td><input type='password' name='text' maxlength='512' value='' onkeyup='selectInput(this.form)'><input name='showPass' type='checkbox' onchange='selectInput(this.form)'>show passphrase</td></tr>";
+  echo "<tr id='copy' style='display:none'><td></td><td class='gap'>Retype passphrase:</td><td><input type='password' name='copy' maxlength='512' value='' onkeyup='selectInput(this.form)'></td></tr>";
+  echo "<tr id='file' style='display:none'><td></td><td class='gap'>Keyfile:</td><td><input type='file' name='local' onchange='getFileContent(event,this.form)'></td></tr>";
+}
+?>
+<script>
+function selectInput(form) {
+<?if ($missing && $var['luksRestricted']!='yes'):?>
+  var strict = false;
+<?else:?>
+  var strict = true;
+<?endif;?>
+  if (form.input.value == 'text') {
+    form.file.value = '';
+    form.local.value = '';
+<?if ($forced):?>
+    $('#text').show();
+    $('#copy').show();
+    $('#perm').hide();
+<?endif;?>
+<?if ($missing):?>
+    $('#text').show();
+    $('#copy').hide();
+    $('#perm').hide();
+<?endif;?>
+<?if ($wrong):?>
+    $('#text').show();
+    if ($('input[name="luksReformat"]').prop('checked')) $('#copy').show(); else $('#copy').hide();
+    $('#perm').show();
+<?endif;?>
+    $('#file').hide();
+    $('input[name="text"],input[name="copy"]').attr('type',$('input[name="showPass"]').prop('checked')?'text':'password');
+    $('#cmdStart').prop('disabled',strict && ($('#copy').is(':visible') ? (form.text.value!=form.copy.value || form.text.value=='') : form.text.value==''));
+  } else {
+    form.text.value = '';
+    form.copy.value = '';
+    $('#text').hide();
+    $('#copy').hide();
+    $('#perm').hide();
+    $('#file').show();
+    $('#cmdStart').prop('disabled',strict && !form.file.value);
+  }
+}
+function getFileContent(event,form) {
+  var input = event.target;
+  var reader = new FileReader();
+  reader.onload = function(){form.file.value=reader.result;selectInput(form);};
+  reader.readAsDataURL(input.files[0]);
+}
+function prepareInput(form) {
+  $(form).append('<input type="hidden" name="cmdStart" value="Start">');
+  if (form.input === undefined) {
+    form.submit();
+  } else {
+    var data = {};
+    data['#file'] = 'unused';
+    data['#include'] = 'webGui/include/KeyUpload.php';
+    data['text'] = form.text.value;
+    data['file'] = form.file.value;
+    form.input.disabled = true;
+    form.local.disabled = true;
+    form.file.disabled = true;
+    form.text.disabled = true;
+    form.copy.disabled = true;
+    $.post('/update.php',data,function(){form.submit();});
+  }
+}
+function parityWarning(form) {
+  if (form.md_invalidslot.checked) {
+<?if (strpos($disks['parity2']['status'],'_NP')===false):?>
+    var text = '<i>Dual parity valid</i> requires <b>ALL</b> disks in their original slots';
+<?else:?>
+    var text = '<i>Parity valid</i> requires <b>ALL</b> disks to have their original content';
+<?endif;?>
+  } else {
+    var text = '<i>Parity</i> disk(s) content will be overwritten';
+  }
+  swal({title:'Proceed to start',text:text,html:true,type:'warning',confirmButtonText:'Proceed',showCancelButton:true},function(){prepareInput(form);});
+}
+$(function(){
+  var form = document.getElementById('arrayOps');
+  if (form.input !== undefined) selectInput(form);
+});
+</script>
+<?
 function maintenance_mode() {
   echo "<tr>";
   echo "<td></td>";
@@ -50,7 +154,6 @@ td.gap{padding-left:26px!important}
 </style>
 <script>
 var ctrl = "<span class='status'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
-var forced = <?=$forced ? 'true':'false'?>;
 
 function tab0() {
   $.removeCookie('one',{path:'/'});
@@ -71,19 +174,7 @@ function parityStatus() {
     }
   });
 }
-function parityWarning(form) {
-<?if (strpos($disks['parity2']['status'],'_NP')===false):?>
-  var text = '<i>Dual parity valid</i> requires <b>ALL</b> disks in their original slots';
-<?else:?>
-  var text = '<i>Parity valid</i> requires <b>ALL</b> disks to have their original content';
-<?endif;?>
-  $(form).append('<input type="hidden" name="cmdStart" value="Start">');
-  if (form.md_invalidslot.checked) {
-    swal({title:'Proceed to start',text:text,html:true,type:'warning',confirmButtonText:'Proceed',showCancelButton:true},function(){form.submit();});
-  } else {
-    form.submit();
-  }
-}
+
 function stopArray(form) {
   $(form).append('<input type="hidden" name="cmdStop" value="Stop">');
 <?if ($confirm['stop']):?>
@@ -108,67 +199,8 @@ function shutdown_now(form,cmd) {
   form.submit();
 <?endif;?>
 }
-function prepareInput(form) {
-  $(form).append('<input type="hidden" name="cmdStart" value="Start">');
-  if (form.input===undefined) {
-    form.submit();
-  } else {
-    var data = {};
-    data['#file'] = 'unused';
-    data['#include'] = 'webGui/include/KeyUpload.php';
-    data['text'] = form.text.value;
-    data['file'] = form.file.value;
-    form.input.disabled = true;
-    form.local.disabled = true;
-    form.file.disabled = true;
-    form.text.disabled = true;
-    form.copy.disabled = true;
-    $.post('/update.php',data,function(){form.submit();});
-  }
-}
-function selectInput(form) {
-  if (form.input.value == 'text') {
-    form.file.value = '';
-    form.local.value = '';
-    $('#text').show();
-    if (forced || $('input[name="luksReformat"]').prop('checked')) $('#copy').show();
-    $('#file').hide();
-  } else {
-    form.text.value = '';
-    form.copy.value = '';
-    $('#text').hide();
-    $('#copy').hide();
-    $('#file').show();
-  }
-  toggleStart(true);
-}
-function toggleStart(form) {
-  var disabled = typeof(form)=='boolean' ? form : ((forced || form.luksReformat.checked) ? (form.text.value!=form.copy.value || form.text.value=='') : form.text.value=='');
-  $('#cmdStart').prop('disabled',disabled);
-}
 function toggleApply(checked) {
   $('input[name="#apply"]').prop('disabled',!checked);
-}
-function showPass(checked) {
-  $('input[name="text"],input[name="copy"]').attr('type',checked ? 'text':'password');
-}
-function showCopy(checked) {
-  if ($('select[name="input"]').val()=='file') return;
-  var text = $('input[name="text"]').val();
-  var copy = $('input[name="copy"]').val();
-  if (forced || checked) {
-    $('#copy').show();
-    toggleStart(text!=copy || text=='');
-  }  else {
-    $('#copy').hide();
-    toggleStart(text=='');
-  }
-}
-function getFileContent(event,form) {
-  var input = event.target;
-  var reader = new FileReader();
-  reader.onload = function(){form.file.value=reader.result;toggleStart(false);};
-  reader.readAsDataURL(input.files[0]);
 }
 parityStatus();
 <?if ($tabbed):?>
@@ -199,18 +231,8 @@ reload_page();
 <?endif;?>
 $('.tooltip_diskio').tooltipster({delay:100,trigger:'custom',triggerOpen:{mouseenter:true},triggerClose:{click:false,scroll:true,mouseleave:true}});
 toggle_diskio(true);
-$(function(){
-<?if ($encrypt):?>
-  $('#cmdStart').prop('disabled',true);
-  $('#copy').show();
-<?endif;?>
-<?if ($var['mdState']=='STOPPED' && $wrong):?>
-  $('#copy').hide();
-  $('#perm').show()
-<?endif;?>
-});
 </script>
-<form name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
+<form id="arrayOps" name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
 <table class="array_status">
@@ -330,102 +352,64 @@ $(function(){
     switch ($var['mdState']):
     case "STOPPED":
       if (strstr($var['mdResyncAction'],"recon")):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"<?=$stop?>></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line and start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.</td></tr>
 <?    elseif ($var['mdResyncAction']=="clear"):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. New data disk(s) detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"<?=$stop?>></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. New data disk(s) detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line and start <strong>Clearing</strong> new data disk(s).</td></tr>
 <?    elseif ($var['sbClean']!="yes" && $var['mdResyncAction']=="check"):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Unclean shutdown detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"<?=$stop?>></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Unclean shutdown detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
 <?    elseif ($var['sbClean']!="yes" && strstr($var['mdResyncAction'],"check")):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Unclean shutdown detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"<?=$stop?>></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Unclean shutdown detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line and start <strong>Parity-Check</strong>.
         <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?    else:?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"<?=$stop?>></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
 <?    endif;
       maintenance_mode();
-      if (($keyfile && $wrong) || $missing || $encrypt || (!$keyfile && $crypto)):?>
-      <tr><td></td><td class="gap">Encryption status:</td><td><span class="red-text"><?=$wrong?'Wrong key':(($missing||$crypto)?'Missing key':'Enter new key')?></span></td></tr>
-      <tr><td></td><td class="gap">Encryption input:</td><td><select name="input" size="1" onchange="selectInput(this.form)"><?=mk_option(1,"text","Passphrase")?><?=mk_option(1,"file","Keyfile")?></select></td></tr>
-      <tr id="text"><td></td><td class="gap">Passphrase:</td><td><input type="password" name="text" maxlength="512" value="" onkeyup="toggleStart(this.form)"><input type="checkbox" onchange="showPass(this.checked)">show passphrase</td></tr>
-      <tr id="copy" style="display:none"><td></td><td class="gap">Retype passphrase:</td><td><input type="password" name="copy" maxlength="512" value="" onkeyup="toggleStart(this.form)"></td></tr>
-      <tr id="file" style="display:none"><td></td><td class="gap">Keyfile:</td><td><input type="file" name="local" onchange="getFileContent(event,this.form)"></td></tr>
-      <tr id="perm" style="display:none"><td></td><td></td><td><input name="luksReformat" type="checkbox" onchange="showCopy(this.checked)">permit reformat</td></tr>
-      <tr><td></td><td></td><td><input type="button" value="Benchmark" onclick="openBox('/webGui/include/CryptoBenchmark.php','Encryption Benchmarking',600,640)"></td></tr>
-<?    endif;
+      check_encryption();
       break;
     case "NEW_ARRAY":
-      if (strpos($disks['parity']['status'],"DISK_NP")===0 && (empty($disks['parity2']) || strpos($disks['parity2']['status'],"DISK_NP")===0)):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="submit" name="cmdStart" value="Start"></td>
+      if (strpos($disks['parity']['status'],"DISK_NP")===0 && strpos($disks['parity2']['status'],"DISK_NP")===0):?>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will record all disk information and bring the array on-line.
         <br>The array will be immediately available, but <strong>unprotected</strong> since <em>parity</em> has not been assigned.</td></tr>
 <?    else:?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" value="Start" onclick="parityWarning(this.form)"></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="parityWarning(this.form)"></td>
         <td><strong>Start</strong> will record all disk information, bring the array on-line, and start Parity-Sync.
         <br>The array will be immediately available, but <strong>unprotected</strong> until Parity-Sync completes.
         <br><input type="checkbox" name="md_invalidslot" value="99">Parity is already valid.</td></tr>
 <?    endif;
       maintenance_mode();
-      break;
-    case "UNPROTECTED_EXPANSION":?>
-      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Found <?=my_word($var['mdNumNew'])?> new disk<?=$var['mdNumNew']==1?'':'s'?>.<br>
-<?    foreach ($disks as $disk) if ($disk['status']=='DISK_NEW') echo "<br><span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")";?></td>
-      <td><input type="submit" name="cmdStart" value="Start"></td><td><strong>Start</strong> will record the new disk<?=$var['mdNumNew']==1?'':'s'?> information and bring the expanded array on-line.</td></tr>
-<?    maintenance_mode();
-      break;
-    case "PROTECTED_EXPANSION":
-      if ($var['mdNumErased']==$var['mdNumNew']):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Found <?=my_word($var['mdNumNew'])?> new erased disk<?=$var['mdNumNew']==1?'':'s'?>.<br>
-<?      foreach ($disks as $disk) if ($disk['status']=='DISK_NEW') echo "<br><span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")";?></td>
-        <td><input type="submit" name="cmdStart" value="Start" disabled></td><td><strong>Start</strong> will record the new disk<?=$var['mdNumNew']==1?'':'s'?> information and bring the expanded array on-line.
-        <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdStart.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
-<?      maintenance_mode();
-      else:?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Found <?=my_word($var['mdNumNew'])?> new disk<?=$var['mdNumNew']==1?'':'s'?>.<br>
-<?      foreach ($disks as $disk) if ($disk['status']=='DISK_NEW') echo "<br><span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")";?></td>
-        <td><input type="submit" name="cmdClear" value="Clear" disabled></td><td><strong>Clear</strong> will completely clear (set to zero) the new disk<?=$var['mdNumNew']==1?'':'s'?>.
-        <br>Once clear completes, the array may be Started, expanding the array to include the new disk<?=$var['mdNumNew']==1?'':'s'?>.
-        <br><strong>Caution: any data on the new disk<?=$var['mdNumNew']==1?'':'s'?> will be erased!</strong>
-        <br>If you want to preserve the data on the new disk<?=$var['mdNumNew']==1?'':'s'?>, reset the array configuration and rebuild parity instead.
-        <br><input type="checkbox" name="confirmClear" value="OFF" onclick="arrayOps.cmdClear.disabled=!arrayOps.confirmClear.checked"><small>Yes I want to do this</small></td></tr>
-<?    endif;
+      check_encryption();
       break;
     case "DISABLE_DISK":?>
-      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Missing disk.</td><td><input type="submit" name="cmdStart" value="Start" disabled></td>
+      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Missing disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
       <td><strong>Start</strong> will disable the missing disk and then bring the array on-line.
       <br>Install a replacement disk as soon as possible.
-      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdStart.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
 <?    maintenance_mode();
+      check_encryption();
       break;
     case "RECON_DISK":?>
-      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Replacement disk installed.</td><td><input type="submit" name="cmdStart" value="Start" disabled></td>
+      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Replacement disk installed.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
       <td><strong>Start</strong> will start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.
-      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdStart.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
 <?    maintenance_mode();
+      check_encryption();
       break;
     case "SWAP_DSBL":
       if ($var['fsCopyPrcnt']=="100"):?>
-        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Upgrading disk/swapping parity.</td><td><input type="submit" name="cmdStart" value="Start" disabled></td>
+        <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Upgrading disk/swapping parity.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will expand the file system of the data disk (if possible); then bring the array on-line and start Data-Rebuild.
-        <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdStart.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
 <?      maintenance_mode();
+        check_encryption();
       else:?>
         <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Upgrading disk/swapping parity.</td><td><input type="submit" name="cmdCopy" value="Copy" disabled></td>
         <td><strong>Copy</strong> will copy the parity information to the new <em>parity</em> disk.
         <br>Once copy completes, the array may be Started, to initiate Data-Rebuild of the disabled disk.
         <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdCopy.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
 <?    endif;
-      break;
-    case "RECORD_DISKS":?>
-      <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Two or more disks are wrong.<br>
-<?    foreach ($disks as $disk) if ($disk['status']=='DISK_WRONG') echo "<br><span class='blue-text'>".my_disk($disk['name'])."</span> &bullet; ".my_id($disk['id'])." (".$disk['device'].")";?></td>
-      <td><input type="submit" name="cmdStart" value="Start" disabled></td><td><strong>Start</strong> will just record the new disk positions and bring the array on-line.
-      <br>We recommend you start a Parity-Check afterwards just to be safe.
-      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="arrayOps.cmdStart.disabled=!arrayOps.confirmStart.checked"><small>Yes I want to do this</small></td></tr>
-<?    maintenance_mode();
       break;
     case "ERROR:INVALID_EXPANSION":?>
       <tr><td><?=status_indicator()?><span class="strong big">Stopped</span>. Invalid expansion.</td><td><input type="submit" name="cmdStart" value="Start" disabled></td>
@@ -477,16 +461,16 @@ $(function(){
 </table>
 </form>
 <?endif;?>
+<?endif;?>
 <?if ($keyfile):?>
 <form name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile, device encryption remains functional.
+ <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile.
  <br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
 </table>
 </form>
-<?endif;?>
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
 <table class="array_status">
@@ -566,7 +550,7 @@ if (isset($display['sleep'])) @include $display['sleep'];
 > Once you have assigned all of your hard drives, refer to the Array Status section below
 > and Start the array.
 
-<?if (($keyfile && $wrong) || $missing || $encrypt || (!$keyfile && $crypto)):?>
+<?if ($encrypt):?>
 <div></div>
 > #### Encryption input
 >

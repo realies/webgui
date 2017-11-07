@@ -202,8 +202,6 @@ File system type:
 
 > Enter the desired file system type.  Changing the file system type of a device will permit you to reformat
 > that device using the new file system.  Be aware that **all existing data on the device will be lost**.
->
-> The encrypted file system types may only be selected when an [encryption key](/Settings/EncryptionSettings) is present.
 
 <?elseif ($var['SYS_CACHE_SLOTS']>1):?>
 File system type:
