@@ -27,6 +27,29 @@ function maintenance_mode() {
   global $var, $disk;
   return ($var['fsState']=="Started" && $var['startMode']=="Maintenance" && $disk['luksState']<=1);
 }
+$sheets = []; $n = 0;
+$type = isset($disks[$name]) ? 'Device' : 'New';
+if ($type=='New') {
+  $dev = $name;
+  foreach ($devs as $sheet) {
+    $sheets[] = $sheet['device'];
+    if ($sheet['device']==$name) {$i = $n; $file = $sheet['id']."-$date.txt";}
+    $n++;
+  }
+} else {
+  $disk = $disks[$name];
+  $dev  = $disk['device'];
+  $file = $disk['id']."-$date.txt";
+  foreach ($disks as $sheet) {
+    if ($sheet['name']=='flash' || strpos($sheet['status'],'_NP')) continue;
+    $sheets[] = $sheet['name'];
+    if ($sheet['name']==$name) { $i = $n; $spindown = "diskSpindownDelay.{$sheet['idx']}"; $delay = $sheet['spindownDelay']; }
+    $n++;
+  }
+}
+$end  = count($sheets)-1;
+$prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
+$next = $i<$end ? $sheets[$i+1] : $sheets[0];
 ?>
 <style>
 input.option{display:none;width:40px}
@@ -126,6 +149,11 @@ function setGlue(form,reset) {
     $('#helptext').hide();
   }
 }
+<?if (count($sheets)>1):?>
+var ctrl  = "<span class='status vhshift'><span class='waitmsg' style='display:none;font-size:small;font-style:italic;margin-right:8px'>please wait...</span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
+    ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-left'></i></button></a>";
+    ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-right'></i></button></a></span>";
+<?endif;?>
 $(function() {
   var form = document.smart_settings;
 <?if (!isset($disk['smType'])):?>
