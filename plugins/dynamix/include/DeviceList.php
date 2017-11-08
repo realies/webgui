@@ -57,10 +57,7 @@ function device_info(&$disk,$online) {
     case 'grey-off': $help = 'Device not present'; break;
   }
   $status = "$ctrl<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>$help</span></a>";
-  $link = ($disk['type']=='Parity' && strpos($disk['status'],'_NP')===false) ||
-          ($disk['type']=='Data' && $disk['status']!='DISK_NP') ||
-          ($disk['type']=='Cache' && $disk['status']!='DISK_NP') ||
-          ($disk['name']=='cache') ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
+  $link = (strpos($disk['status'],'_NP')===false) ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
   if ($crypto && $online) switch ($disk['luksState']) {
     case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
     case 1: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-unlock-alt green-text'></i><span>Device encrypted and unlocked</span></a>"; break;
