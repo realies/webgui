@@ -193,10 +193,13 @@ function selectProtocol(form,port,index) {
       var i = $(this).attr('name').split(':')[1];
       var net4 = $('.'+port+'-ipv4-'+i);
       var net6 = $('.'+port+'-ipv6-'+i);
-      switch (protocol) {
+      var dhcp = $('select[name="USE_DHCP:'+i+'"]').val();
+      if (dhcp) switch (protocol) {
         case 'ipv4': net4.show(); net6.hide(); break;
         case 'ipv6': net4.hide(); net6.show(); break;
         case 'ipv4+ipv6': net4.show(); net6.show(); break;
+      } else {
+        net4.hide(); net6.hide();
       }
       checkNetworkSettings(form,i,true);
     });
