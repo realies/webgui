@@ -77,6 +77,8 @@ span.green{color:#4F8A10}
 input.gap{margin-right:10px}
 div.shade-white{background-color:#F8F8F8}
 div.shade-black{background-color:#0C0C0C}
+div.shade-azure{background-color:#EDEAEF}
+div.shade-gray{background-color:#121510}
 select.slim{min-width:45px}
 input.slim{width:32px}
 </style>
