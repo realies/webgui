@@ -71,15 +71,6 @@ Enable auto start:
 > the array will be automatically Started and shares exported.<br>
 > If set to 'No' then you must Start the array yourself.
 
-Restricted Start:
-: <select name="luksRestricted" size="1">
-  <?=mk_option($var['luksRestricted'], "yes", "Yes")?>
-  <?=mk_option($var['luksRestricted'], "no", "No")?>
-  </select>
-
-> When set to **Yes** the array cannot Start if there are encrypted devices and the encryption passphrase/keyfile
-> is *missing*.
-
 Default spin down delay:
 : <select name="spindownDelay" size="1">
   <?=mk_option($var['spindownDelay'], "0",  "Never")?>
