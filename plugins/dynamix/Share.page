@@ -60,7 +60,7 @@ $(function() {
 <?if ($tabbed):?>
   $('.tabs').append(ctrl);
 <?else:?>
-  $('div[id=title]:not(".nocontrol")').each(function(){$(this).append(ctrl);});
+  $('div[id=title]:first').append(ctrl);
 <?endif;?>
 });
 <?endif;?>
