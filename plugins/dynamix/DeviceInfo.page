@@ -272,13 +272,6 @@ Critical disk utilization threshold (%):
 : <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
-<?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
-<div id="title" class="nocontrol"><span class="left"><i class="title fa fa-inbox"></i>Pool Information</span></div>
-
-btrfs filesystem show:
-: <?echo "<pre>".shell_exec("/sbin/btrfs filesystem show {$disk['uuid']}")."</pre>";?>
-
-<?endif;?>
 <?if (strpos($disk['fsType'],"btrfs")!==false):?>
 <div id="title" class="nocontrol"><span class="left"><i class="title fa fa-balance-scale"></i>Balance Status</span></div>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
@@ -416,10 +409,7 @@ btrfs check status:
 
 <?if (!preg_match('/^cache\d+$/',$disk['name'])):?>
 &nbsp;
-: <input type="submit" value="Check" disabled> (see Help)
-
-> **Check** is only available when array is Started in **Maintenance** mode, and for encrypted devices, the
-> encryption key must not be missing.
+: <input type="submit" value="Check" disabled> **Check** is only available when array is Started in **Maintenance** mode.
 
 <?else:?>
 &nbsp;
@@ -473,10 +463,7 @@ reiserfsck status:
 <?else:?>
 
 &nbsp;
-: <input type="submit" value="Check" disabled> (see Help)
-
-> **Check** is only available when array is Started in **Maintenance** mode, and for encrypted devices, the
-> encryption key must not be missing.
+: <input type="submit" value="Check" disabled> **Check** is only available when array is Started in **Maintenance** mode.
 
 <?endif;?>
 </form>
@@ -523,10 +510,7 @@ xfs_repair status:
 <?else:?>
 
 &nbsp;
-: <input type="submit" value="Check" disabled> (see Help)
-
-> **Check** is only available when array is Started in **Maintenance** mode, and for encrypted devices, the
-> encryption key must not be missing.
+: <input type="submit" value="Check" disabled> **Check** is only available when array is Started in **Maintenance** mode.
 
 <?endif;?>
 </form>
