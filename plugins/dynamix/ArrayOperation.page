@@ -17,21 +17,22 @@ Tag="snowflake-o"
 <?
 $keyfile = file_exists($var['luksKeyfile']);
 $encrypt = false;
-foreach ($disks as $disk)
-  $encrypt |= strpos((($disk['fsType'] == "auto") ? $var['defaultFsType'] : $disk['fsType']),'luks:')!==false;
-
 /* only one of $forced, $missing, or $wrong will be true, or all will be false */
 $forced = false;
 $missing = false;
 $wrong = false;
-if ($encrypt) {
-  if (!$keyfile) {
-    $forced = $var['fsEncryption']=='no';
-    $missing = !$forced;
-  } else {
-    $wrong = $var['fsEncryption']=='wrong';
+foreach ($disks as $disk) {
+  if (($disk['fsType']=="auto" && (strpos($var['defaultFsType'],'luks:')!==false || $disk['luksState']==2 || $disk['luksState']==3)) ||
+      (strpos($disk['fsType'],'luks:')!==false)) {
+    $encrypt = true;
+    if (!$keyfile) {
+      if ($disk['luksState']==0) $forced = true; else $missing = true;
+    } else {
+      if ($disk['luksState']==3) $wrong = true;
+    }
   }
 }
+if ($forced && $missing) $forced = false;
 
 function check_encryption() {
   global $forced, $missing, $wrong;
@@ -52,11 +53,6 @@ function check_encryption() {
 ?>
 <script>
 function selectInput(form) {
-<?if ($missing && $var['luksRestricted']!='yes'):?>
-  var strict = false;
-<?else:?>
-  var strict = true;
-<?endif;?>
   if (form.input.value == 'text') {
     form.file.value = '';
     form.local.value = '';
@@ -77,7 +73,7 @@ function selectInput(form) {
 <?endif;?>
     $('#file').hide();
     $('input[name="text"],input[name="copy"]').attr('type',$('input[name="showPass"]').prop('checked')?'text':'password');
-    $('#cmdStart').prop('disabled',strict && ($('#copy').is(':visible') ? (form.text.value!=form.copy.value || form.text.value=='') : form.text.value==''));
+    $('#cmdStart').prop('disabled',$('#copy').is(':visible') ? (form.text.value!=form.copy.value || form.text.value=='') : form.text.value=='');
   } else {
     form.text.value = '';
     form.copy.value = '';
@@ -85,7 +81,7 @@ function selectInput(form) {
     $('#copy').hide();
     $('#perm').hide();
     $('#file').show();
-    $('#cmdStart').prop('disabled',strict && !form.file.value);
+    $('#cmdStart').prop('disabled',!form.file.value);
   }
 }
 function getFileContent(event,form) {
