@@ -41,7 +41,7 @@ if ($type=='New') {
   $dev  = $disk['device'];
   $file = $disk['id']."-$date.txt";
   foreach ($disks as $sheet) {
-    if ($sheet['type']=='Flash' || ($sheet['type']=='Parity' && $sheet['status']=='DISK_NP_DSBL')) continue;
+    if ($sheet['type']=='Flash' || $sheet['color']=='grey-off') continue;
     $sheets[] = $sheet['name'];
     if ($sheet['name']==$name) { $i = $n; $spindown = "diskSpindownDelay.{$sheet['idx']}"; $delay = $sheet['spindownDelay']; }
     $n++;
