@@ -171,13 +171,6 @@ function startLongTest() {
   }
 }
 $(function() {
-<?if (count($sheets)>1):?>
-<?if ($tabbed):?>
-  $('.tabs').append(ctrl);
-<?else:?>
-  $('div[id=title]:first').append(ctrl);
-<?endif;?>
-<?endif;?>
   var smarttest = $.cookie('test.<?=addslashes(htmlspecialchars($dev))?>');
   testUpdate(smarttest===undefined);
   if (smarttest !== undefined) $('#'+smarttest+'_test').val('Stop').removeAttr('disabled');

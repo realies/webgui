@@ -16,14 +16,14 @@ Tag="snowflake-o"
 ?>
 <?
 $keyfile = file_exists($var['luksKeyfile']);
+$fsLuks  = strpos($var['defaultFsType'],'luks:')!==false;
 $encrypt = false;
 /* only one of $forced, $missing, or $wrong will be true, or all will be false */
-$forced = false;
+$forced  = false;
 $missing = false;
-$wrong = false;
+$wrong   = false;
 foreach ($disks as $disk) {
-  if (($disk['fsType']=="auto" && (strpos($var['defaultFsType'],'luks:')!==false || $disk['luksState']==2 || $disk['luksState']==3)) ||
-      (strpos($disk['fsType'],'luks:')!==false)) {
+  if (($disk['fsType']=='auto' && ($fsLuks || $disk['luksState']==2 || $disk['luksState']==3)) || (strpos($disk['fsType'],'luks:')!==false)) {
     $encrypt = true;
     if (!$keyfile) {
       if ($disk['luksState']==0) $forced = true; else $missing = true;
@@ -457,6 +457,13 @@ toggle_diskio(true);
 </form>
 <?endif;?>
 <?endif;?>
+<form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
+<table class="array_status">
+ <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown_now(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown_now(this.form,'shutdown')"></td>
+ <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
+ <tr><td></td><td class="line" colspan="2"></td></tr>
+</table>
+</form>
 <?if ($keyfile):?>
 <form name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="unused">
@@ -467,12 +474,6 @@ toggle_diskio(true);
 </table>
 </form>
 <?endif;?>
-<form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
-<table class="array_status">
- <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown_now(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown_now(this.form,'shutdown')"></td>
- <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
-</table>
-</form>
 <?
 if (isset($display['sleep'])) @include $display['sleep'];
 ?>

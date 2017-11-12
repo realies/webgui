@@ -70,11 +70,11 @@ $vlan_eth0 = [0];
 if (isset($eth0)) foreach ($eth0 as $key => $val) if (strpos($key,$vlan_id)===0) $vlan_eth0[] = substr($key,strlen($vlan_id));
 ?>
 <style>
-span.pin i{font-size:16px;cursor:pointer}
+span.pin i{font-size:20px;cursor:pointer}
 span.red{color:#E68A00}
 span.blue{color:#00529B}
 span.green{color:#4F8A10}
-input.gap{margin-right:10px}
+input.gap{margin-right:6px}
 div.shade-white{background-color:#F8F8F8}
 div.shade-black{background-color:#0C0C0C}
 div.shade-azure{background-color:#EDEAEF}
