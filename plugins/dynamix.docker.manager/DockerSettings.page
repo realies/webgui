@@ -250,7 +250,7 @@ DHCPv4 pool of custom network <?=$network?> (optional):
   }
   echo "/";
   echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id)\" $disabled>";
-  for ($m=$mask; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
+  for ($m=$mask+1; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
   echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">($size hosts)</span>";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
 ?>
@@ -279,7 +279,7 @@ DHCPv6 pool of custom network <?=$network?> (optional):
   <span id="<?=$docker_dhcp6?>_net" class="net <?=$disabled?>"><?=$net?>:</span><?
   echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $disabled>/";
   echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $disabled>";
-  for ($m=$mask; $m<=120; $m+=8) echo mk_option($mask_user,$m,$m);
+  for ($m=$mask+8; $m<=120; $m+=8) echo mk_option($mask_user,$m,$m);
   echo "</select><input type=\"hidden\" name=\"$docker_dhcp6\" value=\"\">";
 ?>
 <?elseif ($dockercfg[$docker_dhcp6]):?>
