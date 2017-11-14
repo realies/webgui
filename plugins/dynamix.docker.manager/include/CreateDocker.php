@@ -541,8 +541,8 @@ if (isset($_POST['contName'])) {
     echo "<pre>".htmlspecialchars($postXML)."</pre>";
     echo "<h2>COMMAND:</h2>";
     echo "<pre>".htmlspecialchars($cmd)."</pre>";
-    echo "<div style='text-align:center'><input type='button' value='Back' onclick='window.location=window.location.pathname+window.location.hash+\"?xmlTemplate=edit:${filename}\"'>";
-    echo "<input type='button' value='Done' onclick='done()'></div><br>";
+    echo "<div style='text-align:center'><button type='button' onclick='window.location=window.location.pathname+window.location.hash+\"?xmlTemplate=edit:${filename}\"'>Back</button>";
+    echo "<button type='button' onclick='done()'>Done</button></div><br>";
     goto END;
   }
 
@@ -550,7 +550,7 @@ if (isset($_POST['contName'])) {
   if (!$DockerClient->doesImageExist($Repository)) {
     // Pull image
     if (!pullImage($Name, $Repository)) {
-      echo '<div style="text-align:center"><input type="button" value="Done" onclick="done()"></div><br>';
+      echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
       goto END;
     }
   }
@@ -595,7 +595,7 @@ if (isset($_POST['contName'])) {
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/include/Exec.php");
 
-  echo '<div style="text-align:center"><input type="button" value="Done" onclick="done()"></div><br>';
+  echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;
 }
 
@@ -651,7 +651,7 @@ if ($_GET['updateContainer']){
     }
   }
 
-  echo '<div style="text-align:center"><input type="button" value="Done" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');"></div><br>';
+  echo '<div style="text-align:center"><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');">Done</button></div><br>';
   goto END;
 }
 
