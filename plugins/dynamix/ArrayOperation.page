@@ -255,7 +255,7 @@ toggle_diskio(true);
         <tr><td></td><td><input type="submit" name="cmdCheck" value="Clear"></td><td><strong>Clear</strong> will start <strong>Clearing</strong> new data disk(s).</td></tr>
 <?    else:
         if ($var['mdResyncAction']=="check"):?>
-          <tr><td></td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Read-Check</strong> of all data disks.</td></tr>
+          <tr><td></td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Read-Check</strong> of all array disks.</td></tr>
 <?      elseif (strstr($var['mdResyncAction'],"check")):?>
           <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
