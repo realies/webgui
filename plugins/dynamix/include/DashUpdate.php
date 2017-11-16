@@ -76,6 +76,7 @@ case 'disk':
   $var = [];
   $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
   $devs = parse_ini_file('state/devs.ini',true);
+  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $slots = $_POST['slots'];
