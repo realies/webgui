@@ -133,7 +133,7 @@ case 'disk':
     $hot = $_POST['hot'];
     $max = $_POST['max'];
     $top = $_POST['top'] ?? 120;
-    $name = $dev['device'];
+    $name = $disk['device'];
     $port = substr($name,-2)!='n1' ? $name : substr($name,0,-2);
     $smart = "state/smart/$name";
     $state = exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
