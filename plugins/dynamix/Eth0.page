@@ -235,7 +235,10 @@ function checkNetworkSettings(form,index,open) {
     privacy.prop('disabled',!disabled); if (!open) privacy.val(disabled ? 0 : 2);
   }
   if (dns && index==0) {
-    if (!open) form.DHCP_KEEPRESOLV.value = disabled ? 'no' : 'yes';
+    if (!open) {
+      form.DHCP_KEEPRESOLV.value = disabled ? 'no' : 'yes';
+      form.DHCP_KEEPRESOLV.disabled = !disabled;
+    }
     checkDNSSettings(form);
   }
 }
