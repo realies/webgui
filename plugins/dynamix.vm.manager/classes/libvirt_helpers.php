@@ -768,7 +768,8 @@
 			}
 		}
 
-		arsort($arrValidMachineTypes);
+		uksort($arrValidMachineTypes, 'version_compare');
+		$arrValidMachineTypes = array_reverse($arrValidMachineTypes);
 
 		return $arrValidMachineTypes;
 	}
