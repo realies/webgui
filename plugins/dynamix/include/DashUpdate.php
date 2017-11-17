@@ -73,7 +73,7 @@ $failed = ['FAILED','NOK'];
 switch ($_POST['cmd']) {
 case 'disk':
   $i = 1;
-  $var = [];
+  $var = parse_ini_file('state/var.ini');
   $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
   $devs = parse_ini_file('state/devs.ini',true);
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
@@ -88,13 +88,13 @@ case 'disk':
   $row6 = array_fill(0,31,'<td></td>'); my_insert($row6[0],'Heat alarm');
   $row7 = array_fill(0,31,'<td></td>'); my_insert($row7[0],'SMART status');
   $row8 = array_fill(0,31,'<td></td>'); my_insert($row8[0],'Utilization');
-  $diskRow = function($n,$disk) use (&$row1,&$row2,&$row3,&$row4,&$row5,&$row6,&$row7,&$row8,$path) {
+  $diskRow = function($n,$disk) use (&$row1,&$row2,&$row3,&$row4,&$row5,&$row6,&$row7,&$row8,$path,$var) {
     if ($n>0) {
       if (isset($disk['luksState'])) {
         switch ($disk['luksState']) {
-          case 0: $luks = ""; break;
-          case 1: $luks = "<i class='fa fa-unlock-alt green-text'></i>"; break;
-          case 2: $luks = "<i class='fa fa-lock red-text'></i>"; break;
+          case 0: $luks = strpos($disk['fsType'],'luks:')===false ? "" : "<i class='fa fa-unlock orange-text'></i>"; break;
+          case 1: if ($var['fsState']!='Stopped') {$luks = "<i class='fa fa-unlock-alt green-text'></i>"; break;}
+          case 2: $luks = "<i class='fa fa-lock green-text'></i>"; break;
           case 3: $luks = "<i class='fa fa-lock red-text'></i>"; break;
          default: $luks = "<i class='fa fa-lock red-text'></i>"; break;
         }
