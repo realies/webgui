@@ -145,8 +145,8 @@ echo $size;
 $memory_installed = exec("dmidecode -qt17|awk -F: '/^\tSize: [0-9]+ MB\$/{t+=\$2};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024} END{print t}'");
 list($memory_maximum,$ecc_support) = array_map('trim',explode('#',exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024};/^\tError Correction Type:/{e=\$2} END{print t\"#\"e}'")));
 if ($memory_installed >= 1024) {
-  $memory_installed /= 1024;
-  $memory_maximum /= 1024;
+  $memory_installed = round($memory_installed/1024);
+  $memory_maximum = round($memory_maximum/1024);
   $unit = 'GB';
 } else $unit = 'MB';
 if ($memory_maximum < $memory_installed) {$memory_maximum = pow(2,ceil(log($memory_installed)/log(2))); $star = '*';} else $star = '';
