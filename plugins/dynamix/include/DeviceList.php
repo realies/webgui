@@ -271,7 +271,7 @@ function read_disk($name, $part) {
     $smart = "/var/local/emhttp/smart/$name";
     $type = $var['smType'] ?? '';
     if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A $type ".escapeshellarg("/dev/$port")." >".escapeshellarg($smart)." &");
-    return exec("awk 'BEGIN{t=\"*\"}\$1==194{t=\$10;exit};\$1==190{t=100-\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{print t}' ".escapeshellarg($smart)." 2>/dev/null");
+    return exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit} END{if(t!=\"*\")print t; else print s}' ".escapeshellarg($smart)." 2>/dev/null");
   }
 }
 function show_totals($text) {
