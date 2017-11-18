@@ -139,7 +139,7 @@ case 'disk':
     $smart = "state/smart/$name";
     $state = exec("hdparm -C ".escapeshellarg("/dev/$port")."|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
     if ($state=='blue-on') my_smart($row7[$n],$name,'New');
-    $temp = file_exists($smart) ? exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=$4;exit} END{if(t!=\"*\")print t; else print s}' ".escapeshellarg($smart)) : '*';
+    $temp = file_exists($smart) ? exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=\$4;exit} END{if(t!=\"*\")print t; else print s}' ".escapeshellarg($smart)) : '*';
     $heat = exceed($temp,$max,$top) ? 'max' : (exceed($temp,$hot,$top) ? 'hot' : '');
     if ($heat)
       my_insert($row6[$n],"<span class='heat-img'><img src='$path/$heat.png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
