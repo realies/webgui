@@ -18,9 +18,8 @@ Tag="snowflake-o"
 $keyfile = file_exists($var['luksKeyfile']);
 $encrypt = false;
 /* only one of $forced, $missing, or $wrong will be true, or all will be false */
-$forced  = false;
-$missing = false;
-$wrong   = false;
+$forced = $missing = $wrong = false;
+
 foreach ($disks as $disk) {
   if (strpos($disk['fsType'],'luks:')!==false || ($disk['fsType']=='auto' && (strpos($var['defaultFsType'],'luks:')!==false || $disk['luksState']==2 || $disk['luksState']==3))) {
     $encrypt = true;
@@ -39,18 +38,43 @@ function check_encryption() {
   elseif ($missing) $status = "Missing key";
   elseif ($wrong) $status = "Wrong key";
   else return;
-  echo "<tr><td></td><td class='gap'>Encryption status:</td><td><span class='red-text'>$status</span><span id='perm' style='padding-left:20px;display:none'><input name='luksReformat' type='checkbox' onchange='selectInput(this.form)'>permit reformat</span></td></tr>";
+  echo "<tr><td></td><td class='gap'>Encryption status:</td><td><span class='red-text'>$status</span><span id='pass'><input name='luksReformat' type='checkbox' onchange='selectInput(this.form)'>permit reformat</span></td></tr>";
   echo "<tr><td></td><td class='gap'>Encryption input:</td><td>";
   echo "<select name='input' size='1' onchange='selectInput(this.form)'>";
   echo mk_option(1,'text','Passphrase');
   echo mk_option(1,'file','Keyfile');
   echo "</select></td></tr>";
   echo "<tr id='text'><td></td><td class='gap'>Passphrase:</td><td><input type='password' name='text' maxlength='512' value='' onkeyup='selectInput(this.form)'><input name='showPass' type='checkbox' onchange='selectInput(this.form)'>show passphrase</td></tr>";
-  echo "<tr id='copy' style='display:none'><td></td><td class='gap'>Retype passphrase:</td><td><input type='password' name='copy' maxlength='512' value='' onkeyup='selectInput(this.form)'></td></tr>";
-  echo "<tr id='file' style='display:none'><td></td><td class='gap'>Keyfile:</td><td><input type='file' name='local' onchange='getFileContent(event,this.form)'></td></tr>";
+  echo "<tr id='copy'><td></td><td class='gap'>Retype passphrase:</td><td><input type='password' name='copy' maxlength='512' value='' onkeyup='selectInput(this.form)'></td></tr>";
+  echo "<tr id='file'><td></td><td class='gap'>Keyfile:</td><td><input type='file' name='local' onchange='getFileContent(event,this.form)'></td></tr>";
+}
+function maintenance_mode() {
+  echo "<tr>";
+  echo "<td></td>";
+  echo "<td><input type='checkbox' name='startMode' value='Maintenance'>Maintenance mode</td>";
+  echo "<td><strong>Maintenance mode</strong> - if checked, Start array but do not mount disks.</td>";
+  echo "</tr>";
+}
+function status_indicator() {
+  global $var;
+  $ball = "/webGui/images/{$var['mdColor']}.png";
+  switch ($var['mdColor']) {
+   case 'green-on': $help = 'Started, array protected'; break;
+   case 'green-blink': $help = 'Stopped'; break;
+   case 'yellow-on': $help = 'Started, array unprotected'; break;
+   case 'yellow-blink': $help = 'Stopped'; break;
+  }
+  return "<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>$help</span></a>";
 }
 ?>
+<style>
+tr#copy,tr#file{display:none}
+td.gap{padding-left:26px!important}
+span#pass{display:none;margin-left:20px}
+</style>
 <script>
+var ctrl = "<span class='status'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
+
 function selectInput(form) {
   if (form.input.value == 'text') {
     form.file.value = '';
@@ -58,17 +82,15 @@ function selectInput(form) {
 <?if ($forced):?>
     $('#text').show();
     $('#copy').show();
-    $('#perm').hide();
-<?endif;?>
-<?if ($missing):?>
+    $('#pass').hide();
+<?elseif ($missing):?>
     $('#text').show();
     $('#copy').hide();
-    $('#perm').hide();
-<?endif;?>
-<?if ($wrong):?>
+    $('#pass').hide();
+<?elseif ($wrong):?>
     $('#text').show();
     if ($('input[name="luksReformat"]').prop('checked')) $('#copy').show(); else $('#copy').hide();
-    $('#perm').show();
+    $('#pass').show();
 <?endif;?>
     $('#file').hide();
     $('input[name="text"],input[name="copy"]').attr('type',$('input[name="showPass"]').prop('checked')?'text':'password');
@@ -78,8 +100,12 @@ function selectInput(form) {
     form.copy.value = '';
     $('#text').hide();
     $('#copy').hide();
-    $('#perm').hide();
     $('#file').show();
+<?if ($wrong):?>
+    $('#pass').show();
+<?else:?>
+    $('#pass').hide();
+<?endif;?>
     $('#cmdStart').prop('disabled',!form.file.value);
   }
 }
@@ -119,37 +145,6 @@ function parityWarning(form) {
   }
   swal({title:'Proceed to start',text:text,html:true,type:'warning',confirmButtonText:'Proceed',showCancelButton:true},function(){prepareInput(form);});
 }
-$(function(){
-  var form = document.getElementById('arrayOps');
-  if (form.input !== undefined) selectInput(form);
-});
-</script>
-<?
-function maintenance_mode() {
-  echo "<tr>";
-  echo "<td></td>";
-  echo "<td><input type='checkbox' name='startMode' value='Maintenance'>Maintenance mode</td>";
-  echo "<td><strong>Maintenance mode</strong> - if checked, Start array but do not mount disks.</td>";
-  echo "</tr>";
-}
-function status_indicator() {
-  global $var;
-  $ball = "/webGui/images/{$var['mdColor']}.png";
-  switch ($var['mdColor']) {
-   case 'green-on': $help = 'Started, array protected'; break;
-   case 'green-blink': $help = 'Stopped'; break;
-   case 'yellow-on': $help = 'Started, array unprotected'; break;
-   case 'yellow-blink': $help = 'Stopped'; break;
-  }
-  return "<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>$help</span></a>";
-}
-?>
-<style>
-td.gap{padding-left:26px!important}
-</style>
-<script>
-var ctrl = "<span class='status'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
-
 function tab0() {
   $.removeCookie('one',{path:'/'});
   $.cookie('tab','tab0',{path:'/'});
@@ -169,7 +164,6 @@ function parityStatus() {
     }
   });
 }
-
 function stopArray(form) {
   $(form).append('<input type="hidden" name="cmdStop" value="Stop">');
 <?if ($confirm['stop']):?>
@@ -226,8 +220,13 @@ reload_page();
 <?endif;?>
 $('.tooltip_diskio').tooltipster({delay:100,trigger:'custom',triggerOpen:{mouseenter:true},triggerClose:{click:false,scroll:true,mouseleave:true}});
 toggle_diskio(true);
+<?if ($forced || $missing || $wrong):?>
+$(function(){
+  selectInput(document.arrayOps);
+});
+<?endif;?>
 </script>
-<form id="arrayOps" name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
+<form name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
 <table class="array_status">
