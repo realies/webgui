@@ -251,7 +251,7 @@ DHCPv4 pool of custom network <?=$network?> (optional):
   echo "/";
   echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id)\" $disabled>";
   for ($m=$mask+1; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
-  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">($size hosts)</span>";
+  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">(".pow(2,31-$mask)." hosts)</span>";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
 ?>
 <?elseif ($dockercfg[$docker_dhcp]):?>
