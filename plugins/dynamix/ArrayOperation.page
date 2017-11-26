@@ -219,13 +219,12 @@ reload_page();
 <?endif;?>
 $('.tooltip_diskio').tooltipster({delay:100,trigger:'custom',triggerOpen:{mouseenter:true},triggerClose:{click:false,scroll:true,mouseleave:true}});
 toggle_diskio(true);
-<?if ($forced || $missing || $wrong):?>
 $(function(){
-  selectInput(document.arrayOps);
+  var form = document.arrayOps;
+  if (form.input !== undefined) selectInput(form);
 });
-<?endif;?>
 </script>
-<form id="arrayOps" name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
+<form name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
 <table class="array_status">
