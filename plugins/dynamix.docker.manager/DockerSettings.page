@@ -227,7 +227,7 @@ DHCPv4 pool of custom network <?=$network?> (optional):
   $max = base_max($route);
   $mask = explode('/',$route)[1];
   $net_user = $dhcp ? base_min($dhcp) : $net;
-  $mask_user = $dhcp ? explode('/',$dhcp)[1] : $mask;
+  $mask_user = $dhcp ? explode('/',$dhcp)[1] : $mask+1;
   $size = pow(2,32-$mask_user);
   switch (true) {
     case ($mask < 16): $prefix = $net[0]; $box = 1; break;
@@ -251,7 +251,7 @@ DHCPv4 pool of custom network <?=$network?> (optional):
   echo "/";
   echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id)\" $disabled>";
   for ($m=$mask+1; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
-  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">(".pow(2,32-$mask_user)." hosts)</span>";
+  echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">($size hosts)</span>";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
 ?>
 <?elseif ($dockercfg[$docker_dhcp]):?>
