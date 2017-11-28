@@ -25,7 +25,7 @@ $validIP6 = '((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4
 $width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
 
 // get available ethernet ports (excluding eth0)
-exec("ls --indicator-style=none  /sys/class/net|grep -P '^eth[1-9][0-9]*$'",$ports);
+exec("ls --indicator-style=none /sys/class/net|grep -P '^eth[1-9][0-9]*$'",$ports);
 
 function locked($source,$port) {
   global $members;
@@ -89,7 +89,6 @@ refresh(); // automatically include new ethernet ports
 Array.prototype.same = function(){return this.sort().filter(function(v,i,o){return i&&v===o[i-1]?v:0;}).length;}
 
 function prepareSettings(form) {
-  var dns = form.DHCP_KEEPRESOLV !== undefined;
   var metrics = [];
   $(form).find('input[name^="METRIC:"]').each(function(){metrics.push($(this).val());});
   if (metrics.same()) {
@@ -101,6 +100,7 @@ function prepareSettings(form) {
     $(form).find('input[name^="DESCRIPTION:"]').not('input[name$=":0"]').prop('disabled',true);
     $(form).find('select[name^="PROTOCOL:"]').not('select[name$=":0"]').prop('disabled',true);
     $(form).find('select[name^="USE_DHCP:"]').not('select[name$=":0"]').prop('disabled',true);
+    $(form).find('select[name^="USE_DHCP6:"]').not('select[name$=":0"]').prop('disabled',true);
     $(form).find('input[name^="IPADDR:"]').not('input[name$=":0"]').prop('disabled',true);
     $(form).find('input[name^="IPADDR6:"]').not('input[name$=":0"]').prop('disabled',true);
     $(form).find('select[name^="NETMASK:"]').not('select[name$=":0"]').prop('disabled',true);
@@ -173,6 +173,12 @@ function prepareSettings(form) {
         $(form).find('input[name="IPADDR:'+i+'"]').val('Obtaining IPv4 address...');
         $(form).find('input[name="GATEWAY:'+i+'"]').val('Obtaining IPv4 gateway...');
       }
+    }
+  });
+  $(form).find('select[name^="USE_DHCP6:"]').each(function() {
+    var i = $(this).attr('name').split(':')[1];
+    if ($(this).prop('disabled')==false && $(this).val()=='yes') {
+      var protocol = $(form).find('select[name="PROTOCOL:'+i+'"]').val() || 'ipv4';
       if (protocol != 'ipv4') {
         $(form).find('input[name="IPADDR6:'+i+'"]').val('Obtaining IPv6 address...');
         $(form).find('input[name="GATEWAY6:'+i+'"]').val('Obtaining IPv6 gateway...');
@@ -180,10 +186,14 @@ function prepareSettings(form) {
     }
     if ($(this).val()!='yes') $(form).find('input[name="PRIVACY6:'+i+'"]').prop('disabled',true);
   });
-  if (dns && form.DHCP_KEEPRESOLV.value=='no') {
+  if (form.DHCP_KEEPRESOLV !== undefined && form.DHCP_KEEPRESOLV.value=='no') {
     form.DHCP_KEEPRESOLV.disabled = false;
     var protocol = $(form).find('select[name="PROTOCOL:0"]').val() || 'ipv4';
     if (protocol != 'ipv6') $(form).find('input[name^="DNS_SERVER"]').val('Obtaining DNSv4 server...');
+  }
+  if (form.DHCP6_KEEPRESOLV !== undefined && form.DHCP6_KEEPRESOLV.value=='no') {
+    form.DHCP6_KEEPRESOLV.disabled = false;
+    var protocol = $(form).find('select[name="PROTOCOL:0"]').val() || 'ipv4';
     if (protocol != 'ipv4') $(form).find('input[name^="DNS6_SERVER"]').val('Obtaining DNSv6 server...');
   }
   return true;
@@ -193,53 +203,66 @@ function selectProtocol(form,port,index) {
     $(form).find('select[name^="PROTOCOL:"]').each(function() {
       var protocol = $(this).val() || 'ipv4';
       var i = $(this).attr('name').split(':')[1];
-      var net4 = $('.'+port+'-ipv4-'+i);
-      var net6 = $('.'+port+'-ipv6-'+i);
-      var dhcp = $(form).find('select[name="USE_DHCP:'+i+'"]').val();
-      if (dhcp) switch (protocol) {
+      var net4 = $('.'+'ipv4-'+port+'-'+i);
+      var net6 = $('.'+'ipv6-'+port+'-'+i);
+      var more4 = $('.'+'more-ipv4-'+port+'-'+i);
+      var more6 = $('.'+'more-ipv6-'+port+'-'+i);
+      switch (protocol) {
         case 'ipv4': net4.show(); net6.hide(); break;
         case 'ipv6': net4.hide(); net6.show(); break;
         case 'ipv4+ipv6': net4.show(); net6.show(); break;
-      } else {
-        net4.hide(); net6.hide();
       }
-      checkNetworkSettings(form,i,true);
+      if ($(form).find('select[name="USE_DHCP:'+i+'"]').val()) more4.show(); else more4.hide();
+      if ($(form).find('select[name="USE_DHCP6:'+i+'"]').val()) more6.show(); else more6.hide();
+      checkNetworkSettings(form,i);
     });
   } else {
     var protocol = $(form).find('select[name="PROTOCOL:'+index+'"]').val() || 'ipv4';
-    var net4 = $('.'+port+'-ipv4-'+index);
-    var net6 = $('.'+port+'-ipv6-'+index);
+    var net4 = $('.'+'ipv4-'+port+'-'+index);
+    var net6 = $('.'+'ipv6-'+port+'-'+index);
+    var more4 = $('.'+'more-ipv4-'+port+'-'+index);
+    var more6 = $('.'+'more-ipv6-'+port+'-'+index);
     switch (protocol) {
       case 'ipv4': net4.show(); net6.hide(); break;
       case 'ipv6': net4.hide(); net6.show(); break;
       case 'ipv4+ipv6': net4.show(); net6.show(); break;
     }
+    if ($(form).find('select[name="USE_DHCP:'+index+'"]').val()) more4.show(); else more4.hide();
+    if ($(form).find('select[name="USE_DHCP6:'+index+'"]').val()) more6.show(); else more6.hide();
     checkNetworkSettings(form,index);
-    if (index==0) checkDNSSettings(form);
+    if (index==0) {
+      checkDNSSettings(form);
+      checkDNSSettings6(form);
+    }
   }
 }
-function checkNetworkSettings(form,index,open) {
-  var dns = form.DHCP_KEEPRESOLV !== undefined;
-  var disabled = $(form).find('select[name="USE_DHCP:'+index+'"]').val()!='no';
+function checkNetworkSettings(form,index) {
+  var disabled4 = $(form).find('select[name="USE_DHCP:'+index+'"]').val()!='no';
+  var disabled6 = $(form).find('select[name="USE_DHCP6:'+index+'"]').val()!='no';
   var protocol = $(form).find('select[name="PROTOCOL:'+index+'"]').val() || 'ipv4';
   if (protocol != 'ipv6') {
-    $(form).find('input[name="IPADDR:'+index+'"]').prop('disabled',disabled).prop('required',!disabled);
-    $(form).find('select[name="NETMASK:'+index+'"]').prop('disabled',disabled);
-    $(form).find('input[name="GATEWAY:'+index+'"]').prop('disabled',disabled);
+    $(form).find('input[name="IPADDR:'+index+'"]').prop('disabled',disabled4).prop('required',!disabled4);
+    $(form).find('select[name="NETMASK:'+index+'"]').prop('disabled',disabled4);
+    $(form).find('input[name="GATEWAY:'+index+'"]').prop('disabled',disabled4);
   }
   if (protocol != 'ipv4') {
-    $(form).find('input[name="IPADDR6:'+index+'"]').prop('disabled',disabled).prop('required',!disabled);
-    $(form).find('input[name="NETMASK6:'+index+'"]').prop('disabled',disabled).prop('required',!disabled);
-    $(form).find('input[name="GATEWAY6:'+index+'"]').prop('disabled',disabled);
+    $(form).find('input[name="IPADDR6:'+index+'"]').prop('disabled',disabled6).prop('required',!disabled6);
+    $(form).find('input[name="NETMASK6:'+index+'"]').prop('disabled',disabled6).prop('required',!disabled6);
+    $(form).find('input[name="GATEWAY6:'+index+'"]').prop('disabled',disabled6);
     var privacy = $(form).find('select[name="PRIVACY6:'+index+'"]');
-    privacy.prop('disabled',!disabled); if (!open) privacy.val(disabled ? 0 : 2);
+    privacy.prop('disabled',!disabled6);
   }
-  if (dns && index==0) {
-    if (!open) {
-      form.DHCP_KEEPRESOLV.value = disabled ? 'no' : 'yes';
-      form.DHCP_KEEPRESOLV.disabled = !disabled;
+  if (index==0) {
+    if (form.DHCP_KEEPRESOLV !== undefined) {
+      form.DHCP_KEEPRESOLV.value = disabled4 ? 'no' : 'yes';
+      form.DHCP_KEEPRESOLV.disabled = !disabled4;
+      checkDNSSettings(form);
     }
-    checkDNSSettings(form);
+    if (form.DHCP6_KEEPRESOLV !== undefined) {
+      form.DHCP6_KEEPRESOLV.value = disabled6 ? 'no' : 'yes';
+      form.DHCP6_KEEPRESOLV.disabled = !disabled6;
+      checkDNSSettings6(form);
+    }
   }
 }
 function checkDNSSettings(form) {
@@ -253,9 +276,12 @@ function checkDNSSettings(form) {
     if (!form.DNS_SERVER2.value && disabled) $('#dnsserver2').hide(); else $('#dnsserver2').show();
     if (!form.DNS_SERVER3.value && disabled) $('#dnsserver3').hide(); else $('#dnsserver3').show();
   }
+}
+function checkDNSSettings6(form) {
+  var disabled = form.DHCP6_KEEPRESOLV.value=='no';
+  var protocol = $(form).find('select[name="PROTOCOL:0"]').val() || 'ipv4';
   if (protocol != 'ipv4') {
     form.DNS6_SERVER1.disabled = disabled;
-    form.DNS6_SERVER1.required = !disabled;
     form.DNS6_SERVER2.disabled = disabled;
     form.DNS6_SERVER3.disabled = disabled;
     if (!form.DNS6_SERVER2.value && disabled) $('#dns6server2').hide(); else $('#dns6server2').show();
@@ -358,6 +384,7 @@ $(function() {
   if (form.DNS_SERVER3.value) $('#dnsserver3').show(); else $('#dnsserver3').hide();
 <?else:?>
   checkDNSSettings(form);
+  checkDNSSettings6(form);
 <?endif;?>
 <?if ($tabbed):?>
   $('.tabs').append(ctrl);
@@ -457,19 +484,20 @@ Network protocol:
   <?=mk_option($eth0["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:<?=$i?>" size="1" onchange="checkNetworkSettings(this.form,<?=$i?>)">
+<div class="ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
   <?=mk_option($eth0["USE_DHCP:$i"], 'yes', 'Automatic');?>
   <?=mk_option($eth0["USE_DHCP:$i"], 'no', 'Static');?>
   </select>
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface (only available for VLANs)
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
-<div class="eth0-ipv4-<?=$i?>" style="display:none" markdown="1">
+<div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
@@ -498,38 +526,17 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="eth0-ipv6-<?=$i?>" style="display:none" markdown="1">
-IPv6 address:
-: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the system.
-
-IPv6 default gateway:
-: <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$eth0["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
-
-IPv6 privacy extensions:
-: <select name="PRIVACY6:<?=$i?>" size="1">
-  <?=mk_option($eth0["PRIVACY6:$i"], "0", "Disabled");?>
-  <?=mk_option($eth0["PRIVACY6:$i"], "2", "Enabled");?>
-  </select>
-
-> Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
-
-</div>
-DNS server assignment:
+DNSv4 server assignment:
 : <select name="DHCP_KEEPRESOLV" size="1" onchange="checkDNSSettings(this.form)">
   <?=mk_option($eth0['DHCP_KEEPRESOLV'], "no", "Automatic");?>
   <?=mk_option($eth0['DHCP_KEEPRESOLV'], "yes", "Static");?>
   </select>
 
-> If set to *Automatic* the server will use DNS server IP address returned by the local automatic assignment.<br>
+> If set to *Automatic* the server will use DNS server IPv4 address returned by the local automatic assignment.<br>
 > If set to *Static* you may enter your own list.
 >
 > This is useful in Active Directory configurations where you need to set the first DNS Server entry to the IP address of your AD Domain server.
 
-<div class="eth0-ipv4-<?=$i?>" style="display:none" markdown="1">
 IPv4 DNS server:
 : <input type="text" name="DNS_SERVER1" maxlength="15" value="<?=$eth0['DNS_SERVER1'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
@@ -552,7 +559,48 @@ IPv4 DNS server 3:
 
 </div>
 </div>
-<div class="eth0-ipv6-<?=$i?>" style="display:none" markdown="1">
+<div class="ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
+  <?=mk_option($eth0["USE_DHCP6:$i"], 'yes', 'Automatic');?>
+  <?=mk_option($eth0["USE_DHCP6:$i"], 'no', 'Static');?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface (only available for VLANs)
+
+<div class="more-ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+IPv6 address:
+: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
+
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the system.
+
+IPv6 default gateway:
+: <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$eth0["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+
+> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
+
+IPv6 privacy extensions:
+: <select name="PRIVACY6:<?=$i?>" size="1">
+  <?=mk_option($eth0["PRIVACY6:$i"], "0", "Disabled");?>
+  <?=mk_option($eth0["PRIVACY6:$i"], "2", "Enabled");?>
+  </select>
+
+> Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
+
+</div>
+DNSv6 server assignment:
+: <select name="DHCP6_KEEPRESOLV" size="1" onchange="checkDNSSettings6(this.form)">
+  <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "no", "Automatic");?>
+  <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "yes", "Static");?>
+  </select>
+
+> If set to *Automatic* the server will use DNS server IPv4 address returned by the local automatic assignment.<br>
+> If set to *Static* you may enter your own list.
+
 IPv6 DNS server:
 : <input type="text" name="DNS6_SERVER1" maxlength="39" value="<?=$eth0['DNS6_SERVER1'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
@@ -604,8 +652,9 @@ Network protocol:
   <?=mk_option($eth0["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:<?=$i?>" size="1" onchange="checkNetworkSettings(this.form,<?=$i?>)">
+<div class="ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
   <?=mk_option($eth0["USE_DHCP:$i"], 'yes', 'Automatic');?>
   <?=mk_option($eth0["USE_DHCP:$i"], 'no', 'Static');?>
 <?if ($i>0):?>
@@ -615,11 +664,11 @@ IP address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface (only available for VLANs)
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
-<div class="eth0-ipv4-<?=$i?>" style="display:none" markdown="1">
+<div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
@@ -648,7 +697,24 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="eth0-ipv6-<?=$i?>" style="display:none" markdown="1">
+</div>
+<div class="ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
+  <?=mk_option($eth0["USE_DHCP6:$i"], 'yes', 'Automatic');?>
+  <?=mk_option($eth0["USE_DHCP6:$i"], 'no', 'Static');?>
+<?if ($i>0):?>
+  <?=mk_option($eth0["USE_DHCP6:$i"], '', 'None');?>
+<?endif;?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface (only available for VLANs)
+
+<div class="more-ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv6 address:
 : <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
 
@@ -667,6 +733,7 @@ IPv6 privacy extensions:
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
+</div>
 </div>
 </div>
 <?endif;?>
@@ -693,8 +760,9 @@ Network protocol:
   <?=mk_option($eth0["PROTOCOL:INDEX"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:INDEX" size="1" onchange="checkNetworkSettings(this.form,INDEX)">
+<div class="ipv4-eth0-INDEX" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:INDEX" size="1" onchange="selectProtocol(this.form,'eth0',INDEX)">
   <?=mk_option($eth0["USE_DHCP:INDEX"], 'yes', 'Automatic');?>
   <?=mk_option($eth0["USE_DHCP:INDEX"], 'no', 'Static');?>
   <?=mk_option($eth0["USE_DHCP:INDEX"], '', 'None');?>
@@ -702,11 +770,11 @@ IP address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface (only available for VLANs)
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
-<div class="eth0-ipv4-INDEX" style="display:none" markdown="1">
+<div class="more-ipv4-eth0-INDEX" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$eth0["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.0.0", "16");?>
@@ -735,7 +803,22 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="eth0-ipv6-INDEX" style="display:none" markdown="1">
+</div>
+<div class="ipv6-eth0-INDEX" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:INDEX" size="1" onchange="selectProtocol(this.form,'eth0',INDEX)">
+  <?=mk_option($eth0["USE_DHCP6:INDEX"], 'yes', 'Automatic');?>
+  <?=mk_option($eth0["USE_DHCP6:INDEX"], 'no', 'Static');?>
+  <?=mk_option($eth0["USE_DHCP6:INDEX"], '', 'None');?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface (only available for VLANs)
+
+<div class="more-ipv6-eth0-INDEX" style="display:none" markdown="1">
 IPv6 address:
 : <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$eth0["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$eth0["NETMASK6:INDEX"]?>" class="slim">
 
@@ -754,6 +837,7 @@ IPv6 privacy extensions:
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
+</div>
 </div>
 </div>
 </script>
