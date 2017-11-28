@@ -82,12 +82,12 @@ foreach ($ini as $name => $port) {
     if (!$bonding && preg_match('/^(BONDING_MODE|BONDING_MIIMON|BONDNICS|BONDNAME)/',$key)) continue;
     if (!$bridging && preg_match('/^(BRSTP|BRFD|BRNICS|BRNAME)/',$key)) continue;
     list($item,$x) = explode(':',$key,2);
-    if ($trunk && $x>0 && preg_match('/^(VLANID|USE_DHCP|IPADDR6?|NETMASK6?|GATEWAY6?|METRIC|PRIVACY6|DESCRIPTION|PROTOCOL)/',$key)) {
+    if ($trunk && $x>0 && preg_match('/^(VLANID|USE_DHCP6?|IPADDR6?|NETMASK6?|GATEWAY6?|METRIC|PRIVACY6|DESCRIPTION|PROTOCOL)/',$key)) {
       if ($x0 != $x) {$x0 = $x; $j++;}
       $vlan = ",$j]";
     } else $vlan = '';
     if (!$vlan && preg_match('/^VLANID/',$key)) continue;
-    $new[] = $item.(preg_match('/^(DNS6?_SERVER|DHCP_KEEPRESOLV)/',$key)?'':'['.$i.($vlan?'':']')).$vlan."=\"$val\"";
+    $new[] = $item.(preg_match('/^(DNS6?_SERVER|DHCP6?_KEEPRESOLV)/',$key)?'':'['.$i.($vlan?'':']')).$vlan."=\"$val\"";
   }
   if ($trunk) $new[] = "VLANS[$i]=\"".($j+1)."\"";
   $i++;

@@ -170,8 +170,9 @@ Network protocol:
   <?=mk_option($ethX["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:<?=$i?>" size="1" onchange="checkNetworkSettings(this.form,<?=$i?>)">
+<div class="ipv4-ethX-<?=$i?>" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'ethX',<?=$i?>)">
   <?=mk_option($ethX["USE_DHCP:$i"], 'yes', 'Automatic');?>
   <?=mk_option($ethX["USE_DHCP:$i"], 'no', 'Static');?>
   <?=mk_option($ethX["USE_DHCP:$i"], '', 'None');?>
@@ -179,11 +180,11 @@ IP address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface
 
-<div class="ethX-ipv4-<?=$i?>" style="display:none" markdown="1">
+<div class="more-ipv4-ethX-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
@@ -212,7 +213,22 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="ethX-ipv6-<?=$i?>" style="display:none" markdown="1">
+</div>
+<div class="ipv6-ethX-<?=$i?>" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'ethX',<?=$i?>)">
+  <?=mk_option($ethX["USE_DHCP6:$i"], 'yes', 'Automatic');?>
+  <?=mk_option($ethX["USE_DHCP6:$i"], 'no', 'Static');?>
+  <?=mk_option($ethX["USE_DHCP6:$i"], '', 'None');?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface
+
+<div class="more-ipv6-ethX-<?=$i?>" style="display:none" markdown="1">
 IPv6 address:
 : <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="slim">
 
@@ -231,6 +247,7 @@ IPv6 privacy extensions:
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
+</div>
 </div>
 Desired MTU:
 : <input type="number" name="MTU" min="68" max="9198" value="<?=$locked?$ethX['MTU']:$ethX['MTU']?>" class="narrow">
@@ -263,8 +280,9 @@ Network protocol:
   <?=mk_option($ethX["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:<?=$i?>" size="1" onchange="checkNetworkSettings(this.form,<?=$i?>)">
+<div class="ipv4-ethX-<?=$i?>" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'ethX',<?=$i?>)">
   <?=mk_option($ethX["USE_DHCP:$i"], 'yes', 'Automatic');?>
   <?=mk_option($ethX["USE_DHCP:$i"], 'no', 'Static');?>
   <?=mk_option($ethX["USE_DHCP:$i"], '', 'None');?>
@@ -272,11 +290,11 @@ IP address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface
 
-<div class="ethX-ipv4-<?=$i?>" style="display:none" markdown="1">
+<div class="more-ipv4-ethX-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$ethX["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:$i"], "255.255.0.0", "16");?>
@@ -305,7 +323,22 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="ethX-ipv6-<?=$i?>" style="display:none" markdown="1">
+</div>
+<div class="ipv6-ethX-<?=$i?>" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'ethX',<?=$i?>)">
+  <?=mk_option($ethX["USE_DHCP6:$i"], 'yes', 'Automatic');?>
+  <?=mk_option($ethX["USE_DHCP6:$i"], 'no', 'Static');?>
+  <?=mk_option($ethX["USE_DHCP6:$i"], '', 'None');?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface
+
+<div class="more-ipv6-ethX-<?=$i?>" style="display:none" markdown="1">
 IPv6 address:
 : <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$ethX["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$ethX["NETMASK6:$i"]?>" class="slim">
 
@@ -324,6 +357,7 @@ IPv6 privacy extensions:
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
+</div>
 </div>
 </div>
 <?endif;?>
@@ -350,8 +384,9 @@ Network protocol:
   <?=mk_option($ethX["PROTOCOL:INDEX"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-IP address assignment:
-: <select name="USE_DHCP:INDEX" size="1" onchange="checkNetworkSettings(this.form,INDEX)">
+<div class="ipv4-ethX-INDEX" style="display:none" markdown="1">
+IPv4 address assignment:
+: <select name="USE_DHCP:INDEX" size="1" onchange="selectProtocol(this.form,'ethX',INDEX)">
   <?=mk_option($ethX["USE_DHCP:INDEX"], 'yes', 'Automatic');?>
   <?=mk_option($ethX["USE_DHCP:INDEX"], 'no', 'Static');?>
   <?=mk_option($ethX["USE_DHCP:INDEX"], '', 'None');?>
@@ -359,11 +394,11 @@ IP address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain its IP address from the local DHCP server (IPv4) or SLAAC (IPv6)<br>
-> *Static* - the IP address is manually set for this interface<br>
-> *None* - no IP address is assigned to the interface
+> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Static* - the IPv4 address is manually set for this interface<br>
+> *None* - no IPv4 address is assigned to the interface
 
-<div class="ethX-ipv4-INDEX" style="display:none" markdown="1">
+<div class="more-ipv4-ethX-INDEX" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$ethX["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
   <?=mk_option($ethX["NETMASK:INDEX"], "255.255.0.0", "16");?>
@@ -392,7 +427,22 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-<div class="ethX-ipv6-INDEX" style="display:none" markdown="1">
+</div>
+<div class="ipv6-ethX-INDEX" style="display:none" markdown="1">
+IPv6 address assignment:
+: <select name="USE_DHCP6:INDEX" size="1" onchange="selectProtocol(this.form,'ethX',INDEX)">
+  <?=mk_option($ethX["USE_DHCP6:INDEX"], 'yes', 'Automatic');?>
+  <?=mk_option($ethX["USE_DHCP6:INDEX"], 'no', 'Static');?>
+  <?=mk_option($ethX["USE_DHCP6:INDEX"], '', 'None');?>
+  </select>
+
+> The following settings are possible:
+>
+> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Static* - the IPv6 address is manually set for this interface<br>
+> *None* - no IPv6 address is assigned to the interface
+
+<div class="more-ipv6-ethX-INDEX" style="display:none" markdown="1">
 IPv6 address:
 : <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$ethX["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$ethX["NETMASK6:INDEX"]?>" class="slim">
 
@@ -411,6 +461,7 @@ IPv6 privacy extensions:
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
+</div>
 </div>
 </div>
 </script>
