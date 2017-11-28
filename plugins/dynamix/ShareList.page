@@ -36,8 +36,7 @@ $(function() {
 <thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody id="share_list"></tbody>
 </table>
-<p><form name="share_form" method="GET" action="<?=htmlspecialchars($path)?>/Share">
-<input type="hidden" name="name" value="">
+<p><form name="share_form" method="POST" action="<?=htmlspecialchars($path)?>/Share?name=">
 <input id="compute-shares" type="button" value="Compute All" onclick="$(this).prop('disabled',true);displayShares('yes')">
 <?if ($var['startMode']=='Normal'):?>
 <input type="submit" value="Add Share"<?=$var['shareUser']=='e'?'>':' disabled>User shares must be <strong>enabled</strong> to add shares.'?>

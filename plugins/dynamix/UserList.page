@@ -23,6 +23,6 @@ if ($submenu) $path = './Users';
 <div class="user-list" style="text-align:center"><a class="<?=(!empty($user['desc']) ? 'info' : '')?>" href="<?=$path?>/UserEdit?name=<?=htmlspecialchars(urlencode($user['name']))?>"><img src="<?=(file_exists($img) ? autov($img) : '/webGui/images/user.png')?>" class="picture" border="0" width="48" height="48"><br><?=htmlspecialchars($user['name'])?><span><?=htmlspecialchars($user['desc'])?></span></a></div>
 <?endforeach;?>
 <div style='clear:both'></div>
-<form method="GET" action="<?=$path?>/UserAdd">
+<form method="POST" action="<?=$path?>/UserAdd">
 <input type="submit" value="Add User"><?if ($submenu):?><input type="button" value="Done" onclick="done()"><?endif;?>
 </form>
