@@ -383,15 +383,16 @@ foreach ($pages as $page) {
 <?
 // Build footer
 echo '<div id="footer"><span id="statusraid"><span id="statusbar">';
+$progress = ($var['fsProgress']!='')? "&bullet;<span class='blue strong'>{$var['fsProgress']}</span>" : '';
 switch ($var['fsState']) {
 case 'Stopped':
-  echo '<span class="red strong">Array Stopped</span>'; break;
+  echo "<span class='red strong'>Array Stopped</span>$progress"; break;
 case 'Starting':
-  echo '<span class="orange strong">Array Starting</span>'; break;
+  echo "<span class='orange strong'>Array Starting</span>$progress"; break;
 case 'Stopping':
-  echo '<span class="orange strong">Array Stopping</span>'; break;
+  echo "<span class='orange strong'>Array Stopping</span>$progress"; break;
 default:
-  echo '<span class="green strong">Array Started</span>'; break;
+  echo "<span class='green strong'>Array Started</span>$progress"; break;
 }
 echo "</span></span><span id='countdown'></span><span id='user-notice' class='red-text'></span>";
 echo "<span id='copyright'>unRAID&reg; webGui &copy;2017, Lime Technology, Inc.";
