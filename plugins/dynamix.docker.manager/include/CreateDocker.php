@@ -820,7 +820,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     if (opts.Type == "Path") {
       value.attr("onclick", "openFileBrowser(this,$(this).val(),'',true,false);");
     } else if (opts.Type == "Device") {
-      value.attr("onclick", "openFileBrowser(this,$(this).val(),'',false,true);")
+      value.attr("onclick", "openFileBrowser(this,$(this).val()||'/dev','',false,true);")
     } else if (opts.Type == "Variable" && opts.Default.split("|").length > 1) {
       var valueOpts = opts.Default.split("|");
       var newValue = "<select name='confValue[]' class='selectVariable' default='"+valueOpts[0]+"'>";
@@ -1085,7 +1085,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       targetDiv.hide();
       defaultDiv.hide();
       valueDiv.find('#dt2').text('Value:');
-      value.bind("click", function(){openFileBrowser(this,$(this).val(), '', true, true);});
+      value.bind("click", function(){openFileBrowser(this,$(this).val()||'/dev', '', true, true);});
       break;
     }
     reloadTriggers();
@@ -1457,7 +1457,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td><a href="javascript:addConfigPopup()"><i class="fa fa-plus"></i> Add another Path, Port or Variable</a></td>
+        <td><a href="javascript:addConfigPopup()"><i class="fa fa-plus"></i> Add another Path, Port, Variable or Device</a></td>
       </tr>
     </table>
     <br>
