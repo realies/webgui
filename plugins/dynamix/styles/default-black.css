@@ -1,7 +1,8 @@
 html{font-family:arimo}
 body{font-size:12px;color:#808080;background-color:#000000;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-@media (max-width:1920px){#template{min-width:1080px;margin:0 10px}}
-@media (min-width:1921px){#template{min-width:1080px;max-width:1920px;margin:0 auto}}
+@media (max-width:1280px){#template{min-width:1080px;margin:0}}
+@media (min-width:1281px){#template{min-width:1280px;margin:0 10px}}
+@media (min-width:1921px){#template{min-width:1280px;max-width:1920px;margin:0 auto}}
 img{border:0;text-decoration:none;vertical-align:middle}
 p{text-align:justify}
 p.centered{text-align:left}
@@ -96,9 +97,9 @@ input.trim{width:50px}
 .redbar{background:-webkit-radial-gradient(#941C00,#DE1100);background:linear-gradient(#941C00,#DE1100)}
 .graybar{background:-webkit-radial-gradient(#949494,#D9D9D9);background:linear-gradient(#949494,#D9D9D9)}
 table{border-collapse:collapse;border-spacing:0;margin:-21px 0 0 0;width:100%;color:#808080;border-bottom-right-radius:5px;border-bottom-left-radius:5px}
-table thead td{padding:5px 0}
-table tbody td{padding:7px 0}
-table.wide tbody td{padding:.9em 0}
+table thead td{padding:6px 0}
+table tbody td{padding:8px 0}
+table.wide tbody td{padding:8px 0}
 table tbody tr.tr_last{background:#181818;border-top:1px solid #202020;border-bottom:1px solid #202020}
 table td.cpu-info{border:1px solid #303030}
 table.disk_status{white-space:nowrap}
