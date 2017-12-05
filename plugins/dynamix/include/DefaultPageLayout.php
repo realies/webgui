@@ -38,6 +38,8 @@ echo ")}\n";
 if (strstr('gray,azure',$display['theme'])) {
   $pages = find_pages('Tasks');
   foreach ($pages as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
+  $pages = find_pages('Buttons');
+  foreach ($pages as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
 ?>
 </style>
