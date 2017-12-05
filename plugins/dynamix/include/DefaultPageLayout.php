@@ -308,6 +308,7 @@ foreach ($tasks as $page) {
   echo $pagename==$task ? " class='active'>" : ">";
   echo "<a href='/$pagename' onclick='initab()'>$pagename</a></div>";
 }
+unset($tasks);
 if ($display['usage']) my_usage();
 echo "</div>";
 echo "<div id='nav-right'>";
@@ -319,6 +320,7 @@ foreach ($buttons as $page) {
   } else
     echo "<div id='{$page['Link']}'></div>";
 }
+unset($buttons);
 if ($notify['display']) {
   echo "<span id='nav-tub1' class='tub'><i id='box-tub1' class='fa fa-square grey-text'></i><span id='txt-tub1' class='score one'>0</span></span>";
   echo "<span id='nav-tub2' class='tub'><i id='box-tub2' class='fa fa-square grey-text'></i><span id='txt-tub2' class='score one'>0</span></span>";
@@ -377,6 +379,7 @@ foreach ($pages as $page) {
   eval("?>$text");
   if ($close) echo "</div></div>";
 }
+unset($pages);
 ?>
  </div></div>
  <iframe id="progressFrame" name="progressFrame" frameborder="0"></iframe>
