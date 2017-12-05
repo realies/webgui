@@ -30,18 +30,18 @@ function timer() {
   return Math.round((now.getTime()-start.getTime())/1000);
 }
 function reboot_online() {
-  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttp',update:true},timeout:5000})
+  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttpd',update:true},timeout:5000})
    .done(function(){$('div.notice').html('<span class="title">Reboot</span>System is going down... '+timer()); setTimeout(reboot_online,5000);})
    .fail(function(){start=new Date(); setTimeout(reboot_offline,5000);});
 }
 function reboot_offline() {
-  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttp',update:true},timeout:5000})
+  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttpd',update:true},timeout:5000})
    .done(function(){location = '/Main';})
    .fail(function(){$('div.notice').html('<span class="title">Reboot</span>System is rebooting... '+timer()); setTimeout(reboot_offline,1000);});
 }
 
 function shutdown_online() {
-  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttp',update:true},timeout:5000})
+  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'POST',data:{name:'emhttpd',update:true},timeout:5000})
    .done(function(){$('div.notice').html('<span class="title">Shutdown</span>System is going down... '+timer()); setTimeout(shutdown_online,5000);})
    .fail(function(){start=new Date(); setTimeout(shutdown_offline,5000);});
 }
