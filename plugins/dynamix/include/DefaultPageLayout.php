@@ -31,13 +31,15 @@
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
 .dynamix_back-to-top {background: none;margin: 0;position: fixed;bottom: 30px;right: 0;width: 30px;height: 30px;z-index: 100;display: none;text-decoration: none;color: #ffffff;}
 <?
+$tasks = find_pages('Tasks');
+$buttons = find_pages('Buttons');
 $banner = '/boot/config/plugins/dynamix/banner.png';
 echo "#header.image{background-image:url(";
 echo file_exists($banner) ? autov($banner) : '/webGui/images/banner.png';
 echo ")}\n";
 if (strstr('gray,azure',$display['theme'])) {
-  $pages = find_pages('Tasks');
-  foreach ($pages as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
+  foreach ($tasks as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
+  foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
 ?>
 </style>
@@ -300,18 +302,17 @@ $(document).ajaxSend(function(elm, xhr, s){
 <?
 // Build page menus
 echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
-$pages = find_pages('Tasks');
-foreach ($pages as $page) {
+foreach ($tasks as $page) {
   $pagename = $page['name'];
   echo "<div id='nav-item'";
   echo $pagename==$task ? " class='active'>" : ">";
   echo "<a href='/$pagename' onclick='initab()'>$pagename</a></div>";
 }
+unset($tasks);
 if ($display['usage']) my_usage();
 echo "</div>";
 echo "<div id='nav-right'>";
-$pages = find_pages('Buttons');
-foreach ($pages as $page) {
+foreach ($buttons as $page) {
   eval("?>{$page['text']}");
   if (empty($page['Link'])) {
     $icon = substr($page['Icon'],-4)=='.png' ? "<img src='/{$page['root']}/icons/{$page['Icon']}' class='system'>" : "<i class='system fa fa-{$page['Icon']}'></i>";
@@ -319,6 +320,7 @@ foreach ($pages as $page) {
   } else
     echo "<div id='{$page['Link']}'></div>";
 }
+unset($buttons);
 if ($notify['display']) {
   echo "<span id='nav-tub1' class='tub'><i id='box-tub1' class='fa fa-square grey-text'></i><span id='txt-tub1' class='score one'>0</span></span>";
   echo "<span id='nav-tub2' class='tub'><i id='box-tub2' class='fa fa-square grey-text'></i><span id='txt-tub2' class='score one'>0</span></span>";
@@ -377,6 +379,7 @@ foreach ($pages as $page) {
   eval("?>$text");
   if ($close) echo "</div></div>";
 }
+unset($pages);
 ?>
  </div></div>
  <iframe id="progressFrame" name="progressFrame" frameborder="0"></iframe>

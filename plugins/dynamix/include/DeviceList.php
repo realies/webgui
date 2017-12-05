@@ -208,7 +208,7 @@ function array_online(&$disk) {
   global $sum, $diskio;
   if ($disk['device']!='') {
     $dev = $disk['device'];
-    $data = explode(' ',$diskio[$dev] ?? '');
+    $data = explode(' ',$diskio[$dev] ?? '0 0');
     $sum['ioReads'] += $data[0];
     $sum['ioWrites'] += $data[1];
   }
@@ -353,7 +353,7 @@ case 'array':
   break;
 case 'flash':
   $disk = &$disks['flash'];
-  $data = explode(' ',$diskio[$disk['device']] ?? '');
+  $data = explode(' ',$diskio[$disk['device']] ?? '0 0');
   $disk['fsUsed'] = $disk['fsSize']-$disk['fsFree'];
   echo "<tr>";
   echo "<td>".device_info($disk,true)."</td>";
@@ -379,7 +379,7 @@ case 'cache':
 case 'open':
   foreach ($devs as $disk) {
     $dev = $disk['device'];
-    $data = explode(' ',$diskio[$dev] ?? '');
+    $data = explode(' ',$diskio[$dev] ?? '0 0');
     $disk['name'] = $dev;
     $disk['type'] = 'New';
     $disk['color'] = read_disk($dev,'color');
