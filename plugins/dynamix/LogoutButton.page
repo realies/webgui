@@ -17,6 +17,8 @@ Icon="sign-out"
 ?>
 <script>
 function LogoutButton() {
+  var id = window.setTimeout(null,0);
+  while (id--) window.clearTimeout(id);
   $.ajax({
     type: "GET",
     url: "/logout.htm",
