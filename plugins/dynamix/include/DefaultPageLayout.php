@@ -389,13 +389,13 @@ echo '<div id="footer"><span id="statusraid"><span id="statusbar">';
 $progress = ($var['fsProgress']!='')? "&bullet;<span class='blue strong'>{$var['fsProgress']}</span>" : '';
 switch ($var['fsState']) {
 case 'Stopped':
-  echo "<span class='red strong'>Array Stopped</span>$progress"; break;
+  echo "<span class='red strong'><i class='fa fa-battery-empty'></i> Array Stopped</span>$progress"; break;
 case 'Starting':
-  echo "<span class='orange strong'>Array Starting</span>$progress"; break;
+  echo "<span class='orange strong'><i class='fa fa-battery-half'></i> Array Starting</span>$progress"; break;
 case 'Stopping':
-  echo "<span class='orange strong'>Array Stopping</span>$progress"; break;
+  echo "<span class='orange strong'><i class='fa fa-battery-half'></i> Array Stopping</span>$progress"; break;
 default:
-  echo "<span class='green strong'>Array Started</span>$progress"; break;
+  echo "<span class='green strong'><i class='fa fa-battery-full'></i> Array Started</span>$progress"; break;
 }
 echo "</span></span><span id='countdown'></span><span id='user-notice' class='red-text'></span>";
 echo "<span id='copyright'>unRAID&reg; webGui &copy;2017, Lime Technology, Inc.";
@@ -442,13 +442,13 @@ watchdog.on('message', function(data) {
   var progress = ini['fsProgress'];
   var status;
   if (state=='Stopped') {
-    status = "<span class='red strong'>Array Stopped</span>";
+    status = "<span class='red strong'><i class='fa fa-battery-empty'></i> Array Stopped</span>";
   } else if (state=='Started') {
-    status = "<span class='green strong'>Array Started</span>";
+    status = "<span class='green strong'><i class='fa fa-battery-full'></i> Array Started</span>";
   } else if (state=='Formatting') {
-    status = "<span class='green strong'>Array Started</span>&bullet;<span class='orange strong'>Formatting device(s)</span>";
+    status = "<span class='green strong'><i class='fa fa-battery-full'></i> Array Started</span>&bullet;<span class='orange strong'>Formatting device(s)</span>";
   } else {
-    status = "<span class='orange strong'>Array "+state+"</span>";
+    status = "<span class='orange strong'><i class='fa fa-battery-half'></i> Array "+state+"</span>";
   }
   if (ini['mdResync']>0) {
     var action;
