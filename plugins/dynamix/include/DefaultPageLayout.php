@@ -277,8 +277,9 @@ var device=navigator.platform.toLowerCase();
 for (var i=0,mobile; mobile=mobiles[i]; i++) {
   if (device.indexOf(mobile)>=0) {$('#footer').css('position','static'); break;}
 }
-$(document).ajaxSend(function(elm, xhr, s){
-  if (s.type == "POST") {
+$.ajaxPrefilter(function(s, orig, xhr){
+  if (s.type == "post" && !s.crossDomain) {
+    s.data = s.data || "";
     s.data += s.data?"&":"";
     s.data += "csrf_token=<?=$var['csrf_token']?>";
   }
