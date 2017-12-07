@@ -194,7 +194,7 @@ foreach ($devices as $device) {
   exec("smartctl -a $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port).txt"));
 }
 // create cache pool information
-if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')) {
+if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
   exec("/sbin/btrfs filesystem usage /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-usage.txt"));
 }
 // create resulting zip file and remove temp folder
