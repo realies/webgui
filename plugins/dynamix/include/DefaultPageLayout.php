@@ -278,7 +278,7 @@ for (var i=0,mobile; mobile=mobiles[i]; i++) {
   if (device.indexOf(mobile)>=0) {$('#footer').css('position','static'); break;}
 }
 $.ajaxPrefilter(function(s, orig, xhr){
-  if (s.type == "post" && !s.crossDomain) {
+  if (s.type.toLowerCase() == "post" && !s.crossDomain) {
     s.data = s.data || "";
     s.data += s.data?"&":"";
     s.data += "csrf_token=<?=$var['csrf_token']?>";
