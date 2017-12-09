@@ -21,6 +21,6 @@ if ($var['fsState'] != "Started") {
 }
 if ( !is_file('/var/run/dockerd.pid') || (!is_dir('/proc/'.@file_get_contents('/var/run/dockerd.pid'))) ) {
   echo "<p class='notice'>Docker Service failed to start.</p>";
-	exit;
+  return;
 }
 ?>
