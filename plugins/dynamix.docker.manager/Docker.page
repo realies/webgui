@@ -19,4 +19,8 @@ if ($var['fsState'] != "Started") {
   echo "<p class='notice'>Array must be <span class='strong big'>started</span> to view Docker containers.</p>";
   return;
 }
+if ( !is_file('/var/run/dockerd.pid') || (!is_dir('/proc/'.@file_get_contents('/var/run/dockerd.pid'))) ) {
+  echo "<p class='notice'>Docker Service failed to start.</p>";
+	exit;
+}
 ?>
