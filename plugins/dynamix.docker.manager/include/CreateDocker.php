@@ -216,7 +216,7 @@ function postToXML($post, $setOwnership = false) {
 
   for ($i = 0; $i < count($post["confName"]); $i++) {
     $Type                  = $post['confType'][$i];
-    $config                = $xml->addChild('Config', $post['confValue'][$i]);
+    $config                = $xml->addChild('Config', htmlspecialchars($post['confValue'][$i], ENT_XML1, 'UTF-8'));
     $config['Name']        = xml_encode($post['confName'][$i]);
     $config['Target']      = xml_encode($post['confTarget'][$i]);
     $config['Default']     = xml_encode($post['confDefault'][$i]);
