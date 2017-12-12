@@ -317,7 +317,7 @@ foreach ($buttons as $page) {
   eval("?>{$page['text']}");
   if (empty($page['Link'])) {
     $icon = substr($page['Icon'],-4)=='.png' ? "<img src='/{$page['root']}/icons/{$page['Icon']}' class='system'>" : "<i class='system fa fa-{$page['Icon']}'></i>";
-    echo "<div id='nav-item' class='{$page['name']}'><a href='#' onclick='{$page['name']}();return false;'>$icon{$page['Title']}</a></div>";
+    echo "<div id='nav-item' class='{$page['name']}'><a href='#' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
   } else
     echo "<div id='{$page['Link']}'></div>";
 }
@@ -478,6 +478,17 @@ $('.dynamix_back-to-top').click(function(event) {
   return false;
 });
 $(function() {
+  if ($("div#nav-right").css('float').toLowerCase() == 'right') {
+    var origNavRightWidth = $('div#nav-right').width();
+    var adjustMenuSize = function() {
+      if ($('div#nav-block').width() - $('div#nav-left').width() <= origNavRightWidth+6) {
+        $('div#nav-right div#nav-item a').css('min-width', 0).find('span').hide();
+      } else {
+        $('div#nav-right div#nav-item a').css('min-width', '').find('span').show();
+      }
+    };
+    $(window).resize(adjustMenuSize).load(adjustMenuSize);
+  }
 <?if ($notify['entity'] & 1 == 1):?>
   $.post('/webGui/include/Notify.php',{cmd:'init'},function(){timers.notifier = setTimeout(notifier,0);});
 <?endif;?>

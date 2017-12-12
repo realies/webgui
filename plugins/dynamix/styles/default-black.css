@@ -51,7 +51,7 @@ input.trim{width:50px}
 #title span.right{font-size:11px;padding-top:2px;padding-right:10px;float:right}
 #title span img{padding-right:4px}
 #menu{height:32px;line-height:32px;border-radius:5px;background:-webkit-radial-gradient(#606060,#303030);background:linear-gradient(#606060,#303030)}
-#nav-block{color:#F0F0F0}
+#nav-block{color:#F0F0F0;overflow:hidden;height:37px}
 #nav-left{float:left}
 #nav-right{border-right:none;float:right}
 #nav-block #nav-item{display:block;float:left;text-align:center;border-right:thin solid #606060}
