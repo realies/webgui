@@ -81,7 +81,7 @@ exec("lsscsi -vgl 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsscsi.txt"
 exec("lspci -knn 2>/dev/null|todos >".escapeshellarg("/$diag/system/lspci.txt"));
 exec("lsusb 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsusb.txt"));
 exec("free -mth 2>/dev/null|todos >".escapeshellarg("/$diag/system/memory.txt"));
-exec("ps -auxef --sort=-pcpu 2>/dev/null|todos >".escapeshellarg("/$diag/system/ps.txt"));
+exec("ps -auxf --sort=-pcpu 2>/dev/null|todos >".escapeshellarg("/$diag/system/ps.txt"));
 exec("lsof -Pni 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsof.txt"));
 exec("lsmod|sort 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsmod.txt"));
 exec("df -h 2>/dev/null|todos >".escapeshellarg("/$diag/system/df.txt"));
