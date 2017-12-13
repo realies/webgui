@@ -22,7 +22,7 @@ putenv('PATH=.:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin');
 chdir('/usr/local/emhttp');
 setlocale(LC_ALL,'en_US.UTF-8');
 date_default_timezone_set(substr(readlink('/etc/localtime-copied-from'),20));
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($var)) $var = parse_ini_file('state/var.ini');
     if (!isset($var['csrf_token'])) csrf_terminate("uninitialized");
     if (!isset($_POST['csrf_token'])) csrf_terminate("missing");
