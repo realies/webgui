@@ -67,7 +67,7 @@ function provisionSSL(button) {
         }).fail(failure);
     };
 
-    $.post("https://keys.lime-technology.com/account/ssl/provisioncert",{internalip:"<?=$internalip?>",internalport:<?=$var['PORTSSL']?>,keyfile:"<?=$keyfile?>"},success_provision).fail(failure);
+    $.post("/webGui/include/ProvisionCert.php",success_provision).fail(failure);
 }
 
 function updateDNS(button) {
@@ -87,7 +87,7 @@ function updateDNS(button) {
         swal("","Your local IP address <?=$internalip?> has been updated for unraid.net.","success");
     };
 
-    $.post("https://keys.lime-technology.com/account/ssl/updatedns",{internalip:"<?=$internalip?>",internalport:<?=$var['PORTSSL']?>,keyfile:"<?=$keyfile?>"},success).fail(failure);
+    $.post("/webGui/include/UpdateDNS.php",success).fail(failure);
 }
 </script>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
