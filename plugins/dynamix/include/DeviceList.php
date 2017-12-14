@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 
 $path  = $_POST['path'];
@@ -129,17 +129,17 @@ function fs_info(&$disk) {
     return;
   } elseif ($disk['fsStatus']=='Mounted') {
     echo "<td>".vfs_type($disk['fsType'])."</td>";
-    echo "<td>".my_scale($disk['fsSize']*1024,$unit,-1)." $unit</td>";
+    echo "<td>".my_scale(($disk['fsSize']??0)*1024,$unit,-1)." $unit</td>";
     if ($display['text']%10==0) {
       echo "<td>".my_scale($disk['fsUsed']*1024,$unit)." $unit</td>";
     } else {
-      $used = $disk['fsSize'] ? 100-round(100*$disk['fsFree']/$disk['fsSize']) : 0;
+      $used = isset($disk['fsSize']) && $disk['fsSize']>0 ? 100-round(100*$disk['fsFree']/$disk['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($disk,$used,false)."'><span>".my_scale($disk['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
     }
     if ($display['text']<10 ? $display['text']%10==0 : $display['text']%10!=0) {
       echo "<td>".my_scale($disk['fsFree']*1024,$unit)." $unit</td>";
     } else {
-      $free = $disk['fsSize'] ? round(100*$disk['fsFree']/$disk['fsSize']) : 0;
+      $free = isset($disk['fsSize']) && $disk['fsSize']>0 ? round(100*$disk['fsFree']/$disk['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($disk,$free,true)."'><span>".my_scale($disk['fsFree']*1024,$unit)." $unit</span></span></div></td>";
     }
     echo "<td>".device_browse($disk)."</td>";

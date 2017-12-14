@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 $dockerManPaths = [
 	'plugin'            => '/usr/local/emhttp/plugins/dynamix.docker.manager',

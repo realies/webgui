@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 // Invoke the plugin command with indicated method
 function plugin($method, $arg = '') {

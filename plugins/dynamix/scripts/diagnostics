@@ -19,7 +19,7 @@ $cli = empty($zip);
 $get = "/var/local/emhttp";
 $var = file_exists("$get/var.ini") ? parse_ini_file("$get/var.ini") : [];
 
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $folders = ['/boot','/boot/config','/boot/config/plugins','/boot/extra','/boot/syslinux','/var/log','/var/log/plugins','/var/log/packages','/tmp'];
 
 function anonymize($text,$select) {

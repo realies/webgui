@@ -12,7 +12,7 @@
 ?>
 <?
 $disks = []; $var = [];
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/CustomMerge.php";
 require_once "$docroot/webGui/include/Wrappers.php";
 require_once "$docroot/webGui/include/Preselect.php";
