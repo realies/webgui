@@ -16,7 +16,7 @@ $var   = parse_ini_file("/var/local/emhttp/var.ini");
 $devs  = parse_ini_file("/var/local/emhttp/devs.ini",true);
 $disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
 
-$docroot = $docroot ?: $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Wrappers.php";
 require_once "$docroot/webGui/include/Preselect.php";
 require_once "$docroot/webGui/include/CustomMerge.php";
@@ -201,7 +201,7 @@ foreach ($disks as $disk) {
 // process disk SMART notifications
   check_smart($name,port_name($disk['smDevice'] ?? $disk['device']),$text,$info);
 // process disk usage notifications
-  check_usage($name,($disk['fsSize']?100-round(100*$disk['fsFree']/$disk['fsSize']):-1),$text,$info);
+  check_usage($name,isset($disk['fsSize'])&&$disk['fsSize']>0?100-round(100*$disk['fsFree']/$disk['fsSize']):-1,$text,$info);
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';
@@ -231,7 +231,7 @@ foreach ($disks as $disk) {
   if ($disk['numErrors']>0) $errors[] = "$text - $info (errors {$disk['numErrors']})";
 // check file system of cache pool
   $item = 'pool';
-  if ($name=='cache' && strpos($disk['fsType'],'btrfs')) {
+  if ($name=='cache' && strpos($disk['fsType'],'btrfs')!==false) {
     $attr = 'missing';
     if (exec("/sbin/btrfs filesystem show {$disk['uuid']} 2>/dev/null|grep -c 'missing'")>0) {
       if (empty($saved[$item][$attr])) {
