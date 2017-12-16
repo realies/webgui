@@ -102,16 +102,43 @@ Use SSL/TLS:
 >
 > Select **No** to disable HTTPS (but HTTPS is recognized and redirected to HTTP).
 >
-> Select **Yes** to enable HTTPS and redirect HTTP to HTTPS.
+> Select **Yes** to enable HTTPS and redirect HTTP to HTTPS.  If a Let's Encrypt SSL certificate has not
+> been provisioned, then an automatically generated self-signed SSL certificate will be used.
 >
-> With **Auto** selected, behaves like **No** if only a self-signed SSL certificate is present.  If
-> a Lets Encrypt or other user supplied SSL certificate if present, behavies like **Yes**.
+> Select **Auto** if you are using or plan to use a Let's Encrypt SSL certificate provisioned
+> by Lime Technology.  Before the certificate is provisioned, the webGui remains
+> in http-mode.  After provisioning, the webGui automatically switches to https-mode.  In addition
+> two background processes are enabled:
 >
-> A self-signed SSL certificate is automatically generated during start-up in the
-> file `/boot/config/ssl/certs/<hostname>_unraid_bundle.pem` if it does not already exist.
+> - *updatedns* - This starts 30 seconds after server reboot has completed and contacts the Lime Technology
+> DNS service to register the servers local IP address.  Thereafter it wakes up every 10 minutes in case
+> the local IP address has changed again.
 >
-> A Lets Encrypt or other user-generated SSL certificate, must be stored in the
-> file `/boot/config/ssl/csrts/certificate_bundle.pem`.  *nginx* will prefer ths certificate if present.
+> - *renewcert* - This starts 60 seconds after server reboot has completed and contacts the Lime Technology
+> certificate renewal service to determine if your Let's Encrypt SSL certificate needs to be renewed.
+> Thereafter it wakes up every 24 hours.  If within 30 days of expiration, a new certificate is automatically
+> provisioned and downloaded to your server.
+>
+> Note: After provisioning a Let's Encrypt SSL certificate you may turn off the *updatedns* and *newcert*
+> background processes by chaning this field to **Yes**.
+>
+> **nginx certificate handling details**
+> 
+> The nginx startup script looks for a SSL certificate on the USB boot flash in this order:<br>
+> `config/ssl/certs/certficate_bundle.pem`<br>
+> `config/ssl/certs/<server-name>_unraid_bundle.pem`
+> 
+> If neither file exists, a self-signed SSL certificate is automatically created and stored in<br>
+> `config/ssl/certs/<server-name>_unraid_bundle.pem`<br>
+>
+> Provisioning a Let's Encrypt certificate writes the certificate to<br>
+> `config/ssl/certs/certficate_bundle.pem`<br>
+> 
+> **nginx stapling support**
+> 
+> Whether nginx enables OCSP Staping is determined by which certificate is in use:<br>
+> `config/ssl/certs/certficate_bundle.pem` => Yes<br>
+> `config/ssl/certs/<server-name>_unraid_bundle.pem` => No
 
 HTTP port:
 : <input type="number" name="PORT" class="trim" min="0" max="65535" value="<?=htmlspecialchars($var['PORT'])?>">
