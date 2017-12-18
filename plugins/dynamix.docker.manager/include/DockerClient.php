@@ -896,14 +896,18 @@ class DockerClient {
 
 
 	public function getImageID($Image) {
+ 		if ( ! strpos($Image,":") ) {
+			$Image .= ":latest";
+		}
 		foreach ($this->getDockerImages() as $img) {
-			if (preg_match("%" . preg_quote($Image, "%") . "%", $img["Tags"][0])) {
-				return $img["Id"];
+			foreach ($img['Tags'] as $tag) {
+				if ( $Image == $tag ) {
+					return $img["Id"];
+				}
 			}
 		}
 		return null;
 	}
-
 
 	public function getImageName($id) {
 		foreach ($this->getDockerImages() as $img) {
@@ -913,7 +917,6 @@ class DockerClient {
 		}
 		return null;
 	}
-
 
 	private function usedBy($imageId) {
 		$out = [];
