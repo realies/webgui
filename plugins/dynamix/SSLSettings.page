@@ -159,8 +159,12 @@ HTTPS port:
 Certificate issuer:
 : <?=shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Issuer: //p'")?>
 
+<?
+$time = strtotime(exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Not After : //p'"));
+$format = $display['date'].($display['date']!='%c' ? ', '.str_replace(['%M','%R'],['%M:%S','%R:%S'],$display['time']):'');
+?>
 Certificate expiration:
-: <?=shell_exec("/usr/bin/openssl x509 -text -noout -in /etc/ssl/certs/unraid_bundle.pem|sed -n -e 's/^.*Not After : //p'")?>
+: <?=strftime($format, $time)?>
 
 &nbsp;
 : <button type="button" onclick="provisionSSL(this)" <?=$disabled_provision?>><?=$provisionlabel?></button><button type="button" onclick="updateDNS(this)" <?=$disabled_updatedns?>>Update DNS</button>
