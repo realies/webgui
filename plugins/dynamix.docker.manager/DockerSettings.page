@@ -53,8 +53,12 @@ foreach ($other as $network) {
 $include = [];
 $include6 = [];
 foreach ($custom as $network) {
-  if ($route = exec("ip -4 route show dev $network|grep -Po '^[12]\S+'")) $include[$network] = $route;
-  if ($route6 = exec("ip -6 route show dev $network|grep -Po '^[1-9]\S+'")) $include6[$network] = $route6;
+  unset($address,$address6);
+  exec("ip -4 addr show $network|awk '/inet /{print $2}'",$address);
+  exec("ip -6 addr show $network noprefixroute|awk '/inet6 /{print $2}'",$address6);
+  exec("ip -6 addr show $network scope global permanent|awk '/inet6 /{print $2}'",$address6);
+  foreach ($address as $ip4) if ($route = exec("ip -4 route show dev $network $ip4|awk '{print $1}'")) $include[$network] = $route;
+  foreach ($address6 as $ip6) if ($route6 = exec("ip -6 route show dev $network $ip6|awk '{print $1}'")) $include6[$network] = $route6;
 }
 function base_min($route) {
   list($net,$mask) = explode('/',$route);
@@ -260,7 +264,14 @@ DHCPv4 pool of custom network <?=$network?>:
 <?endif;?>
 
 <?endforeach;?>
-> Enter a pool range within the allocated subnet which is used for DHCPv4 assignments by Docker. E.g. 192.168.1.128/25
+<?if ($include):?>
+<?if ($DockerStopped):?>
+> Enter the pool range within each allocated subnet which is used for DHCPv4 assignments by Docker. E.g. 192.168.1.128/25
+
+<?elseif ($dockercfg[$docker_dhcp]):?>
+> Pool range(s) assigned to DHCPv4 for Docker containers.
+<?endif;?>
+<?endif;?>
 
 <?foreach ($include6 as $network => $route):?>
 <?$docker_dhcp6 = 'DOCKER_DHCP6_'.strtoupper(str_replace('.','_',$network))?>
@@ -287,8 +298,15 @@ DHCPv6 pool of custom network <?=$network?>:
 : <?=$dockercfg[$docker_dhcp6]?>
 <?endif;?>
 
-> Enter a pool range within the allocated subnet which is used for DHCPv6 assignments by Docker. E.g. 2a02:abcd:9ef5:100:1::/80
 <?endforeach;?>
+<?if ($include6):?>
+<?if ($DockerStopped):?>
+> Enter the pool range within each allocated subnet which is used for DHCPv6 assignments by Docker. E.g. 2a02:abcd:9ef5:100:1::/72
+
+<?elseif ($dockercfg[$docker_dhcp6]):?>
+> Pool range(s) assigned to DHCPv6 for Docker containers.
+<?endif;?>
+<?endif;?>
 </div>
 &nbsp;
 : <input id="applyBtn" type="button" value="Apply"><input type="button" value="Done" onclick="done()">
