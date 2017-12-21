@@ -284,8 +284,10 @@ class DockerTemplates {
 		global $dockerManPaths;
 
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
-		if (isset($info[$container])) unset($info[$container]);
-		DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
+		if (isset($info[$container])) {
+			unset($info[$container]);
+			DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
+		}
 	}
 
 
@@ -294,8 +296,10 @@ class DockerTemplates {
 		$image = DockerUtil::ensureImageTag($image);
 
 		$updateStatus = DockerUtil::loadJSON($dockerManPaths['update-status']);
-		if (isset($updateStatus[$image])) unset($updateStatus[$image]);
-		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+		if (isset($updateStatus[$image])) {
+			unset($updateStatus[$image]);
+			DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+		}
 	}
 
 
@@ -792,8 +796,8 @@ class DockerClient {
 				}
 			}
 			unset($info[$id]);
+			DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
 		}
-		DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
 		// Attempt to remove container
 		$this->getDockerJSON("/containers/${id}?force=1", "DELETE", $code);
 		$this->allContainersCache = null; // flush cache
@@ -824,8 +828,10 @@ class DockerClient {
 			// Purge cached image information (only if delete was successful)
 			$image = DockerUtil::ensureImageTag($image);
 			$updateStatus = DockerUtil::loadJSON($dockerManPaths['update-status']);
-			if (isset($updateStatus[$image])) unset($updateStatus[$image]);
-			DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+			if (isset($updateStatus[$image])) {
+				unset($updateStatus[$image]);
+				DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+			}
 		}
 		$codes = [
 			"200" => true, // No error
