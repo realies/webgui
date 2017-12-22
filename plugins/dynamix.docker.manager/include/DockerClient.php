@@ -480,6 +480,9 @@ class DockerUpdate{
 		$image = DockerUtil::ensureImageTag($image);
 		$updateStatus = DockerUtil::loadJSON($dockerManPaths['update-status']);
 		if (isset($updateStatus[$image])) {
+			if (isset($updateStatus[$image]['status']) && $updateStatus[$image]['status']=='undef') {
+				return null;
+			}
 			if ($updateStatus[$image]['local'] || $updateStatus[$image]['remote']) {
 				return ($updateStatus[$image]['local'] == $updateStatus[$image]['remote']);
 			}
