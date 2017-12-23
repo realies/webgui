@@ -1122,8 +1122,8 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       filter: filter,
       allowBrowsing: true
     },
-    function(file){if(on_files){p.val(file);if(close_on_select){ft.slideUp('fast',function(){ft.remove();});}}},
-    function(folder){if(on_folders){p.val(folder);if(close_on_select){$(ft).slideUp('fast',function (){$(ft).remove();});}}}
+    function(file){if(on_files){p.val(file);p.trigger('change');if(close_on_select){ft.slideUp('fast',function(){ft.remove();});}}},
+    function(folder){if(on_folders){p.val(folder);p.trigger('change');if(close_on_select){$(ft).slideUp('fast',function (){$(ft).remove();});}}}
     );
     // Format fileTree according to parent position, height and width
     ft.css({'left':p.position().left,'top':( p.position().top + p.outerHeight() ),'width':(p.width()) });
