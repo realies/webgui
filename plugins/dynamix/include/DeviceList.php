@@ -60,8 +60,8 @@ function device_info(&$disk,$online) {
   $link = ($disk['type']=='Parity' && strpos($disk['status'],'_NP')===false) ||
           ($disk['type']=='Data' && $disk['status']!='DISK_NP') ||
           ($disk['type']=='Cache' && $disk['status']!='DISK_NP') ||
-          ($disk['name']=='cache') ||
-          ($disk['name']=='flash') ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
+          ($disk['name']=='cache') || ($disk['name']=='flash') ||
+           $disk['type']=='New' ? "<a href=\"".htmlspecialchars("$path/$type?name=$name")."\">".$fancyname."</a>" : $fancyname;
   if ($crypto) switch ($disk['luksState']) {
     case 0:
       if (!vfs_luks($disk['fsType']))
