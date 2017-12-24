@@ -17,6 +17,7 @@ Cond="strpos($disks[$name]['status'],'_NP')===false"
 ?>
 <?
 $date = date('Ymd-Hi');
+$dev  = $dev ?? $name;
 $live = exec("hdparm -C ".escapeshellarg("/dev/$dev")."|grep -Pom1 'active|unknown'");
 $zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
 
