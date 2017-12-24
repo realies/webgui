@@ -16,10 +16,17 @@ Cond="strpos($disks[$name]['status'],'_NP')===false"
  */
 ?>
 <?
-$date = date('Ymd-Hi');
-$dev  = $dev ?? $name;
+$date = $date ?? date('Ymd-Hi');
 $live = exec("hdparm -C ".escapeshellarg("/dev/$dev")."|grep -Pom1 'active|unknown'");
 $zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
+
+// deal with unassigned devices
+if (!$dev) {
+  $dev = $name; 
+  foreach ($devs as $disk) {
+    if ($disk['device']==$name) {$file = $disk['id']."-$date.txt"; break;}
+  }
+}
 
 function spindownDelay() {
   global $spindown, $delay;
