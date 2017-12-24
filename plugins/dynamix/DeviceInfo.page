@@ -17,6 +17,7 @@ Tag="hdd-o"
 <?
 require_once "$docroot/webGui/include/Preselect.php";
 $disk = &$disks[$name];
+$date = date('Ymd-Hi');
 $events = explode('|',$disk['smEvents'] ?? $var['smEvents'] ?? $numbers);
 
 function displayTemp($temp) {
