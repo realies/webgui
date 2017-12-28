@@ -77,6 +77,7 @@ form+p{display:none}
 #nav-item.HelpButton.active:hover{background:#ABC056;font-size:18px}
 #nav-item.HelpButton.active{background:#121510;font-size:0}
 #nav-item.HelpButton a:before{content:'\f059'}
+#nav-item.TerminalButton a:before{content:'\f120'}
 #nav-item.FeedbackButton a:before{content:'\f075'}
 #nav-item.InfoButton a:before{content:'\f05a'}
 #nav-item.LogButton a:before{content:'\f14b'}
