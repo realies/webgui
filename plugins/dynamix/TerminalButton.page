@@ -1,8 +1,7 @@
-Cond="file_exists('/etc/nginx/htpasswd')"
-Menu="Buttons:1"
-Title="Logout"
-Icon="sign-out"
-Code="f08b"
+Menu="Buttons:2"
+Title="Terminal"
+Icon="terminal"
+Code="f120"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
@@ -17,17 +16,11 @@ Code="f08b"
  */
 ?>
 <script>
-function LogoutButton() {
-  var id = window.setTimeout(null,0);
-  while (id--) window.clearTimeout(id);
-  $.ajax({
-    type: "GET",
-    url: "/logout.htm",
-    username: "logout",
-    password: "",
-    success: function (data){
-      $('body').html(data);
-    }
-  });
+function TerminalButton() {
+  var height = 600;
+  var width = 900;
+  var top = (screen.height-height)/2;
+  var left = (screen.width-width)/2;
+  window.open('/webterminal/', 'Web Terminal', 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();
 }
 </script>

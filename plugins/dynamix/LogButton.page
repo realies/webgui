@@ -1,6 +1,7 @@
 Menu="Buttons"
 Title="Log"
 Icon="file-text-o"
+Code="f14b"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology

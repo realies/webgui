@@ -1,6 +1,7 @@
 Menu="Buttons"
 Title="Info"
 Icon="tv"
+Code="f05a"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
