@@ -191,7 +191,7 @@ echo "<td>Array Status</td>".implode('',$row0);
 </select>
 </td></tr><tr><td colspan='4' style='text-align:center'>Load Statistics</td></tr></thead>
 <tbody>
-<tr class='wide'><td><a onclick='toggle_CPU()' title='Click to show details' class='none' style='cursor:pointer'>Avg. CPU load</a><span class='red-text'> *</span></td><td colspan='3'><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td></tr>
+<tr class='wide'><td><a onclick='toggle_CPU()' title='Click to toggle details' class='none' style='cursor:pointer'>Avg. CPU load</a><span class='red-text'> *</span></td><td colspan='3'><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td></tr>
 </tbody>
 <tbody class='cpu_open' style='display:none'>
 <?if (count($cpus)>1):?><tr><td rowspan='<?=count($cpus)?>'><?else:?><tr class='wide'><td><?endif;?>Per CPU load</td>
