@@ -317,7 +317,7 @@ foreach ($buttons as $page) {
   eval("?>{$page['text']}");
   if (empty($page['Link'])) {
     $icon = substr($page['Icon'],-4)=='.png' ? "<img src='/{$page['root']}/icons/{$page['Icon']}' class='system'>" : "<i class='system fa fa-{$page['Icon']}'></i>";
-    echo "<div id='nav-item' class='{$page['name']}'><a href='#' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
+    echo "<div id='nav-item' class='{$page['name']}'><a href='".(empty($page['Href']) ? "#" : $page['Href'])."' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
   } else
     echo "<div id='{$page['Link']}'></div>";
 }
