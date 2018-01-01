@@ -2,6 +2,7 @@ Menu="Buttons:2"
 Title="Terminal"
 Icon="terminal"
 Href="/webterminal/"
+Code="f120"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
@@ -17,10 +18,11 @@ Href="/webterminal/"
 ?>
 <script>
 function TerminalButton() {
+  var d = new Date();
   var height = 600;
   var width = 900;
   var top = (screen.height-height)/2;
   var left = (screen.width-width)/2;
-  window.open('/webterminal/', 'Web Terminal', 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();
+  window.open('/webterminal/', 'Web Terminal '+d.getTime(), 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();
 }
 </script>

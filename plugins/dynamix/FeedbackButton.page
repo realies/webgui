@@ -2,6 +2,7 @@ Menu="Buttons"
 Title="Feedback"
 Icon="comment-o"
 Tag="commenting"
+Code="f075"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology

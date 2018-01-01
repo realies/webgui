@@ -2,6 +2,7 @@ Cond="file_exists('/etc/nginx/htpasswd')"
 Menu="Buttons:1"
 Title="Logout"
 Icon="sign-out"
+Code="f08b"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology

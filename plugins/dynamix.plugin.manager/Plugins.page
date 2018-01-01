@@ -3,6 +3,7 @@ Type="xmenu"
 Title="Installed Plugins"
 Tag="puzzle-piece"
 Tabs="true"
+Code="f1e6"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
