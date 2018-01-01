@@ -1,6 +1,7 @@
 Menu="Buttons:2"
 Title="Terminal"
 Icon="terminal"
+Href="/webterminal/"
 Code="f120"
 ---
 <?PHP
