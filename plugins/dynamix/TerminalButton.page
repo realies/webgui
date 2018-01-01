@@ -1,6 +1,7 @@
 Menu="Buttons:2"
 Title="Terminal"
 Icon="terminal"
+Href="/webterminal/"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
