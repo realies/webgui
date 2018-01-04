@@ -51,12 +51,11 @@ function find_pages($item) {
       case '/': $menu = get_file_key($menu,strtok(' ')); break;
     }
     while ($menu !== false) {
-      $add = explode(':', $menu);
-      $add[] = '';
-      if ($add[0] == $item) {
+      list($menu,$rank) = explode(':',$menu);
+      if ($menu == $item) {
         $enabled = true;
         if (isset($page['Cond'])) eval("\$enabled={$page['Cond']};");
-        if ($enabled) $pages["{$add[1]}{$page['name']}"] = $page;
+        if ($enabled) $pages["$rank{$page['name']}"] = $page;
         break;
       }
       $menu = strtok(' ');
