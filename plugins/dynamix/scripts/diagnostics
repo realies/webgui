@@ -193,7 +193,7 @@ foreach ($devices as $device) {
     }
   }
   $port = port_name($port);
-  exec("smartctl -a $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port).txt"));
+  exec("smartctl -x $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port).txt"));
 }
 // create cache pool information
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
