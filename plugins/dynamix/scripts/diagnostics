@@ -32,7 +32,6 @@ function anonymize($text,$select) {
       if (!preg_match("/\b(disk|cache|parity|flash)\d*\b/", $row)) {
         $row = preg_replace("/^(\s*\[\S).*(\S\])( => Array)$/","$1..$2$3",$row);
         $row = preg_replace("/^(\s*\[(name|nameOrig|comment|flashGUID|regGUID|regTo|readList|writeList|csrf_token)\] => \S).*(\S)$/","$1..$3",$row);
-        $row = preg_replace(["/(host: \").+(\.unraid\.net:\d+\",)/","/(referrer: \"https?:\/\/).+(\.unraid\.net)/"],"$1hash$2",$row);
       }
     }
     return implode("\n", $rows);
@@ -132,6 +131,7 @@ foreach (glob("/var/log/syslog*") as $file) {
     unset($titles,$rows);
     exec("grep -Po 'logger: moving \"\K[^\"]+' ".escapeshellarg("$log.txt")." 2>/dev/null|sort|uniq", $titles);
     exec("sed -ri 's|\b\S+@\S+\.\S+\b|xxx@removed.com|;s|\b(username\|password)([=:])\S+\b|\\1\\2xxx|;s|(GUID: \S)\S+(\S) |\\1..\\2 |;s|(moving \"\S\|\"/mnt/user/\S).*(\S)\"|\\1..\\2\"|' ".escapeshellarg("$log.txt"));
+    exec("sed -ri 's|(host: \").+(\.unraid\.net:[0-9]+\")|\\1hash\\2|;s|(referrer: \"https?://).+(\.unraid\.net)|\\1hash\\2|' ".escapeshellarg("$log.txt"));
     foreach ($titles as $mover) {
       $title = "/{$mover[0]}..".substr($mover,-1)."/...";
       exec("sed -ri 's|(logger: [.>cr].*)[ /]$mover/.*$|\\1 file: $title|' ".escapeshellarg("$log.txt")." 2>/dev/null");
