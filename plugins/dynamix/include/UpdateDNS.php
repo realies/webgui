@@ -36,6 +36,7 @@ if (!preg_match('/.*\.unraid\.net$/', $hostname)) {
 }
 
 // keyfile
+$var = parse_ini_file("/var/local/emhttp/var.ini");
 $keyfile = @file_get_contents($var['regFILE']);
 if ($keyfile === false) {
   response_complete(406, '{"error":"Registration key required"}');
