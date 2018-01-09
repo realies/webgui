@@ -150,7 +150,7 @@ case "identify":
   }
   break;
 case "save":
-  exec("smartctl -a $type ".escapeshellarg("/dev/$port")." >".escapeshellarg("$docroot/{$_POST['file']}"));
+  exec("smartctl -x $type ".escapeshellarg("/dev/$port")." >".escapeshellarg("$docroot/{$_POST['file']}"));
   break;
 case "delete":
   if (strpos(realpath("/var/tmp/{$_POST['file']}"), "/var/tmp/") === 0) {

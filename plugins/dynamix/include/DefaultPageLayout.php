@@ -29,7 +29,7 @@
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:15px;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
-.dynamix_back-to-top {background: none;margin: 0;position: fixed;bottom: 30px;right: 0;width: 30px;height: 30px;z-index: 100;display: none;text-decoration: none;color: #ffffff;}
+.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:green;font-size:25px}
 <?
 $tasks = find_pages('Tasks');
 $buttons = find_pages('Buttons');
@@ -299,7 +299,7 @@ $.ajaxPrefilter(function(s, orig, xhr){
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
    </div>
   </div>
-  <a href="#" class="dynamix_back-to-top" style="display: none;" title='Back To Top';><i href="#" class="fa fa-arrow-circle-up dynamix_back-to-top" aria-hidden="true" style="color:green;font-size:25px;"></i></a>
+  <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>
 <?
 // Build page menus
 echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
@@ -317,7 +317,7 @@ foreach ($buttons as $page) {
   eval("?>{$page['text']}");
   if (empty($page['Link'])) {
     $icon = substr($page['Icon'],-4)=='.png' ? "<img src='/{$page['root']}/icons/{$page['Icon']}' class='system'>" : "<i class='system fa fa-{$page['Icon']}'></i>";
-    echo "<div id='nav-item' class='{$page['name']}'><a href='".(empty($page['Href']) ? "#" : $page['Href'])."' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
+    echo "<div id='nav-item' class='{$page['name']}'><a href='".($page['Href'] ?? '#')."' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
   } else
     echo "<div id='{$page['Link']}'></div>";
 }
@@ -376,8 +376,7 @@ foreach ($pages as $page) {
       echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\">$icon<div class=\"PanelText\">$title</div></a></div>";
     }
   }
-  $text = empty($page['Markdown']) || $page['Markdown']=='true' ? Markdown($page['text']) : $page['text'];
-  eval("?>$text");
+  empty($page['Markdown']) || $page['Markdown']=='true' ? eval('?>'.Markdown($page['text'])) : eval('?>'.$page['text']);
   if ($close) echo "</div></div>";
 }
 unset($pages);
@@ -467,12 +466,12 @@ var backtotopoffset = 250;
 var backtotopduration = 500;
 $(window).scroll(function() {
   if ($(this).scrollTop() > backtotopoffset) {
-    $('.dynamix_back-to-top').fadeIn(backtotopduration);
+    $('.back_to_top').fadeIn(backtotopduration);
   } else {
-    $('.dynamix_back-to-top').fadeOut(backtotopduration);
+    $('.back_to_top').fadeOut(backtotopduration);
   }
 });
-$('.dynamix_back-to-top').click(function(event) {
+$('.back_to_top').click(function(event) {
   event.preventDefault();
   $('html,body').animate({scrollTop:0},backtotopduration);
   return false;
