@@ -270,7 +270,7 @@ if (!empty($_GET['uuid'])) {
 		width: 30%;
 	}
 	#vmform .four label.cpu2 {
-		width: 32%;
+		width: 31%;
 	}
 	#vmform .mac_generate {
 		cursor: pointer;
