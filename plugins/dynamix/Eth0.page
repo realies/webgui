@@ -459,7 +459,7 @@ Bonding mode:
 > It requires a switch that supports IEEE 802.3ad dynamic link.
 > Slave selection for outgoing traffic is done according to the transmit hash policy, which may be changed from the default simple XOR policy via the xmit_hash_policy option.
 > Note that not all transmit policies may be 802.3ad compliant, particularly inregards to the packet mis-ordering requirements of section 43.2.4 of the 802.3ad standard.
-> Differing peer implementations will have varying tolerances for noncompliance.
+> Different peer implementations will have varying tolerances for noncompliance.
 >
 > **Mode 5 (balance-tlb)**<br>
 > This mode is called *Adaptive transmit load balancing*. The outgoing traffic is distributed according to the current load and queue on each slave interface.
@@ -527,7 +527,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
@@ -560,13 +560,13 @@ IPv4 default gateway:
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
 </div>
-DNSv4 server assignment:
+IPv4 DNS server assignment:
 : <select name="DHCP_KEEPRESOLV" size="1" onchange="checkDNSSettings(this.form)">
   <?=mk_option($eth0['DHCP_KEEPRESOLV'], "no", "Automatic");?>
   <?=mk_option($eth0['DHCP_KEEPRESOLV'], "yes", "Static");?>
   </select>
 
-> If set to *Automatic* the server will use DNS server IPv4 address returned by the local automatic assignment.<br>
+> If set to *Automatic* the server will use IPv4 DNS server(s) returned by the local automatic assignment.<br>
 > If set to *Static* you may enter your own list.
 >
 > This is useful in Active Directory configurations where you need to set the first DNS Server entry to the IP address of your AD Domain server.
@@ -574,7 +574,7 @@ DNSv4 server assignment:
 IPv4 DNS server:
 : <input type="text" name="DNS_SERVER1" maxlength="15" value="<?=$eth0['DNS_SERVER1'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
-> This is the primary DNS server to use. Enter an IPv4 address.
+> This is the primary IPv4 DNS server to use. Enter a IPv4 address.
 >
 > Note: for *Active Directory* you **must** ensure this is set to the IP address of your AD Domain server.
 
@@ -582,14 +582,14 @@ IPv4 DNS server:
 IPv4 DNS server 2:
 : <input type="text" name="DNS_SERVER2" maxlength="15" value="<?=$eth0['DNS_SERVER2'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
-> This is the DNS server to use when DNS server 1 is down.
+> This is the IPv4 DNS server to use when IPv4 DNS server 1 is down.
 
 </div>
 <div id="dnsserver3" style="display:none" markdown="1">
 IPv4 DNS server 3:
 : <input type="text" name="DNS_SERVER3" maxlength="15" value="<?=$eth0['DNS_SERVER3'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
-> This is the DNS server to use when DNS servers 1 and 2 are both down.
+> This is the IPv4 DNS server to use when IPv4 DNS servers 1 and 2 are both down.
 
 </div>
 </div>
@@ -602,7 +602,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface (only available for VLANs)
 
@@ -626,32 +626,32 @@ IPv6 privacy extensions:
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
 </div>
-DNSv6 server assignment:
+IPv6 DNS server assignment:
 : <select name="DHCP6_KEEPRESOLV" size="1" onchange="checkDNSSettings6(this.form)">
   <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "no", "Automatic");?>
   <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "yes", "Static");?>
   </select>
 
-> If set to *Automatic* the server will use DNS server IPv4 address returned by the local automatic assignment.<br>
+> If set to *Automatic* the server will use IPv6 DNS server(s) returned by the local automatic assignment.<br>
 > If set to *Static* you may enter your own list.
 
 IPv6 DNS server:
 : <input type="text" name="DNS6_SERVER1" maxlength="39" value="<?=$eth0['DNS6_SERVER1'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
-> This is the primary DNS IPv6 server to use. Enter an IPv6 address.
+> This is the primary IPv6 DNS server to use. Enter a IPv6 address.
 
 <div id="dns6server2" style="display:none" markdown="1">
 IPv6 DNS server 2:
 : <input type="text" name="DNS6_SERVER2" maxlength="39" value="<?=$eth0['DNS6_SERVER2'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
-> This is the DNS IPv6 server to use when DNS IPv6 server 1 is down.
+> This is the IPv6 DNS server to use when IPv6 DNS server 1 is down.
 
 </div>
 <div id="dns6server3" style="display:none" markdown="1">
 IPv6 DNS server 3:
 : <input type="text" name="DNS6_SERVER3" maxlength="39" value="<?=$eth0['DNS6_SERVER3'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
-> This is the DNS IPv6 server to use when DNS IPv6 servers 1 and 2 are both down.
+> This is the IPv6 DNS server to use when IPv6 DNS servers 1 and 2 are both down.
 
 </div>
 </div>
@@ -698,7 +698,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
@@ -744,7 +744,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface (only available for VLANs)
 
@@ -804,7 +804,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
@@ -848,7 +848,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface (only available for VLANs)
 
