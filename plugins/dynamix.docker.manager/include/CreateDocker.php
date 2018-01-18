@@ -2,7 +2,7 @@
 /* Copyright 2005-2017, Lime Technology
  * Copyright 2015-2017, Guilherme Jardim, Eric Schultz, Jon Panozzo.
  *
- * Adaptations by Bergware International (May 2016)
+ * Adaptations by Bergware International (May 2016 / January 2018)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -1585,12 +1585,12 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 <?endforeach;?>
 
   function showSubnet(bridge) {
-    if (bridge.match(/^(br|eth|bond)[0-9]/) !== null) {
-      $('.myIP').show();
-      $('#myIP').html('Subnet: '+subnet[bridge]);
-    } else {
+    if (bridge.match(/^(bridge|host|none)$/i) !== null) {
       $('.myIP').hide();
       $('input[name="contMyIP"]').val('');
+    } else {
+      $('.myIP').show();
+      $('#myIP').html('Subnet: '+subnet[bridge]);
     }
   }
   function reloadTriggers() {
