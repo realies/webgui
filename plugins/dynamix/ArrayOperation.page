@@ -257,7 +257,7 @@ $(function(){
           <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?      endif;?>
-        <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,540,false)"></td>
+        <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td>
 <?      if ($var['sbSyncExit']!=0):?>
           <td>Last check incomplete on <strong><?=my_time($var['sbSynced2']).day_count($var['sbSynced2'])?></strong><?if ($var['sbSynced2']):?>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.<?endif;?>
           <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=my_error($var['sbSyncExit'])?></small></td></tr>
@@ -301,6 +301,7 @@ $(function(){
         <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
+      <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td><td>Last check in progress.</td></tr>
       <tr><td>Total size:</td><td id="line0"></td><td></td></tr>
       <tr><td>Elapsed time:</td><td id="line1"></td><td></td></tr>
       <tr><td>Current position:</td><td id="line2"></td><td></td></tr>
