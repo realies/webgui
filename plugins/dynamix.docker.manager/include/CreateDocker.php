@@ -1199,7 +1199,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             ?>
           </select>
           <? if (!empty($rmadd)) {
-            echo "<a onclick=\"rmTemplate('".addslashes(htmlspecialchars($rmadd))."');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/images/remove.png\" title=\"".htmlspecialchars($rmadd)."\" width=\"30px\"></a>";
+            echo "<a onclick=\"rmTemplate('".addslashes(htmlspecialchars($rmadd))."');\" style=\"cursor:pointer;\"><i class='fa fa-window-close' aria-hidden='true' style='color:maroon; font-size:20px; position:relative;top:5px;' title=\"".htmlspecialchars($rmadd)."\"></i></a>";
           }?>
         </td>
       </tr>
