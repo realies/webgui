@@ -205,6 +205,7 @@ $plugins = glob("/var/log/plugins/*.plg");
 foreach ($plugins as $plugin) {
 	$installedPlugins .= basename($plugin)." - ".exec("plugin version ".escapeshellarg($plugin))."\r\n";
 }
+$installedPlugins = $installedPlugins ?: "No additional Plugins Installed";
 file_put_contents("/$diag/system/plugins.txt",$installedPlugins);
 
 // create resulting zip file and remove temp folder
