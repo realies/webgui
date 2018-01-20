@@ -123,8 +123,42 @@ Bonding mode:
   </select>
   <span id="attention0" style="display:none"><b>Attention:</b> this mode requires a network switch with proper setup and support...</span>
 
-> Mode 1 (active-backup) is the recommended default. Other modes allow you to set up a specific environment, but may require proper switch support.
-> Choosing a unsupported mode can result in a disrupted communication. Use with caution.
+> **Mode 0 (balance-rr)**<br>
+> This mode transmits packets in a sequential order from the first available slave through the last.
+> If two real interfaces are slaves in the bond and two packets arrive destined out of the bonded interface the first will be transmitted on the first slave and the second frame will be transmitted on the second slave.
+> The third packet will be sent on the first and so on. This provides load balancing and fault tolerance.
+>
+> **Mode 1 (active-backup) - default**<br>
+> This mode places one of the interfaces into a backup state and will only make it active if the link is lost by the active interface.
+> Only one slave in the bond is active at an instance of time. A different slave becomes active only when the active slave fails.
+> This mode provides fault tolerance.
+>
+> **Mode 2 (balance-xor)**<br>
+> This mode transmits packets based on an XOR formula. Source MAC address is XOR'd with destination MAC address modula slave count.
+> This selects the same slave for each destination MAC address and provides load balancing and fault tolerance.
+>
+> **Mode 3 (broadcast)**<br>
+> This mode transmits everything on all slave interfaces. This mode is least used (only for specific purpose) and provides only fault tolerance.
+>
+> **Mode 4 (802.3ad)**<br>
+> This mode is known as *Dynamic Link Aggregation*. It creates aggregation groups that share the same speed and duplex settings.
+> It requires a switch that supports IEEE 802.3ad dynamic link.
+> Slave selection for outgoing traffic is done according to the transmit hash policy, which may be changed from the default simple XOR policy via the xmit_hash_policy option.
+> Note that not all transmit policies may be 802.3ad compliant, particularly inregards to the packet mis-ordering requirements of section 43.2.4 of the 802.3ad standard.
+> Different peer implementations will have varying tolerances for noncompliance.
+>
+> **Mode 5 (balance-tlb)**<br>
+> This mode is called *Adaptive transmit load balancing*. The outgoing traffic is distributed according to the current load and queue on each slave interface.
+> Incoming traffic is received by the current slave.
+>
+> **Mode 6 (balance-alb)**<br>
+> This mode is called *Adaptive load balancing*. This includes balance-tlb + receive load balancing (rlb) for IPV4 traffic.
+> The receive load balancing is achieved by ARP negotiation.
+> The bonding driver intercepts the ARP Replies sent by the server on their way out and overwrites the src hw address with the unique hw address of one of the slaves in the bond
+> such that different clients use different hw addresses for the server.
+>
+> *Mode 1 (active-backup) is the recommended setting. Other modes allow you to set up a specific environment, but may require proper switch support.
+> Choosing a unsupported mode can result in a disrupted communication.*
 
 Bonding members of bondX:
 : <select id="bond-ethX" name="BONDNICS" size="1" multiple="multiple" style="display:none">
@@ -180,7 +214,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface
 
@@ -224,7 +258,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface
 
@@ -290,7 +324,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface
 
@@ -334,7 +368,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface
 
@@ -394,7 +428,7 @@ IPv4 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv4 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface
 
@@ -438,7 +472,7 @@ IPv6 address assignment:
 
 > The following settings are possible:
 >
-> *Automatic* - the server will attempt to obtain an IPv6 address from the local DHCP server<br>
+> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface
 

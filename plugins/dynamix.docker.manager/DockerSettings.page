@@ -119,7 +119,7 @@ Docker vdisk size:
 
 > If the system needs to create a new docker image file, this is the default size to use specified in GB.
 >
-> To resize an existing image file, specify the new size here.  Next time the Docker service is started the file (and file system) will increased to the new size (but never decreased).
+> To resize an existing image file, specify the new size here. Next time the Docker service is started the file (and file system) will increased to the new size (but never decreased).
 
 Docker storage location:
 : <input id="DOCKER_IMAGE_FILE" type="text" name="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE']?>" placeholder="e.g. /mnt/disk1/docker.img" data-pickcloseonfile="true" data-pickfilter="img" data-pickroot="/mnt/" data-pickfolders="true" required="required">
@@ -132,7 +132,7 @@ Docker storage location:
   <span><i class="fa fa-warning icon warning"></i> Path does not exist</span>
   <?endif;?><span id="IMAGE_ERROR" class="errortext"></span>
 
-> You must specify an image file for Docker.  The system will automatically create this file when the Docker service is first started.
+> You must specify an image file for Docker. The system will automatically create this file when the Docker service is first started.
 
 Docker LOG rotation:
 : <select name="DOCKER_LOG_ROTATION" class="narrow" onchange="showLogOptions(this.value)">
@@ -163,6 +163,16 @@ Docker LOG number of files:
   </select>
 </div>
 
+User defined networks:
+: <select name="DOCKER_USER_NETWORKS" class="narrow">
+  <?=mk_option($dockercfg['DOCKER_USER_NETWORKS'], 'remove', 'Remove')?>
+  <?=mk_option($dockercfg['DOCKER_USER_NETWORKS'], 'preserve', 'Preserve')?>
+  </select>
+
+> By default user created networks are removed from Docker. This is done to prevent potential conflicts with the automatic generation of custom networks.
+>
+> Change this setting to preserve user defined networks, but it is the responsibility of the user to ensure these entries work correctly and are conflict free.
+
 </div>
 <?else: /* DOCKER STARTED */?>
 <div markdown="1" class="advanced">
@@ -181,6 +191,11 @@ Docker LOG rotation:
 
 > By default a single unlimited LOG file is created. Otherwise LOG file size and number of files are limited when LOG rotation is enabled.
 
+User defined networks:
+: <?=ucfirst($dockercfg['DOCKER_USER_NETWORKS']??'remove').'d'?>
+
+> Shows whether user defined networks are removed or preserved from Docker. When preserved user defined networks become available in the *Network type* dropdown list of containers.
+
 </div>
 <?endif;?>
 <div markdown="1" class="advanced">
@@ -194,7 +209,7 @@ Default appdata storage location:
 
 > You can specify a folder to automatically generate and store subfolders containing configuration files for each Docker app (via the /config mapped volume).
 >
-> Only used when adding new Docker apps.  Editing existing Docker apps will not be affected by this setting.
+> Only used when adding new Docker apps. Editing existing Docker apps will not be affected by this setting.
 
 <!--
 Auto-map user shares to containers as /unraid:
@@ -205,7 +220,7 @@ Auto-map user shares to containers as /unraid:
 
 > You can expose all of your user shares (/mnt/user) to a folder named /unraid within Docker containers.
 >
-> Only used when adding new Docker apps.  Editing existing Docker apps will not be affected by this setting.
+> Only used when adding new Docker apps. Editing existing Docker apps will not be affected by this setting.
 -->
 </div>
 <div markdown="1" class="advanced">
