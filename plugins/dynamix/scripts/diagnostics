@@ -200,6 +200,14 @@ foreach ($devices as $device) {
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
   exec("/sbin/btrfs filesystem usage /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-usage.txt"));
 }
+// create installed plugin information
+$plugins = glob("/var/log/plugins/*.plg");
+foreach ($plugins as $plugin) {
+	$installedPlugins .= basename($plugin)." - ".exec("plugin version ".escapeshellarg($plugin))."\r\n";
+}
+$installedPlugins = $installedPlugins ?: "No additional Plugins Installed";
+file_put_contents("/$diag/system/plugins.txt",$installedPlugins);
+
 // create resulting zip file and remove temp folder
 exec("zip -qmr ".escapeshellarg($zip)." ".escapeshellarg("/$diag"));
 if ($cli) echo "done.\nZIP file '$zip' created.\n";
