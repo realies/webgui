@@ -100,7 +100,7 @@ Use SSL/TLS:
 
 > Determines how the webGui responds to HTTP and/or HTTPS protocol.
 >
-> Select **No** to disable HTTPS (but HTTPS is recognized and redirected to HTTP).
+> Select **No** to disable HTTPS
 >
 > Select **Yes** to enable HTTPS and redirect HTTP to HTTPS.  If a Let's Encrypt SSL certificate has not
 > been provisioned, then an automatically generated self-signed SSL certificate will be used.
@@ -149,6 +149,11 @@ HTTPS port:
 : <input type="number" name="PORTSSL" class="trim" min="0" max="65535" value="<?=htmlspecialchars($var['PORTSSL'])?>">
 
 > Enter the HTTPS port, default is 443.
+
+Local TLD:
+: <input type="text" name="LOCAL_TLD" value="<?=htmlspecialchars($var['LOCAL_TLD'])?>">
+
+> Enter your local Top Level Domain.  May be blank.
 
 &nbsp;
 : <input type="submit" name="changePorts" value="Apply"><input type="button" value="Done" onclick="done()">
