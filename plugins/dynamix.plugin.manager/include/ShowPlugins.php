@@ -20,8 +20,6 @@ $branch  = $_GET['branch'] ?? false;
 $audit   = $_GET['audit'] ?? false;
 $empty   = true;
 $builtin = ['unRAIDServer'];
-$https   = ['stable' => 'https://raw.github.com/limetech/\&name;/master/\&name;.plg',
-            'next'   => 'https://s3.amazonaws.com/dnld.lime-technology.com/\&category;/\&name;.plg'];
 
 foreach (glob("/var/log/plugins/*.plg",GLOB_NOSORT) as $plugin_link) {
 //only consider symlinks
@@ -40,12 +38,10 @@ foreach (glob("/var/log/plugins/*.plg",GLOB_NOSORT) as $plugin_link) {
 //toggle stable/next release?
   if ($os && $branch) {
     $toggle = plugin('version',$plugin_file);
-    $cat = strpos($toggle,'rc')!==false ? 'stable' : 'next';
     $tmp_plg = "$name-.plg";
     $tmp_file = "/var/tmp/$name.plg";
     copy($plugin_file,$tmp_file);
-    exec("sed -ri 's|^(<!ENTITY category).*|\\1 \"{$cat}\">|' $tmp_file");
-    exec("sed -ri 's|^(<!ENTITY pluginURL).*|\\1 \"{$https[$branch]}\">|' $tmp_file");
+    exec("sed -ri 's|^(<!ENTITY category).*|\\1 \"{$branch}\">|' $tmp_file");
     symlink($tmp_file,"/var/log/plugins/$tmp_plg");
     if (check_plugin($tmp_plg)) {
       copy("/tmp/plugins/$tmp_plg",$tmp_file);
@@ -70,7 +66,7 @@ foreach (glob("/var/log/plugins/*.plg",GLOB_NOSORT) as $plugin_link) {
   $version = plugin('version',$plugin_file) ?: "unknown";
   $date = str_replace('.','',$version);
 //category
-  $cat = strpos($version,'rc')!==false ? 'next' : 'stable';
+  $category = plugin('category',$plugin_file) ?: (strpos($version,'-')!==false ? 'next' : 'stable');
 //status
   $status = 'unknown';
   $changes_file = $plugin_file;
@@ -116,8 +112,8 @@ foreach (glob("/var/log/plugins/*.plg",GLOB_NOSORT) as $plugin_link) {
   if ($system) {
     if ($os) {
       echo "<select id='change_branch' class='auto' onchange='update_table(this.value)'>";
-      echo mk_options($cat,'stable');
-      echo mk_options($cat,'next');
+      echo mk_options($category,'stable');
+      echo mk_options($category,'next');
       echo "</select>";
     }
   } else {
