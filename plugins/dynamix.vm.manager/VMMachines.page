@@ -132,7 +132,6 @@ if ($action) {
                   <th class='header'>Hard Drives</th>
                   <th class='header'>VNC Port</th>
                   <th class='header'>Autostart</th>
-                  <th class='header'>Log</th>
                </tr>
             </thead>
             <tbody id='kvm_list'>";
@@ -212,17 +211,10 @@ if ($action) {
                <td>$vncport</td>
                <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>";
 
-      // Log file
-      if (!empty($log)) {
-         echo "<td><a class='log' href='#' onclick=\"openWindow('/webGui/scripts/tail_log&arg1=".addslashes(htmlspecialchars($log))."', '".addslashes(htmlspecialchars($name))." QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
-      } else {
-         echo "<td><img class='basic' src='/webGui/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
-      }
-
       echo "</tr>
 			   <tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='8' style='overflow: hidden'>
+         echo "<td colspan='7' style='overflow: hidden'>
                   <table class='tablesorter domdisk' id='domdisk_table'>
                      <thead>
                         <tr>
