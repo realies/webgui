@@ -214,17 +214,7 @@ if ($action) {
 
       $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), addslashes($template), $state, addslashes($vnc), addslashes($log));
 
-      // fallback icon for users that created VMs before metadata support was added
-      $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
-
-      $vmtemplateicon = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@icon');
-      if (!empty($vmtemplateicon)) {
-         if (file_exists($vmtemplateicon)) {
-            $vmicon = $vmtemplateicon;
-         } elseif (file_exists("$docroot/plugins/dynamix.vm.manager/templates/images/".$vmtemplateicon)) {
-            $vmicon = "/plugins/dynamix.vm.manager/templates/images/".$vmtemplateicon;
-         }
-      }
+      $vmicon = $lv->domain_get_icon_url($res);
 
 		//Domain information
       echo "<tr style='background-color:".bcolor($i)."'>
@@ -246,8 +236,7 @@ if ($action) {
 
       // Log file
       if (!empty($log)) {
-         echo "<td><a class='log' href='#' 
-onclick=\"openWindow('/webGui/scripts/tail_log&arg1=".addslashes(htmlspecialchars($log))."', '".addslashes(htmlspecialchars($name))." QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
+         echo "<td><a class='log' href='#' onclick=\"openWindow('/webGui/scripts/tail_log&arg1=".addslashes(htmlspecialchars($log))."', '".addslashes(htmlspecialchars($name))." QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
       } else {
          echo "<td><img class='basic' src='/webGui/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
       }

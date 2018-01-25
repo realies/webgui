@@ -1244,6 +1244,25 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+		function domain_get_icon_url($domain) {
+			global $docroot;
+
+			$strIcon = $this->_get_single_xpath_result($domain, '//domain/metadata/*[local-name()=\'vmtemplate\']/@icon');
+			if (empty($strIcon)) {
+				$strIcon = ($this->domain_get_clock_offset($domain) == 'localtime' ? 'windows.png' : 'linux.png');
+			}
+
+			if (is_file($strIcon)) {
+				return $strIcon;
+			} elseif (is_file("$docroot/plugins/dynamix.vm.manager/templates/images/" . $strIcon)) {
+				return '/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
+			} elseif (is_file("$docroot/boot/config/plugins/dynamix.vm.manager/templates/images/" . $strIcon)) {
+				return '/boot/config/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
+			}
+
+			return '/plugins/dynamix.vm.manager/templates/images/default.png';
+		}
+
 		function domain_change_xml($domain, $xml) {
 			$dom = $this->get_domain_object($domain);
 

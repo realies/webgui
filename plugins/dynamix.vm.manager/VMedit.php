@@ -38,22 +38,11 @@ if (!empty($_GET['uuid'])) {
 		return;
 	}
 
-	$strIcon = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@icon');
-
-	if (!empty($strIcon)) {
-		if (is_file($strIcon)) {
-			$strIconURL = $strIcon;
-		} elseif (is_file("$docroot/plugins/dynamix.vm.manager/templates/images/" . $strIcon)) {
-			$strIconURL = '/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
-		}
-	} else {
-		$strIcon = ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
-		$strIconURL = '/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
-	}
+	$strIconURL = $lv->domain_get_icon_url($res);
 
 	$arrLoad = [
 		'name' => $lv->domain_get_name($res),
-		'icon' => $strIcon,
+		'icon' => basename($strIconURL),
 		'autostart' => $lv->domain_get_autostart($res),
 		'form' => $arrAllTemplates[$strSelectedTemplate]['form']
 	];
