@@ -117,10 +117,6 @@
 
 
 	if (array_key_exists('createvm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_newxml.xml', $lv->config_to_xml($_POST));
-
 		$tmp = $lv->domain_new($_POST);
 		if (!$tmp){
 			$arrResponse = ['error' => $lv->get_last_error()];
@@ -143,10 +139,6 @@
 	}
 
 	if (array_key_exists('updatevm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_updatexml.xml', $lv->config_to_xml($_POST));
-
 		// Backup xml for existing domain in ram
 		$strOldXML = '';
 		$boolOldAutoStart = false;
@@ -175,9 +167,6 @@
 					}
 				}
 			}
-
-			//DEBUG
-			file_put_contents('/tmp/debug_libvirt_oldxml.xml', $strOldXML);
 		}
 
 		// Remove existing domain

@@ -326,10 +326,6 @@
 
 
 	if (array_key_exists('createvm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_newxml.xml', $lv->config_to_xml($_POST));
-
 		if (!empty($_POST['shares'][0]['source'])) {
 			@mkdir($_POST['shares'][0]['source'], 0777, true);
 		}
@@ -346,10 +342,6 @@
 	}
 
 	if (array_key_exists('updatevm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_updatexml.xml', $lv->config_to_xml($_POST));
-
 		if (!empty($_POST['shares'][0]['source'])) {
 			@mkdir($_POST['shares'][0]['source'], 0777, true);
 		}
@@ -382,9 +374,6 @@
 					}
 				}
 			}
-
-			//DEBUG
-			file_put_contents('/tmp/debug_libvirt_oldxml.xml', $strOldXML);
 		}
 
 		// Remove existing domain
