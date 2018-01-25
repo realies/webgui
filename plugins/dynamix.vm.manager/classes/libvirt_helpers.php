@@ -518,6 +518,36 @@
 		return $abbreviation;
 	}
 
+	function renderVMContentIcon($uuid, $name, $icon, $state) {
+		switch ($state) {
+			case 'running':
+				$shape = 'play';
+				$status = 'started';
+				break;
+			case 'paused': //no break on purpose
+			case 'pmsuspended':
+				$shape = 'pause';
+				$status = 'paused';
+				break;
+			default:
+				$shape = 'square';
+				$status = 'stopped';
+				break;
+		}
+
+		return "<div class=\"Panel $status\">
+				<div id=\"vm-".htmlspecialchars($uuid)."\" style=\"display:block; cursor:pointer\">
+					<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
+						<img src=\"$icon\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
+						<i class=\"fa iconstatus fa-$shape $status\" title=\"$status\"></i>
+					</div>
+					<div class=\"PanelText\">
+						<span class=\"PanelText $status\">$name</span>
+					</div>
+				</div>
+			</div>";
+	}
+
 	function sanitizeVendor($strVendor) {
 		// Specialized vendor name cleanup
 		// e.g.: Advanced Micro Devices, Inc. [AMD/ATI] --> Advanced Micro Devices, Inc.
