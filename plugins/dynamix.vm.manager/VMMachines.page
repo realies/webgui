@@ -181,6 +181,7 @@ if ($action) {
       }
 
       $vncport = $lv->domain_get_vnc_port($res);
+      $arrValidDiskBuses = getValidDiskBuses();
 
       $vnc = '';
       $graphics = '';
@@ -201,8 +202,6 @@ if ($action) {
         }
         $graphics = str_replace("\n", "<br>", trim($graphics));
       }
-
-		$bootdev = $lv->domain_get_boot_devices($res)[0];
 
       unset($tmp);
       if (!$id)
@@ -231,21 +230,8 @@ if ($action) {
                   <table class='tablesorter domdisk' id='domdisk_table'>
                      <thead>
                         <tr>
-                           <th class='header'><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b>
-                              <select name='boot_dev' class='narrow' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
-                              <option ";
-                              //boot device select
-                              if($bootdev == 'hd')
-                                 echo "selected ";
-                              echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=hd'>hd</option>
-                                 <option ";
-                              if($bootdev == 'cdrom')
-                                 echo "selected ";
-                              echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=cdrom'>cd</option>
-                              </select><span class='small'>(boot)</span>
-                           </th>
-                           <th class='header'>Driver type</th>
-                           <th class='header'>Dev Name</th>
+                           <th class='header'><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th>
+                           <th class='header'>Bus</th>
                            <th class='header'>Capacity</th>
                            <th class='header'>Allocation</th>
                            <th class='header'>Actions</th><th class='header'></th>
@@ -253,82 +239,63 @@ if ($action) {
                      </thead>
                      <tbody id='domdisk_list'>";
 		/* Display domain disks */
-			$tmp = $lv->get_disk_stats($res);
-         if (!empty($tmp)) {
-				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
-            	$capacity = $lv->format_size($tmp[$ii]['capacity'], 0);
-               $allocation = $lv->format_size($tmp[$ii]['allocation'], 2);
-               $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
-					$type = $tmp[$ii]['type'];
-					$dev = $tmp[$ii]['device'];
-					echo "<tr>
-						   <td>".basename($disk)."</td>
-							<td>$type</td>
-           				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;olddev=$dev' /><span class='diskdev' style='width:30px'>
-								<span class='text' ><a href='#'> $dev </a></span>
-  									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
-								</span></form>
-							</td>
-                     <td title='Click to increase Disk Size'>
-                     	<form method='post' action='?subaction=disk-resize&amp;uuid=$uuid&amp;disk=$disk&amp;oldcap=$capacity' /><span class='diskresize' style='width:30px'>
-								<span class='text' ><a href='#'> $capacity </a></span>
-  									<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden />
-								</span></form>
-							</td>
-                     <td>$allocation</td>
-                     <td>";
-            /* add detach button if shutoff */
-                     if ($state == 'shutoff')
+        $tmp = $lv->get_disk_stats($res);
+        if (!empty($tmp)) {
+          for ($ii = 0; $ii < sizeof($tmp); $ii++) {
+            $capacity = $lv->format_size($tmp[$ii]['capacity'], 0);
+            $allocation = $lv->format_size($tmp[$ii]['allocation'], 0);
+            $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
+            $dev = $tmp[$ii]['device'];
+            $bus = $tmp[$ii]['bus'];
+            echo "<tr>
+                    <td>$disk</td>
+                    <td>{$arrValidDiskBuses[$bus]}</td>
+                    <td title='Click to increase Disk Size'>
+                      <form method='post' action='?subaction=disk-resize&amp;uuid=$uuid&amp;disk=$disk&amp;oldcap=$capacity' /><span class='diskresize' style='width:30px'>
+                        <span class='text' ><a href='#'> $capacity </a></span>
+                        <input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden />
+                        </span>
+                      </form>
+                    </td>
+                    <td>$allocation</td>
+                    <td>";
+                    /* add detach button if shutoff */
+                      if ($state == 'shutoff')
                         echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: ".$name."',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'".$uuid."',dev:'".$dev."'});});return false;\" title='detach disk from VM'>
                           <i class='fa fa-eject blue'></i></a>";
-                     else
-                      echo "N/A";
-          echo '</td>
-						</tr>';
-				}
-         }
+                      else
+                        echo "N/A";
+            echo '</td>
+                </tr>';
+          }
+        }
 		/*end display disk display*/
 
 		/* Display domain cdroms */
-         $tmp = $lv->get_cdrom_stats($res);
-         if (!empty($tmp)) {
-				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
-            	$capacity = $lv->format_size($tmp[$ii]['capacity'], 2);
-               $allocation = $lv->format_size($tmp[$ii]['allocation'], 2);
-               $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
-					$type = $tmp[$ii]['type'];
-					$dev = $tmp[$ii]['device'];
-					$bus = $tmp[$ii]['bus'];
-					echo "<tr>
-							<td>
-						<form method='post' id='cdrom_form$i$ii' name='cdromform' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
-							<span>
-								<span class='text'><a href='#'>".basename($disk)."</a></span>
-								<input class='input cdrom_file' id='cdrom_file$i$ii'
-								onclick='CDRomTree(cdrom_tree$i$ii, cdrom_file$i$ii, cdrom_form$i$ii);' hidden type='text' name='cdrom' value='$disk' title=change cdrom image'>
-								<div class='cdrom_tree' id='cdrom_tree$i$ii' hidden></div>
-							</span>
-						</form>
-              			</td>
-                     <td>$type</td>
-           				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;dev=$dev' /><span class='diskdev' style='width:30px'>
-								<span class='text' ><a href='#'> $dev </a></span>
-  									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
-								</span></form>
-							</td>
-                     <td>$capacity</td>
-                     <td>$allocation</td>
-                     <td>";
-						/* add detach button if shutoff */
-                     if ($state == 'shutoff')
-                 	      echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: ".$name."',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'".$uuid."',dev:'".$dev."'});});return false;\" title='detach disk from VM'>
-                  	      <i class='fa fa-eject blue'></i></a>";
-                 	   else
-                 	   	echo "N/A";
-					echo '</td>
-					</tr>';
-				}
-         }
+        $tmp = $lv->get_cdrom_stats($res);
+        if (!empty($tmp)) {
+          for ($ii = 0; $ii < sizeof($tmp); $ii++) {
+            $capacity = $lv->format_size($tmp[$ii]['capacity'], 0);
+            $allocation = $lv->format_size($tmp[$ii]['allocation'], 0);
+            $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
+            $dev = $tmp[$ii]['device'];
+            $bus = $tmp[$ii]['bus'];
+            echo "<tr>
+                    <td>$disk</td>
+                    <td>{$arrValidDiskBuses[$bus]}</td>
+                    <td>$capacity</td>
+                    <td>$allocation</td>
+                    <td>";
+                    /* add detach button if shutoff */
+                    if ($state == 'shutoff')
+                      echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: ".$name."',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'".$uuid."',dev:'".$dev."'});});return false;\" title='detach disk from VM'>
+                         <i class='fa fa-eject blue'></i></a>";
+                      else
+                        echo "N/A";
+            echo '  </td>
+                  </tr>';
+          }
+        }
 			/*end display cdrom display*/
          echo "</tbody></table>";
 			unset($capacity, $dev, $disk, $type, $vcpu);
