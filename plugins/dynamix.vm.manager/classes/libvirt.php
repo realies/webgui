@@ -1102,7 +1102,7 @@
 			}
 			unset($tmp);
 
-			return $this->format_size($ret, 2, $unit);
+			return $this->format_size($ret, 0, $unit);
 		}
 
 		function get_disk_count($domain) {
@@ -1139,11 +1139,11 @@
 			$unit = strtoupper($unit);
 
 			switch ($unit) {
-				case 'T': return number_format($value / (float)1099511627776, $decimals).' TB';
-				case 'G': return number_format($value / (float)(1 << 30), $decimals).' GB';
-				case 'M': return number_format($value / (float)(1 << 20), $decimals).' MB';
-				case 'K': return number_format($value / (float)(1 << 10), $decimals).' KB';
-				case 'B': return $value.' B';
+				case 'T': return number_format($value / (float)1099511627776, $decimals).'T';
+				case 'G': return number_format($value / (float)(1 << 30), $decimals).'G';
+				case 'M': return number_format($value / (float)(1 << 20), $decimals).'M';
+				case 'K': return number_format($value / (float)(1 << 10), $decimals).'K';
+				case 'B': return $value.'B';
 			}
 
 			return false;
