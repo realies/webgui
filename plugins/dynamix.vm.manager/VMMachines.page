@@ -2,6 +2,7 @@ Menu="VMs:1"
 Title="Virtual Machines"
 Tag="columns"
 Cond="(pgrep('libvirtd')!==false)"
+Markdown="false"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
@@ -121,7 +122,7 @@ if ($action) {
 		}
 	echo "<script>clearHistory();</script>";
 	}
-	echo "<table class='tablesorter kvm' id='kvm_table'>
+	echo "<table class='tablesorter shift kvm' id='kvm_table'>
             <thead>
                <tr>
                   <th class='header'><i class='fa fa-th-list'></i></th>
