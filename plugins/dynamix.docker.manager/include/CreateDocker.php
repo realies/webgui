@@ -198,6 +198,7 @@ function postToXML($post, $setOwnership = false) {
   $xml->MyIP               = xml_encode($post['contMyIP']);
   $xml->Privileged         = (strtolower($post["contPrivileged"]) == 'on') ? 'true' : 'false';
   $xml->Support            = xml_encode($post['contSupport']);
+	$xml->Project            = xml_encode($post['contProject']);
   $xml->Overview           = xml_encode($post['contOverview']);
   $xml->Category           = xml_encode($post['contCategory']);
   $xml->WebUI              = xml_encode(trim($post['contWebUI']));
@@ -262,6 +263,7 @@ function xmlToVar($xml) {
   $out['MyIP']        = isset($xml->MyIP) ? xml_decode($xml->MyIP) : '';
   $out['Privileged']  = xml_decode($xml->Privileged);
   $out['Support']     = xml_decode($xml->Support);
+	$out['Project']     = xml_decode($xml->Project);
   $out['Overview']    = stripslashes(xml_decode($xml->Overview));
   $out['Category']    = xml_decode($xml->Category);
   $out['WebUI']       = xml_decode($xml->WebUI);
@@ -1317,6 +1319,17 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <td colspan="2">
           <blockquote class="inline_help">
             <p>Link to a support thread on Lime-Technology's forum.</p>
+          </blockquote>
+        </td>
+      </tr>
+			<tr class="<?=$authoring;?>">
+        <td>Project Page:</td>
+        <td><input type="text" name="contProject"></td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Link to the project page (eg: www.plex.tv)</p>
           </blockquote>
         </td>
       </tr>
