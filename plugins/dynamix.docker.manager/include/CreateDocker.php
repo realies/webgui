@@ -207,6 +207,10 @@ function postToXML($post, $setOwnership = false) {
   $xml->ExtraParams        = xml_encode($post['contExtraParams']);
   $xml->PostArgs           = xml_encode($post['contPostArgs']);
   $xml->DateInstalled      = xml_encode(time());
+  $xml->DonateText         = xml_encode($post['contDonateText']);
+  $xml->DonateLink         = xml_encode($post['contDonateLink']);
+  $xml->DonateImg          = xml_encode($post['contDonateImg']);
+  $xml->MinVer             = xml_encode($post['contMinVer']);
 
   # V1 compatibility
   $xml->Description      = xml_encode($post['contOverview']);
@@ -271,6 +275,10 @@ function xmlToVar($xml) {
   $out['Icon']        = xml_decode($xml->Icon);
   $out['ExtraParams'] = xml_decode($xml->ExtraParams);
   $out['PostArgs']    = xml_decode($xml->PostArgs);
+  $out['DonateText']  = xml_decode($xml->DonateText);
+  $out['DonateLink']  = xml_decode($xml->DonateLink);
+  $out['DonateImg']   = (xml_decode($xml->DonateImage)) ? xml_decode($xml->DonateImage) : xml_decode($xml->DonateImg); # Various authors use different tags. DonateImg is the official spec
+  $out['MinVer']      = xml_decode($xml->MinVer);
 
   $out['Config'] = [];
   if (isset($xml->Config)) {
@@ -1333,6 +1341,50 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
           </blockquote>
         </td>
       </tr>
+      <tr class="<?=$authoring;?>">
+        <td>Minimum unRAID version:</td>
+        <td><input type="text" name="contMinVer"></td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Minimum unRAID version required to run this container.  Enforced by the Apps Tab on Installation.  If there is no minimum version of unRaid required to run the container, leave blank.  Note that any container using 32 bit binaries should have a minimum version set to 6.4.0</p>
+          </blockquote>
+        </td>
+      </tr>			
+			<tr class="<?=$authoring;?>">
+        <td>Donation Text:</td>
+        <td><input type="text" name="contDonateText"></td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Text to appear on Donation Links Within The Apps Tab</p>
+          </blockquote>
+        </td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td>Donation Image:</td>
+        <td><input type="text" name="contDonateImg"></td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Link to the image used for Donation Links Within The Apps Tab</p>
+          </blockquote>
+        </td>
+      </tr>			
+      <tr class="<?=$authoring;?>">
+        <td>Donation Link:</td>
+        <td><input type="text" name="contDonateLink"></td>
+      </tr>
+      <tr class="<?=$authoring;?>">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Link to the donation page.  If using donation's, both the image and link must be set</p>
+          </blockquote>
+        </td>
+      </tr>			
       <tr class="advanced">
         <td>Docker Hub URL:</td>
         <td><input type="text" name="contRegistry"></td>
