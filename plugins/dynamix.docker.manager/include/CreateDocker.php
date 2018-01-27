@@ -263,7 +263,7 @@ function xmlToVar($xml) {
   $out['MyIP']        = isset($xml->MyIP) ? xml_decode($xml->MyIP) : '';
   $out['Privileged']  = xml_decode($xml->Privileged);
   $out['Support']     = xml_decode($xml->Support);
-	$out['Project']     = xml_decode($xml->Project);
+  $out['Project']     = xml_decode($xml->Project);
   $out['Overview']    = stripslashes(xml_decode($xml->Overview));
   $out['Category']    = xml_decode($xml->Category);
   $out['WebUI']       = xml_decode($xml->WebUI);
@@ -1322,7 +1322,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
           </blockquote>
         </td>
       </tr>
-			<tr class="<?=$authoring;?>">
+      <tr class="<?=$authoring;?>">
         <td>Project Page:</td>
         <td><input type="text" name="contProject"></td>
       </tr>
