@@ -1,6 +1,6 @@
 var eventURL = "/plugins/dynamix.docker.manager/include/Events.php";
 
-function addDockerContainerContext(container, image, template, started, update, autostart, webui, id, Support="", Project="") {
+function addDockerContainerContext(container, image, template, started, update, autostart, webui, id, Support, Project) {
   var opts = [{header: container, image: "/plugins/dynamix.docker.manager/images/dynamix.docker.manager.png"}];
   if (started && (webui !== "" && webui != "#")) {
     opts.push({text: 'WebUI', icon: 'fa-globe', href: webui, target: '_blank'});
