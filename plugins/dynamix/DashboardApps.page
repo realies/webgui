@@ -56,7 +56,6 @@ if ((pgrep('dockerd')!==false) && (empty($display['dashapps']) || $display['dash
 
 $allVMs = [];
 if ((pgrep('libvirtd')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'vms')) {
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
 	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
 
 	$doms = $lv->get_domains();

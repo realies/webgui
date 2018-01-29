@@ -2070,7 +2070,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change vpus for domain
+		//change vpus for domain
 		function domain_set_vcpu($domain, $vcpu) {
 			$domain = $this->get_domain_object($domain);
 
@@ -2083,7 +2083,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change memory for domain
+		//change memory for domain
 		function domain_set_memory($domain, $memory) {
 			$domain = $this->get_domain_object($domain);
 			if (($old_memory = $this->domain_get_memory($domain)) == $memory)
@@ -2095,7 +2095,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change memory for domain
+		//change memory for domain
 		function domain_set_current_memory($domain, $memory) {
 			$domain = $this->get_domain_object($domain);
 			if (($old_memory = $this->domain_get_current_memory($domain)) == $memory)
@@ -2107,7 +2107,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change domain disk dev name
+		//change domain disk dev name
 		function domain_set_disk_dev($domain, $olddev, $dev) {
 			$domain = $this->get_domain_object($domain);
 
@@ -2122,7 +2122,7 @@
 			return $this->domain_define($xml);
 		}
 
-//set domain description
+		//set domain description
 		function domain_set_description($domain, $desc) {
 			$domain = $this->get_domain_object($domain);
 
@@ -2145,7 +2145,7 @@
 			return $this->domain_define($xml);
 		}
 
-//create metadata node for domain
+		//create metadata node for domain
 		function domain_set_metadata($domain) {
 			$domain = $this->get_domain_object($domain);
 
@@ -2163,7 +2163,7 @@
 			return $this->domain_define($xml);
 		}
 
-//set description for snapshot
+		//set description for snapshot
 		function snapshot_set_metadata($domain, $name, $desc) {
 			$this->domain_set_metadata($domain);
 			$domain = $this->get_domain_object($domain);
@@ -2184,33 +2184,33 @@
 			return $this->domain_define($xml);
 		}
 
-//get host node info
+		//get host node info
 		function host_get_node_info() {
 			$tmp = libvirt_node_get_info($this->conn);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//get domain autostart status true or false
+		//get domain autostart status true or false
 		function domain_get_autostart($domain) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_get_autostart($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//set domain to start with libvirt
+		//set domain to start with libvirt
 		function domain_set_autostart($domain,$flags) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_set_autostart($domain,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//list all snapshots for domain
+		//list all snapshots for domain
 		function domain_snapshots_list($domain) {
 			$tmp = libvirt_list_domain_snapshots($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-// create a snapshot and metadata node for description
+		// create a snapshot and metadata node for description
 		function domain_snapshot_create($domain) {
 			$this->domain_set_metadata($domain);
 			$domain = $this->get_domain_object($domain);
@@ -2218,7 +2218,7 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//delete snapshot and metadata
+		//delete snapshot and metadata
 		function domain_snapshot_delete($domain, $name) {
 			$this->snapshot_remove_metadata($domain, $name);
 			$name = $this->domain_snapshot_lookup_by_name($domain, $name);
@@ -2226,21 +2226,21 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//get resource number of snapshot
+		//get resource number of snapshot
 		function domain_snapshot_lookup_by_name($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_snapshot_lookup_by_name($domain, $name);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//revert domain to snapshot state
+		//revert domain to snapshot state
 		function domain_snapshot_revert($domain, $name) {
 			$name = $this->domain_snapshot_lookup_by_name($domain, $name);
 			$tmp = libvirt_domain_snapshot_revert($name);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//get snapshot description
+		//get snapshot description
 		function domain_snapshot_get_info($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);
@@ -2250,7 +2250,7 @@
 			return $var;
 		}
 
-//remove snapshot metadata
+		//remove snapshot metadata
 		function snapshot_remove_metadata($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 
@@ -2265,7 +2265,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change cdrom media
+		//change cdrom media
 		function domain_change_cdrom($domain, $iso, $dev, $bus) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='$bus'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
@@ -2274,7 +2274,7 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-//change disk capacity
+		//change disk capacity
 		function disk_set_cap($disk, $cap) {
 			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
@@ -2287,7 +2287,7 @@
 			return $this->domain_define($xml);
 		}
 
-//change domain boot device
+		//change domain boot device
 		function domain_set_boot_device($domain, $bootdev) {
 			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);

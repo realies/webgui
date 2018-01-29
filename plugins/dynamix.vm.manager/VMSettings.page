@@ -17,7 +17,6 @@ Markdown="false"
  */
 ?>
 <?
-require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
 require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
 
 
