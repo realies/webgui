@@ -70,6 +70,8 @@ Clicking **Start** will open another window and start the background process.
 
 Closing the window before completion will terminate the background process - so don't do that. This process can take a long time if you have many files.
 
+Note that this tool may negatively affect any docker containers if you allow your appdata share to be included.
+
 <form method="POST" action="/update.htm" target="progressFrame">
 <span style="display:inline-block;margin-top:8px">
 <span style="display:block;margin-bottom:4px;font-weight:bold">Disks</span>
