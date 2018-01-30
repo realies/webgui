@@ -228,13 +228,14 @@ $(function(){
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
 <table class="array_status">
-<?$parity = $var['mdResync']>0 ? '<small>Disabled -- Parity operation is running</small>' : '';
-  $mover = file_exists('/var/run/mover.pid') ? '<small>Disabled -- Mover is running</small>' : '';
+<?$parity = $var['mdResync']>0 ? '<br><small>Disabled -- Parity operation is running</small>' : '';
+  $mover = file_exists('/var/run/mover.pid') ? '<br><small>Disabled -- Mover is running</small>' : '';
+  $btrfs = exec('pgrep -cf /sbin/btrfs') ? '<br><small>Disabled -- BTRFS operation is running</small>' : '';
   switch ($var['fsState']):
   case "Started":?>
     <tr><td><?status_indicator()?><span class="strong big">Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></span></td>
-    <td><input type="button" value="Stop" onclick="stopArray(this.form)"<?if ($parity||$mover):?> disabled<?endif;?>></td>
-    <td><strong>Stop</strong> will take the array off-line.<?=$parity?"<br>$parity":($mover?"<br>$mover":"")?></td></tr>
+    <td><input type="button" value="Stop" onclick="stopArray(this.form)"<?if ($parity||$mover||$btrfs):?> disabled<?endif;?>></td>
+    <td id="stop"><strong>Stop</strong> will take the array off-line.<?=$parity?:$mover?:$btrfs?:''?></td></tr>
 <?  if ($var['fsNumUnmountable']>0):?>
       <tr><td><strong>Unmountable disk<?=$var['fsNumUnmountable']==1?'':'s'?> present:</strong><br>
 <?    foreach ($disks as $disk) if (strpos($disk['fsStatus'],'Unmountable')!==false)
@@ -301,7 +302,7 @@ $(function(){
         <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
-      <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td><td>Last check in progress.</td></tr>
+      <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td><td>Current operation started on <strong><?=my_time($var['sbUpdated'])?></strong></td></tr>
       <tr><td>Total size:</td><td id="line0"></td><td></td></tr>
       <tr><td>Elapsed time:</td><td id="line1"></td><td></td></tr>
       <tr><td>Current position:</td><td id="line2"></td><td></td></tr>
@@ -474,6 +475,24 @@ $(function(){
 <?
 if (isset($display['sleep'])) @include $display['sleep'];
 ?>
+<?if ($btrfs):?>
+<script>
+function enable_stop() {
+  $.get('/webGui/include/ReloadPage.php',{btrfs:'btrfs'},function(data) {
+    switch (data) {
+    case 'disable':
+      setTimeout(enable_stop,5000);
+    break;
+    case 'enable':
+      var stop = $('td#stop');
+      stop.html(stop.html().replace("<?=$btrfs?>",""));
+      $('input[value="Stop"]').prop('disabled',false);
+    break;}
+  });
+}
+enable_stop();
+</script>
+<?endif;?>
 
 > **Colored Status Indicator** the significance of the color indicator of the *Array* is as follows:
 >

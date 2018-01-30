@@ -11,16 +11,20 @@
  */
 ?>
 <?
-$var = parse_ini_file("state/var.ini");
-switch ($var['fsState']) {
-case 'Copying':
-  echo "<strong>Copying, {$var['fsCopyPrcnt']}% complete...</strong>";
-  break;
-case 'Clearing':
-  echo "<strong>Clearing, {$var['fsClearPrcnt']}% complete...</strong>";
-  break;
-default:
-  echo substr($var['fsState'],-3)=='ing' ? 'wait' : 'stop';
-  break;
+if (empty($_GET['btrfs'])) {
+  $var = parse_ini_file("state/var.ini");
+  switch ($var['fsState']) {
+  case 'Copying':
+    echo "<strong>Copying, {$var['fsCopyPrcnt']}% complete...</strong>";
+    break;
+  case 'Clearing':
+    echo "<strong>Clearing, {$var['fsClearPrcnt']}% complete...</strong>";
+    break;
+  default:
+    echo substr($var['fsState'],-3)=='ing' ? 'wait' : 'stop';
+    break;
+  }
+} else {
+  echo exec('pgrep -cf /sbin/btrfs')>0 ? 'disable' : 'enable';
 }
 ?>

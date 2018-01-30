@@ -89,8 +89,22 @@ function updateDNS(button) {
 
     $.post("/webGui/include/UpdateDNS.php",success).fail(failure);
 }
+function checkPorts(form) {
+  if (!form.PORT.value) form.PORT.value = 80;
+  if (!form.PORTSSL.value) form.PORTSSL.value = 443;
+  var http = form.PORT.value < 1024 && form.PORT.value != 80;
+  var https = form.PORTSSL.value < 1024 && form.PORTSSL.value != 443;
+  if (http || https) {
+    var text = http ? 'HTTP' : '';
+    text = https ? (text ? 'HTTP & HTTPS' : 'HTTPS') : text;
+    swal({title:'Non-recommended port',text:text+' port may conflict with well known services',type:'warning',showCancelButton:true},function(){form.submit();});
+  } else {
+    form.submit();
+  }
+}
 </script>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
+<input type="hidden" name="changePorts" value="apply">
 Use SSL/TLS:
 : <select name="USE_SSL" size="1" class="narrow">
   <?=mk_option($var['USE_SSL'], "auto", "Auto")?>
@@ -156,7 +170,7 @@ Local TLD:
 > Enter your local Top Level Domain.  May be blank.
 
 &nbsp;
-: <input type="submit" name="changePorts" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="button" value="Apply" onclick="checkPorts(this.form)"><input type="button" value="Done" onclick="done()">
 
 </form>
 <form markdown="1" name="Provision" method="POST" action="/update.htm" target="progressFrame">
