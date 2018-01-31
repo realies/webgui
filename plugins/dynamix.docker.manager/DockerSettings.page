@@ -213,6 +213,7 @@ Preserve user defined networks:
   <?=mk_option($dockercfg['DOCKER_USER_NETWORKS'], 'preserve', 'Yes')?>
   </select>
 
+> User created networks are networks created by the user outside of the GUI.<br>
 > By default user created networks are removed from Docker. This is done to prevent potential conflicts with the automatic generation of custom networks.
 >
 > Change this setting to preserve user defined networks, but it is the responsibility of the user to ensure these entries work correctly and are conflict free.
@@ -412,7 +413,7 @@ Docker LOG rotation:
 Preserve user defined networks:
 : <?=$dockercfg['DOCKER_USER_NETWORKS']=='preserve'?'Yes':'No'?>
 
-> Shows whether user defined networks are removed or preserved from Docker. When preserved user defined networks become available in the *Network type* dropdown list of containers.
+> Shows whether networks created outside of the GUI are removed or preserved for Docker. When preserved *user defined networks* become available in the *Network type* dropdown list of containers.
 
 <?
 $title = false;
@@ -424,7 +425,7 @@ if ($title):?>
 System created networks:
 : &nbsp;
 
-> Lists the number of system created networks which are available as custom network for Docker.
+> Lists the system created networks which become available in the *Network type* dropdown list of containers.
 
 <?endif;?>
 <?foreach ($include as $network => $route):?>
@@ -470,7 +471,7 @@ list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
 Custom created networks:
 : &nbsp;
 
-> Lists the number of user created networks which are available as custom network for Docker.
+> Lists the custom created networks which become available in the *Network type* dropdown list of containers.
 
 <?endif;?>
 <span class="ident">IPv4 custom network on interface <?=$network?>:</span>
