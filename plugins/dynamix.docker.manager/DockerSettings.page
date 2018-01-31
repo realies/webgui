@@ -30,14 +30,13 @@ $DockerStopped   = pgrep('dockerd')===false;
 $realfile = $dockercfg['DOCKER_IMAGE_FILE'];
 if (file_exists($realfile)) {
   $realfile = transpose_user_path($realfile);
-
   if (exec("stat -c %T -f " . escapeshellarg($realfile)) == "btrfs") {
     if (shell_exec("lsattr " . escapeshellarg($realfile) . " | grep \"\\-C\"") == "") {
       echo '<p class="notice">Your existing Docker image file needs to be recreated due to an issue from an earlier beta of unRAID 6.  Failure to do so may result in your docker image suffering corruption at a later time.  Please do this NOW!</p>';
     }
   }
 }
-unset($custom);
+unset($custom,$other);
 exec("ls --indicator-style=none /sys/class/net|grep -P '^br[0-9]'",$custom);
 exec("ls --indicator-style=none /sys/class/net|grep -P '^(bond|eth)[0-9]'",$other);
 foreach ($other as $network) {
@@ -50,15 +49,22 @@ foreach ($other as $network) {
     if (!in_array($br,$custom) && !in_array($bond,$custom)) $custom[] = $network;
   }
 }
-$include = [];
-$include6 = [];
+$include = $include6 = $address = $address6 = $gateway = $gateway6 = $unset = [];
 foreach ($custom as $network) {
-  unset($address,$address6);
-  exec("ip -4 addr show $network|awk '/inet /{print $2}'",$address);
-  exec("ip -6 addr show $network noprefixroute|awk '/inet6 /{print $2}'",$address6);
-  exec("ip -6 addr show $network scope global permanent|awk '/inet6 /{print $2}'",$address6);
-  foreach ($address as $ip4) if ($route = exec("ip -4 route show dev $network $ip4|awk '{print $1}'")) $include[$network] = $route;
-  foreach ($address6 as $ip6) if ($route6 = exec("ip -6 route show dev $network $ip6|awk '{print $1}'")) $include6[$network] = $route6;
+  $ip4 = exec("ip -4 addr show $network|awk '/inet /{print $2}'");
+  $ip6 = exec("ip -6 addr show $network noprefixroute|awk '/inet6 /{print $2}'");
+  $ip6 = $ip6 ?: exec("ip -6 addr show $network scope global permanent|awk '/inet6 /{print $2}'");
+  $gw4 = exec("ip -4 route show dev $network default|awk '{print $3}'");
+  $gw6 = exec("ip -6 route show dev $network default|awk '{print $3}'");
+  $route4 = exec("ip -4 route show dev $network $ip4|awk '{print $1}'");
+  $route6 = exec("ip -6 route show dev $network $ip6|awk '{print $1}'");
+  if ($ip4 && $route4) {$include[$network] = $route4; $address[$network] = $ip4; $gateway[$network] = $gw4;} elseif (!array_key_exists($network,$gateway6)) $unset[] = $network;
+  if ($ip6 && $route6) {$include6[$network] = $route6; $address6[$network] = $ip6; $gateway6[$network] = $gw6;} elseif (!array_key_exists($network,$gateway)) $unset[] = $network;
+}
+$unset = array_unique($unset);
+
+function normalize($network) {
+  return strtoupper(str_replace('.','_',$network));
 }
 function base_min($route) {
   list($net,$mask) = explode('/',$route);
@@ -84,8 +90,15 @@ function base_net($route) {
 select.mask{min-width:0;margin:0 10px 0 4px}
 select.net{min-width:0;margin:0 4px 0 0}
 select option.hide{display:none}
-input.net{width:146px;margin:0 4px 0 0}
-span.net{margin-right:8px}
+input.net{width:100px;margin:0 4px 0 2px}
+input.net6{width:200px;margin:0 4px}
+input.check{margin-right:1px}
+span.ident{margin-left:24px}
+span.net{margin-left:4px;margin-right:2px}
+span.ip4{display:inline-block;width:200px}
+span.ip6{display:inline-block;width:380px}
+span.gw4{display:inline-block;width:180px}
+span.gw6{display:inline-block;width:250px}
 <?if (strstr('white,azure',$display['theme'])):?>
 span.disabled{color:#B0B0B0}
 <?else:?>
@@ -97,6 +110,8 @@ span.disabled{color:#404040}
 <form markdown="1" id="settingsForm" name="settingsForm" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDocker(this)">
 <input type="hidden" name="#file" value="<?=$docker_cfgfile?>">
 <input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
+<input type="hidden" name="#cleanup" value="true">
+<input type="hidden" name="DOCKER_CUSTOM_NETWORKS" value="<?=$dockercfg['DOCKER_CUSTOM_NETWORKS']?>">
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
   <?=mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No')?>
@@ -214,7 +229,7 @@ Default appdata storage location:
 <!--
 Auto-map user shares to containers as /unraid:
 : <select id="DOCKER_APP_UNRAID_PATH" name="DOCKER_APP_UNRAID_PATH" class="narrow">
-  <?=mk_option($dockercfg['DOCKER_APP_UNRAID_PATH'], ($dockercfg['DOCKER_APP_UNRAID_PATH'] != '' ? $dockercfg['DOCKER_APP_UNRAID_PATH'] : '/mnt/user'), 'Yes')?>
+  <?=mk_option($dockercfg['DOCKER_APP_UNRAID_PATH'], ($dockercfg['DOCKER_APP_UNRAID_PATH'] ?? '/mnt/user'), 'Yes')?>
   <?=mk_option($dockercfg['DOCKER_APP_UNRAID_PATH'], '', 'No')?>
   </select>
 
@@ -234,14 +249,25 @@ Template Authoring Mode:
 
 </div>
 <div markdown="1" class="advanced">
+**System created networks**
+: &nbsp;
+
 <?foreach ($include as $network => $route):?>
-<?$docker_dhcp = 'DOCKER_DHCP_'.strtoupper(str_replace('.','_',$network))?>
+<?
+$nnet = normalize($network);
+$docker_auto = "DOCKER_AUTO_$nnet";
+$docker_dhcp = "DOCKER_DHCP_$nnet";
+?>
+
+<input type="hidden" name="<?=$docker_auto?>" value="<?=$dockercfg[$docker_auto]?>">
 
 <?if ($DockerStopped):?>
-DHCPv4 pool of custom network <?=$network?> (optional):
+<span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
 <?
+  $auto = $dockercfg[$docker_auto]!='no';
+  $autoDisabled = $auto ? '':'disabled';
   $dhcp = $dockercfg[$docker_dhcp] ?? false;
-  $disabled = $dhcp ? '':'disabled';
+  $dhcpDisabled = $dhcp ? '':'disabled';
   $net = base_min($route);
   $max = base_max($route);
   $mask = explode('/',$route)[1];
@@ -254,8 +280,8 @@ DHCPv4 pool of custom network <?=$network?> (optional):
     case ($mask < 32): $prefix = $net[0].'.'.$net[1].'.'.$net[2]; $box = 3 ;break;
   }
 ?>
-: <input type="checkbox" id="<?=$docker_dhcp?>_edit" onchange="changeEdit(this.id)"<?=$dhcp?'checked':''?>>
-  <span id="<?=$docker_dhcp?>_net" class="net <?=$disabled?>"><?=$prefix?>.</span><?
+: <input type="checkbox" id="<?=$docker_dhcp?>_edit" onchange="changeEdit(this.id,4)"<?=$auto?'checked':''?>><span id="<?=$docker_dhcp?>_line" class="<?=$autoDisabled?>"><span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>
+  <input type="checkbox" id="<?=$docker_dhcp?>_dhcp" onchange="changeDHCP(this.id,4)"<?=$dhcp?'checked':''?>>**DHCP pool:**<span id="<?=$docker_dhcp?>_net" class="net <?=$dhcpDisabled?>"><?=$prefix?>.</span></span><?
   for ($b=$box; $b<=3; $b++) {
     switch ($b) {
       case 1: $step = $size/65536%256; break;
@@ -263,19 +289,20 @@ DHCPv4 pool of custom network <?=$network?> (optional):
       case 3: $step = $size%256; break;
     }
     if ($step===0) $step = 256;
-    echo "<select id=\"{$docker_dhcp}_{$b}\" class=\"net\" $disabled>";
+    echo "<select id=\"{$docker_dhcp}_{$b}\" class=\"net\" $dhcpDisabled>";
     for ($n=$net[$b]; $n<=$max[$b]; $n++) echo mk_option($net_user[$b],$n,$n,$n%$step==0?'':'class="hide"');
     echo "</select>";
   }
   echo "/";
-  echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id)\" $disabled>";
+  echo "<select id=\"{$docker_dhcp}_mask\" class=\"mask\" onchange=\"changeMask(this.id,this.value)\" $dhcpDisabled>";
   for ($m=$mask+1; $m<=30; $m++) echo mk_option($mask_user,$m,$m);
   echo "</select><span id=\"{$docker_dhcp}_size\" style=\"".($dhcp?'':'display:none')."\">($size hosts)</span>";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
+  echo "";
 ?>
 <?elseif ($dockercfg[$docker_dhcp]):?>
-DHCPv4 pool of custom network <?=$network?>:
-: <?=$dockercfg[$docker_dhcp]?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)
+<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
+: <span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp]?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)
 <?endif;?>
 
 <?endforeach;?>
@@ -289,28 +316,34 @@ DHCPv4 pool of custom network <?=$network?>:
 <?endif;?>
 
 <?foreach ($include6 as $network => $route):?>
-<?$docker_dhcp6 = 'DOCKER_DHCP6_'.strtoupper(str_replace('.','_',$network))?>
+<?
+$nnet = normalize($network);
+$docker_auto = "DOCKER_AUTO_$nnet";
+$docker_dhcp6 = "DOCKER_DHCP6_$nnet";
+?>
 
 <?if ($DockerStopped):?>
-DHCPv6 pool of custom network <?=$network?> (optional):
+<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
 <?
-  $dhcp = $dockercfg[$docker_dhcp6] ?? false;
-  $disabled = $dhcp ? '':'disabled';
+  $auto6 = $dockercfg[$docker_auto]!='no';
+  $auto6Disabled = $auto6 ? '':'disabled';
+  $dhcp6 = $dockercfg[$docker_dhcp6] ?? false;
+  $dhcp6Disabled = $dhcp6 ? '':'disabled';
   $net = base_net($route);
   $mask = explode('/',$route)[1];
-  $net_user = $dhcp ? str_replace("$net:","",base_net($dhcp)) : '';
-  $mask_user = $dhcp ? explode('/',$dhcp)[1] : $mask;
+  $net_user = $dhcp6 ? str_replace("$net:","",base_net($dhcp6)) : '';
+  $mask_user = $dhcp6 ? explode('/',$dhcp6)[1] : $mask;
 ?>
-: <input type="checkbox" id="<?=$docker_dhcp6?>_edit" onchange="changeEdit6(this.id)"<?=$dhcp?'checked':''?>>
-  <span id="<?=$docker_dhcp6?>_net" class="net <?=$disabled?>"><?=$net?>:</span><?
-  echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $disabled>/";
-  echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $disabled>";
+: <input type="checkbox" id="<?=$docker_dhcp6?>_edit" onchange="changeEdit(this.id,6)"<?=$auto6?'checked':''?>><span id="<?=$docker_dhcp6?>_line" class="<?=$auto6Disabled?>"><span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>
+  <input type="checkbox" id="<?=$docker_dhcp6?>_dhcp" onchange="changeDHCP(this.id,6)"<?=$dhcp6?'checked':''?>>**DHCP pool:**<span id="<?=$docker_dhcp6?>_net" class="net <?=$dhcp6Disabled?>"><?=$net?>:</span></span><?
+  echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $dhcp6Disabled>/";
+  echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $dhcp6Disabled>";
   for ($m=$mask+8; $m<=120; $m+=8) echo mk_option($mask_user,$m,$m);
   echo "</select><input type=\"hidden\" name=\"$docker_dhcp6\" value=\"\">";
 ?>
 <?elseif ($dockercfg[$docker_dhcp6]):?>
-DHCPv6 pool of custom network <?=$network?>:
-: <?=$dockercfg[$docker_dhcp6]?>
+<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
+: <span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6]?>
 <?endif;?>
 
 <?endforeach;?>
@@ -320,9 +353,83 @@ DHCPv6 pool of custom network <?=$network?>:
 
 <?elseif ($dockercfg[$docker_dhcp6]):?>
 > Pool range(s) assigned to DHCPv6 for Docker containers.
+
 <?endif;?>
 <?endif;?>
+
+<?if ($unset):?>
+**Custom created networks**
+: &nbsp;
+
+<?endif;?>
+<?foreach ($unset as $network):?>
+<?
+$port = normalize($network);
+list($eth,$vlan) = explode('.',$network);
+$eth = str_replace(['bond','br'],'eth',$eth);
+if (!$vlan) {
+  $protocol = $$eth['PROTOCOL:0'] ?? 'ipv4';
+} else {
+  foreach ($$eth as $key => $value) {
+    if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
+  }
+}
+?>
+<?if ($protocol != 'ipv6'):?>
+<?
+list($subnet,$mask) = explode('/',$dockercfg["DOCKER_SUBNET_$port"]);
+list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
+$disabled = $subnet ? '':'disabled';
+?>
+<?if ($DockerStopped):?>
+<span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
+: <input type="checkbox" id="DOCKER_CUSTOM_<?=$port?>_edit" onchange="changeCustom(this.id,4)"<?=$subnet?'checked':''?> class="check">
+  **Address:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_net" name="DOCKER_SUBNET_<?=$port?>" class="net" value="<?=$subnet?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_mask" name="DOCKER_MASK_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($mask?:24,$m,$m)?></select>
+  **Gateway:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_gw" name="DOCKER_GATEWAY_<?=$port?>" class="net" value="<?=$dockercfg["DOCKER_GATEWAY_$port"]?>" title="IPv4 address A.B.C.D"<?=$disabled?>>
+  **DHCP pool:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_pool" name="DOCKER_RANGE_<?=$port?>" class="net" value="<?=$range?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_size" name="DOCKER_SIZE_<?=$port?>" class="mask" onchange="changeHosts(this.id,this.value)"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($size?:25,$m,$m)?></select><span id="DOCKER_CUSTOM_<?=$port?>_hosts" style="<?=$subnet?'':'display:none'?>">(<?=pow(2,32-($size?:25))?> hosts)</span>
+
+<?elseif ($subnet):?>
+<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
+: <span class="ip4">**Address:** <?=$subnet?>/<?=$mask?></span><span class="gw4">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY_$port"]?></span>**DHCP pool:** <?=$range?>/<?=$size?>&nbsp;&nbsp;(<?=pow(2,32-($size?:25))?> hosts)
+
+<?endif;?>
+<?endif;?>
+<?endforeach;?>
+<?foreach ($unset as $network):?>
+<?
+$port = normalize($network);
+list($eth,$vlan) = explode('.',$network);
+$eth = str_replace(['bond','br'],'eth',$eth);
+if (!$vlan) {
+  $protocol = $$eth['PROTOCOL:0'] ?? 'ipv4';
+} else {
+  foreach ($$eth as $key => $value) {
+    if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
+  }
+}
+?>
+<?if ($protocol != 'ipv4'):?>
+<?
+list($subnet6,$mask6) = explode('/',$dockercfg["DOCKER_SUBNET6_$port"]);
+list($range6,$size6) = explode('/',$dockercfg["DOCKER_RANGE6_$port"]);
+$disabled = $subnet6 ? '':'disabled';
+?>
+<?if ($DockerStopped):?>
+<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
+: <input type="checkbox" id="DOCKER_CUSTOM6_<?=$port?>_edit" onchange="changeCustom(this.id,6)"<?=$subnet6?'checked':''?> class="check">
+  **Address:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
+  **Gateway:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_gw" name="DOCKER_GATEWAY6_<?=$port?>" class="net6" value="<?=$dockercfg["DOCKER_GATEWAY6_$port"]?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>
+  **DHCP pool:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_pool" name="DOCKER_RANGE6_<?=$port?>" class="net6" value="<?=$range6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_size" name="DOCKER_SIZE6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($size6?:72,$m,$m)?></select>
+
+<?elseif ($subnet6):?>
+<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
+: <span class="ip6">**Address:** <?=$subnet6?>/<?=$mask6?></span><span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>**DHCP pool:** <?=$range6?>/<?=$size6?>
+
+<?endif;?>
+<?endif;?>
+<?endforeach;?>
 </div>
+
 &nbsp;
 : <input id="applyBtn" type="button" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
@@ -374,48 +481,158 @@ btrfs scrub status:
 function prepareDocker(form) {
   $(form).find('input:hidden[name^="DOCKER_DHCP_"]').each(function(){
     var id = '#'+$(this).attr('name')+'_';
-    if ($(id+'edit').prop('checked')) {
+    if ($(id+'dhcp').prop('checked') && $(id+'edit').prop('checked')) {
       var net = $(id+'net').text();
       for (var b=1; b<=3; b++) if ($(id+b).length>0) net += $(id+b).val()+'.';
       net = net.replace(/\.$/,'/')+$(id+'mask').val();
       $(this).val(net);
+    } else {
+      $(this).val('').prop('disabled',false);
     }
   });
   $(form).find('input:hidden[name^="DOCKER_DHCP6_"]').each(function(){
     var id = '#'+$(this).attr('name')+'_';
-    if ($(id+'edit').prop('checked')) {
+    if ($(id+'dhcp').prop('checked') && $(id+'edit').prop('checked')) {
       var net = $(id+'net').text()+$(id+'text').val();
       if (net.substr(-2)!='::') net += '::';
       $(this).val(net+'/'+$(id+'mask').val());
+    } else {
+      $(this).val('').prop('disabled',false);
     }
   });
+  $(form).find('input[name^="DOCKER_SUBNET_"]').each(function(){
+    var edit = '#'+$(this).attr('name').replace('SUBNET','CUSTOM')+'_edit';
+    var mask = '#'+$(this).attr('name').replace('SUBNET','CUSTOM')+'_mask';
+    if ($(edit).prop('checked')) {
+      if ($(this).val()) $(this).val($(this).val()+'/'+$(mask).val());
+    } else {
+      $(this).val('').prop('disabled',false);
+    }
+    $(mask).prop('disabled',true);
+  });
+  $(form).find('input[name^="DOCKER_GATEWAY_"]').each(function(){
+    var edit = '#'+$(this).attr('name').replace('GATEWAY','CUSTOM')+'_edit';
+    if (!$(edit).prop('checked')) $(this).val('').prop('disabled',false);
+  });
+  $(form).find('input[name^="DOCKER_RANGE_"]').each(function(){
+    var edit = '#'+$(this).attr('name').replace('RANGE','CUSTOM')+'_edit';
+    var size = '#'+$(this).attr('name').replace('RANGE','CUSTOM')+'_size';
+    if ($(edit).prop('checked')) {
+      if ($(this).val()) $(this).val($(this).val()+'/'+$(size).val());
+    } else {
+      $(this).val('').prop('disabled',false);
+    }
+    $(size).prop('disabled',true);
+  });
+  $(form).find('input[name^="DOCKER_SUBNET6_"]').each(function(){
+    var edit6 = '#'+$(this).attr('name').replace('SUBNET','CUSTOM')+'_edit';
+    var mask6 = '#'+$(this).attr('name').replace('SUBNET','CUSTOM')+'_mask';
+    if ($(edit6).prop('checked')) {
+      if ($(this).val()) $(this).val($(this).val()+'/'+$(mask6).val());
+    } else {
+      $(this).val('').prop('disabled',false);
+    }
+    $(mask6).prop('disabled',true);
+  });
+  $(form).find('input[name^="DOCKER_GATEWAY6_"]').each(function(){
+    var edit6 = '#'+$(this).attr('name').replace('GATEWAY','CUSTOM')+'_edit';
+    if (!$(edit6).prop('checked')) $(this).val('').prop('disabled',false);
+  });
+  $(form).find('input[name^="DOCKER_RANGE6_"]').each(function(){
+    var edit6 = '#'+$(this).attr('name').replace('RANGE','CUSTOM')+'_edit';
+    var size6 = '#'+$(this).attr('name').replace('RANGE','CUSTOM')+'_size';
+    if ($(edit6).prop('checked')) {
+      if ($(this).val()) $(this).val($(this).val()+'/'+$(size6).val());
+    } else {
+      $(this).val('').prop('disabled',false);
+    }
+    $(size6).prop('disabled',true);
+  });
 }
-function changeEdit(id) {
+function changeEdit(id,ip) {
   var checked = $('#'+id).prop('checked');
-  id = '#'+id.substr(0,id.length-4);
-  for (var b=1; b<=3; b++) if ($(id+b).length>0) $(id+b).prop('disabled',!checked);
-  $(id+'mask').prop('disabled',!checked);
-  if (checked) {
-    $(id+'size').show();
-    $(id+'net').removeClass('disabled');
+  var id1 = '#'+id.substr(0,id.length-4);
+  if (ip==4) {
+    var name = id.substr(0,id.length-5).replace('DHCP','AUTO');
+    var id2 = '#'+name.replace('AUTO','DHCP6')+'_';
   } else {
-    $(id+'size').hide();
-    $(id+'net').addClass('disabled','disabled');
+    var name = id.substr(0,id.length-5).replace('DHCP6','AUTO');
+    var id2 = '#'+name.replace('AUTO','DHCP')+'_';
+  }
+  if (checked) {
+    $(id1+'line').removeClass('disabled');
+    $(id1+'dhcp').prop('disabled',false);
+    $(id2+'line').removeClass('disabled');
+    $(id2+'dhcp').prop('disabled',false);
+    $(id2+'edit').prop('checked',true);
+  } else {
+    $(id1+'line').addClass('disabled','disabled');
+    $(id1+'dhcp').prop('disabled',true);
+    $(id2+'line').addClass('disabled','disabled');
+    $(id2+'dhcp').prop('disabled',true);
+    $(id2+'edit').prop('checked',false);
+  }
+  $('input:hidden[name="'+name+'"]').val(checked?'':'no');
+  if (ip==4) {
+    changeDHCP(id,4,$('#'+id.replace('edit','dhcp')).prop('checked'));
+    id = id.replace('DHCP','DHCP6');
+    $('#'+id).prop('checked',checked);
+    changeDHCP(id,6,$('#'+id.replace('edit','dhcp')).prop('checked'));
+  } else {
+    changeDHCP(id,6,$('#'+id.replace('edit','dhcp')).prop('checked'));
+    id = id.replace('DHCP6','DHCP');
+    $('#'+id).prop('checked',checked);
+    changeDHCP(id,4,$('#'+id.replace('edit','dhcp')).prop('checked'));
   }
 }
-function changeEdit6(id) {
-  var checked = $('#'+id).prop('checked');
+function changeDHCP(id,ip,sid) {
+  if (sid==null) sid = true;
+  var checked = $('#'+id).prop('checked') && sid;
   id = '#'+id.substr(0,id.length-4);
-  $(id+'text').prop('disabled',!checked);
-  $(id+'mask').prop('disabled',!checked);
-  if (checked) {
-    $(id+'net').removeClass('disabled');
+  if (ip==4) {
+    for (var b=1; b<=3; b++) if ($(id+b).length>0) $(id+b).prop('disabled',!checked);
+    $(id+'mask').prop('disabled',!checked);
+    if (checked) {
+      $(id+'size').show();
+      $(id+'net').removeClass('disabled');
+    } else {
+      $(id+'size').hide();
+      $(id+'net').addClass('disabled','disabled');
+    }
   } else {
-    $(id+'net').addClass('disabled','disabled');
+    $(id+'text').prop('disabled',!checked);
+    $(id+'mask').prop('disabled',!checked);
+    if (checked) {
+      $(id+'net').removeClass('disabled');
+    } else {
+      $(id+'net').addClass('disabled','disabled');
+    }
   }
 }
-function changeMask(id) {
-  var mask = Math.pow(2,32-$('#'+id).val());
+function changeCustom(id,ip) {
+  var checked = $('#'+id).prop('checked');
+  var device = id.substr(0,id.length-5).split('_').splice(2,2).join('.').toLowerCase();
+  var user = $('input:hidden[name="DOCKER_CUSTOM_NETWORKS"]');
+  if (ip==4) {
+    var other = $('#'+id.replace('CUSTOM','CUSTOM6')).prop('checked');
+  } else {
+    var other = $('#'+id.replace('CUSTOM6','CUSTOM')).prop('checked');
+  }
+  if (checked || other) {
+    if (user.val().indexOf(device)<0) user.val(user.val()+device+' ');
+  } else {
+    user.val(user.val().replace(device+' ',''));
+  }
+  id = '#'+id.substr(0,id.length-4);
+  $(id+'net').prop('disabled',!checked);
+  $(id+'mask').prop('disabled',!checked);
+  $(id+'gw').prop('disabled',!checked);
+  $(id+'pool').prop('disabled',!checked);
+  $(id+'size').prop('disabled',!checked);
+  if (checked) $(id+'hosts').show(); else $(id+'hosts').hide();
+}
+function changeMask(id,val) {
+  var mask = Math.pow(2,32-val);
   id = '#'+id.substr(0,id.length-4);
   $(id+'size').html('('+mask+' hosts)');
   for (var b=1; b<=3; b++) {
@@ -432,10 +649,15 @@ function changeMask(id) {
     if ($(cell+' option:selected').val()%step!=0) $(cell+' option:selected').removeAttr('selected');
   }
 }
+function changeHosts(id,val) {
+  var mask = Math.pow(2,32-val);
+  id = '#'+id.substr(0,id.length-4);
+  $(id+'hosts').html('('+mask+' hosts)');
+}
 function ip2int(ip) {
   return ip.split('.').reduce(function(ipInt,octet){return (ipInt<<8)+parseInt(octet,10)},0)>>>0;
 }
-function checkDHCPv4() {
+function checkDHCP() {
   var good = true;
   $('#settingsForm').find('input[name^="DOCKER_DHCP_"]').each(function(){
     if ($(this).val()) {
@@ -453,11 +675,7 @@ function checkDHCPv4() {
       if (good && (toppool < topbase || endpool > endbase)) {good = false; swal('Invalid pool address','Pool address is out of range','error');}
     }
   });
-  return good;
-}
-function checkDHCPv6() {
-  var good = true;
-  $('#settingsForm').find('input[name^="DOCKER_DHCP6_"]').each(function(){
+  if (good) $('#settingsForm').find('input[name^="DOCKER_DHCP6_"]').each(function(){
     if ($(this).val()) {
       var id = $(this).attr('name');
       var pool = $(this).val().split('/');
@@ -468,6 +686,36 @@ function checkDHCPv6() {
   });
   return good;
 }
+function checkIP() {
+  var validIP4 = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  var validIP6 = /^((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$/;
+  var error = null;
+  $('#settingsForm').find('input[name^="DOCKER_SUBNET_"]').each(function(){
+    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 address';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  $('#settingsForm').find('input[name^="DOCKER_GATEWAY_"]').each(function(){
+    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 gateway';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  $('#settingsForm').find('input[name^="DOCKER_RANGE_"]').each(function(){
+    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 range';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  $('#settingsForm').find('input[name^="DOCKER_SUBNET6_"]').each(function(){
+    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 address';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  $('#settingsForm').find('input[name^="DOCKER_GATEWAY6_"]').each(function(){
+    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 gateway';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  $('#settingsForm').find('input[name^="DOCKER_RANGE6_"]').each(function(){
+    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 range';
+  });
+  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  return true;
+}
 function showLogOptions(log) {
   if (log == 'no') {
     $('#DOCKER_LOG_OPTIONS').hide('slow');
@@ -477,7 +725,7 @@ function showLogOptions(log) {
 }
 $(function() {
   $("#applyBtn").click(function(){
-    if (!checkDHCPv4() || !checkDHCPv6()) return;
+    if (!checkDHCP() || !checkIP()) return;
     if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
       $("#removeForm").submit();
       return;
