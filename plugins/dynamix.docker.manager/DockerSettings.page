@@ -128,7 +128,7 @@ Enable Docker:
 > Once started, Docker will always automatically start after the array has been started.
 
 <?if ($DockerStopped):?>
-<div markdown="1" class="advanced">
+
 Docker vdisk size:
 : <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE']?>" style="width:50px;" required="required">GB <span id="SIZE_ERROR" class="errortext"></span>
 
@@ -148,7 +148,24 @@ Docker storage location:
   <?endif;?><span id="IMAGE_ERROR" class="errortext"></span>
 
 > You must specify an image file for Docker. The system will automatically create this file when the Docker service is first started.
+>
+> It is recommended to create this image file outside the array, e.g. on the Cache pool. For best performance SSD devices are preferred.
 
+Default appdata storage location:
+: <input id="DOCKER_APP_CONFIG_PATH" type="text" name="DOCKER_APP_CONFIG_PATH" value="<?=$dockercfg['DOCKER_APP_CONFIG_PATH']?>" placeholder="e.g. /mnt/user/appdata" data-pickfilter="HIDE_FILES_FILTER" data-pickroot="<?=(is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/')?>" data-pickfolders="true">
+  <?if ($var['fsState'] != "Started"):?>
+  <span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span>
+  <?elseif (!is_dir($dockercfg['DOCKER_APP_CONFIG_PATH'])):?>
+  <span><i class="fa fa-warning icon warning"></i> Path does not exist</span>
+  <?endif;?>
+
+> You can specify a folder to automatically generate and store subfolders containing configuration files for each Docker app (via the /config mapped volume).
+>
+> It is recommended to create this folder outside the array, e.g. on the Cache pool. For best performance SSD devices are preferred.
+>
+> Only used when adding new Docker apps. Editing existing Docker apps will not be affected by this setting.
+
+<div markdown="1" class="advanced">
 Docker LOG rotation:
 : <select name="DOCKER_LOG_ROTATION" class="narrow" onchange="showLogOptions(this.value)">
   <?=mk_option($dockercfg['DOCKER_LOG_ROTATION'], 'no', 'Disabled')?>
@@ -170,6 +187,8 @@ Docker LOG maximum file size:
   <?=mk_option($dockercfg['DOCKER_LOG_SIZE'], '1g', '1000 MB')?>
   </select>
 
+> Specifies the maximum LOG size. When exceeded LOG rotation will occur.
+
 Docker LOG number of files:
 : <select name="DOCKER_LOG_FILES" class="narrow">
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '1', '1')?>
@@ -177,6 +196,8 @@ Docker LOG number of files:
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '3', '3')?>
   </select>
 </div>
+
+> Specifies the number of LOG files when LOG rotation is done.
 
 User defined networks:
 : <select name="DOCKER_USER_NETWORKS" class="narrow">
@@ -188,57 +209,6 @@ User defined networks:
 >
 > Change this setting to preserve user defined networks, but it is the responsibility of the user to ensure these entries work correctly and are conflict free.
 
-</div>
-<?else: /* DOCKER STARTED */?>
-<div markdown="1" class="advanced">
-Docker version:
-: <?$arrInfo = $docker->getInfo(); echo $arrInfo['Version']?>
-
-> This is the docker version.
-
-Docker storage location:
-: <?=$dockercfg['DOCKER_IMAGE_FILE']?>
-
-> This is the docker volume.
-
-Docker LOG rotation:
-: <?=$dockercfg['DOCKER_LOG_ROTATION']=='yes'?'Enabled':'Disabled'?>
-
-> By default a single unlimited LOG file is created. Otherwise LOG file size and number of files are limited when LOG rotation is enabled.
-
-User defined networks:
-: <?=ucfirst($dockercfg['DOCKER_USER_NETWORKS']??'remove').'d'?>
-
-> Shows whether user defined networks are removed or preserved from Docker. When preserved user defined networks become available in the *Network type* dropdown list of containers.
-
-</div>
-<?endif;?>
-<div markdown="1" class="advanced">
-Default appdata storage location:
-: <input id="DOCKER_APP_CONFIG_PATH" type="text" name="DOCKER_APP_CONFIG_PATH" value="<?=$dockercfg['DOCKER_APP_CONFIG_PATH']?>" placeholder="e.g. /mnt/user/appdata" data-pickfilter="HIDE_FILES_FILTER" data-pickroot="<?=(is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/')?>" data-pickfolders="true">
-  <?if ($var['fsState'] != "Started"):?>
-  <span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span>
-  <?elseif (!is_dir($dockercfg['DOCKER_APP_CONFIG_PATH'])):?>
-  <span><i class="fa fa-warning icon warning"></i> Path does not exist</span>
-  <?endif;?>
-
-> You can specify a folder to automatically generate and store subfolders containing configuration files for each Docker app (via the /config mapped volume).
->
-> Only used when adding new Docker apps. Editing existing Docker apps will not be affected by this setting.
-
-<!--
-Auto-map user shares to containers as /unraid:
-: <select id="DOCKER_APP_UNRAID_PATH" name="DOCKER_APP_UNRAID_PATH" class="narrow">
-  <?=mk_option($dockercfg['DOCKER_APP_UNRAID_PATH'], ($dockercfg['DOCKER_APP_UNRAID_PATH'] ?? '/mnt/user'), 'Yes')?>
-  <?=mk_option($dockercfg['DOCKER_APP_UNRAID_PATH'], '', 'No')?>
-  </select>
-
-> You can expose all of your user shares (/mnt/user) to a folder named /unraid within Docker containers.
->
-> Only used when adding new Docker apps. Editing existing Docker apps will not be affected by this setting.
--->
-</div>
-<div markdown="1" class="advanced">
 Template Authoring Mode:
 : <select id="DOCKER_AUTHORING_MODE" name="DOCKER_AUTHORING_MODE" class="narrow">
   <?=mk_option($dockercfg['DOCKER_AUTHORING_MODE'], 'no', 'No')?>
@@ -247,10 +217,12 @@ Template Authoring Mode:
 
 > If set to **Yes**, when creating/editing containers the interface will be present with some extra fields related to template authoring.
 
-</div>
-<div markdown="1" class="advanced">
 **System created networks**
 : &nbsp;
+
+> Any interface or VLAN with an IP address assigned to it will be by default included as custom network for Docker.
+>
+> The user can exclude an interface or VLAN when not required for Docker. E.g. when custom network creation is done.
 
 <?foreach ($include as $network => $route):?>
 <?
@@ -261,7 +233,6 @@ $docker_dhcp = "DOCKER_DHCP_$nnet";
 
 <input type="hidden" name="<?=$docker_auto?>" value="<?=$dockercfg[$docker_auto]?>">
 
-<?if ($DockerStopped):?>
 <span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
 <?
   $auto = $dockercfg[$docker_auto]!='no';
@@ -281,7 +252,7 @@ $docker_dhcp = "DOCKER_DHCP_$nnet";
   }
 ?>
 : <input type="checkbox" id="<?=$docker_dhcp?>_edit" onchange="changeEdit(this.id,4)"<?=$auto?'checked':''?>><span id="<?=$docker_dhcp?>_line" class="<?=$autoDisabled?>"><span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>
-  <input type="checkbox" id="<?=$docker_dhcp?>_dhcp" onchange="changeDHCP(this.id,4)"<?=$dhcp?'checked':''?>>**DHCP pool:**<span id="<?=$docker_dhcp?>_net" class="net <?=$dhcpDisabled?>"><?=$prefix?>.</span></span><?
+  <input type="checkbox" id="<?=$docker_dhcp?>_dhcp" onchange="changeDHCP(this.id,4)"<?=$dhcp?'checked':''?><?=$dhcpDisabled?>>**DHCP pool:**<span id="<?=$docker_dhcp?>_net" class="net <?=$dhcpDisabled?>"><?=$prefix?>.</span></span><?
   for ($b=$box; $b<=3; $b++) {
     switch ($b) {
       case 1: $step = $size/65536%256; break;
@@ -300,21 +271,14 @@ $docker_dhcp = "DOCKER_DHCP_$nnet";
   echo "<input type=\"hidden\" name=\"$docker_dhcp\" value=\"\">";
   echo "";
 ?>
-<?elseif ($dockercfg[$docker_dhcp]):?>
-<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
-: <span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp]?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)
-<?endif;?>
 
 <?endforeach;?>
 <?if ($include):?>
-<?if ($DockerStopped):?>
+> Include (default) or exclude the above interfaces or VLANs as custom network for Docker.
+>
 > Enter the pool range within each allocated subnet which is used for DHCPv4 assignments by Docker. E.g. 192.168.1.128/25
 
-<?elseif ($dockercfg[$docker_dhcp]):?>
-> Pool range(s) assigned to DHCPv4 for Docker containers.
 <?endif;?>
-<?endif;?>
-
 <?foreach ($include6 as $network => $route):?>
 <?
 $nnet = normalize($network);
@@ -322,7 +286,6 @@ $docker_auto = "DOCKER_AUTO_$nnet";
 $docker_dhcp6 = "DOCKER_DHCP6_$nnet";
 ?>
 
-<?if ($DockerStopped):?>
 <span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
 <?
   $auto6 = $dockercfg[$docker_auto]!='no';
@@ -335,33 +298,27 @@ $docker_dhcp6 = "DOCKER_DHCP6_$nnet";
   $mask_user = $dhcp6 ? explode('/',$dhcp6)[1] : $mask;
 ?>
 : <input type="checkbox" id="<?=$docker_dhcp6?>_edit" onchange="changeEdit(this.id,6)"<?=$auto6?'checked':''?>><span id="<?=$docker_dhcp6?>_line" class="<?=$auto6Disabled?>"><span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>
-  <input type="checkbox" id="<?=$docker_dhcp6?>_dhcp" onchange="changeDHCP(this.id,6)"<?=$dhcp6?'checked':''?>>**DHCP pool:**<span id="<?=$docker_dhcp6?>_net" class="net <?=$dhcp6Disabled?>"><?=$net?>:</span></span><?
+  <input type="checkbox" id="<?=$docker_dhcp6?>_dhcp" onchange="changeDHCP(this.id,6)"<?=$dhcp6?'checked':''?><?=$dhcpDisabled?>>**DHCP pool:**<span id="<?=$docker_dhcp6?>_net" class="net <?=$dhcp6Disabled?>"><?=$net?>:</span></span><?
   echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $dhcp6Disabled>/";
   echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $dhcp6Disabled>";
   for ($m=$mask+8; $m<=120; $m+=8) echo mk_option($mask_user,$m,$m);
   echo "</select><input type=\"hidden\" name=\"$docker_dhcp6\" value=\"\">";
 ?>
-<?elseif ($dockercfg[$docker_dhcp6]):?>
-<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
-: <span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6]?>
-<?endif;?>
 
 <?endforeach;?>
 <?if ($include6):?>
-<?if ($DockerStopped):?>
+> Include (default) or exclude the above interfaces or VLANs as custom network for Docker.
+>
 > Enter the pool range within each allocated subnet which is used for DHCPv6 assignments by Docker. E.g. 2a02:abcd:9ef5:100:1::/72
 
-<?elseif ($dockercfg[$docker_dhcp6]):?>
-> Pool range(s) assigned to DHCPv6 for Docker containers.
-
-<?endif;?>
 <?endif;?>
 
-<?if ($unset):?>
 **Custom created networks**
 : &nbsp;
 
-<?endif;?>
+> Interfaces and VLANs without an IP address assigned, can be included as custom network for Docker.
+> This allows creation of custom networks without participation of the host (unRAID).
+
 <?foreach ($unset as $network):?>
 <?
 $port = normalize($network);
@@ -374,25 +331,141 @@ if (!$vlan) {
     if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
   }
 }
-?>
-<?if ($protocol != 'ipv6'):?>
-<?
 list($subnet,$mask) = explode('/',$dockercfg["DOCKER_SUBNET_$port"]);
 list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
 $disabled = $subnet ? '':'disabled';
 ?>
-<?if ($DockerStopped):?>
+<?if ($protocol != 'ipv6'):?>
+
 <span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
 : <input type="checkbox" id="DOCKER_CUSTOM_<?=$port?>_edit" onchange="changeCustom(this.id,4)"<?=$subnet?'checked':''?> class="check">
   **Address:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_net" name="DOCKER_SUBNET_<?=$port?>" class="net" value="<?=$subnet?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_mask" name="DOCKER_MASK_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($mask?:24,$m,$m)?></select>
   **Gateway:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_gw" name="DOCKER_GATEWAY_<?=$port?>" class="net" value="<?=$dockercfg["DOCKER_GATEWAY_$port"]?>" title="IPv4 address A.B.C.D"<?=$disabled?>>
   **DHCP pool:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_pool" name="DOCKER_RANGE_<?=$port?>" class="net" value="<?=$range?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_size" name="DOCKER_SIZE_<?=$port?>" class="mask" onchange="changeHosts(this.id,this.value)"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($size?:25,$m,$m)?></select><span id="DOCKER_CUSTOM_<?=$port?>_hosts" style="<?=$subnet?'':'display:none'?>">(<?=pow(2,32-($size?:25))?> hosts)</span>
 
-<?elseif ($subnet):?>
+<?endif;?>
+<?endforeach;?>
+<?if ($unset && $protocol != 'ipv6'):?>
+> Include or exclude (default) the above interfaces or VLANs as custom network for Docker.
+>
+> Enter the pool range within each allocated subnet which is used for DHCPv4 assignments by Docker. E.g. 192.168.1.128/25
+
+<?endif;?>
+<?foreach ($unset as $network):?>
+<?
+$port = normalize($network);
+list($eth,$vlan) = explode('.',$network);
+$eth = str_replace(['bond','br'],'eth',$eth);
+if (!$vlan) {
+  $protocol = $$eth['PROTOCOL:0'] ?? 'ipv4';
+} else {
+  foreach ($$eth as $key => $value) {
+    if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
+  }
+}
+list($subnet6,$mask6) = explode('/',$dockercfg["DOCKER_SUBNET6_$port"]);
+list($range6,$size6) = explode('/',$dockercfg["DOCKER_RANGE6_$port"]);
+$disabled = $subnet6 ? '':'disabled';
+?>
+<?if ($protocol != 'ipv4'):?>
+
+<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
+: <input type="checkbox" id="DOCKER_CUSTOM6_<?=$port?>_edit" onchange="changeCustom(this.id,6)"<?=$subnet6?'checked':''?> class="check">
+  **Address:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
+  **Gateway:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_gw" name="DOCKER_GATEWAY6_<?=$port?>" class="net6" value="<?=$dockercfg["DOCKER_GATEWAY6_$port"]?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>
+  **DHCP pool:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_pool" name="DOCKER_RANGE6_<?=$port?>" class="net6" value="<?=$range6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_size" name="DOCKER_SIZE6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($size6?:72,$m,$m)?></select>
+
+<?endif;?>
+<?endforeach;?>
+<?if ($unset && $protocol != 'ipv4'):?>
+> Include or exclude (default) the above interfaces or VLANs as custom network for Docker.
+>
+> Enter the pool range within each allocated subnet which is used for DHCPv6 assignments by Docker. E.g. 2a02:abcd:9ef5:100:1::/72
+
+<?endif;?>
+</div>
+<?else: /* DOCKER STARTED */?>
+
+Docker version:
+: <?$arrInfo = $docker->getInfo(); echo $arrInfo['Version']?>
+
+> This is the Docker version.
+
+Docker storage location:
+: <?=$dockercfg['DOCKER_IMAGE_FILE']?>
+
+> This is the location of the Docker image.
+
+Default appdata storage location:
+: <?=$dockercfg['DOCKER_APP_CONFIG_PATH']?>
+
+> This is the storage location for Docker containers.
+
+<div markdown="1" class="advanced">
+Docker LOG rotation:
+: <?=$dockercfg['DOCKER_LOG_ROTATION']=='yes'?'Enabled':'Disabled'?>
+
+> By default a single unlimited LOG file is created. Otherwise LOG file size and number of files are limited when LOG rotation is enabled.
+
+User defined networks:
+: <?=ucfirst($dockercfg['DOCKER_USER_NETWORKS']??'remove').'d'?>
+
+> Shows whether user defined networks are removed or preserved from Docker. When preserved user defined networks become available in the *Network type* dropdown list of containers.
+
+**System created networks**
+: &nbsp;
+
+> Lists the number of system created networks which are available as custom network for Docker.
+
+<?foreach ($include as $network => $route):?>
+<?
+$nnet = normalize($network);
+$docker_dhcp = "DOCKER_DHCP_$nnet";
+?>
+<?if ($dockercfg[$docker_dhcp]):?>
+
+<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
+: <span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp]?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)
+
+<?endif;?>
+<?endforeach;?>
+<?foreach ($include6 as $network => $route):?>
+<?
+$nnet = normalize($network);
+$docker_dhcp6 = "DOCKER_DHCP6_$nnet";
+?>
+<?if ($dockercfg[$docker_dhcp6]):?>
+
+<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
+: <span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6]?>
+
+<?endif;?>
+<?endforeach;?>
+
+**Custom created networks**
+: &nbsp;
+
+> Lists the number of user created networks which are available as custom network for Docker.
+
+<?foreach ($unset as $network):?>
+<?
+$port = normalize($network);
+list($eth,$vlan) = explode('.',$network);
+$eth = str_replace(['bond','br'],'eth',$eth);
+if (!$vlan) {
+  $protocol = $$eth['PROTOCOL:0'] ?? 'ipv4';
+} else {
+  foreach ($$eth as $key => $value) {
+    if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
+  }
+}
+list($subnet,$mask) = explode('/',$dockercfg["DOCKER_SUBNET_$port"]);
+list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
+?>
+<?if ($protocol != 'ipv6' && $subnet):?>
 <span class="ident">IPv4 custom network on interface <?=$network?>:</span>
 : <span class="ip4">**Address:** <?=$subnet?>/<?=$mask?></span><span class="gw4">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY_$port"]?></span>**DHCP pool:** <?=$range?>/<?=$size?>&nbsp;&nbsp;(<?=pow(2,32-($size?:25))?> hosts)
 
-<?endif;?>
 <?endif;?>
 <?endforeach;?>
 <?foreach ($unset as $network):?>
@@ -407,28 +480,17 @@ if (!$vlan) {
     if (strpos($key,'VLANID')!==false && $value==$vlan) {$protocol = $$eth[str_replace('VLANID','PROTOCOL',$key)] ?? 'ipv4'; break;}
   }
 }
-?>
-<?if ($protocol != 'ipv4'):?>
-<?
 list($subnet6,$mask6) = explode('/',$dockercfg["DOCKER_SUBNET6_$port"]);
 list($range6,$size6) = explode('/',$dockercfg["DOCKER_RANGE6_$port"]);
-$disabled = $subnet6 ? '':'disabled';
 ?>
-<?if ($DockerStopped):?>
-<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
-: <input type="checkbox" id="DOCKER_CUSTOM6_<?=$port?>_edit" onchange="changeCustom(this.id,6)"<?=$subnet6?'checked':''?> class="check">
-  **Address:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
-  **Gateway:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_gw" name="DOCKER_GATEWAY6_<?=$port?>" class="net6" value="<?=$dockercfg["DOCKER_GATEWAY6_$port"]?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>
-  **DHCP pool:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_pool" name="DOCKER_RANGE6_<?=$port?>" class="net6" value="<?=$range6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_size" name="DOCKER_SIZE6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($size6?:72,$m,$m)?></select>
-
-<?elseif ($subnet6):?>
+<?if ($protocol != 'ipv4' && $subnet6):?>
 <span class="ident">IPv6 custom network on interface <?=$network?>:</span>
 : <span class="ip6">**Address:** <?=$subnet6?>/<?=$mask6?></span><span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>**DHCP pool:** <?=$range6?>/<?=$size6?>
 
 <?endif;?>
-<?endif;?>
 <?endforeach;?>
 </div>
+<?endif;?>
 
 &nbsp;
 : <input id="applyBtn" type="button" value="Apply"><input type="button" value="Done" onclick="done()">
