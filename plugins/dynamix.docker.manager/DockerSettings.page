@@ -58,8 +58,8 @@ foreach ($custom as $network) {
   $gw6 = exec("ip -6 route show dev $network default|awk '{print $3}'");
   $route4 = exec("ip -4 route show dev $network $ip4|awk '{print $1}'");
   $route6 = exec("ip -6 route show dev $network $ip6|awk '{print $1}'");
-  if ($ip4 && $route4) {$include[$network] = $route4; $address[$network] = $ip4; $gateway[$network] = $gw4;} else $unset[] = $network;
-  if ($ip6 && $route6) {$include6[$network] = $route6; $address6[$network] = $ip6; $gateway6[$network] = $gw6;} else $unset[] = $network;
+  if ($ip4 && $route4) {$include[$network] = $route4; $address[$network] = $ip4; $gateway[$network] = $gw4;} elseif (!array_key_exists($network,$gateway6)) $unset[] = $network;
+  if ($ip6 && $route6) {$include6[$network] = $route6; $address6[$network] = $ip6; $gateway6[$network] = $gw6;} elseif (!array_key_exists($network,$gateway)) $unset[] = $network;
 }
 $unset = array_unique($unset);
 
@@ -557,7 +557,7 @@ function changeEdit(id,ip) {
     var id2 = '#'+name.replace('AUTO','DHCP6')+'_';
   } else {
     var name = id.substr(0,id.length-5).replace('DHCP6','AUTO');
-    var id2 = '#'+name.replace('AUTO6','DHCP')+'_';
+    var id2 = '#'+name.replace('AUTO','DHCP')+'_';
   }
   if (checked) {
     $(id1+'line').removeClass('disabled');
