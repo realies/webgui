@@ -382,11 +382,12 @@ function xmlToVar($xml) {
 
 function xmlToCommand($xml, $create_paths=false) {
   global $var;
+  global $docroot;
   $xml           = xmlToVar($xml);
-  $cmdName       = (strlen($xml['Name'])) ? '--name="'.$xml['Name'].'"' : "";
-  $cmdPrivileged = (strtolower($xml['Privileged']) == 'true') ? '--privileged="true"' : "";
-  $cmdNetwork    = '--net="'.strtolower($xml['Network']).'"';
-  $cmdMyIP       = $xml['MyIP'] ? '--ip="'.$xml['MyIP'].'"' : '';
+  $cmdName       = (strlen($xml['Name'])) ? '--name='.escapeshellarg($xml['Name']) : '';
+  $cmdPrivileged = (strtolower($xml['Privileged']) == 'true') ? '--privileged=true' : '';
+  $cmdNetwork    = '--net='.escapeshellarg(strtolower($xml['Network']));
+  $cmdMyIP       = $xml['MyIP'] ? '--ip='.escapeshellarg($xml['MyIP']) : '';
   $Volumes       = [''];
   $Ports         = [''];
   $Variables     = [''];
@@ -403,7 +404,7 @@ function xmlToCommand($xml, $create_paths=false) {
     $Mode            = strval($config['Mode']);
     if ($confType != "device" && !strlen($containerConfig)) continue;
     if ($confType == "path") {
-      $Volumes[] = sprintf('"%s":"%s":%s', $hostConfig, $containerConfig, $Mode);
+      $Volumes[] = escapeshellarg($hostConfig).':'.escapeshellarg($containerConfig).':'.escapeshellarg($Mode);
       if ( ! file_exists($hostConfig) && $create_paths ) {
         @mkdir($hostConfig, 0777, true);
         @chown($hostConfig, 99);
@@ -412,19 +413,19 @@ function xmlToCommand($xml, $create_paths=false) {
     } elseif ($confType == 'port') {
       # Export ports as variable if Network is set to host
       if (preg_match('/^(host|eth[0-9]|br[0-9]|bond[0-9])/',strtolower($xml['Network']))) {
-        $Variables[] = strtoupper(sprintf('"%s_PORT_%s"="%s"', $Mode, $containerConfig, $hostConfig));
+        $Variables[] = strtoupper(escapeshellarg($Mode.'_PORT_'.$containerConfig).'='.escapeshellarg($hostConfig));
       # Export ports as port if Network is set to bridge
       } elseif (strtolower($xml['Network'])== 'bridge') {
-        $Ports[] = sprintf("%s:%s/%s", $hostConfig, $containerConfig, $Mode);
+        $Ports[] = escapeshellarg($hostConfig.':'.$containerConfig.'/'.$Mode);
       # No export of ports if Network is set to none
       }
     } elseif ($confType == "variable") {
-      $Variables[] = sprintf('"%s"="%s"', $containerConfig, $hostConfig);
+      $Variables[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);
     } elseif ($confType == "device") {
-      $Devices[] = '"'.$hostConfig.'"';
+      $Devices[] = escapeshellarg($hostConfig);
     }
   }
-  $cmd = sprintf('/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s',
+  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s',
                  $cmdName,
                  $cmdNetwork,
                  $cmdMyIP,
@@ -434,11 +435,40 @@ function xmlToCommand($xml, $create_paths=false) {
                  implode(' -v ', $Volumes),
                  implode(' --device=', $Devices),
                  $xml['ExtraParams'],
-                 $xml['Repository'],
+                 escapeshellarg($xml['Repository']),
                  $xml['PostArgs']);
 
   $cmd = trim(preg_replace('/\s+/', ' ', $cmd));
   return [$cmd, $xml['Name'], $xml['Repository']];
+}
+
+function execCommand($command) {
+  // $command should have all its args already properly run through 'escapeshellarg'
+
+  $descriptorspec = [
+    0 => ["pipe", "r"],   // stdin is a pipe that the child will read from
+    1 => ["pipe", "w"],   // stdout is a pipe that the child will write to
+    2 => ["pipe", "w"]    // stderr is a pipe that the child will write to
+  ];
+
+  $id = mt_rand();
+  echo '<p class="logLine" id="logBody"></p>';
+  echo '<script>addLog(\'<fieldset style="margin-top:1px;" class="CMD"><legend>Command:</legend>';
+  echo 'root@localhost:# '.addslashes(htmlspecialchars($command)).'<br>';
+  echo '<span id="wait'.$id.'">Please wait </span>';
+  echo '<p class="logLine" id="logBody"></p></fieldset>\');show_Wait('.$id.');</script>';
+  @flush();
+  $proc = proc_open($command." 2>&1", $descriptorspec, $pipes, '/', []);
+  while ($out = fgets( $pipes[1] )) {
+    $out = preg_replace("%[\t\n\x0B\f\r]+%", '', $out);
+    echo '<script>addLog("'.htmlspecialchars($out).'");</script>';
+    @flush();
+  }
+  $retval = proc_close($proc);
+  echo '<script>stop_Wait('.$id.');</script>';
+  $out = $retval ?  'The command failed.' : 'The command finished successfully!';
+  echo '<script>addLog(\'<br><b>'.$out.'</b>\');</script>';
+  return $retval===0;
 }
 
 function getXmlVal($xml, $element, $attr = null, $pos = 0) {
@@ -601,9 +631,7 @@ if (isset($_POST['contName'])) {
     $cmd = str_replace('/plugins/dynamix.docker.manager/scripts/docker create ', '/plugins/dynamix.docker.manager/scripts/docker run -d ', $cmd);
   }
 
-  // Injecting the command in $_GET variable and executing.
-  $_GET['cmd'] = $cmd;
-  include($dockerManPaths['plugin'] . "/include/Exec.php");
+  execCommand($cmd);
 
   echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;
@@ -649,8 +677,7 @@ if ($_GET['updateContainer']){
     // force kill container if still running after 10 seconds
     removeContainer($Name);
 
-    $_GET['cmd'] = $cmd;
-    include($dockerManPaths['plugin'] . "/include/Exec.php");
+    execCommand($cmd);
 
     $DockerClient->flushCaches();
 
@@ -1351,7 +1378,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             <p>Minimum unRAID version required to run this container.  Enforced by the Apps Tab on Installation.  If there is no minimum version of unRaid required to run the container, leave blank.  Note that any container using 32 bit binaries should have a minimum version set to 6.4.0</p>
           </blockquote>
         </td>
-      </tr>			
+      </tr>
 			<tr class="<?=$authoring;?>">
         <td>Donation Text:</td>
         <td><input type="text" name="contDonateText"></td>
@@ -1373,7 +1400,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             <p>Link to the image used for Donation Links Within The Apps Tab</p>
           </blockquote>
         </td>
-      </tr>			
+      </tr>
       <tr class="<?=$authoring;?>">
         <td>Donation Link:</td>
         <td><input type="text" name="contDonateLink"></td>
@@ -1384,7 +1411,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             <p>Link to the donation page.  If using donation's, both the image and link must be set</p>
           </blockquote>
         </td>
-      </tr>			
+      </tr>
       <tr class="advanced">
         <td>Docker Hub URL:</td>
         <td><input type="text" name="contRegistry"></td>
