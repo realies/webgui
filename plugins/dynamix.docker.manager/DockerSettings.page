@@ -93,7 +93,6 @@ select option.hide{display:none}
 input.net{width:100px;margin:0 4px 0 2px}
 input.net6{width:200px;margin:0 4px}
 input.check{margin-right:1px}
-span.ident{margin-left:24px}
 span.net{margin-left:4px;margin-right:2px}
 span.ip4{display:inline-block;width:200px}
 span.ip6{display:inline-block;width:380px}
@@ -218,13 +217,6 @@ Preserve user defined networks:
 >
 > Change this setting to preserve user defined networks, but it is the responsibility of the user to ensure these entries work correctly and are conflict free.
 
-System created networks:
-: &nbsp;
-
-> Any interface or VLAN with an IP address assigned to it will be by default included as custom network for Docker.
->
-> The user can exclude an interface or VLAN when not required for Docker. E.g. when custom network creation is done.
-
 <?foreach ($include as $network => $route):?>
 <?
 $net = normalize($network);
@@ -234,7 +226,7 @@ $docker_dhcp = "DOCKER_DHCP_$net";
 
 <input type="hidden" name="<?=$docker_auto?>" value="<?=$dockercfg[$docker_auto]?>">
 
-<span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
+IPv4 custom network on interface <?=$network?> (optional):
 <?
   $auto = $dockercfg[$docker_auto]!='no';
   $autoDisabled = $auto ? '':'disabled';
@@ -288,7 +280,7 @@ $docker_auto = "DOCKER_AUTO_$net";
 $docker_dhcp6 = "DOCKER_DHCP6_$net";
 ?>
 
-<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
+IPv6 custom network on interface <?=$network?> (optional):
 <?
   $auto6 = $dockercfg[$docker_auto]!='no';
   $auto6Disabled = $auto6 ? '':'disabled';
@@ -315,13 +307,6 @@ $docker_dhcp6 = "DOCKER_DHCP6_$net";
 > Enter the pool range within each allocated subnet which is used for DHCPv6 assignments by Docker. E.g. 2a02:abcd:9ef5:100:1::/72
 
 <?endif;?>
-
-Custom created networks:
-: &nbsp;
-
-> Interfaces and VLANs without an IP address assigned, can be included as custom network for Docker.
-> This allows creation of custom networks without participation of the host (unRAID).
-
 <?foreach ($unset as $network):?>
 <?
 $port = normalize($network);
@@ -340,7 +325,7 @@ $disabled = $subnet ? '':'disabled';
 ?>
 <?if ($protocol != 'ipv6'):?>
 
-<span class="ident">IPv4 custom network on interface <?=$network?> (optional):</span>
+IPv4 custom network on interface <?=$network?> (optional):
 : <input type="checkbox" id="DOCKER_CUSTOM_<?=$port?>_edit" onchange="changeCustom(this.id,4)"<?=$subnet?'checked':''?> class="check">
   **Address:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_net" name="DOCKER_SUBNET_<?=$port?>" class="net" value="<?=$subnet?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_mask" name="DOCKER_MASK_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($mask?:24,$m,$m)?></select>
   **Gateway:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_gw" name="DOCKER_GATEWAY_<?=$port?>" class="net" value="<?=$dockercfg["DOCKER_GATEWAY_$port"]?>" title="IPv4 address A.B.C.D"<?=$disabled?>>
@@ -372,7 +357,7 @@ $disabled = $subnet6 ? '':'disabled';
 ?>
 <?if ($protocol != 'ipv4'):?>
 
-<span class="ident">IPv6 custom network on interface <?=$network?> (optional):</span>
+IPv6 custom network on interface <?=$network?> (optional):
 : <input type="checkbox" id="DOCKER_CUSTOM6_<?=$port?>_edit" onchange="changeCustom(this.id,6)"<?=$subnet6?'checked':''?> class="check">
   **Address:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
   **Gateway:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_gw" name="DOCKER_GATEWAY6_<?=$port?>" class="net6" value="<?=$dockercfg["DOCKER_GATEWAY6_$port"]?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>
@@ -415,26 +400,13 @@ Preserve user defined networks:
 
 > Shows whether networks created outside of the GUI are removed or preserved for Docker. When preserved *user defined networks* become available in the *Network type* dropdown list of containers.
 
-<?
-$title = false;
-foreach ($include as $network => $route) {
-  $net = normalize($network);
-  $title |= empty($dockercfg["DOCKER_AUTO_$net"]);
-}
-if ($title):?>
-System created networks:
-: &nbsp;
-
-> Lists the system created networks which become available in the *Network type* dropdown list of containers.
-
-<?endif;?>
 <?foreach ($include as $network => $route):?>
 <?
 $net = normalize($network);
 $docker_dhcp = "DOCKER_DHCP_$net";
 ?>
 <?if ($dockercfg[$docker_dhcp] || empty($dockercfg["DOCKER_AUTO_$net"])):?>
-<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
+IPv4 custom network on interface <?=$network?>:
 : <span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp] ?? 'not set'?><?if ($dockercfg[$docker_dhcp]):?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)<?endif;?>
 
 <?endif;?>
@@ -444,12 +416,11 @@ $docker_dhcp = "DOCKER_DHCP_$net";
 $net = normalize($network);
 $docker_dhcp6 = "DOCKER_DHCP6_$net";
 if ($dockercfg[$docker_dhcp6]):?>
-<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
+IPv6 custom network on interface <?=$network?>:
 : <span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6] ?? 'not set'?>
 
 <?endif;?>
 <?endforeach;?>
-<?$title = true?>
 <?foreach ($unset as $network):?>
 <?
 $port = normalize($network);
@@ -466,15 +437,7 @@ list($subnet,$mask) = explode('/',$dockercfg["DOCKER_SUBNET_$port"]);
 list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
 ?>
 <?if ($protocol != 'ipv6' && $subnet):?>
-<?if ($title):?>
-<?$title = false;?>
-Custom created networks:
-: &nbsp;
-
-> Lists the custom created networks which become available in the *Network type* dropdown list of containers.
-
-<?endif;?>
-<span class="ident">IPv4 custom network on interface <?=$network?>:</span>
+IPv4 custom network on interface <?=$network?>:
 : <span class="ip4">**Address:** <?=$subnet?>/<?=$mask?></span><span class="gw4">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY_$port"]?></span>**DHCP pool:** <?=$range?"$range/$size":"not set"?><?if ($range):?>&nbsp;&nbsp;(<?=pow(2,32-($size?:25))?> hosts)<?endif;?>
 
 <?endif;?>
@@ -495,7 +458,7 @@ list($subnet6,$mask6) = explode('/',$dockercfg["DOCKER_SUBNET6_$port"]);
 list($range6,$size6) = explode('/',$dockercfg["DOCKER_RANGE6_$port"]);
 ?>
 <?if ($protocol != 'ipv4' && $subnet6):?>
-<span class="ident">IPv6 custom network on interface <?=$network?>:</span>
+IPv6 custom network on interface <?=$network?>:
 : <span class="ip6">**Address:** <?=$subnet6?>/<?=$mask6?></span><span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>**DHCP pool:** <?=$range6?"$range6/$size6":"not set"?>
 
 <?endif;?>
