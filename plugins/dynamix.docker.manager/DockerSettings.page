@@ -194,9 +194,10 @@ Docker LOG number of files:
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '2', '2')?>
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '3', '3')?>
   </select>
-</div>
 
 > Specifies the number of LOG files when LOG rotation is done.
+
+</div>
 
 Template Authoring Mode:
 : <select id="DOCKER_AUTHORING_MODE" name="DOCKER_AUTHORING_MODE" class="narrow">
