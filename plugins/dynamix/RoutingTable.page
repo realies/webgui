@@ -14,9 +14,20 @@ Tag="share-alt"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
-exec("ls --indicator-style=none /sys/class/net|grep -P '^(eth|br|bond)[0-9]'",$list);
+unset($list,$other);
+exec("ls /sys/class/net|grep -P '^br[0-9]'",$list);
+exec("ls /sys/class/net|grep -P '^(bond|eth)[0-9]'",$other);
+foreach ($other as $port) {
+  if (substr($port,0,4)=='bond') {
+    $br = str_replace('bond','br',$port);
+    if (!in_array($br,$list)) $list[] = $port;
+  } else {
+    $br = str_replace('eth','br',$port);
+    $bond = str_replace('eth','bond',$port);
+    if (!in_array($br,$list) && !in_array($bond,$list)) $list[] = $port;
+  }
+}
 ?>
 <style>
 input.fixed{width:200px;}
