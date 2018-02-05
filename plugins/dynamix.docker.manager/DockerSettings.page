@@ -95,7 +95,7 @@ input.net6{width:200px;margin:0 4px}
 input.check{margin-right:1px}
 span.net{margin-left:4px;margin-right:2px}
 span.ip4{display:inline-block;width:200px}
-span.ip6{display:inline-block;width:380px}
+span.ip6{display:inline-block;width:280px}
 span.gw4{display:inline-block;width:180px}
 span.gw6{display:inline-block;width:250px}
 <?if (strstr('white,azure',$display['theme'])):?>
@@ -246,7 +246,7 @@ IPv4 custom network on interface <?=$network?> (optional):
   }
 ?>
 : <input type="checkbox" id="<?=$docker_dhcp?>_edit" onchange="changeEdit(this.id,4)"<?=$auto?'checked':''?>>
-  <span id="<?=$docker_dhcp?>_line" class="<?=$autoDisabled?>"><span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span><input type="checkbox" id="<?=$docker_dhcp?>_dhcp" onchange="changeDHCP(this.id,4)"<?=$dhcp?'checked':''?><?=$dhcpDisabled?>>
+  <span id="<?=$docker_dhcp?>_line" class="<?=$autoDisabled?>"><span class="ip4">**Subnet:** <?=$route?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span><input type="checkbox" id="<?=$docker_dhcp?>_dhcp" onchange="changeDHCP(this.id,4)"<?=$dhcp?'checked':''?><?=$dhcpDisabled?>>
    **DHCP pool:**<span id="<?=$docker_dhcp?>_net" class="net <?=$dhcpDisabled?>"><?=$prefix?>.</span></span><?
   for ($b=$box; $b<=3; $b++) {
     switch ($b) {
@@ -293,7 +293,7 @@ IPv6 custom network on interface <?=$network?> (optional):
   $mask_user = $dhcp6 ? explode('/',$dhcp6)[1] : $mask;
 ?>
 : <input type="checkbox" id="<?=$docker_dhcp6?>_edit" onchange="changeEdit(this.id,6)"<?=$auto6?'checked':''?>>
-  <span id="<?=$docker_dhcp6?>_line" class="<?=$auto6Disabled?>"><span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span><input type="checkbox" id="<?=$docker_dhcp6?>_dhcp" onchange="changeDHCP(this.id,6)"<?=$dhcp6?'checked':''?><?=$dhcp6Disabled?>>
+  <span id="<?=$docker_dhcp6?>_line" class="<?=$auto6Disabled?>"><span class="ip6">**Subnet:** <?=$route?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span><input type="checkbox" id="<?=$docker_dhcp6?>_dhcp" onchange="changeDHCP(this.id,6)"<?=$dhcp6?'checked':''?><?=$dhcp6Disabled?>>
   **DHCP pool:**<span id="<?=$docker_dhcp6?>_net" class="net <?=$dhcp6Disabled?>"><?=$net?>:</span></span><?
   echo "<input type=\"text\" id=\"{$docker_dhcp6}_text\" value=\"$net_user\" class=\"net\" $dhcp6Disabled>/";
   echo "<select id=\"{$docker_dhcp6}_mask\" class=\"mask\" $dhcp6Disabled>";
@@ -328,7 +328,7 @@ $disabled = $subnet ? '':'disabled';
 
 IPv4 custom network on interface <?=$network?> (optional):
 : <input type="checkbox" id="DOCKER_CUSTOM_<?=$port?>_edit" onchange="changeCustom(this.id,4)"<?=$subnet?'checked':''?> class="check">
-  **Address:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_net" name="DOCKER_SUBNET_<?=$port?>" class="net" value="<?=$subnet?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_mask" name="DOCKER_MASK_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($mask?:24,$m,$m)?></select>
+  **Subnet:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_net" name="DOCKER_SUBNET_<?=$port?>" class="net" value="<?=$subnet?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_mask" name="DOCKER_MASK_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($mask?:24,$m,$m)?></select>
   **Gateway:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_gw" name="DOCKER_GATEWAY_<?=$port?>" class="net" value="<?=$dockercfg["DOCKER_GATEWAY_$port"]?>" title="IPv4 address A.B.C.D"<?=$disabled?>>
   **DHCP pool:** <input type="text" id="DOCKER_CUSTOM_<?=$port?>_pool" name="DOCKER_RANGE_<?=$port?>" class="net" value="<?=$range?>" title="IPv4 address A.B.C.D"<?=$disabled?>>/<select id="DOCKER_CUSTOM_<?=$port?>_size" name="DOCKER_SIZE_<?=$port?>" class="mask" onchange="changeHosts(this.id,this.value)"<?=$disabled?>><?for ($m=16; $m<=30; $m++) echo mk_option($size?:25,$m,$m)?></select><span id="DOCKER_CUSTOM_<?=$port?>_hosts" style="<?=$subnet?'':'display:none'?>">(<?=pow(2,32-($size?:25))?> hosts)</span>
 
@@ -360,7 +360,7 @@ $disabled = $subnet6 ? '':'disabled';
 
 IPv6 custom network on interface <?=$network?> (optional):
 : <input type="checkbox" id="DOCKER_CUSTOM6_<?=$port?>_edit" onchange="changeCustom(this.id,6)"<?=$subnet6?'checked':''?> class="check">
-  **Address:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
+  **Subnet:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_net" name="DOCKER_SUBNET6_<?=$port?>" class="net6" value="<?=$subnet6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_mask" name="DOCKER_MASK6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($mask6?:64,$m,$m)?></select>
   **Gateway:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_gw" name="DOCKER_GATEWAY6_<?=$port?>" class="net6" value="<?=$dockercfg["DOCKER_GATEWAY6_$port"]?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>
   **DHCP pool:**<input type="text" id="DOCKER_CUSTOM6_<?=$port?>_pool" name="DOCKER_RANGE6_<?=$port?>" class="net6" value="<?=$range6?>" title="IPv6 address nnnn:xxxx::yyyy"<?=$disabled?>>/<select id="DOCKER_CUSTOM6_<?=$port?>_size" name="DOCKER_SIZE6_<?=$port?>" class="mask"<?=$disabled?>><?for ($m=64; $m<=120; $m+=8) echo mk_option($size6?:72,$m,$m)?></select>
 
@@ -408,7 +408,7 @@ $docker_dhcp = "DOCKER_DHCP_$net";
 ?>
 <?if ($dockercfg[$docker_dhcp] || empty($dockercfg["DOCKER_AUTO_$net"])):?>
 IPv4 custom network on interface <?=$network?>:
-: <span class="ip4">**Address:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp] ?? 'not set'?><?if ($dockercfg[$docker_dhcp]):?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)<?endif;?>
+: <span class="ip4">**Subnet:** <?=$address[$network]?></span><span class="gw4">**Gateway:** <?=$gateway[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp] ?? 'not set'?><?if ($dockercfg[$docker_dhcp]):?>&nbsp;&nbsp;(<?=pow(2,32-explode('/',$dockercfg[$docker_dhcp])[1])?> hosts)<?endif;?>
 
 <?endif;?>
 <?endforeach;?>
@@ -418,7 +418,7 @@ $net = normalize($network);
 $docker_dhcp6 = "DOCKER_DHCP6_$net";
 if ($dockercfg[$docker_dhcp6]):?>
 IPv6 custom network on interface <?=$network?>:
-: <span class="ip6">**Address:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6] ?? 'not set'?>
+: <span class="ip6">**Subnet:** <?=$address6[$network]?></span><span class="gw6">**Gateway:** <?=$gateway6[$network]?></span>**DHCP pool:** <?=$dockercfg[$docker_dhcp6] ?? 'not set'?>
 
 <?endif;?>
 <?endforeach;?>
@@ -439,7 +439,7 @@ list($range,$size) = explode('/',$dockercfg["DOCKER_RANGE_$port"]);
 ?>
 <?if ($protocol != 'ipv6' && $subnet):?>
 IPv4 custom network on interface <?=$network?>:
-: <span class="ip4">**Address:** <?=$subnet?>/<?=$mask?></span><span class="gw4">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY_$port"]?></span>**DHCP pool:** <?=$range?"$range/$size":"not set"?><?if ($range):?>&nbsp;&nbsp;(<?=pow(2,32-($size?:25))?> hosts)<?endif;?>
+: <span class="ip4">**Subnet:** <?=$subnet?>/<?=$mask?></span><span class="gw4">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY_$port"]?></span>**DHCP pool:** <?=$range?"$range/$size":"not set"?><?if ($range):?>&nbsp;&nbsp;(<?=pow(2,32-($size?:25))?> hosts)<?endif;?>
 
 <?endif;?>
 <?endforeach;?>
@@ -460,7 +460,7 @@ list($range6,$size6) = explode('/',$dockercfg["DOCKER_RANGE6_$port"]);
 ?>
 <?if ($protocol != 'ipv4' && $subnet6):?>
 IPv6 custom network on interface <?=$network?>:
-: <span class="ip6">**Address:** <?=$subnet6?>/<?=$mask6?></span><span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>**DHCP pool:** <?=$range6?"$range6/$size6":"not set"?>
+: <span class="ip6">**Subnet:** <?=$subnet6?>/<?=$mask6?></span><span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>**DHCP pool:** <?=$range6?"$range6/$size6":"not set"?>
 
 <?endif;?>
 <?endforeach;?>
