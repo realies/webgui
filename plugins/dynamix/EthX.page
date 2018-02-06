@@ -270,6 +270,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$ethX["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC6:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
@@ -380,6 +381,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$ethX["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:<?=$i?>" min="1" max="9999" value="<?=$ethX["METRIC6:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
@@ -484,6 +486,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:INDEX" maxlength="39" value="<?=$ethX["GATEWAY6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:INDEX" min="1" max="9999" value="<?=$ethX["METRIC6:INDEX"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 

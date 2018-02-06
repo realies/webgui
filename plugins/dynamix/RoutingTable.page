@@ -33,9 +33,9 @@ foreach ($other as $port) {
 input.fixed{width:200px;}
 </style>
 <script>
-function deleteRoute(button,gateway,route) {
-  swal({title:"Are you sure?",text:"This will delete route "+route+" on gateway "+gateway,type:"warning",showCancelButton:true},function(){
-    $.post('/webGui/include/RoutingTable.php',{gateway:gateway,route:route,task:'delete'},function(){resetTable();});
+function deleteRoute(gateway,route,metric) {
+  swal({title:"Delete route?",text:route+" by gateway "+gateway,type:"warning",showCancelButton:true},function(){
+    $.post('/webGui/include/RoutingTable.php',{gateway:gateway,route:route,metric:metric,task:'delete'},function(){resetTable();});
   });
 }
 function routeTable() {

@@ -90,25 +90,27 @@ Array.prototype.same = function(){return this.sort().filter(function(v,i,o){retu
 
 function prepareSettings(form) {
   var metrics = [];
+  var metrics6 = [];
   $(form).find('input[name^="METRIC:"]').each(function(){metrics.push($(this).val());});
-  if (metrics.same()) {
+  $(form).find('input[name^="METRIC6:"]').each(function(){metrics6.push($(this).val());});
+  if (metrics.same() || metrics6.same()) {
     swal('Duplicate metrics','List of default gateways contains duplicate metric values','error');
     return false;
   }
   if (form.TYPE.value == 'access') {
-    $(form).find('input[name^="VLANID:"]').prop('disabled',true);
-    $(form).find('input[name^="DESCRIPTION:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="PROTOCOL:"]').not('select[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="USE_DHCP:"]').not('select[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="USE_DHCP6:"]').not('select[name$=":0"]').prop('disabled',true);
-    $(form).find('input[name^="IPADDR:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('input[name^="IPADDR6:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="NETMASK:"]').not('select[name$=":0"]').prop('disabled',true);
-    $(form).find('input[name^="NETMASK6:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="GATEWAY:"]').not('select[name$=":0"]').prop('disabled',true);
-    $(form).find('input[name^="GATEWAY6:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('input[name^="METRIC:"]').not('input[name$=":0"]').prop('disabled',true);
-    $(form).find('select[name^="PRIVACY6:"]').not('select[name$=":0"]').prop('disabled',true);
+    $(form).find('input[name^="VLANID:"]').prop('disabled',false).val('');
+    $(form).find('input[name^="DESCRIPTION:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="PROTOCOL:"]').not('select[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="USE_DHCP:"]').not('select[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="USE_DHCP6:"]').not('select[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('input[name^="IPADDR:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('input[name^="IPADDR6:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="NETMASK:"]').not('select[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('input[name^="NETMASK6:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="GATEWAY:"]').not('select[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('input[name^="GATEWAY6:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('input[name^="METRIC:"]').not('input[name$=":0"]').prop('disabled',false).val('');
+    $(form).find('select[name^="PRIVACY6:"]').not('select[name$=":0"]').prop('disabled',false).val('');
   } else {
     var vlans = [];
     $(form).find('input[name^="VLANID:"]').each(function(){vlans.push($(this).val());});
@@ -146,45 +148,47 @@ function prepareSettings(form) {
     var protocol = $(this).val() || 'ipv4';
     var i = $(this).attr('name').split(':')[1];
     if (protocol == 'ipv6') {
-      $(form).find('input[name="IPADDR:'+i+'"]').prop('disabled',true);
-      $(form).find('select[name="NETMASK:'+i+'"]').prop('disabled',true);
-      $(form).find('input[name="GATEWAY:'+i+'"]').prop('disabled',true);
-      $(form).find('input[name="METRIC:'+i+'"]').prop('disabled',true);
-      if (i==0) $(form).find('input[name^="DNS_SERVER"]').prop('disabled',true);
+      $(form).find('input[name="IPADDR:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('select[name="NETMASK:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="GATEWAY:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="METRIC:'+i+'"]').prop('disabled',false).val('');
+      if (i==0) $(form).find('input[name^="DNS_SERVER"]').prop('disabled',false).val('');
     }
     if (protocol == 'ipv4') {
-      $(form).find('input[name="IPADDR6:'+i+'"]').prop('disabled',true);
-      $(form).find('input[name="NETMASK6:'+i+'"]').prop('disabled',true);
-      $(form).find('input[name="GATEWAY6:'+i+'"]').prop('disabled',true);
-      $(form).find('select[name="PRIVACY6:'+i+'"]').prop('disabled',true);
-      if (i==0) $(form).find('input[name^="DNS6_SERVER"]').prop('disabled',true);
-    }
-    if (protocol != 'ipv6') {
-      var metric = $(form).find('input[name="METRIC:'+i+'"]').val();
-      var gateway = $(form).find('input[name="GATEWAY:'+i+'"]');
-      if (metric) gateway.val(gateway.val()+'#'+metric);
+      $(form).find('input[name="IPADDR6:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="NETMASK6:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="GATEWAY6:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="METRIC6:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('select[name="PRIVACY6:'+i+'"]').prop('disabled',false).val('');
+      if (i==0) $(form).find('input[name^="DNS6_SERVER"]').prop('disabled',false).val('');
     }
   });
   $(form).find('select[name^="USE_DHCP:"]').each(function() {
     var i = $(this).attr('name').split(':')[1];
+    var protocol = $(form).find('select[name="PROTOCOL:'+i+'"]').val() || 'ipv4';
     if ($(this).prop('disabled')==false && $(this).val()=='yes') {
-      var protocol = $(form).find('select[name="PROTOCOL:'+i+'"]').val() || 'ipv4';
       if (protocol != 'ipv6') {
         $(form).find('input[name="IPADDR:'+i+'"]').val('Obtaining IPv4 address...');
         $(form).find('input[name="GATEWAY:'+i+'"]').val('Obtaining IPv4 gateway...');
       }
+    } else if (protocol != 'ipv6' && $(this).val()=='yes') {
+      $(form).find('input[name="IPADDR:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="GATEWAY:'+i+'"]').prop('disabled',false).val('');
     }
   });
   $(form).find('select[name^="USE_DHCP6:"]').each(function() {
     var i = $(this).attr('name').split(':')[1];
+    var protocol = $(form).find('select[name="PROTOCOL:'+i+'"]').val() || 'ipv4';
     if ($(this).prop('disabled')==false && $(this).val()=='yes') {
-      var protocol = $(form).find('select[name="PROTOCOL:'+i+'"]').val() || 'ipv4';
       if (protocol != 'ipv4') {
         $(form).find('input[name="IPADDR6:'+i+'"]').val('Obtaining IPv6 address...');
         $(form).find('input[name="GATEWAY6:'+i+'"]').val('Obtaining IPv6 gateway...');
       }
+    } else if (protocol != 'ipv4' && $(this).val()=='yes') {
+      $(form).find('input[name="IPADDR6:'+i+'"]').prop('disabled',false).val('');
+      $(form).find('input[name="GATEWAY6:'+i+'"]').prop('disabled',false).val('');
     }
-    if ($(this).val()!='yes') $(form).find('input[name="PRIVACY6:'+i+'"]').prop('disabled',true);
+    if ($(this).val()!='yes') $(form).find('input[name="PRIVACY6:'+i+'"]').prop('disabled',false).val('');
   });
   if (form.DHCP_KEEPRESOLV !== undefined && form.DHCP_KEEPRESOLV.value=='no') {
     form.DHCP_KEEPRESOLV.disabled = false;
@@ -214,7 +218,7 @@ function selectProtocol(form,port,index) {
       }
       if ($(form).find('select[name="USE_DHCP:'+i+'"]').val()) more4.show(); else more4.hide();
       if ($(form).find('select[name="USE_DHCP6:'+i+'"]').val()) more6.show(); else more6.hide();
-      checkNetworkSettings(form,i);
+      checkNetworkSettings(form,i,true);
     });
   } else {
     var protocol = $(form).find('select[name="PROTOCOL:'+index+'"]').val() || 'ipv4';
@@ -236,7 +240,7 @@ function selectProtocol(form,port,index) {
     }
   }
 }
-function checkNetworkSettings(form,index) {
+function checkNetworkSettings(form,index,start) {
   var disabled4 = $(form).find('select[name="USE_DHCP:'+index+'"]').val()!='no';
   var disabled6 = $(form).find('select[name="USE_DHCP6:'+index+'"]').val()!='no';
   var protocol = $(form).find('select[name="PROTOCOL:'+index+'"]').val() || 'ipv4';
@@ -254,12 +258,12 @@ function checkNetworkSettings(form,index) {
   }
   if (index==0) {
     if (form.DHCP_KEEPRESOLV !== undefined) {
-      form.DHCP_KEEPRESOLV.value = disabled4 ? 'no' : 'yes';
+      if (!start) form.DHCP_KEEPRESOLV.value = disabled4 ? 'no' : 'yes';
       form.DHCP_KEEPRESOLV.disabled = !disabled4;
       checkDNSSettings(form);
     }
     if (form.DHCP6_KEEPRESOLV !== undefined) {
-      form.DHCP6_KEEPRESOLV.value = disabled6 ? 'no' : 'yes';
+      if (!start) form.DHCP6_KEEPRESOLV.value = disabled6 ? 'no' : 'yes';
       form.DHCP6_KEEPRESOLV.disabled = !disabled6;
       checkDNSSettings6(form);
     }
@@ -328,7 +332,7 @@ function addVLAN(port) {
   var template = $($('<div/>').loadTemplate($('#network-template-'+port)).html().replace(/INDEX/g,index));
   var element = $('[id^="index-'+port+'-"]').last();
   $(element).after(template);
-  selectProtocol($('form[name="'+$(element).parent().attr('name')+'"]'),port);
+  selectProtocol($('form[name="'+$(element).parent().attr('name')+'"]'),port,index);
   $(element).find('input').first().trigger('change');
 }
 function removeVLAN(element) {
@@ -361,6 +365,17 @@ function portcheck_eth0() {
 function portToggle(port,cmd) {
   $.post('/webGui/include/PortToggle.php',{port:port,cmd:cmd},function(){refresh();});
 }
+var watchDHCP = new NchanSubscriber('/sub/dhcp');
+watchDHCP.on('message', function(data) {
+  data = data.split(' ');
+  for (var i=0,row; row=data[i]; i++) {
+    var id = row.split('_');
+    var form = $('form[name="'+id[0]+'_settings"]');
+    var key = id[2].split('=');
+    if (id[1]=='I') form.find('input[name="'+key[0]+'"]').val(key[1]);
+    else if (id[1]=='S') form.find('select[name="'+key[0]+'"]').val(key[1]);
+  }
+});
 $(function() {
   var ctrl = "<span id='wait_eth0' class='status red' style='display:none;font-size:small;font-style:italic'>Please wait... configuring interfaces</span>";
   var form = document.eth0_settings;
@@ -392,6 +407,7 @@ $(function() {
   $('div[id=title]').append(ctrl);
 <?endif;?>
   portcheck_eth0();
+  watchDHCP.start();
 });
 </script>
 <form markdown="1" name="eth0_settings" method="POST" action="/update.php" target="progressFrame" onchange="exitCode(this,false)" onsubmit="return prepareSettings(this)">
@@ -614,6 +630,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$eth0["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:<?=$i?>" min="1" max="9999" value="<?=$eth0["METRIC6:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
@@ -756,6 +773,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$eth0["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:<?=$i?>" min="1" max="9999" value="<?=$eth0["METRIC6:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
@@ -860,6 +878,7 @@ IPv6 address:
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:INDEX" maxlength="39" value="<?=$eth0["GATEWAY6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:INDEX" min="1" max="9999" value="<?=$eth0["METRIC6:INDEX"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 

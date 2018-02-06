@@ -37,8 +37,8 @@ if (file_exists($realfile)) {
   }
 }
 unset($custom,$other);
-exec("ls --indicator-style=none /sys/class/net|grep -P '^br[0-9]'",$custom);
-exec("ls --indicator-style=none /sys/class/net|grep -P '^(bond|eth)[0-9]'",$other);
+exec("ls /sys/class/net|grep -P '^br[0-9]'",$custom);
+exec("ls /sys/class/net|grep -P '^(bond|eth)[0-9]'",$other);
 foreach ($other as $network) {
   if (substr($network,0,4)=='bond') {
     $br = str_replace('bond','br',$network);
