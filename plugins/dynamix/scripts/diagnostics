@@ -124,10 +124,9 @@ $showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_HOME']), 3, 1
 // copy share information (anonymize if applicable)
 $files = glob("/boot/config/shares/*.cfg");
 foreach ($files as $file) {
-  if (in_array(basename($file),$showshares)) {
-    $dest = "/$diag/shares/".basename($file);
-  } else {
-    $dest = anonymize("/$diag/shares/".basename($file),2);
+  $dest = "/$diag/shares/".basename($file);
+  if (!in_array(basename($file),$showshares)) {
+    $dest = anonymize($dest,2);
   }
   @copy($file, $dest);
   if (!$all) exec("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
