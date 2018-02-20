@@ -109,10 +109,25 @@ exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go ".escapeshellarg("/$diag/
 // anonymize configuration files
 if (!$all) exec("sed -ri 's/^((disk|flash)(Read|Write)List.*=\")[^\"]+/\\1.../' ".escapeshellarg("/$diag/config/*.cfg")." 2>/dev/null");
 
+// don't anonymize system share names
+$vardomain = file_exists('/boot/config/domain.cfg') ? parse_ini_file('/boot/config/domain.cfg') : [];
+$vardocker = file_exists('/boot/config/docker.cfg') ? parse_ini_file('/boot/config/docker.cfg') : [];
+$showshares = [];
+$showshares[] = current(array_slice(explode('/',$vardomain['IMAGE_FILE']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['DOMAINDIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['MEDIADIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['DISKDIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_IMAGE_FILE']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_APP_CONFIG_PATH']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_HOME']), 3, 1)).'.cfg';
+
 // copy share information (anonymize if applicable)
 $files = glob("/boot/config/shares/*.cfg");
 foreach ($files as $file) {
-  $dest = anonymize("/$diag/shares/".basename($file),2);
+  $dest = "/$diag/shares/".basename($file);
+  if (!in_array(basename($file),$showshares)) {
+    $dest = anonymize($dest,2);
+  }
   @copy($file, $dest);
   if (!$all) exec("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
 }
