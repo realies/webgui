@@ -198,7 +198,7 @@ function postToXML($post, $setOwnership = false) {
   $xml->MyIP               = xml_encode($post['contMyIP']);
   $xml->Privileged         = (strtolower($post["contPrivileged"]) == 'on') ? 'true' : 'false';
   $xml->Support            = xml_encode($post['contSupport']);
-	$xml->Project            = xml_encode($post['contProject']);
+  $xml->Project            = xml_encode($post['contProject']);
   $xml->Overview           = xml_encode($post['contOverview']);
   $xml->Category           = xml_encode($post['contCategory']);
   $xml->WebUI              = xml_encode(trim($post['contWebUI']));
@@ -257,14 +257,14 @@ function postToXML($post, $setOwnership = false) {
 }
 
 function xmlToVar($xml) {
-  $xml           = (is_file($xml)) ? simplexml_load_file($xml) : simplexml_load_string($xml);
-
+  global $subnet;
+  $xml                = is_file($xml) ? simplexml_load_file($xml) : simplexml_load_string($xml);
   $out                = [];
   $out['Name']        = preg_replace('/\s+/', '', xml_decode($xml->Name));
   $out['Repository']  = xml_decode($xml->Repository);
   $out['Registry']    = xml_decode($xml->Registry);
-  $out['Network']     = isset($xml->Network) ? xml_decode($xml->Network) : xml_decode($xml->Network['Default']);
-  $out['MyIP']        = isset($xml->MyIP) ? xml_decode($xml->MyIP) : '';
+  $out['Network']     = xml_decode($xml->Network);
+  $out['MyIP']        = xml_decode($xml->MyIP ?? '');
   $out['Privileged']  = xml_decode($xml->Privileged);
   $out['Support']     = xml_decode($xml->Support);
   $out['Project']     = xml_decode($xml->Project);
@@ -277,10 +277,9 @@ function xmlToVar($xml) {
   $out['PostArgs']    = xml_decode($xml->PostArgs);
   $out['DonateText']  = xml_decode($xml->DonateText);
   $out['DonateLink']  = xml_decode($xml->DonateLink);
-  $out['DonateImg']   = (xml_decode($xml->DonateImage)) ? xml_decode($xml->DonateImage) : xml_decode($xml->DonateImg); # Various authors use different tags. DonateImg is the official spec
+  $out['DonateImg']   = xml_decode($xml->DonateImg ?? $xml->DonateImage); # Various authors use different tags. DonateImg is the official spec
   $out['MinVer']      = xml_decode($xml->MinVer);
-
-  $out['Config'] = [];
+  $out['Config']      = [];
   if (isset($xml->Config)) {
     foreach ($xml->Config as $config) {
       $c = [];
@@ -303,12 +302,13 @@ function xmlToVar($xml) {
       $out['Config'][] = $c;
     }
   }
-
   # some xml templates advertise as V2 but omit the new <Network> element
   # check for and use the V1 <Networking> element when this occurs
   if (empty($out['Network']) && isset($xml->Networking->Mode)) {
     $out['Network'] = xml_decode($xml->Networking->Mode);
   }
+  # check if network exists
+  if (!key_exists($out['Network'],$subnet)) $out['Network'] = 'none';
 
   # V1 compatibility
   if ($xml["version"] != "2") {
@@ -335,7 +335,6 @@ function xmlToVar($xml) {
         ];
       }
     }
-
     if (isset($xml->Data->Volume)) {
       $volNum = 0;
       foreach ($xml->Data->Volume as $vol) {
@@ -355,7 +354,6 @@ function xmlToVar($xml) {
         ];
       }
     }
-
     if (isset($xml->Environment->Variable)) {
       $varNum = 0;
       foreach ($xml->Environment->Variable as $varitem) {
@@ -376,7 +374,6 @@ function xmlToVar($xml) {
       }
     }
   }
-
   return $out;
 }
 
@@ -1379,7 +1376,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
           </blockquote>
         </td>
       </tr>
-			<tr class="<?=$authoring;?>">
+      <tr class="<?=$authoring;?>">
         <td>Donation Text:</td>
         <td><input type="text" name="contDonateText"></td>
       </tr>

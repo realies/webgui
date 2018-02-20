@@ -34,7 +34,7 @@ function my_scale($value, &$unit, $decimals=NULL, $scale=NULL) {
     if ($scale<0 && round($value,-1)==1000) {$value = 1; $base++;}
     $unit = $units[$base];
   }
-  return number_format($value, $decimals, $number[0], $value>=10000 ? $number[1] : '');
+  return number_format($value, $decimals, $number[0], $value>9999 ? $number[1] : '');
 }
 function my_number($value) {
   global $display;
