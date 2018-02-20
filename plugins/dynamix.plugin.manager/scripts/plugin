@@ -495,9 +495,13 @@ if ($method == "install") {
   // Bergware change: add user or system plugin selection - deprecated
   $plugintype = plugin("plugintype", $plugin_file, $error);
   $target = $plugintype != "system" ? "/boot/config/plugins/$plugin" : "/boot/plugins/$plugin";
-  if ($target != $plugin_file) copy($plugin_file, $target);
-  symlink($target, "/var/log/plugins/$plugin");
+  if ( ! plugin("noInstall",$plugin_file,$error) ) {
+    if ($target != $plugin_file) copy($plugin_file, $target);
+    symlink($target, "/var/log/plugins/$plugin");
   echo "plugin: installed\n";
+  } else {
+    echo "Script: executed\n";
+  }
   exit(0);
 }
 
