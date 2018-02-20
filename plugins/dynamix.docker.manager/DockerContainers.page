@@ -87,7 +87,7 @@ img.stopped{opacity:0.3;}
 			$Support        = $ct['Support'];
 			$Project        = $ct['Project'];
 
-			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s', '%s', '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl), $ct["Id"], addslashes($info[$name]['Support']),addslashes($info[$name]['Project']));
+			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s', '%s', '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes(html_entity_decode($webGuiUrl)), $ct["Id"], addslashes(html_entity_decode($info[$name]['Support'])),addslashes(html_entity_decode($info[$name]['Project'])));
 			$shape          = ($ct["Running"]) ? "play" : "square";
 			$status         = ($ct["Running"]) ? "started" : "stopped";
 
