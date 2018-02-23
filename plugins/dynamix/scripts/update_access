@@ -56,12 +56,8 @@ fi
 sed -ri "s/^(telnet\s+)[0-9]+\/(tcp|udp)\$/\1${PORTTELNET}\/\2/" $SERV
 
 # bind/unbind TELNET service
-if [[ -n $IPV4 && -n $IPV6 ]]; then
-  BIND="$IPV4,$IPV6:"
-elif [[ -n $IPV4 ]]; then
+if [[ -n $IPV4 ]]; then
   BIND="$IPV4:"
-elif [[ -n $IPV6 ]]; then
-  BIND="$IPV6:"
 fi
 # enable/disable TELNET service
 if  [[ $USE_TELNET == yes ]]; then
