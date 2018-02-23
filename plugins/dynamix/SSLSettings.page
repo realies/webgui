@@ -82,20 +82,19 @@ function updateDNS(button) {
   $.post("/webGui/include/UpdateDNS.php",success).fail(failure);
 }
 function checkPorts(form) {
-  form.PORTTELNET.disabled = false;
-  form.PORTSSH.disabled = false;
-  form.PORTSSL.disabled = false;
-  if (!form.PORTTELNET.value) form.PORTTELNET.value = 23;
-  if (!form.PORTSSH.value) form.PORTSSL.value = 22;
-  if (!form.PORT.value) form.PORT.value = 80;
-  if (!form.PORTSSL.value) form.PORTSSL.value = 443;
-  var port = [];
-  if (form.PORTTELNET.value < 1024 && form.PORTTELNET.value != 23) port.push('TELNET ('+form.PORTTELNET.value+')');
-  if (form.PORTSSH.value < 1024 && form.PORTSSH.value != 22) port.push('SSH ('+form.PORTSSH.value+')');
-  if (form.PORT.value < 1024 && form.PORT.value != 80) port.push('HTTP ('+form.PORT.value+')');
-  if (form.PORTSSL.value < 1024 && form.PORTSSL.value != 443) port.push('HTTPS ('+form.PORTSSL.value+')');
-  if (port.length > 0) {
-    swal({title:'Non-recommended port'+(port.length>1?'s':''),text:port.join(', ')+'<br>may conflict with well-known services',html:true,type:'warning',showCancelButton:true},function(){form.submit();});
+  var check = [{'key':'PORTTELNET','port':'23','text':'TELNET'},{'key':'PORTSSH','port':'22','text':'SSH'},{'key':'PORT','port':'80','text':'HTTP'},{'key':'PORTSSL','port':'443','text':'HTTPS'}];
+  var list = [];
+  for (var i=0; i < check.length; i++) {
+    var key = check[i]['key'];
+    var port = check[i]['port'];
+    var text = check[i]['text'];
+    var item = $(form).find('input[name="'+key+'"]');
+    if (!item.val()) item.val(port);
+    if (item.val() < 1024 && item.val() != port && item.prop('disabled')==false) list.push(text+' ('+item.val()+')');
+    item.prop('disabled',false);
+  }
+  if (list.length > 0) {
+    swal({title:'Non-recommended port'+(list.length>1?'s':''),text:list.join(', ')+'<br>may conflict with well-known services',html:true,type:'warning',showCancelButton:true},function(){form.submit();});
   } else {
     form.submit();
   }
