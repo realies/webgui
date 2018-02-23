@@ -334,6 +334,9 @@ IPv4 custom network on interface <?=$network?> (optional):
 > Enter the pool range within each allocated subnet which is used for DHCPv4 assignments by Docker. E.g. 192.168.1.128/25
 
 <?endif;?>
+<?if ($include6):?>
+<hr>
+<?endif;?>
 <?foreach ($include6 as $network => $route):?>
 <?
 $net = normalize($network);
