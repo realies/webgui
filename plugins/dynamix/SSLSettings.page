@@ -27,6 +27,9 @@ $disabled_provision = $keyfile===false || ($isLEcert && $retval_expired===0) || 
 $disabled_updatedns = $keyfile!==false && $isLEcert ? '' : 'disabled';
 $internalip = $eth0['IPADDR:0'];
 ?>
+<?if (strstr('azure,gray',$display['theme'])):?>
+<style>input.trim{width:65px}</style>
+<?endif;?>
 <script>
 function provisionSSL(button) {
   var oldlabel = $.trim($(button).text());
@@ -49,11 +52,11 @@ function provisionSSL(button) {
         $.get("//"+data.internal_dns+":<?=$var['PORT']?>/dnscheck",function() {
           success_rebind_check(data);
         }).fail(function(){
-          failure({"status": 403, "responseJSON": {"error": "Your router or DNS server has DNS rebinding protection enabled, preventing "+data.internal_dns+" <?=$internalip?> resolution. See Help for more details and workarounds"}});
+          failure({"status":403, "responseJSON":{"error": "Your router or DNS server has DNS rebinding protection enabled, preventing "+data.internal_dns+" <?=$internalip?> resolution. See Help for more details and workarounds"}});
         });
       }
     } else {
-      failure({"status": 403, "responseJSON": {"error": "Server was unable to provision SSL certificate"}});
+      failure({"status":403, "responseJSON":{"error": "Server was unable to provision SSL certificate"}});
     }
   };
   var success_rebind_check = function(data) {
@@ -79,43 +82,82 @@ function updateDNS(button) {
   $.post("/webGui/include/UpdateDNS.php",success).fail(failure);
 }
 function checkPorts(form) {
+  form.PORTTELNET.disabled = false;
+  form.PORTSSH.disabled = false;
+  form.PORTSSL.disabled = false;
+  if (!form.PORTTELNET.value) form.PORTTELNET.value = 23;
+  if (!form.PORTSSH.value) form.PORTSSL.value = 22;
   if (!form.PORT.value) form.PORT.value = 80;
   if (!form.PORTSSL.value) form.PORTSSL.value = 443;
-  if (!form.PORTSSH.value) form.PORTSSL.value = 22;
   var port = [];
-  if (form.PORT.value < 1024 && form.PORT.value != 80) port.push('HTTP');
-  if (form.PORTSSL.value < 1024 && form.PORTSSL.value != 443) port.push('HTTPS');
-  if (form.PORTSSH.value < 1024 && form.PORTSSH.value != 22) port.push('SSH');
-  if (port) {
-    swal({title:'Non-recommended port',text:port.join(',')+' may conflict with well known services',type:'warning',showCancelButton:true},function(){form.submit();});
+  if (form.PORTTELNET.value < 1024 && form.PORTTELNET.value != 23) port.push('TELNET ('+form.PORTTELNET.value+')');
+  if (form.PORTSSH.value < 1024 && form.PORTSSH.value != 22) port.push('SSH ('+form.PORTSSH.value+')');
+  if (form.PORT.value < 1024 && form.PORT.value != 80) port.push('HTTP ('+form.PORT.value+')');
+  if (form.PORTSSL.value < 1024 && form.PORTSSL.value != 443) port.push('HTTPS ('+form.PORTSSL.value+')');
+  if (port.length > 0) {
+    swal({title:'Non-recommended port'+(port.length>1?'s':''),text:port.join(', ')+'<br>may conflict with well-known services',html:true,type:'warning',showCancelButton:true},function(){form.submit();});
   } else {
     form.submit();
   }
 }
+function updateTELNET(form) {
+  form.PORTTELNET.disabled = form.USE_TELNET.value=='no';
+}
+function updateSSH(form) {
+  form.PORTSSH.disabled = form.USE_SSH.value=='no';
+}
+function updateSSL(form) {
+  form.PORTSSL.disabled = form.USE_SSL.value=='no';
+}
+$(function(){
+  var form = document.SSLSettings;
+  updateTELNET(form);
+  updateSSH(form);
+  updateSSL(form);
+});
 </script>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
-Restricted management access:
+Restrict management access:
 : <select name="BIND_MGT" size="1" class="narrow">
   <?=mk_option($var['BIND_MGT'], "no", "No")?>
   <?=mk_option($var['BIND_MGT'], "yes", "Yes")?>
   </select>
 
-> By default webGUI and SSH access are available on any active interface of the system.
+> By default GUI, SSH and TELNET access are available on all active interfaces of the system.
 >
-> Restricted management access limits webGUI and SSH access to the management interface only (eth0).
+> *Restrict management access* limits GUI, SSH and TELNET access to the management interface only (eth0).
 
 Use TELNET:
-: <select name="USE_TELNET" size="1" class="narrow">
+: <select name="USE_TELNET" size="1" class="narrow" onchange="updateTELNET(this.form)">
   <?=mk_option($var['USE_TELNET'], "no", "No")?>
   <?=mk_option($var['USE_TELNET'], "yes", "Yes")?>
   </select>
 
-> By default TELNET access is enabled. TELNET is an insecure type of access however,
+> By default TELNET access is enabled. TELNET is an insecure type of CLI access however,
 > and it is highly recommended to use SSH access instead and disable TELNET access.
 
+TELNET port:
+: <input type="number" name="PORTTELNET" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTTELNET']??23)?>">
+
+> Enter the TELNET port, default port is 23.
+
+Use SSH:
+: <select name="USE_SSH" size="1" class="narrow" onchange="updateSSH(this.form)">
+  <?=mk_option($var['USE_SSH'], "no", "No")?>
+  <?=mk_option($var['USE_SSH'], "yes", "Yes")?>
+  </select>
+
+> SSH is enabled by default and offers a secure way of CLI access. Upon system startup SSH keys are automatically generated
+> if not yet existing, and stored on the flash device in the folder */config/ssh*.
+
+SSH port:
+: <input type="number" name="PORTSSH" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSH']??22)?>">
+
+> Enter the SSH port, default port is 22.
+
 Use SSL/TLS:
-: <select name="USE_SSL" size="1" class="narrow">
+: <select name="USE_SSL" size="1" class="narrow" onchange="updateSSL(this.form)">
   <?=mk_option($var['USE_SSL'], "auto", "Auto")?>
   <?=mk_option($var['USE_SSL'], "no", "No")?>
   <?=mk_option($var['USE_SSL'], "yes", "Yes")?>
@@ -172,11 +214,6 @@ HTTPS port:
 : <input type="number" name="PORTSSL" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSL']??443)?>">
 
 > Enter the HTTPS port, default port is 443.
-
-SSH port:
-: <input type="number" name="PORTSSH" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSH']??22)?>">
-
-> Enter the SSH port, default port is 22.
 
 Local TLD:
 : <input type="text" name="LOCAL_TLD" value="<?=htmlspecialchars($var['LOCAL_TLD'])?>" class="narrow">

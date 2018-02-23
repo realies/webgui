@@ -2,6 +2,7 @@
 
 CONF=/etc/ssh/sshd_config
 INET=/etc/inetd.conf
+SERV=/etc/services
 
 # read settings
 if [[ -a /boot/config/ident.cfg ]]; then
@@ -10,8 +11,10 @@ if [[ -a /boot/config/ident.cfg ]]; then
 fi
 
 # preset default values
-[[ -z $BIND_MGT ]] && BIND_MGT=yes
+[[ -z $BIND_MGT ]] && BIND_MGT=no
 [[ -z $USE_TELNET ]] && USE_TELNET=yes
+[[ -z $PORTTELNET ]] && PORTTELNET=23
+[[ -z $USE_SSH ]] && USE_SSH=yes
 [[ -z $PORTSSH ]] && PORTSSH=22
 
 # get management IP addresses
@@ -28,26 +31,42 @@ fi
 if [[ $PORTSSH == 22 ]]; then
   sed -ri 's/^#?Port [0-9]+$/#Port 22/' $CONF
 else
-  sed -ri "s/^#?Port [0-9]+\$/Port $PORTSSH/" $CONF
+  sed -ri "s/^#?Port [0-9]+\$/Port ${PORTSSH}/" $CONF
 fi
 
 # bind/unbind SSH service
 if [[ -n $IPV4 ]]; then
-  sed -ri "s/^#?(ListenAddress) 0.0.0.0\$/\1 $IPV4/" $CONF
+  sed -ri "s/^#?(ListenAddress) 0.0.0.0\$/\1 ${IPV4}/" $CONF
 else
   sed -ri 's/^#?(ListenAddress) [0-9]{1,3}\..+$/#\1 0.0.0.0/' $CONF
 fi
 if [[ -n $IPV6 ]]; then
-  sed -ri "s/^#?(ListenAddress) ::\$/\1 $IPV6/" $CONF
+  sed -ri "s/^#?(ListenAddress) ::\$/\1 ${IPV6}/" $CONF
 else
   sed -ri 's/^#?(ListenAddress) [A-Fa-f0-9]{1,4}:.+$/#\1 ::/' $CONF
 fi
-/etc/rc.d/rc.sshd restart >/dev/null
 
+# enable/disable SSH service
+/etc/rc.d/rc.sshd stop >/dev/null
+if [[ $USE_SSH == yes ]]; then
+  /etc/rc.d/rc.sshd start >/dev/null
+fi
+
+# update TELNET listening port
+sed -ri "s/^(telnet\s+)[0-9]+\/(tcp|udp)\$/\1${PORTTELNET}\/\2/" $SERV
+
+# bind/unbind TELNET service
+if [[ -n $IPV4 && -n $IPV6 ]]; then
+  BIND="$IPV4,$IPV6:"
+elif [[ -n $IPV4 ]]; then
+  BIND="$IPV4:"
+elif [[ -n $IPV6 ]]; then
+  BIND="$IPV6:"
+fi
 # enable/disable TELNET service
 if  [[ $USE_TELNET == yes ]]; then
-  sed -ri 's/^#?(telnet\s.*telnetd$)/\1/' $INET
+  sed -ri "s/^#?(.+:)?(telnet\s.+telnetd\$)/${BIND}\2/" $INET
 else
-  sed -ri 's/^#?(telnet\s.*telnetd$)/#\1/' $INET
+  sed -ri 's/^#?(.+:)?(telnet\s.+telnetd$)/#\2/' $INET
 fi
 /etc/rc.d/rc.inetd restart >/dev/null
