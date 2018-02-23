@@ -47,9 +47,14 @@ else
 fi
 
 # enable/disable SSH service
-/etc/rc.d/rc.sshd stop >/dev/null
 if [[ $USE_SSH == yes ]]; then
-  /etc/rc.d/rc.sshd start >/dev/null
+  if [[ -r /var/run/sshd.pid ]]; then
+    /etc/rc.d/rc.sshd restart >/dev/null
+  else
+    /etc/rc.d/rc.sshd start >/dev/null
+  fi
+else
+  /etc/rc.d/rc.sshd stop >/dev/null
 fi
 
 # update TELNET listening port
