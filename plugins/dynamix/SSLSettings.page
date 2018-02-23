@@ -223,8 +223,7 @@ Local TLD:
 : <input type="button" value="Apply" onclick="checkPorts(this.form)"><input type="button" value="Done" onclick="done()">
 
 </form>
-
-<br><br>
+<div style="height:24px"></div>
 <form markdown="1" name="Provision" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
 Certificate issuer:
