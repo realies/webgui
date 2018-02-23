@@ -117,6 +117,7 @@ $(function(){
 </script>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
+<!--
 Restrict management access:
 : <select name="BIND_MGT" size="1" class="narrow">
   <?=mk_option($var['BIND_MGT'], "no", "No")?>
@@ -126,7 +127,7 @@ Restrict management access:
 > By default GUI, SSH and TELNET access are available on all active interfaces of the system.
 >
 > *Restrict management access* limits GUI, SSH and TELNET access to the management interface only (eth0).
-
+-->
 Use TELNET:
 : <select name="USE_TELNET" size="1" class="narrow" onchange="updateTELNET(this.form)">
   <?=mk_option($var['USE_TELNET'], "no", "No")?>
