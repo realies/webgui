@@ -1,6 +1,5 @@
 Menu="Identification"
 Title="Management Access"
-Icon="ident.png"
 Tag="expeditedssl"
 ---
 <?PHP
@@ -16,16 +15,36 @@ Tag="expeditedssl"
  */
 ?>
 <?
+function find_tasks() {
+  global $site;
+  $tasks = [];
+  foreach ($site as $page) {
+    if (empty($page['Menu'])) continue;
+    $menu = strtok($page['Menu'], ' ');
+    switch ($menu[0]) {
+      case '$': $menu = get_ini_key($menu,strtok(' ')); break;
+      case '/': $menu = get_file_key($menu,strtok(' ')); break;
+    }
+    while ($menu !== false) {
+      if (substr($menu,0,5) == 'Tasks') {
+        if (empty($page['Cond'])) $tasks[] = $page['name'];
+        break;
+      }
+      $menu = strtok(' ');
+    }
+  }
+  sort($tasks);
+  return $tasks;
+}
 $keyfile = @file_get_contents($var['regFILE']);
-if ($keyfile !== false)
-  $keyfile = @base64_encode($keyfile);
 $isLEcert = file_exists("/boot/config/ssl/certs/certificate_bundle.pem");
-if ($isLEcert)
-  exec("/usr/bin/openssl x509 -checkend 2592000 -noout -in /etc/ssl/certs/unraid_bundle.pem",$arrout,$retval_expired);
+if ($keyfile !== false) $keyfile = base64_encode($keyfile);
+if ($isLEcert) exec("/usr/bin/openssl x509 -checkend 2592000 -noout -in /etc/ssl/certs/unraid_bundle.pem",$arrout,$retval_expired);
 $provisionlabel = $isLEcert ? 'Renew' : 'Provision';
 $disabled_provision = $keyfile===false || ($isLEcert && $retval_expired===0) || $var['USE_SSL']!="auto" ? 'disabled' : '';
 $disabled_updatedns = $keyfile!==false && $isLEcert ? '' : 'disabled';
 $internalip = $eth0['IPADDR:0'];
+$tasks = find_tasks();
 ?>
 <?if (strstr('azure,gray',$display['theme'])):?>
 <style>input.trim{width:65px}</style>
@@ -117,8 +136,15 @@ $(function(){
 </script>
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
+Start page:
+: <select name="START_PAGE" size="1" class="narrow">
+<?foreach ($tasks as $task) echo mk_option($var['START_PAGE']??'Main', $task, $task);?>
+  </select>
+
+> Select the page which is opened first when entering the GUI. By default the *Main* page is selected.
+
 <!--
-Restrict management access:
+Restrict access:
 : <select name="BIND_MGT" size="1" class="narrow">
   <?=mk_option($var['BIND_MGT'], "no", "No")?>
   <?=mk_option($var['BIND_MGT'], "yes", "Yes")?>
@@ -126,8 +152,9 @@ Restrict management access:
 
 > By default GUI, SSH and TELNET access are available on all active interfaces of the system.
 >
-> *Restrict management access* limits GUI, SSH and TELNET access to the management interface only (eth0).
+> *Restrict access* limits GUI, SSH and TELNET access to the management interface only (eth0).
 -->
+
 Use TELNET:
 : <select name="USE_TELNET" size="1" class="narrow" onchange="updateTELNET(this.form)">
   <?=mk_option($var['USE_TELNET'], "no", "No")?>
