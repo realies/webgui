@@ -141,6 +141,8 @@ Start page:
 <?foreach ($tasks as $task) echo mk_option($var['START_PAGE']??'Main', $task, $task);?>
   </select>
 
+> Select the page which is opened first when entering the GUI. By default the *Main* page is selected.
+
 <!--
 Restrict access:
 : <select name="BIND_MGT" size="1" class="narrow">
