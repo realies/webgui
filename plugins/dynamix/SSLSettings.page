@@ -138,9 +138,8 @@ $(function(){
 <input type="hidden" name="changePorts" value="apply">
 Start page:
 : <select name="START_PAGE" size="1" class="narrow">
-<?foreach ($tasks as $task) {
-  echo mk_option($var['START_PAGE']??'Main', $task, $task);}
-?></select>
+<?foreach ($tasks as $task) echo mk_option($var['START_PAGE']??'Main', $task, $task);?>
+  </select>
 
 <!--
 Restrict access:
