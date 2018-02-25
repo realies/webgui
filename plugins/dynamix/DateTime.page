@@ -58,7 +58,7 @@ NTP server 3:
 > This is the alternate NTP Server to use if NTP Servers 1 and 2 are both down.
 
 NTP server 4:
-: <input type="text" name="NTP_SERVER4" maxlength="80" value="<?=htmlspecialchars($var['NTP_SERVER3'])?>">
+: <input type="text" name="NTP_SERVER4" maxlength="80" value="<?=htmlspecialchars($var['NTP_SERVER4'])?>">
 
 > This is the alternate NTP Server to use if NTP Servers 1, 2, and 3 are all down.
 
