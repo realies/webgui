@@ -17,13 +17,15 @@ Tag="thumbs-up"
 <?
 $empty = "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i><em>Please wait, retrieving and updating system information ...</em></td><tr>";
 $audit = $notify['unraidos'] ? 1 : 0;
+$version = $date = 'unknown';
 
 if (file_exists('/boot/previous/changes.txt')) {
   exec("head -n4 /boot/previous/changes.txt",$rows);
   foreach ($rows as $row) {
-    list($check,$version,$date) = explode(' ',$row);
-    if (stripos($check,'version')!==false) break;
-    $version = $date = 'unknown';
+    if ($i = stripos($row,'version')!==false) {
+      list($version,$date) = explode(' ',trim(substr($row,$i+7)));
+      break;
+    }
   }
 }
 ?>
