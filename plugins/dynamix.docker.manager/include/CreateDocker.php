@@ -1488,7 +1488,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
           <?=mk_option(0,'host','Host')?>
           <?=mk_option(0,'none','None')?>
           <?foreach ($custom as $network):?>
-          <?=mk_option(0,$network,$network)?>
+          <?=mk_option(0,$network,"Custom : $network")?>
           <?endforeach;?>
           </select>
         </td>
