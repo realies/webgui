@@ -12,7 +12,6 @@
 ?>
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-exec("cp -rf /boot/previous/* /boot >/dev/null");
-exec("rm -rf /boot/previous >/dev/null");
+exec("mv -f /boot/previous/* /boot");
 file_put_contents("$docroot/plugins/unRAIDServer/README.md","**DOWNGRADE TO VERSION {$_GET['version']}**");
 ?>
