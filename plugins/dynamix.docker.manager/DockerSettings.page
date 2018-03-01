@@ -136,7 +136,7 @@ span.disabled{color:#404040}
 <input type="hidden" name="#include" value="/plugins/dynamix.docker.manager/include/PruneConfig.php">
 <input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
 <input type="hidden" name="#cleanup" value="true">
-<input type="hidden" name="DOCKER_CUSTOM_NETWORKS" value="<?=implode(' ',$unset)?>">
+<input type="hidden" name="DOCKER_CUSTOM_NETWORKS" value="<?=implode(' ',$unset)?> ">
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
   <?=mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No')?>
