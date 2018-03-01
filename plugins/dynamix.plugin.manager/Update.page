@@ -22,7 +22,8 @@ $version = $date = 'unknown';
 if (file_exists('/boot/previous/changes.txt')) {
   exec("head -n4 /boot/previous/changes.txt",$rows);
   foreach ($rows as $row) {
-    if ($i = stripos($row,'version')!==false) {
+    $i = stripos($row,'version');
+    if ($i !== false) {
       list($version,$date) = explode(' ',trim(substr($row,$i+7)));
       break;
     }
