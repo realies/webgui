@@ -492,48 +492,29 @@ function setXmlVal(&$xml, $value, $el, $attr = null, $pos = 0) {
 }
 
 function getUsedPorts() {
-  global $dockerManPaths;
-  $docker = new DockerClient();
-  $docker = $docker->getDockerContainers();
-  if (!$docker) $docker = [];
-  $names = $ports = [];
-  foreach ($docker as $ct) $names[] = strtolower($ct['Name']);
-  foreach (glob($dockerManPaths['templates-user'].'/*.xml',GLOB_NOSORT) as $file) {
-    $name = strtolower(getXmlVal($file,'Name'));
-    if (!in_array($name,$names)) continue;
-    $list = []; $p = 0;
-    $list['Name'] = $name;
-    $list['Port'] = '';
-    while ($port = getXmlVal($file,'HostPort',null,$p++)) $list['Port'] .= $port.' ';
+  $ports = [];
+  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
+  foreach ($names as $name) {
+    $list = [];
+    $list['Name'] = strtolower($name);
+    $port = explode(' ',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}} {{end}}' $name 2>/dev/null")));
+    $gui = exec("docker inspect --format='{{range \$c := .Config.Env}}{{\$c}} {{end}}' $name 2>/dev/null|grep -Po '(TCP|UDP)_PORT_\d+=\K\d+'");
+    if ($gui) $port[] = $gui;
+    natsort($port);
+    $list['Port'] = trim(implode(' ',array_unique($port)));
     $ports[] = $list;
   }
   return $ports;
 }
 
 function getUsedIPs() {
-  global $dockerManPaths,$eth0;
-  $docker = new DockerClient();
-  $docker = $docker->getDockerContainers();
-  if (!$docker) $docker = [];
-  $names = $ips = [];
-  foreach ($docker as $ct) $names[] = strtolower($ct['Name']);
-  foreach (glob($dockerManPaths['templates-user'].'/*.xml',GLOB_NOSORT) as $file) {
-    $name = strtolower(getXmlVal($file,'Name'));
-    if (!in_array($name,$names)) continue;
+  $ips = [];
+  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
+  foreach ($names as $name) {
     $list = [];
-    $list['Name'] = $name;
-    $mode = strtolower(getXmlVal($file,'Mode'));
-    if ($mode == 'none')
-      $list['ip'] = '-';
-    if ($mode == 'bridge')
-      $list['ip'] = 'dynamic';
-    elseif ($mode == 'host')
-      $list['ip'] = $eth0['IPADDR:0'];
-    else {
-      $list['ip'] = getXmlVal($file,'MyIP',null,0);
-      if (!$list['ip']) $list['ip'] = 'dynamic';
-    }
-    $list['ip'] .= " ($mode)";
+    $list['Name'] = strtolower($name);
+    $dev = exec("docker inspect --format='{{range \$p,\$c := .NetworkSettings.Networks}}{{\$p}}{{end}}' $name 2>/dev/null");
+    $list['ip'] = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' $name 2>/dev/null")." ($dev)";
     $ips[] = $list;
   }
   return $ips;
@@ -1656,13 +1637,13 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 
 <div id="templateUsedPorts" style="display:none">
 <table class='settings wide'>
-  <tr><td></td><td style="{0}"><span style="width:120px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
+  <tr><td></td><td style="{0}"><span style="width:160px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
 </table>
 </div>
 
 <div id="templateUsedIPs" style="display:none">
 <table class='settings wide'>
-  <tr><td></td><td style="{0}"><span style="width:120px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
+  <tr><td></td><td style="{0}"><span style="width:160px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
 </table>
 </div>
 
