@@ -87,7 +87,7 @@ img.stopped{opacity:0.3;}
 			$Support        = $ct['Support'];
 			$Project        = $ct['Project'];
 
-			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s', '%s', '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes(html_entity_decode($webGuiUrl)), $ct["Id"], addslashes(html_entity_decode($info[$name]['Support'])),addslashes(html_entity_decode($info[$name]['Project'])));
+			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s', '%s', '%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes(html_entity_decode($webGuiUrl)), $ct["Id"], addslashes(html_entity_decode($info[$name]['Support'])),addslashes(html_entity_decode($info[$name]['Project'])));
 			$shape          = ($ct["Running"]) ? "play" : "square";
 			$status         = ($ct["Running"]) ? "started" : "stopped";
 
@@ -97,26 +97,21 @@ img.stopped{opacity:0.3;}
 			}
 
 			$ports = [];
-			foreach ($ct['Ports'] as $p) {
-				if (strlen($p['PublicPort'])) {
-					$ipAddr    = sprintf("%s:%s", $IP, $p['PublicPort']);
-					$outFormat = sprintf('<a href="http://%s" target="_blank">%s/%s <i class="fa fa-arrows-h" style="margin: 0 3px"></i> %s</a>', $ipAddr, $p['PrivatePort'], $p['Type'], htmlspecialchars($ipAddr));
-				} else {
-					$outFormat = sprintf("%s/%s", $p['PrivatePort'], $p['Type']);
-				}
-				$ports[] = $outFormat;
+			$binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+			foreach ($binds as $bind) {
+				list($container_port,$host_port) = explode(':',$bind);
+				if (!$host_port) continue;
+				$ipAddr  = sprintf("%s:%s", $IP, $host_port);
+				$ports[] = sprintf('<a href="http://%s" target="_blank">%s <i class="fa fa-arrows-h" style="margin: 0 3px"></i> %s</a>', $ipAddr, $container_port, htmlspecialchars($ipAddr));
 			}
 
 			$paths = [];
-			if (count($ct['Volumes'])){
-				foreach ($ct['Volumes'] as $value) {
-					if (preg_match('/localtime/', $value) == true) continue;
-					list($host_path, $container_path, $access_mode) = explode(":", $value);
-
-					$tip = 'Container volume \'' . $container_path . '\' has ' . ($access_mode == 'ro' ? 'read-only' : 'read-write') . ' access to Host path \'' . $host_path . '\'';
-
-					$paths[] = sprintf('<a href="/Shares/Browse?dir=%s" target="_blank" title="%s">%s <i class="fa fa-%s" style="margin: 0 3px"></i> %s</a>', urlencode($host_path), htmlspecialchars($tip), htmlspecialchars($container_path), ($access_mode == 'ro' ? 'long-arrow-left' : 'arrows-h'), htmlspecialchars($host_path));
-				}
+			$mounts = explode('|',exec("docker inspect --format='{{range .Mounts}}{{.Destination}}:{{.Source}}:{{.Mode}}|{{end}}' $name 2>/dev/null"));
+			foreach ($mounts as $mount) {
+				list($container_path,$host_path,$access_mode) = explode(':',$mount);
+				if (!$access_mode) continue;
+				$tip = 'Container volume \''.$container_path.'\' has '.($access_mode == 'ro' ? 'read-only' : 'read-write').' access to Host path \''.$host_path.'\'';
+				$paths[] = sprintf('<a href="/Shares/Browse?dir=%s" target="_blank" title="%s">%s <i class="fa fa-%s" style="margin: 0 3px"></i> %s</a>', urlencode($host_path), htmlspecialchars($tip), htmlspecialchars($container_path), ($access_mode == 'ro' ? 'long-arrow-left' : 'arrows-h'), htmlspecialchars($host_path));
 			}
 			?>
 		<tr>
