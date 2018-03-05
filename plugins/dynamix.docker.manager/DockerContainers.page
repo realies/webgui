@@ -60,6 +60,7 @@ img.stopped{opacity:0.3;}
 			<th>&nbsp;</th>
 			<th>Application</th>
 			<th>Version</th>
+			<th>Network</th>
 			<th>Port Mappings <small>(App to Host)</small></th>
 			<th>Volume Mappings <small>(App to Host)</small></th>
 			<th width="80px" style="text-align: center">Autostart</th>
@@ -76,9 +77,10 @@ img.stopped{opacity:0.3;}
 		$info = $DockerTemplates->getAllInfo();
 		$contextMenus = [];
 
-		$IP = $eth0["IPADDR:0"];
+		$IP = $eth0['IPADDR:0'];
 		foreach ($all_containers as $ct) {
-			$name           = $ct["Name"];
+			$name           = $ct['Name'];
+			$mode           = $ct['NetworkMode'];
 			$is_autostart   = ($info[$name]['autostart']) ? 'true' : 'false';
 			$updateStatus   = $info[$name]['updated'];
 			$updateStatus   = ($updateStatus == "true" || $updateStatus == "undef") ? 'true' : 'false';
@@ -97,21 +99,29 @@ img.stopped{opacity:0.3;}
 			}
 
 			$ports = [];
-			$binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
-			foreach ($binds as $bind) {
-				list($container_port,$host_port) = explode(':',$bind);
-				if (!$host_port) continue;
-				$ipAddr  = sprintf("%s:%s", $IP, $host_port);
-				$ports[] = sprintf('<a href="http://%s" target="_blank">%s <i class="fa fa-arrows-h" style="margin: 0 3px"></i> %s</a>', $ipAddr, $container_port, htmlspecialchars($ipAddr));
+			if ($mode == 'bridge') {
+				$binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+				$ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null");
+				foreach ($binds as $bind) {
+					if (!$bind) continue;
+					list($container_port,$host_port) = explode(':',$bind);
+					$ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $ip, $container_port, $IP, $host_port);
+				}
+			} else {
+				$binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null"));
+				$ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $IP;
+				foreach ($binds as $bind) {
+					if (!$bind) continue;
+					$ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
+				}
 			}
 
 			$paths = [];
-			$mounts = explode('|',exec("docker inspect --format='{{range .Mounts}}{{.Destination}}:{{.Source}}:{{.Mode}}|{{end}}' $name 2>/dev/null"));
+			$mounts = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name 2>/dev/null"));
 			foreach ($mounts as $mount) {
-				list($container_path,$host_path,$access_mode) = explode(':',$mount);
-				if (!$access_mode) continue;
-				$tip = 'Container volume \''.$container_path.'\' has '.($access_mode == 'ro' ? 'read-only' : 'read-write').' access to Host path \''.$host_path.'\'';
-				$paths[] = sprintf('<a href="/Shares/Browse?dir=%s" target="_blank" title="%s">%s <i class="fa fa-%s" style="margin: 0 3px"></i> %s</a>', urlencode($host_path), htmlspecialchars($tip), htmlspecialchars($container_path), ($access_mode == 'ro' ? 'long-arrow-left' : 'arrows-h'), htmlspecialchars($host_path));
+				if (!$mount) continue;
+				list($host_path,$container_path,$access_mode) = explode(':',$mount);
+				$paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
 			}
 			?>
 		<tr>
@@ -158,8 +168,9 @@ img.stopped{opacity:0.3;}
 				}
 				?>
 			</td>
-			<td style="white-space:nowrap;"><span class="docker_readmore"><?= implode("<br>", $ports); ?></span></td>
-			<td style="word-break:break-all;"><span class="docker_readmore"><?= implode("<br>", $paths); ?></span></td>
+			<td><?=$mode?></td>
+			<td style="white-space:nowrap;"><?= implode("<br>", $ports)?></td>
+			<td style="word-break:break-all;"><?= implode("<br>", $paths)?></td>
 			<td><input type="checkbox" class="autostart" container="<?=htmlspecialchars($ct['Name']);?>" <?=$info[$ct['Name']]['autostart'] ? "checked" : ""?>></td>
 			<td><a class="log" onclick="containerLogs('<?=addslashes(htmlspecialchars($ct['Name']));?>','<?=$ct['Id'];?>', false, false)"><img class="basic" src="/plugins/dynamix/icons/log.png"/><div class="advanced" style="width: 124px;"><?=htmlspecialchars($ct['Status'])?></div><div class="advanced" style="color:#888;">Created <?=htmlspecialchars($ct['Created'])?></div></a></td>
 		</tr>
@@ -264,7 +275,5 @@ $(function() {
 
 	context.init({ preventDoubleContext: false });
 	<?=htmlspecialchars(implode("\n\t", $contextMenus));?>
-
-	$('.docker_readmore').readmore({maxHeight:48, moreLink: '<a href="#" style="text-align:center;"><i class="fa fa-chevron-down"></i></a>', lessLink: '<a href="#" style="text-align:center;"><i class="fa fa-chevron-up"></i></a>'});
 });
 </script>

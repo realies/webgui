@@ -497,11 +497,13 @@ function getUsedPorts() {
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = strtolower($name);
-    $port = explode(' ',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}} {{end}}' $name 2>/dev/null")));
-    $gui = exec("docker inspect --format='{{range \$c := .Config.Env}}{{\$c}} {{end}}' $name 2>/dev/null|grep -Po '(TCP|UDP)_PORT_\d+=\K\d+'");
-    if ($gui) $port[] = $gui;
+    $mode = exec("docker inspect --format='{{lower .HostConfig.NetworkMode}}' $name 2>/dev/null");
+    if ($mode == 'bridge')
+      $port = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+    else
+      $port = explode('|',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null")));
     natsort($port);
-    $list['Port'] = trim(implode(' ',array_unique($port)));
+    $list['Port'] = implode(' ',array_unique($port));
     $ports[] = $list;
   }
   return $ports;
@@ -513,8 +515,8 @@ function getUsedIPs() {
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = strtolower($name);
-    $dev = exec("docker inspect --format='{{range \$p,\$c := .NetworkSettings.Networks}}{{\$p}}{{end}}' $name 2>/dev/null");
-    $list['ip'] = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' $name 2>/dev/null")." ($dev)";
+    $mode = exec("docker inspect --format='{{lower .HostConfig.NetworkMode}}' $name 2>/dev/null");
+    $list['ip'] = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null")." ($mode)";
     $ips[] = $list;
   }
   return $ips;
@@ -1512,14 +1514,14 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="portsused_toggle" class="portsused_collapsed"><a onclick="togglePortsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show deployed host ports ...</a></td>
+        <td id="portsused_toggle" class="portsused_collapsed"><a onclick="togglePortsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed host ports ...</a></td>
       </tr>
     </table>
     <div id="configLocationPorts" style="display:none"></div><br>
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="ipsused_toggle" class="ipsused_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show deployed IP addresses ...</a></td>
+        <td id="ipsused_toggle" class="ipsused_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed IP addresses ...</a></td>
       </tr>
     </table>
     <div id="configLocationIPs" style="display:none"></div><br>
@@ -1684,11 +1686,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     if ( readm.hasClass('portsused_collapsed') ) {
       readm.removeClass('portsused_collapsed').addClass('portsused_expanded');
       $('#configLocationPorts').slideDown('fast');
-      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide deployed host ports ...');
+      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed host ports ...');
     } else {
       $('#configLocationPorts').slideUp('fast');
       readm.removeClass('portsused_expanded').addClass('portsused_collapsed');
-      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show deployed host ports ...');
+      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed host ports ...');
     }
   }
   function toggleIPsUsed() {
@@ -1696,11 +1698,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     if ( readm.hasClass('ipsused_collapsed') ) {
       readm.removeClass('ipsused_collapsed').addClass('ipsused_expanded');
       $('#configLocationIPs').slideDown('fast');
-      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide deployed IP addresses ...');
+      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed IP addresses ...');
     } else {
       $('#configLocationIPs').slideUp('fast');
       readm.removeClass('ipsused_expanded').addClass('ipsused_collapsed');
-      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show deployed IP addresses ...');
+      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed IP addresses ...');
     }
   }
   function load_contOverview() {
@@ -1765,10 +1767,10 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     // Show associated subnet with fixed IP (if existing)
     showSubnet($('select[name="contNetwork"]').val());
 
-    // Add list of deployed host ports
+    // Add list of exposed host ports
     $("#configLocationPorts").html(makeUsedPorts(UsedPorts,$('input[name="contName"]').val()));
 
-    // Add list of deployed IP addresses
+    // Add list of exposed IP addresses
     $("#configLocationIPs").html(makeUsedIPs(UsedIPs,$('input[name="contName"]').val()));
 
     // Add switchButton
