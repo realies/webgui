@@ -125,10 +125,12 @@ div.PanelText{display:none;}
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/vmmanager.js')?>"></script>
 <script>
 function startAll() {
+  $('input[type=button]').prop('disabled',true);
   for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).addClass('fa-spin');
   $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
+  $('input[type=button]').prop('disabled',true);
   for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).addClass('fa-spin');
   $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'stop'}, function(){loadlist();});
 }
@@ -207,6 +209,7 @@ foreach ($vms as $vm) {
       },'json');
     });
     context.init({preventDoubleContext:false});
+    $('input[type=button]').prop('disabled',false);
   });
 }
 $(function() {

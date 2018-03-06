@@ -49,10 +49,12 @@ img.stopped{opacity:0.3}
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
 <script>
 function startAll() {
+  $('input[type=button]').prop('disabled',true);
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).addClass('fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
+  $('input[type=button]').prop('disabled',true);
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).addClass('fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
 }
@@ -88,6 +90,7 @@ function loadlist() {
     });
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
     context.init({preventDoubleContext:false});
+    $('input[type=button]').prop('disabled',false);
   });
 }
 $(function() {
