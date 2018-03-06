@@ -77,12 +77,12 @@ foreach ($all_containers as $ct) {
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
   }
   echo "<tr><td style='width:48px;padding:4px'>";
-  echo "<div id=\"$id\" style=\"display:block; cursor:pointer\"><div style=\"position:relative;width:48px;height:48px;margin:0px auto\">";
-  echo "<img src=\"".htmlspecialchars($icon)."\" class=\"".htmlspecialchars($status)."\" style=\"position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px\">";
-  echo "<i class=\"fa iconstatus fa-$shape $status\" title=\"".htmlspecialchars($status)."\"></i></div></div>";
+  echo "<div id='$id' style='display:block; cursor:pointer'><div style='position:relative;width:48px;height:48px;margin:0px auto'>";
+  echo "<img src='".htmlspecialchars($icon)."' class='".htmlspecialchars($status)."' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
+  echo "<i class='fa iconstatus fa-$shape $status' title='".htmlspecialchars($status)."'></i></div></div>";
   echo "</td><td>";
   if ($template) {
-    echo "<a class=\"exec\" onclick=\"editContainer('".addslashes(htmlspecialchars($name))."','".addslashes(htmlspecialchars($template))."')\">".htmlspecialchars($name)."</a>";
+    echo "<a class='exec' onclick=\"editContainer('".addslashes(htmlspecialchars($name))."','".addslashes(htmlspecialchars($template))."')\">".htmlspecialchars($name)."</a>";
   } else {
     echo htmlspecialchars($name);
   }
@@ -91,31 +91,31 @@ foreach ($all_containers as $ct) {
   echo "<div class='advanced' style='width:160px'>By:";
   $registry = $info['registry'];
   if ($registry) {
-    echo "<a href=\"".htmlspecialchars($registry)."\" target=\"_blank\">".htmlspecialchars($ct['Image'])."</a>";
+    echo "<a href='".htmlspecialchars($registry)."' target='_blank'>".htmlspecialchars($ct['Image'])."</a>";
   } else {
     echo htmlspecialchars($ct['Image']);
   }
   echo "</div></td><td class='updatecolumn'>";
   if ($updateStatus=='false') {
-    echo "<a class=\"exec\" onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> update ready</span></a>";
+    echo "<a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download'></i> update ready</span></a>";
   } elseif ($updateStatus=='true') {
-    echo "<span style=\"color:#44B012;white-space:nowrap;\"><i class=\"fa fa-check\"></i> up-to-date</span>";
-    echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
+    echo "<span style='color:#44B012;white-space:nowrap;'><i class='fa fa-check'></i> up-to-date</span>";
+    echo "<div class='advanced'><a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download'></i> force update</span></a></div>";
   } else {
-    echo "<span style=\"color:#FF2400;white-space:nowrap;\"><i class=\"fa fa-exclamation-triangle\"></i> not available</span>";
-    echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
+    echo "<span style='color:#FF2400;white-space:nowrap;'><i class='fa fa-exclamation-triangle'></i> not available</span>";
+    echo "<div class='advanced'><a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download'></i> force update</span></a></div>";
   }
   echo "</td><td>$mode</td>";
-  echo "<td style='white-space:nowrap'>".implode('<br>',$ports)."</td>";
-  echo "<td style='word-break:break-all'>".implode('<br>',$paths)."</td>";
-  echo "<td><input type='checkbox' class='autostart' container=\"".htmlspecialchars($name)."\"".($info['autostart'] ? ' checked':'')."></td>";
+  echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
+  echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
+  echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced' style='width:124px;'>".htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced'>Created ".htmlspecialchars($ct['Created'])."</div></a></td></tr>";
 }
 foreach ($DockerClient->getDockerImages() as $image) {
   if (count($image['usedBy'])) continue;
   $menu[] = sprintf("addDockerImageContext('%s','%s');",$image['Id'],implode(', ',$image['Tags']));
   echo "<tr class='advanced'><td style='width:48px;padding:4px'>";
-  echo "<div id=\"context-".htmlspecialchars($image['Id'])."\" style=\"display:block;cursor:pointer\">";
+  echo "<div id='context-{$image['Id']}' style='display:block;cursor:pointer'>";
   echo "<div style='position:relative;width:48px;height:48px;margin:0 auto'>";
   echo "<img src='/webGui/images/disk.png' style='position:absolute;opacity:0.3;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
   echo "</div></div></td>";

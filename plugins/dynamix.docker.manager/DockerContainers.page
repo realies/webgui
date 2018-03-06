@@ -35,7 +35,7 @@ img.stopped{opacity:0.3}
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top:-44px"><input type="checkbox" class="advancedview"></span>
+<span class="status" style="margin-top:-44px"><span style="float:right;margin-left:48px"><input type="checkbox" class="advancedview"></span><span style="float:right"><input type="checkbox" class="expandedlist"></span></span>
 <table class="tablesorter shift" id="docker_containers">
 <thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th>Log</th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
@@ -71,6 +71,13 @@ function resize(bind) {
   }
 }
 <?endif;?>
+function listview() {
+  if ($.cookie('docker_list_mode')=='collapsed') {
+    $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
+  } else {
+    $('.docker_readmore').readmore('destroy');
+  }
+}
 function loadlist() {
   $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
     var data = d.split(/\0/);
@@ -90,15 +97,21 @@ function loadlist() {
     });
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
     context.init({preventDoubleContext:false});
+    listview();
     $('input[type=button]').prop('disabled',false);
   });
 }
 $(function() {
-  $('.advancedview').switchButton({labels_placement:"left", on_label:'Advanced View', off_label:'Basic View', checked:$.cookie('docker_listview_mode')=='advanced'});
+  $('.expandedlist').switchButton({labels_placement:'left', on_label:'Collapsed List', off_label:'Expanded List', checked:$.cookie('docker_list_mode')=='collapsed'});
+  $('.expandedlist').change(function() {
+    $.cookie('docker_list_mode',$('.expandedlist').is(':checked')?'collapsed':'expanded',{expires:3650});
+    listview();
+  });
+  $('.advancedview').switchButton({labels_placement:'left', on_label:'Advanced View', off_label:'Basic View', checked:$.cookie('docker_listview_mode')=='advanced'});
   $('.advancedview').change(function() {
     $('.advanced').toggle('slow');
     $('.basic').toggle('slow');
-    $.cookie('docker_listview_mode', $('.advancedview').is(':checked')?'advanced':'basic', {expires:3650});
+    $.cookie('docker_listview_mode',$('.advancedview').is(':checked')?'advanced':'basic',{expires:3650});
   });
   loadlist();
 });
