@@ -45,8 +45,8 @@ if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dash
     echo "<div class='Panel $status'>";
     echo "<div id='$id' style='display:block; cursor:pointer'>";
     echo "<div style='position:relative;width:48px;height:48px;margin:0px auto;'>";
-    echo "<img src='$icon' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px;'><i class='fa iconstatus fa-$shape $status' title='$status'></i></div>";
-    echo "<div class='PanelText'><span class='PanelText ".($updateStatus=='false'?'update':$status)."'>$name</span></div></div></div>";
+    echo "<img src='$icon' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px;'><i class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
+    echo "<div class='PanelText'><span class='PanelText ".($updateStatus=='false'?'update':$status)."'>$name</span></div></div>";
   }
 }
 
