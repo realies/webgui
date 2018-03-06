@@ -50,12 +50,12 @@ img.stopped{opacity:0.3}
 <script>
 function startAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).addClass('fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').addClass('fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).addClass('fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
 }
 <?if ($display['resize']):?>

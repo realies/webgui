@@ -1,6 +1,6 @@
 function ajaxVMDispatch(params, reload){
   var spin = typeof reload != 'undefined';
-  if (spin) $('#vm-'+params['uuid']).addClass('fa-spin');
+  if (spin) $('#vm-'+params['uuid']).find('i').addClass('fa-spin');
   $.post("/plugins/dynamix.vm.manager/VMajax.php", params, function(data) {
     if (data.error) {
       swal({title:"Execution error",text:data.error,type:"error"});

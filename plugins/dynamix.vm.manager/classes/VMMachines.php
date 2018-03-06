@@ -16,11 +16,18 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
 
-$vms = $lv->get_domains() ?: [];
-sort($vms);
+$txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
+$vms = $lv->get_domains();
 if (empty($vms)) {
   echo '<tr><td colspan="8" style="text-align:center;padding-top:12px">No Virtual Machines installed</td></tr>';
   return;
+}
+if (file_exists($txt)) {
+  $prefs = parse_ini_file($txt); $sort = [];
+  foreach ($vms as $vm) $sort[] = $prefs[$vm] ?? 999;
+  array_multisort($sort,SORT_NUMERIC,$vms);
+} else {
+  natsort($vms);
 }
 $i = 0;
 $menu = [];
@@ -75,13 +82,14 @@ foreach ($vms as $vm) {
   /* VM information */
   echo "<tr style='background-color:".bcolor($i)."'>";
   echo "<td style='width:48px;padding:4px'>".renderVMContentIcon($uuid, $vm, $vmicon, $state)."</td>";
-  echo "<td><a href='#' onclick='return toggle_id(\"name{$i}\")' title='click for more VM info'>$vm</a></td>";
+  echo "<td class='vm-name'><a href='#' onclick='return toggle_id(\"name{$i}\")' title='click for more VM info'>$vm</a></td>";
   echo "<td>$desc</td>";
   echo "<td><a class='vcpu{$i}' style='cursor:pointer'>$vcpu</a></td>";
   echo "<td>$mem</td>";
   echo "<td title='$diskdesc'>$disks</td>";
   echo "<td>$graphics</td>";
-  echo "<td><input class='autostart' type='checkbox' name='auto_{$vm}' title='Toggle VM auostart' uuid='$uuid' $auto></td></tr>";
+  echo "<td><input class='autostart' type='checkbox' name='auto_{$vm}' title='Toggle VM auostart' uuid='$uuid' $auto></td>";
+  echo "<td><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 
   /* Disk device information */
   echo "<tr id='name".($i++)."' style='display:none'>";

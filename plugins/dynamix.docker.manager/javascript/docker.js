@@ -144,7 +144,7 @@ function rmImage(image, imageName) {
 
 function eventControl(params, reload) {
   var spin = typeof reload != 'undefined';
-  if (spin) $('#'+params['container']).addClass('fa-spin');
+  if (spin) $('#'+params['container']).find('i').addClass('fa-spin');
   $.post(eventURL, params, function(data) {
     if (data.success === true) {
       if (spin) setTimeout(reload+'()',500); else location=window.location.href;
