@@ -310,6 +310,10 @@
 		$arrConfigDefaults = array_replace_recursive($arrConfigDefaults, $arrAllTemplates[$strSelectedTemplate]['overrides']);
 	}
 
+	if (array_key_exists('updatevm', $_POST) && !empty($_POST['domain']['uuid'])) {
+		$_GET['uuid'] = $_POST['domain']['uuid'];
+	}
+
 	// If we are editing a existing VM load it's existing configuration details
 	$arrExistingConfig = (!empty($_GET['uuid']) ? domain_to_config($_GET['uuid']) : []);
 
@@ -341,6 +345,63 @@
 	}
 
 	if (array_key_exists('updatevm', $_POST)) {
+		$dom = $lv->domain_get_domain_by_uuid($_POST['domain']['uuid']);
+
+		if ($boolRunning) {
+			$arrErrors = [];
+
+			$arrExistingConfig = domain_to_config($_POST['domain']['uuid']);
+			$arrNewUSBIDs = $_POST['usb'];
+
+			// hot-attach any new usb devices
+			foreach ($arrNewUSBIDs as $strNewUSBID) {
+				foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
+					if ($strNewUSBID == $arrExistingUSB['id']) {
+						continue 2;
+					}
+				}
+				list($strVendor, $strProduct) = explode(':', $strNewUSBID);
+				// hot-attach usb
+				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'>
+					<source startupPolicy='optional'>
+						<vendor id='0x".$strVendor."'/>
+						<product id='0x".$strProduct."'/>
+					</source>
+				</hostdev>");
+				exec("virsh attach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+				if ($intReturnCode != 0) {
+					$arrErrors[] = implode(' ', $arrOutput);
+				}
+			}
+
+			// hot-detach any old usb devices
+			foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
+				if (!in_array($arrExistingUSB['id'], $arrNewUSBIDs)) {
+					list($strVendor, $strProduct) = explode(':', $arrExistingUSB['id']);
+
+					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'>
+						<source startupPolicy='optional'>
+							<vendor id='0x".$strVendor."'/>
+							<product id='0x".$strProduct."'/>
+						</source>
+					</hostdev>");
+					exec("virsh detach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+					if ($intReturnCode != 0) {
+						$arrErrors[] = implode(' ', $arrOutput);
+					}
+				}
+			}
+
+
+			if (empty($arrErrors)) {
+				$arrResponse = ['success' => true];
+			} else {
+				$arrResponse = ['error' => implode(', ', $arrErrors)];
+			}
+			echo json_encode($arrResponse);
+			exit;
+		}
+
 		if (!empty($_POST['shares'][0]['source'])) {
 			@mkdir($_POST['shares'][0]['source'], 0777, true);
 		}
@@ -348,7 +409,6 @@
 		// Backup xml for existing domain in ram
 		$strOldXML = '';
 		$boolOldAutoStart = false;
-		$dom = $lv->domain_get_domain_by_uuid($_POST['domain']['uuid']);
 		if ($dom) {
 			$strOldXML = $lv->domain_get_xml($dom);
 			$boolOldAutoStart = $lv->domain_get_autostart($dom);
@@ -913,20 +973,16 @@
 		<tr>
 			<td></td>
 			<td>
-			<? if (!$boolRunning) { ?>
-				<? if (!$boolNew) { ?>
-					<input type="hidden" name="updatevm" value="1" />
-					<input type="button" value="Update" busyvalue="Updating..." readyvalue="Update" id="btnSubmit" />
-				<? } else { ?>
-					<label for="domain_start"><input type="checkbox" name="domain[startnow]" id="domain_start" value="1" checked="checked"/> Start VM after creation</label>
-					<br>
-					<input type="hidden" name="createvm" value="1" />
-					<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
-				<? } ?>
-					<input type="button" value="Cancel" id="btnCancel" />
+			<? if (!$boolNew) { ?>
+				<input type="hidden" name="updatevm" value="1" />
+				<input type="button" value="Update" busyvalue="Updating..." readyvalue="Update" id="btnSubmit" />
 			<? } else { ?>
-				<input type="button" value="Done" id="btnCancel" />
+				<label for="domain_start"><input type="checkbox" name="domain[startnow]" id="domain_start" value="1" checked="checked"/> Start VM after creation</label>
+				<br>
+				<input type="hidden" name="createvm" value="1" />
+				<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
 			<? } ?>
+				<input type="button" value="Cancel" id="btnCancel" />
 			</td>
 		</tr>
 	</table>
@@ -1001,6 +1057,10 @@ $(function() {
 				$form.find('input').prop('disabled', false);
 				$("#vmform .domain_vcpu").change(); // restore the cpu checkbox disabled states
 				$button.val($button.attr('readyvalue'));
+				<?if ($boolRunning):?>
+				$("#vmform").find('input[type!="button"],select,.mac_generate').prop('disabled', true);
+				$("#vmform").find('input[name^="usb"]').prop('disabled', false);
+				<?endif?>
 			}
 		}, "json");
 	});
@@ -1103,5 +1163,10 @@ $(function() {
 			$("#vmform #libreelec_image").html($selected.attr('localpath'));
 		}
 	}).change(); // Fire now too!
+
+	<?if ($boolRunning):?>
+	$("#vmform").find('input[type!="button"],select,.mac_generate').prop('disabled', true);
+	$("#vmform").find('input[name^="usb"]').prop('disabled', false);
+	<?endif?>
 });
 </script>

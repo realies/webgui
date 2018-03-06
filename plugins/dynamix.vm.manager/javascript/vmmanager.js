@@ -24,7 +24,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
   }
   if (state == "running") {
     opts.push({text:"Stop", icon:"fa-stop", action:function(e) {
-      e.preventDefault(); 
+      e.preventDefault();
       ajaxVMDispatch({action:"domain-stop", uuid:uuid}, "loadlist");
     }});
     opts.push({text:"Pause", icon:"fa-pause", action:function(e) {
@@ -86,6 +86,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
       }});
     }
   } else {
+    opts.push({text:"Edit", icon:"fa-pencil", href:path+'/UpdateVM?uuid='+uuid});
     opts.push({text:"View XML", icon:"fa-code", href:path+'/UpdateVM?template=Custom&amp;uuid='+uuid});
   }
   context.attach('#vm-'+uuid, opts);

@@ -1656,7 +1656,7 @@
 			$tmp = $this->domain_get_info( $domain, $name );
 			if (!$tmp)
 				return $this->_set_last_error();
-			$ret = ( ($tmp['state'] == VIR_DOMAIN_RUNNING) || ($tmp['state'] == VIR_DOMAIN_BLOCKED) );
+			$ret = ( ($tmp['state'] == VIR_DOMAIN_RUNNING) || ($tmp['state'] == VIR_DOMAIN_BLOCKED) || ($tmp['state'] == 7 /*VIR_DOMAIN_PMSUSPENDED*/) );
 			unset($tmp);
 			return $ret;
 		}

@@ -24,7 +24,8 @@ $arrLoad = [
 	'name' => '',
 	'icon' => $arrAllTemplates[$strSelectedTemplate]['icon'],
 	'autostart' => false,
-	'form' => $arrAllTemplates[$strSelectedTemplate]['form']
+	'form' => $arrAllTemplates[$strSelectedTemplate]['form'],
+	'state' => 'shutoff'
 ];
 $strIconURL = '/plugins/dynamix.vm.manager/templates/images/'.$arrLoad['icon'];
 
@@ -43,7 +44,8 @@ if (!empty($_GET['uuid'])) {
 		'name' => $lv->domain_get_name($res),
 		'icon' => basename($strIconURL),
 		'autostart' => $lv->domain_get_autostart($res),
-		'form' => $arrAllTemplates[$strSelectedTemplate]['form']
+		'form' => $arrAllTemplates[$strSelectedTemplate]['form'],
+		'state' => $lv->domain_get_state($res)
 	];
 
 	if (empty($_GET['template'])) {
@@ -381,7 +383,7 @@ $(function() {
 		var category = $(this).data('category');
 
 		updatePrefixLabels(category);
-		bindSectionEvents(category);
+		<?if ($arrLoad['state'] == 'shutoff'):?> bindSectionEvents(category); <?endif;?>
 	});
 
 	$("#vmform input[data-pickroot]").fileTreeAttach();
