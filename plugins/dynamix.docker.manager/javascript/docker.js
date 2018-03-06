@@ -49,7 +49,6 @@ function execUpContainer(container) {
 
 function popupWithIframe(title, cmd, reload) {
   pauseEvents();
-
   $("#iframe-popup").html('<iframe id="myIframe" frameborder="0" scrolling="yes" width="100%" height="99%"></iframe>');
   $("#iframe-popup").dialog({
     autoOpen:true,
@@ -82,7 +81,6 @@ function addContainer() {
   var path = location.pathname;
   var x = path.indexOf("?");
   if (x!=-1) path = path.substring(0,x);
-
   location = path+"/AddContainer";
 }
 
@@ -90,13 +88,11 @@ function editContainer(container, template) {
   var path = location.pathname;
   var x = path.indexOf("?");
   if (x!=-1) path = path.substring(0, x);
-
   location = path+"/UpdateContainer?xmlTemplate=edit:"+template;
 }
 
 function updateContainer(container) {
   var body = "Update container: "+container;
-
   swal({
     title:"Are you sure?",
     text:body,
@@ -111,7 +107,6 @@ function updateContainer(container) {
 
 function rmContainer(container, image, id) {
   var body = "Remove container: "+container+"<br><br><label><input id=\"removeimagechk\" type=\"checkbox\" checked style=\"display:inline; width:unset; height:unset; margin-top:unset; margin-bottom:unset\">also remove image</label>";
-
   swal({
     title:"Are you sure?",
     text:body,
@@ -133,7 +128,6 @@ function rmContainer(container, image, id) {
 
 function rmImage(image, imageName) {
   var body = "Remove image: "+$('<textarea />').html(imageName).text();
-
   swal({
     title:"Are you sure?",
     text:body,

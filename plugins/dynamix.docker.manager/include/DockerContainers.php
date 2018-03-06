@@ -32,6 +32,7 @@ extract(parse_ini_file('state/network.ini',true));
 // Read container info
 $all = $DockerTemplates->getAllInfo();
 $menu = [];
+$docker = ['var docker=[];'];
 
 foreach ($all_containers as $ct) {
   $name = $ct['Name'];
@@ -47,6 +48,7 @@ foreach ($all_containers as $ct) {
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
   $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
+  $docker[] = "docker.push({id:'$id',state:'$running'});";
   $shape = $ct['Running'] ? 'play':'square';
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
@@ -122,5 +124,5 @@ foreach ($DockerClient->getDockerImages() as $image) {
   echo "</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
-echo "\0".implode($menu);
+echo "\0".implode($menu).implode($docker);
 ?>

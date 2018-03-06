@@ -42,10 +42,20 @@ img.stopped{opacity:0.3}
 </table>
 <input type="button" onclick="addContainer()" value="Add Container"/>
 <input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
+<input type="button" onclick="startAll()" value="Start all Containers"/>
+<input type="button" onclick="stopAll()" value="Stop all Containers"/>
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
 <script>
+function startAll() {
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).addClass('fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
+}
+function stopAll() {
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).addClass('fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
+}
 <?if ($display['resize']):?>
 function resize(bind) {
   var width = [];
