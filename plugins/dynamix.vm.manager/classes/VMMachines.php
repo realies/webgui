@@ -22,7 +22,9 @@ if (empty($vms)) {
   echo '<tr><td colspan="8" style="text-align:center;padding-top:12px">No Virtual Machines installed</td></tr>';
   return;
 }
-$menu = []; $i = 0;
+$i = 0;
+$menu = [];
+$kvm = ['var kvm=[];'];
 foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
   $desc = $lv->domain_get_description($res);
@@ -69,7 +71,7 @@ foreach ($vms as $vm) {
   }
   unset($dom);
   $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');", addslashes($vm),addslashes($uuid),addslashes($template),$state,addslashes($vnc),addslashes($log));
-
+  $kvm[] = "kvm.push({id:'$uuid',state:'$state'});";
   /* VM information */
   echo "<tr style='background-color:".bcolor($i)."'>";
   echo "<td style='width:48px;padding:4px'>".renderVMContentIcon($uuid, $vm, $vmicon, $state)."</td>";
@@ -131,5 +133,5 @@ foreach ($vms as $vm) {
   echo "</tbody></table>";
   echo "</td></tr>";
 }
-echo "\0".implode($menu);
+echo "\0".implode($menu).implode($kvm);
 ?>

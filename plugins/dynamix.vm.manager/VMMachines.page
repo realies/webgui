@@ -116,12 +116,22 @@ div.PanelText{display:none;}
 <tbody id="kvm_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving VM information</td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM"/>
+<input type="button" onclick="startAll()" value="Start all VMs"/>
+<input type="button" onclick="stopAll()" value="Stop all VMs"/>
 
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/vmmanager.js')?>"></script>
 <script>
+function startAll() {
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).addClass('fa-spin');
+  $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'start'}, function(){loadlist();});
+}
+function stopAll() {
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).addClass('fa-spin');
+  $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'stop'}, function(){loadlist();});
+}
 function vncOpen() {
   $.post('/plugins/dynamix.vm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'<?=$docroot?>/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
     window.location.href = data;
