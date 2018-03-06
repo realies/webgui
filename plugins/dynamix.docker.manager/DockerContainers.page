@@ -41,9 +41,9 @@ img.stopped{opacity:0.3}
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container"/>
-<input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
 <input type="button" onclick="startAll()" value="Start all Containers"/>
 <input type="button" onclick="stopAll()" value="Stop all Containers"/>
+<input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
