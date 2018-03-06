@@ -541,12 +541,9 @@
 					<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
 						<img src=\"$icon\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
 						<i class=\"fa iconstatus fa-$shape $status\" title=\"$status\"></i>
-					</div>
-					<div class=\"PanelText\">
-						<span class=\"PanelText $status\">$name</span>
-					</div>
-				</div>
-			</div>";
+					</div></div>
+					<div class=\"PanelText\"><span class=\"PanelText $status\">$name</span></div>
+				</div>";
 	}
 
 	function sanitizeVendor($strVendor) {
@@ -990,19 +987,19 @@
 		}
 
 		foreach ($arrHostDevs as $arrHostDev) {
-			$arrFoundGPUDevices = array_filter($arrValidGPUDevices, function($arrDev) use ($arrHostDev) { return ($arrDev['id'] == $arrHostDev['id']); });
+			$arrFoundGPUDevices = array_filter($arrValidGPUDevices, function($arrDev) use ($arrHostDev) {return ($arrDev['id'] == $arrHostDev['id']);});
 			if (!empty($arrFoundGPUDevices)) {
 				$arrGPUDevices[] = ['id' => $arrHostDev['id']];
 				continue;
 			}
 
-			$arrFoundAudioDevices = array_filter($arrValidAudioDevices, function($arrDev) use ($arrHostDev) { return ($arrDev['id'] == $arrHostDev['id']); });
+			$arrFoundAudioDevices = array_filter($arrValidAudioDevices, function($arrDev) use ($arrHostDev) {return ($arrDev['id'] == $arrHostDev['id']);});
 			if (!empty($arrFoundAudioDevices)) {
 				$arrAudioDevices[] = ['id' => $arrHostDev['id']];
 				continue;
 			}
 
-			$arrFoundOtherDevices = array_filter($arrValidOtherDevices, function($arrDev) use ($arrHostDev) { return ($arrDev['id'] == $arrHostDev['id']); });
+			$arrFoundOtherDevices = array_filter($arrValidOtherDevices, function($arrDev) use ($arrHostDev) {return ($arrDev['id'] == $arrHostDev['id']);});
 			if (!empty($arrFoundOtherDevices)) {
 				$arrOtherDevices[] = ['id' => $arrHostDev['id']];
 				continue;
