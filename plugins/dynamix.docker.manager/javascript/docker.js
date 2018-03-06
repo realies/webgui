@@ -42,8 +42,8 @@ function addDockerImageContext(image, imageTag) {
 }
 
 function execUpContainer(container) {
-  var title = "Updating the container: " + container;
-  var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true&ct[]=" + encodeURIComponent(container);
+  var title = "Updating the container: "+container;
+  var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true&ct[]="+encodeURIComponent(container);
   popupWithIframe(title, address, true);
 }
 
@@ -81,9 +81,9 @@ function popupWithIframe(title, cmd, reload) {
 function addContainer() {
   var path = location.pathname;
   var x = path.indexOf("?");
-  if (x!=-1) path = path.substring(0, x);
+  if (x!=-1) path = path.substring(0,x);
 
-  location = path + "/AddContainer";
+  location = path+"/AddContainer";
 }
 
 function editContainer(container, template) {
@@ -91,7 +91,7 @@ function editContainer(container, template) {
   var x = path.indexOf("?");
   if (x!=-1) path = path.substring(0, x);
 
-  location = path + "/UpdateContainer?xmlTemplate=edit:" + template;
+  location = path+"/UpdateContainer?xmlTemplate=edit:"+template;
 }
 
 function updateContainer(container) {
@@ -176,7 +176,7 @@ function autoStart(container, event) {
 function containerLogs(container, id) {
   var height = 600;
   var width = 900;
-  var run = eventURL + "?action=log&container=" + id + "&title=Log for:" + container;
+  var run = eventURL+"?action=log&container="+id+"&title=Log for:"+container;
   var top = (screen.height-height) / 2;
   var left = (screen.width-width) / 2;
   var options = 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left;

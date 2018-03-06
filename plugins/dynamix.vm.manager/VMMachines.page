@@ -55,8 +55,8 @@ if ($_GET['refresh']) {
 if ($subaction) {
   $vm = $lv->domain_get_name_by_uuid($uuid);
   if ($subaction == 'disk-resize') {
-    $capacity = str_replace(["KB","MB","GB","TB","PB", " ", ","], ["K","M","G","T","P", "", ""], strtoupper($_POST['cap']));
-    $oldcap = str_replace(["KB","MB","GB","TB","PB", " ", ","], ["K","M","G","T","P", "", ""], strtoupper($_GET['oldcap']));
+    $capacity = str_replace(["KB","MB","GB","TB","PB"," ",","], ["K","M","G","T","P","",""], strtoupper($_POST['cap']));
+    $oldcap = str_replace(["KB","MB","GB","TB","PB"," ",","], ["K","M","G","T","P","",""], strtoupper($_GET['oldcap']));
     if (substr($oldcap,0,-1) < substr($capacity,0,-1)){
       shell_exec("qemu-img resize -q ".escapeshellarg($_GET['disk'])." ".escapeshellarg($capacity));
       $msg = $vm." disk capacity has been changed to $capacity";
@@ -149,8 +149,8 @@ function hideInput(){
 function addVM() {
   var path = location.pathname;
   var x = path.indexOf("?");
-  if (x!=-1) path = path.substring(0, x);
-  location = path + "/VMTemplates";
+  if (x!=-1) path = path.substring(0,x);
+  location = path+"/VMTemplates";
 }
 <?if ($display['resize']):?>
 function resize(bind) {
@@ -196,7 +196,7 @@ foreach ($vms as $vm) {
         $(this).prop('checked', data.autostart);
       },'json');
     });
-    context.init({preventDoubleContext:false });
+    context.init({preventDoubleContext:false});
   });
 }
 $(function() {

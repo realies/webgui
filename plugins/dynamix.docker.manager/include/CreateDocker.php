@@ -31,7 +31,7 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$echo = function($m){ echo "<pre>".print_r($m, true)."</pre>"; };
+$echo = function($m){echo "<pre>".print_r($m, true)."</pre>";};
 
 unset($custom);
 exec("docker network ls --filter driver='macvlan' --format='{{.Name}}'", $custom);
@@ -781,7 +781,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
     for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
     <?endif;?>
-    $('.advanced-switch').switchButton({ labels_placement: "left", on_label: 'Advanced View', off_label: 'Basic View'});
+    $('.advanced-switch').switchButton({labels_placement: "left", on_label: 'Advanced View', off_label: 'Basic View'});
     $('.advanced-switch').change(function () {
       var status = $(this).is(':checked');
       toggleRows('advanced', status, 'basic');
@@ -918,7 +918,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             Opts.Name = makeName(Opts.Type);
           }
           if (! Opts.Description ) {
-            Opts.Description = "Container " + Opts.Type + ": " + Opts.Target;
+            Opts.Description = "Container "+Opts.Type+": "+Opts.Target;
           }
           if (Opts.Required == "true") {
             Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",false)'> Edit</button> ";
@@ -953,7 +953,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     popup.html($("#templatePopupConfig").html());
 
     // Load existing config info
-    var config = $("#ConfigNum" + num);
+    var config = $("#ConfigNum"+num);
     config.find("input").each(function(){
       var name = $(this).attr("name").replace("conf", "").replace("[]", "");
       popup.find("*[name='"+name+"']").val($(this).val());
@@ -1000,7 +1000,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             Opts.Name = makeName(Opts.Type);
           }
           if (! Opts.Description ) {
-            Opts.Description = "Container " + Opts.Type + ": " + Opts.Target;
+            Opts.Description = "Container "+Opts.Type+": "+Opts.Target;
           }
           Opts.Number = num;
           newConf = makeConfig(Opts);
@@ -1031,7 +1031,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   }
 
   function removeConfig(num) {
-    $('#ConfigNum' + num).fadeOut("fast", function() { $(this).remove(); });
+    $('#ConfigNum'+num).fadeOut("fast", function() {$(this).remove();});
     $('input[name="contName"]').trigger('change'); // signal change
   }
 
@@ -1046,8 +1046,8 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   }
 
   function makeName(type) {
-    i = $("#configLocation input[name^='confType'][value='"+type+"']").length + 1;
-    return "Host " + type.replace('Variable','Key') + " "+i;
+    i = $("#configLocation input[name^='confType'][value='"+type+"']").length+1;
+    return "Host "+type.replace('Variable','Key')+" "+i;
   }
 
   function toggleMode(el,disabled) {
@@ -1143,7 +1143,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     function(folder){if(on_folders){p.val(folder);p.trigger('change');if(close_on_select){$(ft).slideUp('fast',function (){$(ft).remove();});}}}
     );
     // Format fileTree according to parent position, height and width
-    ft.css({'left':p.position().left,'top':( p.position().top + p.outerHeight() ),'width':(p.width()) });
+    ft.css({'left':p.position().left,'top':(p.position().top+p.outerHeight()),'width':(p.width())});
     // close if click elsewhere
     $(document).mouseup(function(e){if(!ft.is(e.target) && ft.has(e.target).length === 0){ft.slideUp('fast',function (){$(ft).remove();});}});
     // close if parent changed
@@ -1208,7 +1208,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
                 //$value['name'] = str_replace("my-", '', $value['name']);
                 $selected = (isset($xmlTemplate) && $value['path'] == $xmlTemplate) ? ' selected ' : '';
                 if ($selected && ($key == "default")) $showAdditionalInfo = 'class="advanced"';
-                if (strlen($selected) && $key == 'user' ){ $rmadd = $value['path']; }
+                if (strlen($selected) && $key == 'user' ){$rmadd = $value['path'];}
                 printf("\t\t\t\t\t\t<option class=\"list\" value=\"%s:%s\" {$selected} >%s</option>\n", htmlspecialchars($key), htmlspecialchars($value['path']), htmlspecialchars($value['name']));
               }
               printf("\t\t\t\t\t</optgroup>\n");

@@ -70,7 +70,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
   }
   opts.push({divider:true});
   if (log !== "") {
-    opts.push({text:"Logs", icon:"fa-navicon", action:function(e){e.preventDefault(); openWindow('/webGui/scripts/tail_log&arg1=' + log, 'Log for:' + name, 600, 900);}});
+    opts.push({text:"Logs", icon:"fa-navicon", action:function(e){e.preventDefault(); openWindow('/webGui/scripts/tail_log&arg1='+log, 'Log for:'+name, 600, 900);}});
   }
   if (state == "shutoff") {
     opts.push({text:"Edit", icon:"fa-pencil", href:path+'/UpdateVM?uuid='+uuid});
@@ -81,7 +81,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
       swal({title:"Are you sure?",text:"Remove definition:"+name,type:"warning",showCancelButton:true},function(){ajaxVMDispatch({action:"domain-undefine",uuid:uuid});});
     }});
     if (template != 'OpenELEC') {
-      opts.push({text:"Remove VM + Disks", icon:"fa-trash", action:function(e) {
+      opts.push({text:"Remove VM & Disks", icon:"fa-trash", action:function(e) {
         e.preventDefault();
         swal({title:"Are you sure?",text:"Completely REMOVE "+name+" disk image and definition",type:"warning",showCancelButton:true},function(){ajaxVMDispatch({action:"domain-delete",uuid:uuid});});
       }});
