@@ -34,7 +34,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
     }});
     opts.push({text:"Restart", icon:"fa-refresh", action:function(e) {
       e.preventDefault();
-      ajaxVMDispatch({action:"domain-restart", uuid:uuid});
+      ajaxVMDispatch({action:"domain-restart", uuid:uuid}, "loadlist");
     }});
     opts.push({text:"Hibernate", icon:"fa-bed", action:function(e) {
       e.preventDefault();

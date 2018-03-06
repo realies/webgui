@@ -12,7 +12,7 @@ function addDockerContainerContext(container, image, template, started, update, 
   }
   if (started) {
     opts.push({text:'Stop', icon:'fa-stop', action:function(e){e.preventDefault(); eventControl({action:"stop", container:id}, 'loadlist');}});
-    opts.push({text:'Restart', icon:'fa-refresh', action:function(e){e.preventDefault(); eventControl({action:"restart", container:id});}});
+    opts.push({text:'Restart', icon:'fa-refresh', action:function(e){e.preventDefault(); eventControl({action:"restart", container:id}, 'loadlist');}});
   } else {
     opts.push({text:'Start', icon:'fa-play', action:function(e){e.preventDefault(); eventControl({action:"start", container:id}, 'loadlist');}});
   }
