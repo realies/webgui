@@ -541,12 +541,9 @@
 					<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
 						<img src=\"$icon\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
 						<i class=\"fa iconstatus fa-$shape $status\" title=\"$status\"></i>
-					</div>
-					<div class=\"PanelText\">
-						<span class=\"PanelText $status\">$name</span>
-					</div>
-				</div>
-			</div>";
+					</div></div>
+					<div class=\"PanelText\"><span class=\"PanelText $status\">$name</span></div>
+				</div>";
 	}
 
 	function sanitizeVendor($strVendor) {
