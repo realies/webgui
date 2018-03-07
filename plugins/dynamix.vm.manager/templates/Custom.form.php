@@ -459,7 +459,7 @@
 	<tr>
 		<td>OS Install ISO:</td>
 		<td>
-			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[cdrom]" value="<?=htmlspecialchars($arrConfig['media']['cdrom'])?>" placeholder="Click and Select cdrom image to install operating system">
+			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[cdrom]" class="cdrom" value="<?=htmlspecialchars($arrConfig['media']['cdrom'])?>" placeholder="Click and Select cdrom image to install operating system">
 		</td>
 	</tr>
 	<tr class="advanced">
@@ -483,7 +483,7 @@
 	<tr class="advanced">
 		<td>VirtIO Drivers ISO:</td>
 		<td>
-			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[drivers]" value="<?=htmlspecialchars($arrConfig['media']['drivers'])?>" placeholder="Download, Click and Select virtio drivers image">
+			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[drivers]" class="cdrom" value="<?=htmlspecialchars($arrConfig['media']['drivers'])?>" placeholder="Download, Click and Select virtio drivers image">
 		</td>
 	</tr>
 	<tr class="advanced">
@@ -1241,6 +1241,14 @@ $(function() {
 		}
 	});
 
+	$("#vmform").on("input change", ".cdrom", function changeCdromEvent() {
+		if ($(this).val() == '') {
+			slideUpRows($(this).closest('table').find('.cdrom_bus').closest('tr'));
+		} else {
+			slideDownRows($(this).closest('table').find('.cdrom_bus').closest('tr'));
+		}
+	});
+
 	$("#vmform").on("change", ".disk_select", function changeDiskSelectEvent() {
 		regenerateDiskPreview($(this).closest('table').data('index'));
 	});
@@ -1362,6 +1370,8 @@ $(function() {
 	} else {
 		$('.vncmodel,.vncpassword,.vnckeymap').hide();
 	}
+
+	$('#vmform .cdrom').change();
 
 	regenerateDiskPreview();
 
