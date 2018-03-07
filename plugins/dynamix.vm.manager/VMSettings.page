@@ -334,11 +334,11 @@ $(function(){
 			return;
 		}
 		if ($('#pcie_acs_override').val() == '1') {
-			$.getJSON("/plugins/dynamix.vm.manager/VMajax.php", {action: "acs-override-enable"}, function(data) {
+			$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php", {action: "acs-override-enable"}, function(data) {
 				$("#settingsForm").submit();
 			});
 		} else {
-			$.getJSON("/plugins/dynamix.vm.manager/VMajax.php", {action: "acs-override-disable"}, function(data) {
+			$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php", {action: "acs-override-disable"}, function(data) {
 				$("#settingsForm").submit();
 			});
 		}
@@ -365,7 +365,7 @@ $(function(){
 		$form.find('input,select').prop('disabled', true);
 		$button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
 
-		$.post("/plugins/dynamix.vm.manager/VMajax.php", postdata, function( data ) {
+		$.post("/plugins/dynamix.vm.manager/classes/VMajax.php", postdata, function( data ) {
 			if (data.error) {
 				$("#download_status").html('<span style="color: red">' + data.error + '</span>');
 			} else {
@@ -419,7 +419,7 @@ $(function(){
 			file: $(this).val()
 		};
 
-		$.get("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
+		$.get("/plugins/dynamix.vm.manager/classes/VMajax.php", params, function( data ) {
 
 			if (!data.exists) {
 				$("#download_button").show('fast');

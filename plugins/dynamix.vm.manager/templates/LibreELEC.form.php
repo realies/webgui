@@ -1028,7 +1028,7 @@ $(function() {
 	$("#vmform").on("click", ".mac_generate", function generateMac() {
 		var $input = $(this).prev('input');
 
-		$.getJSON("/plugins/dynamix.vm.manager/VMajax.php?action=generate-mac", function (data) {
+		$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php?action=generate-mac", function (data) {
 			if (data.mac) {
 				$input.val(data.mac);
 			}

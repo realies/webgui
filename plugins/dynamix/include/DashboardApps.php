@@ -14,12 +14,13 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
+require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
+require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
 
 // Get the webGui configuration preferences
 extract(parse_plugin_cfg('dynamix',true));
 
 if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='docker')) {
-  require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
   $DockerClient    = new DockerClient();
   $DockerTemplates = new DockerTemplates();
   $containers      = $DockerClient->getDockerContainers() ?: [];
@@ -51,9 +52,15 @@ if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dash
 }
 
 if (pgrep('libvirtd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='vms')) {
-  require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
-  $vms = $lv->get_domains() ?: [];
-  sort($vms);
+  $txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
+  $vms = $lv->get_domains();
+  if (file_exists($txt)) {
+    $prefs = parse_ini_file($txt); $sort = [];
+    foreach ($vms as $vm) $sort[] = $prefs[$vm] ?? 999;
+    array_multisort($sort,SORT_NUMERIC,$vms);
+  } else {
+    natsort($vms);
+  }
   foreach ($vms as $vm) {
     $res = $lv->get_domain_by_name($vm);
     $uuid = libvirt_domain_get_uuid_string($res);

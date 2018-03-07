@@ -86,10 +86,7 @@ if ($subaction) {
   }
   echo "<script>clearHistory();</script>";
 }
-if ($libvirt_running=='yes') {
-  $vms = $lv->get_domains() ?: [];
-  sort($vms);
-}
+if ($libvirt_running=='yes') $vms = $lv->get_domains();
 if (empty($vms)) {
   $msg = $libvirt_running=='yes'
   ? 'No VMs defined. Create from template or add XML.'
@@ -110,10 +107,11 @@ div.four label.cpu2{width:33%}
 div.Panel{float:unset;margin:4px;height:inherit;border:none;}
 div.Panel:hover{background-color:unset;}
 div.PanelText{display:none;}
+th.five{width:5%}
 </style>
 <table class="tablesorter shift kvm" id="kvm_table">
-<thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th>Autostart</th></tr></thead>
-<tbody id="kvm_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving VM information</td></tr></tbody>
+<thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th><th class="five"><i class="fa fa-sort"></i></th></tr></thead>
+<tbody id="kvm_list"><tr><td colspan='9' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving VM information</td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM"/>
 <input type="button" onclick="startAll()" value="Start all VMs"/>
@@ -126,12 +124,12 @@ div.PanelText{display:none;}
 <script>
 function startAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).addClass('fa-spin');
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
   $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).addClass('fa-spin');
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
   $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'stop'}, function(){loadlist();});
 }
 function vncOpen() {
@@ -204,12 +202,35 @@ foreach ($vms as $vm) {
 <?endif;?>
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
-      $.post('/plugins/dynamix.vm.manager/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
+      $.post('/plugins/dynamix.vm.manager/classes/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
         $(this).prop('checked', data.autostart);
       },'json');
     });
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false);
+    $('.text').click(showInput);
+    $('.input').blur(hideInput);
+    $('i.up,i.down').click(function() {
+      var row1 = $(this).parents('tr:first');
+      var row2 = row1.next();
+      var color1 = row1.css('background-color');
+      if ($(this).is('.up')) {
+        var color2 = row1.prev().prev().css('background-color');
+        row1.prev().prev().css('background-color',color1);
+        row1.css('background-color',color2);
+        row1.insertBefore(row1.prev().prev());
+        row2.insertBefore(row2.prev().prev());
+      } else {
+        var color2 = row1.next().next().css('background-color');
+        row1.next().next().css('background-color',color1);
+        row1.css('background-color',color2);
+        row2.insertAfter(row2.next().next());
+        row1.insertAfter(row1.next().next());
+      }
+      var names = ''; var index = '';
+      row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
+      $.post('/plugins/dynamix.vm.manager/classes/UserPrefs.php',{names:names,index:index});
+    });
   });
 }
 $(function() {
@@ -217,8 +238,6 @@ $(function() {
   <?$color = strpos($msg, "rror:")!==false ? 'red-text':'green-text'?>
   $('#countdown').html("<span class='<?-$color?>'><?=$msg?></span>");
 <?endif;?>
-  $('.text').click(showInput);
-  $('.input').blur(hideInput);
   $('#btnAddVM').click(function AddVMEvent(){$('.tab>input#tab2').click();});
   loadlist();
 });
