@@ -208,6 +208,8 @@ foreach ($vms as $vm) {
     });
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false);
+    $('.text').click(showInput);
+    $('.input').blur(hideInput);
     $('i.up,i.down').click(function() {
       var row1 = $(this).parents('tr:first');
       var row2 = row1.next();
@@ -236,8 +238,6 @@ $(function() {
   <?$color = strpos($msg, "rror:")!==false ? 'red-text':'green-text'?>
   $('#countdown').html("<span class='<?-$color?>'><?=$msg?></span>");
 <?endif;?>
-  $('.text').click(showInput);
-  $('.input').blur(hideInput);
   $('#btnAddVM').click(function AddVMEvent(){$('.tab>input#tab2').click();});
   loadlist();
 });
