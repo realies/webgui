@@ -27,7 +27,7 @@ foreach ($vms as $vm) {
   case 'stop':
     if ($state!='running') continue;
     $result = $lv->domain_shutdown($domName) ? ['success'=>true, 'state'=>$lv->domain_get_state($domName)] : ['error'=>$lv->get_last_error()];
-    $n = 10; // wait for VM to die
+    $n = 20; // wait for VM to die
     while ($result['success'] && $lv->domain_get_state($domName)=='running') {sleep(1); if(!--$n) break;}
     break;
   case 'start':
