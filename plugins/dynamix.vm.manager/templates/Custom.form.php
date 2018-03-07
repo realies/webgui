@@ -441,7 +441,7 @@
 	<tr class="advanced">
 		<td>Hyper-V:</td>
 		<td>
-			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows">
 			<?php mk_dropdown_options(['No', 'Yes'], $arrConfig['domain']['hyperv']); ?>
 			</select>
 		</td>
