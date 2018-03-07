@@ -35,6 +35,7 @@ img.stopped{opacity:0.3}
 .started{color:#009900}
 .stopped{color:#EF3D47}
 .switch-button-label.off{color:inherit}
+th.three{width:3%}
 </style>
 
 <form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
@@ -50,7 +51,7 @@ img.stopped{opacity:0.3}
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span style="float:right;margin-left:48px"><input type="checkbox" class="advancedview"></span><span style="float:right"><input type="checkbox" class="expandedlist"></span></span>
 <table class="tablesorter shift" id="docker_containers">
-<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th>Log</th></tr></thead>
+<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th class="three">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container"/>
