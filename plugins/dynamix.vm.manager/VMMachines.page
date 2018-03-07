@@ -202,7 +202,7 @@ foreach ($vms as $vm) {
 <?endif;?>
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
-      $.post('/plugins/dynamix.vm.manager/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
+      $.post('/plugins/dynamix.vm.manager/classes/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
         $(this).prop('checked', data.autostart);
       },'json');
     });
