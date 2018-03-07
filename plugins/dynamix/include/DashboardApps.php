@@ -14,12 +14,13 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
+require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
+require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
 
 // Get the webGui configuration preferences
 extract(parse_plugin_cfg('dynamix',true));
 
 if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='docker')) {
-  require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
   $DockerClient    = new DockerClient();
   $DockerTemplates = new DockerTemplates();
   $containers      = $DockerClient->getDockerContainers() ?: [];
@@ -51,7 +52,6 @@ if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dash
 }
 
 if (pgrep('libvirtd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='vms')) {
-  require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
   $txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
   $vms = $lv->get_domains();
   if (file_exists($txt)) {
