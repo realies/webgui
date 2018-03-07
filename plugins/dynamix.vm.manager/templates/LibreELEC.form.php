@@ -13,7 +13,7 @@
 <?
 	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
+	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 	$arrValidMachineTypes = getValidMachineTypes();
 	$arrValidGPUDevices = getValidGPUDevices();
@@ -1028,7 +1028,7 @@ $(function() {
 	$("#vmform").on("click", ".mac_generate", function generateMac() {
 		var $input = $(this).prev('input');
 
-		$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php?action=generate-mac", function (data) {
+		$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php?action=generate-mac", function (data) {
 			if (data.mac) {
 				$input.val(data.mac);
 			}

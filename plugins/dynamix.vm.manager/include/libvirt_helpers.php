@@ -12,7 +12,7 @@
 ?>
 <?
 	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
+	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt.php";
 
 	// Load emhttp variables if needed.
 	if (!isset($var)){
