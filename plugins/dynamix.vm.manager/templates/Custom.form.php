@@ -13,7 +13,7 @@
 <?
 	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
+	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 	$arrValidMachineTypes = getValidMachineTypes();
 	$arrValidGPUDevices = getValidGPUDevices();
@@ -1133,7 +1133,7 @@ $(function() {
 				$disk_bus_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
 				slideDownRows($disk_bus_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 
-				$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php?action=file-info&file=" + encodeURIComponent($disk_input.val()), function( info ) {
+				$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php?action=file-info&file=" + encodeURIComponent($disk_input.val()), function( info ) {
 					if (info.isfile || info.isblock) {
 						slideUpRows($disk_file_sections);
 						$disk_file_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
@@ -1159,7 +1159,7 @@ $(function() {
 				$disk_bus_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
 				slideDownRows($disk_bus_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 
-				$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php?action=file-info&file=" + encodeURIComponent(auto_disk_path), function( info ) {
+				$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php?action=file-info&file=" + encodeURIComponent(auto_disk_path), function( info ) {
 					if (info.isfile || info.isblock) {
 						slideUpRows($disk_file_sections);
 						$disk_file_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
@@ -1277,7 +1277,7 @@ $(function() {
 	$("#vmform").on("click", ".mac_generate", function generateMac() {
 		var $input = $(this).prev('input');
 
-		$.getJSON("/plugins/dynamix.vm.manager/classes/VMajax.php?action=generate-mac", function( data ) {
+		$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php?action=generate-mac", function( data ) {
 			if (data.mac) {
 				$input.val(data.mac);
 			}

@@ -16,5 +16,5 @@ Markdown="false"
  */
 ?>
 <?
-require_once "$docroot/plugins/dynamix.vm.manager/classes/VMedit.php";
+require_once "$docroot/plugins/dynamix.vm.manager/include/VMedit.php";
 ?>

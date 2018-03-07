@@ -18,7 +18,7 @@ Markdown="false"
  */
 ?>
 <?
-require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
+require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
 
@@ -125,15 +125,15 @@ th.five{width:5%}
 function startAll() {
   $('input[type=button]').prop('disabled',true);
   for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'start'}, function(){loadlist();});
+  $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
   for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.vm.manager/classes/VMManager.php',{action:'stop'}, function(){loadlist();});
+  $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'stop'}, function(){loadlist();});
 }
 function vncOpen() {
-  $.post('/plugins/dynamix.vm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'<?=$docroot?>/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
+  $.post('/plugins/dynamix.vm.manager/include/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'<?=$docroot?>/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
     window.location.href = data;
   });
 }
@@ -176,7 +176,7 @@ function resize(bind) {
 }
 <?endif;?>
 function loadlist() {
-  $.get('/plugins/dynamix.vm.manager/classes/VMMachines.php',function(d) {
+  $.get('/plugins/dynamix.vm.manager/include/VMMachines.php',function(d) {
     var data = d.split(/\0/);
     $('#kvm_list').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
@@ -202,7 +202,7 @@ foreach ($vms as $vm) {
 <?endif;?>
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
-      $.post('/plugins/dynamix.vm.manager/classes/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
+      $.post('/plugins/dynamix.vm.manager/include/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
         $(this).prop('checked', data.autostart);
       },'json');
     });
@@ -229,7 +229,7 @@ foreach ($vms as $vm) {
       }
       var names = ''; var index = '';
       row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
-      $.post('/plugins/dynamix.vm.manager/classes/UserPrefs.php',{names:names,index:index});
+      $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
     });
   });
 }
