@@ -230,6 +230,20 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 		<p>NOTE: You can also specify a network bridge on a per-VM basis.</p>
 	</blockquote>
 	<dl>
+		<dt>Upon host shutdown:</dt>
+		<dd>
+			<select id="hostshutdown" name="HOSTSHUTDOWN" class="narrow">
+			<?
+				echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'shutdown', 'Shutdown VMs');
+				echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'hibernate', 'Hibernate VMs');
+			?>
+			</select>
+		</dd>
+	</dl>
+	<blockquote class="inline_help">
+		<p>When shutting down the server, this defines the action to take upon running VMs. If <em>Hibernate VMs</em> is chosen, the VM will be instructed to hibernate (if supported) otherwise it will attempt a VM shutdown.</p>
+	</blockquote>
+	<dl>
 		<dt>VM shutdown time-out:</dt>
 		<dd>
 			<input type="number" name="TIMEOUT" value="<?=htmlspecialchars($domain_cfg['TIMEOUT'])?>" class="narrow">
@@ -482,6 +496,7 @@ $(function(){
 			$("#winvirtio_select").prop("disabled", checked);
 			$("#winvirtio").prop("disabled", checked);
 			$("#bridge").prop("disabled", checked);
+			$("#hostshutdown").prop("disabled", checked);
 			$("#pcie_acs_override").prop("disabled", checked);
 			$("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
 		});
