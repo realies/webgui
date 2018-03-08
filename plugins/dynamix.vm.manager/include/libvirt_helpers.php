@@ -1056,6 +1056,13 @@
 			$medias = array_reverse($medias);
 		}
 
+		$strUSBMode = 'usb2';
+		if ($lv->_get_single_xpath_result($res, '//domain/devices/controller[@model=\'nec-xhci\']')) {
+			$strUSBMode = 'usb3';
+		} else if ($lv->_get_single_xpath_result($res, '//domain/devices/controller[@model=\'qemu-xhci\']')) {
+			$strUSBMode = 'usb3-qemu';
+		}
+
 		return [
 			'template' => $arrTemplateValues,
 			'domain' => [
@@ -1076,7 +1083,7 @@
 				'autostart' => ($lv->domain_get_autostart($res) ? 1 : 0),
 				'state' => $lv->domain_state_translate($dom['state']),
 				'ovmf' => ($lv->domain_get_ovmf($res) ? 1 : 0),
-				'usbmode' => ($lv->_get_single_xpath_result($res, '//domain/devices/controller[@model=\'nec-xhci\']') ? 'usb3' : 'usb2')
+				'usbmode' => $strUSBMode
 			],
 			'media' => [
 				'cdrom' => (!empty($medias) && !empty($medias[0]) && array_key_exists('file', $medias[0])) ? $medias[0]['file'] : '',

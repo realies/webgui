@@ -441,7 +441,7 @@
 	<tr class="advanced">
 		<td>Hyper-V:</td>
 		<td>
-			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows">
 			<?php mk_dropdown_options(['No', 'Yes'], $arrConfig['domain']['hyperv']); ?>
 			</select>
 		</td>
@@ -456,10 +456,33 @@
 </div>
 
 <table>
+	<tr class="advanced">
+		<td>USB Controller:</td>
+		<td>
+			<select name="domain[usbmode]" id="usbmode" class="narrow" title="Select the USB Controller to emulate.  Some OSes won't support USB3 (e.g. Windows 7/XP)">
+			<?php
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb2', '2.0 (EHCI)');
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb3', '3.0 (nec XHCI)');
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb3-qemu', '3.0 (qemu XHCI)');
+			?>
+			</select>
+		</td>
+	</tr>
+</table>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>
+			<b>USB Controller</b><br>
+			Select the USB Controller to emulate.  Some OSes won't support USB3 (e.g. Windows 7).  Qemu XHCI is the same code base as Nec XHCI but without several hacks applied over the years.  Recommended to try qemu XHCI before resorting to nec XHCI.
+		</p>
+	</blockquote>
+</div>
+
+<table>
 	<tr>
 		<td>OS Install ISO:</td>
 		<td>
-			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[cdrom]" value="<?=htmlspecialchars($arrConfig['media']['cdrom'])?>" placeholder="Click and Select cdrom image to install operating system">
+			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[cdrom]" class="cdrom" value="<?=htmlspecialchars($arrConfig['media']['cdrom'])?>" placeholder="Click and Select cdrom image to install operating system">
 		</td>
 	</tr>
 	<tr class="advanced">
@@ -483,7 +506,7 @@
 	<tr class="advanced">
 		<td>VirtIO Drivers ISO:</td>
 		<td>
-			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[drivers]" value="<?=htmlspecialchars($arrConfig['media']['drivers'])?>" placeholder="Download, Click and Select virtio drivers image">
+			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickmatch="^[^.].*" data-pickroot="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" name="media[drivers]" class="cdrom" value="<?=htmlspecialchars($arrConfig['media']['drivers'])?>" placeholder="Download, Click and Select virtio drivers image">
 		</td>
 	</tr>
 	<tr class="advanced">
@@ -1024,28 +1047,6 @@
 </blockquote>
 
 <table>
-	<tr class="advanced">
-		<td>USB Mode:</td>
-		<td>
-			<select name="domain[usbmode]" id="usbmode" class="narrow" title="Select the USB Mode to emulate.  Some OSes won't support USB3 (e.g. Windows 7/XP)">
-			<?php
-				echo mk_option($arrConfig['domain']['usbmode'], 'usb2', '2.0 (EHCI)');
-				echo mk_option($arrConfig['domain']['usbmode'], 'usb3', '3.0 (XHCI)');
-			?>
-			</select>
-		</td>
-	</tr>
-</table>
-<div class="advanced">
-	<blockquote class="inline_help">
-		<p>
-			<b>USB Mode</b><br>
-			Select the USB Mode to emulate.  Some OSes won't support USB3 (e.g. Windows 7).
-		</p>
-	</blockquote>
-</div>
-
-<table>
 	<tr>
 		<td>Other PCI Devices:</td>
 		<td>
@@ -1241,6 +1242,14 @@ $(function() {
 		}
 	});
 
+	$("#vmform").on("input change", ".cdrom", function changeCdromEvent() {
+		if ($(this).val() == '') {
+			slideUpRows($(this).closest('table').find('.cdrom_bus').closest('tr'));
+		} else {
+			slideDownRows($(this).closest('table').find('.cdrom_bus').closest('tr'));
+		}
+	});
+
 	$("#vmform").on("change", ".disk_select", function changeDiskSelectEvent() {
 		regenerateDiskPreview($(this).closest('table').data('index'));
 	});
@@ -1362,6 +1371,8 @@ $(function() {
 	} else {
 		$('.vncmodel,.vncpassword,.vnckeymap').hide();
 	}
+
+	$('#vmform .cdrom').change();
 
 	regenerateDiskPreview();
 
