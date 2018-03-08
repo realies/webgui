@@ -456,6 +456,29 @@
 </div>
 
 <table>
+	<tr class="advanced">
+		<td>USB Controller:</td>
+		<td>
+			<select name="domain[usbmode]" id="usbmode" class="narrow" title="Select the USB Controller to emulate.  Some OSes won't support USB3 (e.g. Windows 7/XP)">
+			<?php
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb2', '2.0 (EHCI)');
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb3', '3.0 (nec XHCI)');
+				echo mk_option($arrConfig['domain']['usbmode'], 'usb3-qemu', '3.0 (qemu XHCI)');
+			?>
+			</select>
+		</td>
+	</tr>
+</table>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>
+			<b>USB Controller</b><br>
+			Select the USB Controller to emulate.  Some OSes won't support USB3 (e.g. Windows 7).  Qemu XHCI is the same code base as Nec XHCI but without several hacks applied over the years.  Recommended to try qemu XHCI before resorting to nec XHCI.
+		</p>
+	</blockquote>
+</div>
+
+<table>
 	<tr>
 		<td>OS Install ISO:</td>
 		<td>
@@ -1022,28 +1045,6 @@
 	<p>If you wish to assign any USB devices to your guest, you can select them from this list.<br>
 	NOTE:  USB hotplug support is not yet implemented, so devices must be attached before the VM is started to use them.</p>
 </blockquote>
-
-<table>
-	<tr class="advanced">
-		<td>USB Mode:</td>
-		<td>
-			<select name="domain[usbmode]" id="usbmode" class="narrow" title="Select the USB Mode to emulate.  Some OSes won't support USB3 (e.g. Windows 7/XP)">
-			<?php
-				echo mk_option($arrConfig['domain']['usbmode'], 'usb2', '2.0 (EHCI)');
-				echo mk_option($arrConfig['domain']['usbmode'], 'usb3', '3.0 (XHCI)');
-			?>
-			</select>
-		</td>
-	</tr>
-</table>
-<div class="advanced">
-	<blockquote class="inline_help">
-		<p>
-			<b>USB Mode</b><br>
-			Select the USB Mode to emulate.  Some OSes won't support USB3 (e.g. Windows 7).
-		</p>
-	</blockquote>
-</div>
 
 <table>
 	<tr>
