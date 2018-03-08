@@ -767,6 +767,12 @@
 					</select>
 				</td>
 			</tr>
+			<tr class="<? if ($arrGPU['id'] == 'vnc') echo 'was'; ?>advanced romfile">
+				<td>Graphics ROM BIOS:</td>
+				<td>
+					<input type="text" data-pickcloseonfile="true" data-pickfilter="rom,bin" data-pickmatch="^[^.].*" data-pickroot="/" value="<?=htmlspecialchars($arrGPU['rom'])?>" name="gpu[<?=$i?>][rom]" placeholder="Path to ROM BIOS file (optional)" title="Path to ROM BIOS file (optional)" />
+				</td>
+			</tr>
 		</table>
 		<? if ($i == 0) { ?>
 		<blockquote class="inline_help">
@@ -774,6 +780,12 @@
 				<b>Graphics Card</b><br>
 				If you wish to assign a graphics card to the VM, select it from this list.
 			</p>
+
+			<p class="<? if ($arrGPU['id'] == 'vnc') echo 'was'; ?>advanced romfile">
+				<b>Graphics ROM BIOS</b><br>
+				If you wish to use a custom ROM BIOS for a Graphics card, specify one here.
+			</p>
+
 			<? if (count($arrValidGPUDevices) > 1) { ?>
 			<p>Additional devices can be added/removed by clicking the symbols to the left.</p>
 			<? } ?>
@@ -794,6 +806,12 @@
 						}
 					?>
 					</select>
+				</td>
+			</tr>
+			<tr class="advanced romfile">
+				<td>Graphics ROM BIOS:</td>
+				<td>
+					<input type="text" data-pickcloseonfile="true" data-pickfilter="rom,bin" data-pickmatch="^[^.].*" data-pickroot="/" value="" name="gpu[{{INDEX}}][rom]" placeholder="Path to ROM BIOS file (optional)" title="Path to ROM BIOS file (optional)" />
 				</td>
 			</tr>
 		</table>
@@ -1019,14 +1037,31 @@ $(function() {
 		}
 	});
 
+	$("#vmform").on("spawn_section", function spawnSectionEvent(evt, section, sectiondata) {
+		if (sectiondata.category == 'Graphics_Card') {
+			$(section).find(".gpu").change();
+		}
+	});
+
 	$("#vmform").on("change", ".gpu", function changeGPUEvent() {
 		var myvalue = $(this).val();
+		var mylabel = $(this).children('option:selected').text();
+		var myindex = $(this).closest('table').data('index');
 
-		$("#vmform .gpu").not(this).each(function () {
-			if (myvalue == $(this).val()) {
-				$(this).prop("selectedIndex", 0).change();
-			}
-		});
+		$romfile = $(this).closest('table').find('.romfile');
+		if (myvalue == 'vnc' || myvalue == '') {
+			slideUpRows($romfile.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+			$romfile.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+		} else {
+			$romfile.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
+			slideDownRows($romfile.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+
+			$("#vmform .gpu").not(this).each(function () {
+				if (myvalue == $(this).val()) {
+					$(this).prop("selectedIndex", 0).change();
+				}
+			});
+		}
 	});
 
 	$("#vmform").on("click", ".mac_generate", function generateMac() {
@@ -1167,6 +1202,8 @@ $(function() {
 			$("#vmform #openelec_image").html($selected.attr('localpath'));
 		}
 	}).change(); // Fire now too!
+
+	$("#vmform .gpu").change();
 
 	<?if ($boolRunning):?>
 	$("#vmform").find('input[type!="button"],select,.mac_generate').prop('disabled', true);

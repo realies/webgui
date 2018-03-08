@@ -864,6 +864,12 @@
 			</td>
 		</tr>
 		<? } ?>
+		<tr class="<? if ($arrGPU['id'] == 'vnc') echo 'was'; ?>advanced romfile">
+			<td>Graphics ROM BIOS:</td>
+			<td>
+				<input type="text" data-pickcloseonfile="true" data-pickfilter="rom,bin" data-pickmatch="^[^.].*" data-pickroot="/" value="<?=htmlspecialchars($arrGPU['rom'])?>" name="gpu[<?=$i?>][rom]" placeholder="Path to ROM BIOS file (optional)" title="Path to ROM BIOS file (optional)" />
+			</td>
+		</tr>
 	</table>
 	<?php if ($i == 0) { ?>
 	<blockquote class="inline_help">
@@ -887,6 +893,11 @@
 			If you wish to assign a different keyboard layout to use for a VNC connection, specify one here.
 		</p>
 
+		<p class="<? if ($arrGPU['id'] == 'vnc') echo 'was'; ?>advanced romfile">
+			<b>Graphics ROM BIOS</b><br>
+			If you wish to use a custom ROM BIOS for a Graphics card, specify one here.
+		</p>
+
 		<p>Additional devices can be added/removed by clicking the symbols to the left.</p>
 	</blockquote>
 	<? } ?>
@@ -905,6 +916,12 @@
 					}
 				?>
 				</select>
+			</td>
+		</tr>
+		<tr class="advanced romfile">
+			<td>Graphics ROM BIOS:</td>
+			<td>
+				<input type="text" data-pickcloseonfile="true" data-pickfilter="rom,bin" data-pickmatch="^[^.].*" data-pickroot="/" value="" name="gpu[{{INDEX}}][rom]" placeholder="Path to ROM BIOS file (optional)" title="Path to ROM BIOS file (optional)" />
 			</td>
 		</tr>
 	</table>
@@ -1234,6 +1251,9 @@ $(function() {
 		if (sectiondata.category == 'vDisk') {
 			regenerateDiskPreview(sectiondata.index);
 		}
+		if (sectiondata.category == 'Graphics_Card') {
+			$(section).find(".gpu").change();
+		}
 	});
 
 	$("#vmform").on("destroy_section", function destroySectionEvent(evt, section, sectiondata) {
@@ -1266,21 +1286,33 @@ $(function() {
 	$("#vmform").on("change", ".gpu", function changeGPUEvent() {
 		var myvalue = $(this).val();
 		var mylabel = $(this).children('option:selected').text();
+		var myindex = $(this).closest('table').data('index');
 
-		$vnc_sections = $('.vncmodel,.vncpassword,.vnckeymap');
-		if ($("#vmform .gpu option[value='vnc']:selected").length) {
-			$vnc_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
-			slideDownRows($vnc_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
-		} else {
-			slideUpRows($vnc_sections);
-			$vnc_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+		if (myindex == 0) {
+			$vnc_sections = $('.vncmodel,.vncpassword,.vnckeymap');
+			if (myvalue == 'vnc') {
+				$vnc_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
+				slideDownRows($vnc_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+			} else {
+				slideUpRows($vnc_sections);
+				$vnc_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+			}
 		}
 
-		$("#vmform .gpu").not(this).each(function () {
-			if (myvalue == $(this).val()) {
-				$(this).prop("selectedIndex", 0).change();
-			}
-		});
+		$romfile = $(this).closest('table').find('.romfile');
+		if (myvalue == 'vnc' || myvalue == '') {
+			slideUpRows($romfile.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+			$romfile.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+		} else {
+			$romfile.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
+			slideDownRows($romfile.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+
+			$("#vmform .gpu").not(this).each(function () {
+				if (myvalue == $(this).val()) {
+					$(this).prop("selectedIndex", 0).change();
+				}
+			});
+		}
 	});
 
 	$("#vmform").on("click", ".mac_generate", function generateMac() {
@@ -1366,11 +1398,7 @@ $(function() {
 	}
 	$("#vmform #usbmode option[value='usb3']").prop('disabled', noUSB3);
 
-	if ($("#vmform .gpu option[value='vnc']:selected").length) {
-		$('.vncmodel,.vncpassword,.vnckeymap').not(isVMAdvancedMode() ? '.basic' : '.advanced').show();
-	} else {
-		$('.vncmodel,.vncpassword,.vnckeymap').hide();
-	}
+	$("#vmform .gpu").change();
 
 	$('#vmform .cdrom').change();
 

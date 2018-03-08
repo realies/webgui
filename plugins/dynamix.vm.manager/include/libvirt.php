@@ -665,12 +665,18 @@
 						$strSpecialAddress = "<address type='pci' domain='0x0000' bus='0x".$gpu_bus."' slot='0x".$gpu_slot."' function='0x".$gpu_function."'/>";
 					}
 
+					$strRomFile = '';
+					if (!empty($gpu['rom'])) {
+						$strRomFile = "<rom file='".$gpu['rom']."'/>";
+					}
+
 					$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'".$strXVGA.">
 									<driver name='vfio'/>
 									<source>
 										<address domain='0x0000' bus='0x".$gpu_bus."' slot='0x".$gpu_slot."' function='0x".$gpu_function."'/>
 									</source>
 									$strSpecialAddress
+									$strRomFile
 								</hostdev>";
 
 					$gpudevs_used[] = $gpu['id'];
@@ -1916,28 +1922,39 @@
 		}
 
 		function domain_get_host_devices_pci($domain) {
-			$xpath = '//domain/devices/hostdev[@type="pci"]/source/address/@';
-
-			$dom  = $this->get_xpath($domain, $xpath.'domain', false);
-			$bus  = $this->get_xpath($domain, $xpath.'bus', false);
-			$slot = $this->get_xpath($domain, $xpath.'slot', false);
-			$func = $this->get_xpath($domain, $xpath.'function', false);
-
 			$devs = [];
-			for ($i = 0; $i < $bus['num']; $i++) {
-				$devid = str_replace('0x', '', 'pci_'.$dom[$i].'_'.$bus[$i].'_'.$slot[$i].'_'.$func[$i]);
-				$tmp2 = $this->get_node_device_information($devid);
-				$devs[] = [
-					'domain' => $dom[$i],
-					'bus' => $bus[$i],
-					'slot' => $slot[$i],
-					'func' => $func[$i],
-					'id' => str_replace('0x', '', $bus[$i].':'.$slot[$i].'.'.$func[$i]),
-					'vendor' => $tmp2['vendor_name'],
-					'vendor_id' => $tmp2['vendor_id'],
-					'product' => $tmp2['product_name'],
-					'product_id' => $tmp2['product_id']
-				];
+
+			$res = $this->get_domain_object($domain);
+			$strDOMXML = $this->domain_get_xml($res);
+			$xmldoc = new DOMDocument();
+			$xmldoc->loadXML($strDOMXML);
+			$xpath = new DOMXPath($xmldoc);
+			$objNodes = $xpath->query('//domain/devices/hostdev[@type="pci"]');
+			if ($objNodes->length > 0) {
+				foreach ($objNodes as $objNode) {
+					$dom  = $xpath->query('source/address/@domain', $objNode)->Item(0)->value;
+					$bus  = $xpath->query('source/address/@bus', $objNode)->Item(0)->value;
+					$slot = $xpath->query('source/address/@slot', $objNode)->Item(0)->value;
+					$func = $xpath->query('source/address/@function', $objNode)->Item(0)->value;
+					$rom = $xpath->query('rom/@file', $objNode);
+					$rom = ($rom->length > 0 ? $rom->Item(0)->value : '');
+
+					$devid = str_replace('0x', '', 'pci_'.$dom.'_'.$bus.'_'.$slot.'_'.$func);
+					$tmp2 = $this->get_node_device_information($devid);
+
+					$devs[] = [
+						'domain' => $dom,
+						'bus' => $bus,
+						'slot' => $slot,
+						'func' => $func,
+						'id' => str_replace('0x', '', $bus.':'.$slot.'.'.$func),
+						'vendor' => $tmp2['vendor_name'],
+						'vendor_id' => $tmp2['vendor_id'],
+						'product' => $tmp2['product_name'],
+						'product_id' => $tmp2['product_id'],
+						'rom' => $rom
+					];
+				}
 			}
 
 			// Get any pci devices contained in the qemu args

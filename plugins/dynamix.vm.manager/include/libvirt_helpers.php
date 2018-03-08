@@ -989,7 +989,7 @@
 		foreach ($arrHostDevs as $arrHostDev) {
 			$arrFoundGPUDevices = array_filter($arrValidGPUDevices, function($arrDev) use ($arrHostDev) {return ($arrDev['id'] == $arrHostDev['id']);});
 			if (!empty($arrFoundGPUDevices)) {
-				$arrGPUDevices[] = ['id' => $arrHostDev['id']];
+				$arrGPUDevices[] = ['id' => $arrHostDev['id'], 'rom' => $arrHostDev['rom']];
 				continue;
 			}
 
