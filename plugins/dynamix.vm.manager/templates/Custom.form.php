@@ -1393,10 +1393,10 @@ $(function() {
 
 	// disable usb3 option for windows7 / xp / server 2003 / server 2008
 	var noUSB3 = (os == 'windows7' || os == 'windows2008' || os == 'windowsxp' || os == 'windows2003');
-	if (noUSB3 && $("#vmform #usbmode").val() == 'usb3') {
+	if (noUSB3 && ($("#vmform #usbmode").val().indexOf('usb3')===0)) {
 		$("#vmform #usbmode").val('usb2');
 	}
-	$("#vmform #usbmode option[value='usb3']").prop('disabled', noUSB3);
+	$("#vmform #usbmode option[value^='usb3']").prop('disabled', noUSB3);
 
 	$("#vmform .gpu").change();
 
