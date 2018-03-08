@@ -60,13 +60,13 @@ function loadlist(id) {
     $('#plugin_table').tablesorter({sortList:[[4,0],[1,0]],sortAppend:[[1,0]],headers:{0:{sorter:false},5:{sorter:false}},textAttribute:'data'});
     $('.desc_readmore').readmore({maxHeight:66,moreLink:"<a href='#'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#'><i class='fa fa-chevron-up'></i></a>"});
   });
+}
+$(function() {
+  loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
 <?if (!$notify['version']):?>
   $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 <?endif;?>
-}
-$(function() {
-  loadlist();
 });
 </script>
 <table class='tablesorter plugins shift' id='plugin_table'>
