@@ -339,7 +339,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 
 <script src="/webGui/javascript/jquery.filetree.js"></script>
 <script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
 <script>
 $(function(){
 	$("#applyBtn").click(function(){

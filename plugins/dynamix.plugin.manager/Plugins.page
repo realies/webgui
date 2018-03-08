@@ -17,17 +17,14 @@ Code="f1e6"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $empty = "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i><em>Please wait, retrieving and updating plugin information ...</em></td><tr>";
 // Remove stale /tmp/plugin/*.plg entries
 foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if (!file_exists("/var/log/plugins/".basename($entry))) @unlink($entry);
-$audit = $notify['version'] ? 1 : 0;
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<style>
-#plugin_tree{width:33%;height:200px;overflow-y:scroll;}
-</style>
+<style>#plugin_tree{width:33%;height:200px;overflow-y:scroll;}</style>
+
 <script src="/webGui/javascript/jquery.filetree.js"></script>
 <script>
 <?if ($display['resize']):?>
@@ -43,27 +40,31 @@ function resize(bind) {
   }
 }
 <?endif;?>
-function noAudit() {
-  hideUpgrade();
-  $.cookie('noAudit','true',{path:'/'});
-}
-$(function() {
-  var audit = <?=$audit?>;
-  if ($.cookie('noAudit') != null) {
-    $.removeCookie('noAudit',{path:'/'});
-    audit = 0;
-  }
-  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:audit},function(data) {
-    if (data) $('#plugin_list').html(data);
+function loadlist(id) {
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id},function(data) {
+    if (id) {
+      var tmp = id.split(':');
+      var tr = 'tr#'+tmp[0].replace(/[\. _]/g,'');
+      switch (tmp[1]) {
+        case 'remove' : $('#plugin_list').find(tr).remove(); break;
+        case 'update' : $('#plugin_list').find(tr).remove();
+        case 'install': $('#plugin_list').append(data).trigger('update'); break;
+      }
+    } else {
+      $('#plugin_list').html(data);
+    }
 <?if ($display['resize']):?>
     resize();
     $(window).bind('resize',function(){resize(true);});
 <?endif;?>
     $('#plugin_table').tablesorter({sortList:[[4,0],[1,0]],sortAppend:[[1,0]],headers:{0:{sorter:false},5:{sorter:false}},textAttribute:'data'});
-    $('.desc_readmore').readmore({maxHeight:58});
+    $('.desc_readmore').readmore({maxHeight:66,moreLink:"<a href='#'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#'><i class='fa fa-chevron-up'></i></a>"});
   });
+}
+$(function() {
+  loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-<?if (!$audit):?>
+<?if (!$notify['version']):?>
   $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 <?endif;?>
 });

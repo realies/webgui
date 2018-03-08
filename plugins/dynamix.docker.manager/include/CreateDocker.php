@@ -764,7 +764,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 </style>
 <script src="/webGui/javascript/jquery.switchbutton.js"></script>
 <script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
 <script type="text/javascript">
   var this_tab = $('input[name$="tabs"]').length;
   $(function() {

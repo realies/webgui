@@ -336,7 +336,7 @@ if (!empty($_GET['uuid'])) {
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script src="/webGui/javascript/jquery.filetree.js"></script>
 <script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
 <script>
 function isVMAdvancedMode() {
 	return ($.cookie('vmmanager_listview_mode') == 'advanced');
