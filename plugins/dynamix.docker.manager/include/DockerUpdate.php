@@ -22,6 +22,6 @@ if ($_POST['check']) {
   $DockerTemplates->getAllInfo(true);
 }
 foreach ($DockerTemplates->getAllInfo() as $info) {
-  if ($info['updated']=='false'&&$info['updated']!='undef') {echo 'true'; break;}
+  if ($info['updated']=='false' && $info['updated']!='undef') {echo 'true'; break;}
 }
 ?>

@@ -43,10 +43,10 @@ th.three{width:3%}
 <thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th class="three">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
 </table>
-<input type="button" onclick="addContainer()" value="Add Container">
-<input type="button" onclick="startAll()" value="Start all Containers">
-<input type="button" onclick="stopAll()" value="Stop all Containers">
-<input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll">
+<input type="button" onclick="addContainer()" value="Add Container" disabled>
+<input type="button" onclick="startAll()" value="Start all Containers" disabled>
+<input type="button" onclick="stopAll()" value="Stop all Containers" disabled>
+<input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll" disabled>
 <input type="button" onclick="updateAll()" value="Update all Containers" id="updateAll" style="display:none">
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
