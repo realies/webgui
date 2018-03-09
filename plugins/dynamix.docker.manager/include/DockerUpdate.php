@@ -15,17 +15,13 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-$DockerClient = new DockerClient();
 $DockerTemplates = new DockerTemplates();
 
 if ($_POST['check']) {
   $DockerTemplates->downloadTemplates();
   $DockerTemplates->getAllInfo(true);
 }
-$all_containers = $DockerClient->getDockerContainers();
-$all_info = $DockerTemplates->getAllInfo();
-foreach ($all_containers as $ct) {
-  $info = &$all_info[$ct['Name']];
+foreach ($DockerTemplates->getAllInfo() as $info) {
   if ($info['updated']=='false'&&$info['updated']!='undef') {echo 'true'; break;}
 }
 ?>
