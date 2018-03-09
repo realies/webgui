@@ -62,16 +62,6 @@ th.three{width:3%}
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
 <script>
-function startAll() {
-  $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
-}
-function stopAll() {
-  $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
-}
 <?if ($display['resize']):?>
 function resize(bind) {
   var width = [];

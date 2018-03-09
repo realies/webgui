@@ -9,7 +9,6 @@ function ajaxVMDispatch(params, reload){
     }
   }, "json");
 }
-
 function addVMContext(name, uuid, template, state, vncurl, log){
   var opts = [{header:name, image:"/plugins/dynamix.vm.manager/images/dynamix.vm.manager.png"}];
   var path = location.pathname;
@@ -90,4 +89,44 @@ function addVMContext(name, uuid, template, state, vncurl, log){
     opts.push({text:"View XML", icon:"fa-code", href:path+'/UpdateVM?template=Custom&amp;uuid='+uuid});
   }
   context.attach('#vm-'+uuid, opts);
+}
+function startAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
+  $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'start'}, function(){loadlist();});
+}
+function stopAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).find('i').addClass('fa-spin');
+  $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'stop'}, function(){loadlist();});
+}
+function vncOpen() {
+  $.post('/plugins/dynamix.vm.manager/include/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'<?=$docroot?>/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
+    window.location.href = data;
+  });
+}
+function toggle_id(itemID){
+   if ((document.getElementById(itemID).style.display == 'none')) {
+      slideDownRows($('#'+itemID));
+   } else {
+      slideUpRows($('#'+itemID));
+   }
+   return false;
+}
+function showInput(){
+  $(this).off('click');
+  $(this).siblings('input').each(function(){$(this).show();});
+  $(this).siblings('input').focus();
+  $(this).hide();
+}
+function hideInput(){
+  $(this).hide();
+  $(this).siblings('span').show();
+  $(this).siblings('span').click(showInput);
+}
+function addVM() {
+  var path = location.pathname;
+  var x = path.indexOf("?");
+  if (x!=-1) path = path.substring(0,x);
+  location = path+"/VMTemplates";
 }

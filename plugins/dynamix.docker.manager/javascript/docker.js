@@ -34,19 +34,16 @@ function addDockerContainerContext(container, image, template, started, update, 
   }
   context.attach('#'+id, opts);
 }
-
 function addDockerImageContext(image, imageTag) {
   var opts = [{header:'(orphan image)'}];
   opts.push({text:"Remove", icon:"fa-trash", action:function(e){e.preventDefault(); rmImage(image, imageTag);}});
   context.attach('#context-'+image, opts);
 }
-
 function execUpContainer(container) {
   var title = "Updating the container: "+container;
   var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true&ct[]="+encodeURIComponent(container);
   popupWithIframe(title, address, true);
 }
-
 function popupWithIframe(title, cmd, reload) {
   pauseEvents();
   $("#iframe-popup").html('<iframe id="myIframe" frameborder="0" scrolling="yes" width="100%" height="99%"></iframe>');
@@ -76,21 +73,18 @@ function popupWithIframe(title, cmd, reload) {
   $(".ui-dialog .ui-dialog-content").css("padding", "0");
 //$('.ui-widget-overlay').click(function() {$("#iframe-popup").dialog("close");});
 }
-
 function addContainer() {
   var path = location.pathname;
   var x = path.indexOf("?");
   if (x!=-1) path = path.substring(0,x);
   location = path+"/AddContainer";
 }
-
 function editContainer(container, template) {
   var path = location.pathname;
   var x = path.indexOf("?");
   if (x!=-1) path = path.substring(0, x);
   location = path+"/UpdateContainer?xmlTemplate=edit:"+template;
 }
-
 function updateContainer(container) {
   var body = "Update container: "+container;
   swal({
@@ -104,7 +98,6 @@ function updateContainer(container) {
     execUpContainer(container);
   });
 }
-
 function rmContainer(container, image, id) {
   var body = "Remove container: "+container+"<br><br><label><input id=\"removeimagechk\" type=\"checkbox\" checked style=\"display:inline; width:unset; height:unset; margin-top:unset; margin-bottom:unset\">also remove image</label>";
   swal({
@@ -125,7 +118,6 @@ function rmContainer(container, image, id) {
     }
   });
 }
-
 function rmImage(image, imageName) {
   var body = "Remove image: "+$('<textarea />').html(imageName).text();
   swal({
@@ -141,7 +133,6 @@ function rmImage(image, imageName) {
     eventControl({action:"remove_image", image:image});
   });
 }
-
 function eventControl(params, reload) {
   var spin = typeof reload != 'undefined';
   if (spin) $('#'+params['container']).find('i').addClass('fa-spin');
@@ -153,7 +144,16 @@ function eventControl(params, reload) {
     }
   }, "json");
 }
-
+function startAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').addClass('fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
+}
+function stopAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
+}
 function reloadUpdate() {
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
   $("#cmdStartStop").val("/plugins/dynamix.docker.manager/scripts/dockerupdate.php");
@@ -161,12 +161,10 @@ function reloadUpdate() {
   $("#cmdArg2").remove();
   $("#formStartStop").submit();
 }
-
 function autoStart(container, event) {
   document.getElementsByName("container")[0].value = container;
   $("#formStartStop").submit();
 }
-
 function containerLogs(container, id) {
   var height = 600;
   var width = 900;
