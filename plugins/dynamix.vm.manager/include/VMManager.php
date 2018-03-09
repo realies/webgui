@@ -15,7 +15,8 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-$vms = $lv->get_domains() ?: [];
+$act = $_POST['action'];
+$vms = $lv->get_domains();
 
 foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
@@ -23,7 +24,7 @@ foreach ($vms as $vm) {
   $domName = $lv->domain_get_name_by_uuid($uuid);
   $dom = $lv->domain_get_info($res);
   $state = $lv->domain_state_translate($dom['state']);
-  switch ($_POST['action']) {
+  switch ($act) {
   case 'stop':
     if ($state!='running') continue;
     $result = $lv->domain_shutdown($domName) ? ['success'=>true, 'state'=>$lv->domain_get_state($domName)] : ['error'=>$lv->get_last_error()];
