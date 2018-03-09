@@ -48,7 +48,7 @@ foreach ($all_containers as $ct) {
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
   $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
-  $docker[] = "docker.push({id:'$id',state:'$running'});";
+  $docker[] = "docker.push({name:'$name',id:'$id',state:'$running',update:'$updateStatus'});";
   $shape = $ct['Running'] ? 'play':'square';
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';

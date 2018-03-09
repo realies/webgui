@@ -19,7 +19,6 @@ Markdown="false"
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
-
 <style>
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
@@ -37,16 +36,6 @@ img.stopped{opacity:0.3}
 .switch-button-label.off{color:inherit}
 th.three{width:3%}
 </style>
-
-<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
-  <input type="hidden" name="action" value="autostart" />
-  <input type="hidden" name="container" value="none" />
-</form>
-<form id="formStartStop" method="POST" action="/update.php" target="progressFrame">
-  <input type="hidden" id="cmdStartStop" name="#command" value="">
-  <input type="hidden" id="cmdArg1" name="#arg[1]" value="">
-  <input type="hidden" id="cmdArg2" name="#arg[2]" value="">
-</form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
@@ -54,10 +43,11 @@ th.three{width:3%}
 <thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th class="three">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
 </table>
-<input type="button" onclick="addContainer()" value="Add Container"/>
-<input type="button" onclick="startAll()" value="Start all Containers"/>
-<input type="button" onclick="stopAll()" value="Stop all Containers"/>
-<input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
+<input type="button" onclick="addContainer()" value="Add Container">
+<input type="button" onclick="startAll()" value="Start all Containers">
+<input type="button" onclick="stopAll()" value="Stop all Containers">
+<input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll">
+<input type="button" onclick="updateAll()" value="Update all Containers" id="updateAll" style="display:none">
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
@@ -82,7 +72,7 @@ function listview() {
     $('.docker_readmore').readmore('destroy');
   }
 }
-function loadlist() {
+function loadlist(update) {
   $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
     var data = d.split(/\0/);
     $('#docker_list').html(data[0]);
@@ -103,6 +93,11 @@ function loadlist() {
     listview();
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false);
+    if (update) {
+      $('input#checkAll').hide(); $('input#updateAll').show();
+    } else {
+      $('input#checkAll').show(); $('input#updateAll').hide();      
+    }
   });
 }
 $(function() {
@@ -113,6 +108,6 @@ $(function() {
     $.cookie('docker_listview_mode',$('.advancedview').is(':checked')?'advanced':'basic',{expires:3650});
     listview();
   });
-  loadlist();
+  $.post('/plugins/dynamix.docker.manager/include/DockerUpdate.php',{},function(u){loadlist(u);});
 });
 </script>

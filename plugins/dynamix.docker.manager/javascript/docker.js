@@ -42,9 +42,9 @@ function addDockerImageContext(image, imageTag) {
 function execUpContainer(container) {
   var title = "Updating the container: "+container;
   var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true&ct[]="+encodeURIComponent(container);
-  popupWithIframe(title, address, true);
+  popupWithIframe(title, address, true, 'loadlist');
 }
-function popupWithIframe(title, cmd, reload) {
+function popupWithIframe(title, cmd, reload, func) {
   pauseEvents();
   $("#iframe-popup").html('<iframe id="myIframe" frameborder="0" scrolling="yes" width="100%" height="99%"></iframe>');
   $("#iframe-popup").dialog({
@@ -62,7 +62,7 @@ function popupWithIframe(title, cmd, reload) {
     },
     close:function(event, ui) {
       if (reload && !$("#myIframe").contents().find("#canvas").length) {
-        location = window.location.href;
+        if (func) setTimeout(func+'()',0); else location = window.location.href;
       } else {
         resumeEvents();
       }
@@ -154,16 +154,17 @@ function stopAll() {
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
 }
-function reloadUpdate() {
+function checkAll() {
+  $('input[type=button]').prop('disabled',true);
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
-  $("#cmdStartStop").val("/plugins/dynamix.docker.manager/scripts/dockerupdate.php");
-  $("#cmdArg1").remove();
-  $("#cmdArg2").remove();
-  $("#formStartStop").submit();
+  $.post('/plugins/dynamix.docker.manager/include/DockerUpdate.php',{check:true},function(u){loadlist(u);});
 }
-function autoStart(container, event) {
-  document.getElementsByName("container")[0].value = container;
-  $("#formStartStop").submit();
+function updateAll() {
+  $('input[type=button]').prop('disabled',true);
+  var list = '';
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') list += '&ct[]='+ct.name;
+  var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true"+list;
+  popupWithIframe('Updating all Containers', address, true, 'loadlist');
 }
 function containerLogs(container, id) {
   var height = 600;
