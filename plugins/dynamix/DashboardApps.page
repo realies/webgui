@@ -55,7 +55,7 @@ function loadlist() {
       if ($('.Panel.started').length===0) $('#noapps').show();
     }
     if ($('.Panel').length===0) $('#noapps').show();
-    $('#apps_icons').fadeIn('slow');
+    $('#apps_icons').slideDown('slow');
     context.init({preventDoubleContext:false});
   });
 }
@@ -64,9 +64,9 @@ $(function() {
   $('.appview').change(function() {
     $('.Panel').not('.started').finish().toggle('fast');
     if ($('.Panel').length===0 || ($('.appview').is(':checked') && $('.Panel.started').length===0)) {
-      $('#noapps').fadeIn('fast');
+      $('#noapps').slideDown('fast');
     } else {
-      $('#noapps').fadeOut('fast');
+      $('#noapps').slideUp('fast');
     }
     $.cookie('dashapps_view_mode',$('.appview').is(':checked') ? 'startedonly':'allapps',{expires:3650});
   });
