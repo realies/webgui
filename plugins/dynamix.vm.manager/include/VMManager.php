@@ -15,7 +15,18 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
+$act = $_POST['action'];
+$txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
 $vms = $lv->get_domains() ?: [];
+
+if (file_exists($txt)) {
+  $prefs = parse_ini_file($txt); $sort = [];
+  foreach ($vms as $vm) $sort[] = $prefs[$vm] ?? 999;
+  array_multisort($sort,SORT_NUMERIC,$vms);
+} else {
+  natsort($vms);
+}
+if ($act=='stop') $vms = array_reverse($vms);
 
 foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
@@ -23,7 +34,7 @@ foreach ($vms as $vm) {
   $domName = $lv->domain_get_name_by_uuid($uuid);
   $dom = $lv->domain_get_info($res);
   $state = $lv->domain_state_translate($dom['state']);
-  switch ($_POST['action']) {
+  switch ($act) {
   case 'stop':
     if ($state!='running') continue;
     $result = $lv->domain_shutdown($domName) ? ['success'=>true, 'state'=>$lv->domain_get_state($domName)] : ['error'=>$lv->get_last_error()];
