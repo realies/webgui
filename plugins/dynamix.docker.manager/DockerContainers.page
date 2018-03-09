@@ -92,7 +92,7 @@ function loadlist(update) {
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
     listview();
     context.init({preventDoubleContext:false});
-    $('input[type=button]').prop('disabled',false).show();
+    $('input[type=button]').prop('disabled',false).show('slow');
     if (update) {
       $('input#checkAll').hide(); $('input#updateAll').show();
     } else {

@@ -166,7 +166,7 @@ function loadlist() {
       },'json');
     });
     context.init({preventDoubleContext:false});
-    $('input[type=button]').prop('disabled',false).show();
+    $('input[type=button]').prop('disabled',false).show('slow');
     $('.text').click(showInput);
     $('.input').blur(hideInput);
     $('i.up,i.down').click(function() {
