@@ -17,7 +17,7 @@ require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 $act = $_POST['action'];
 $txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
-$vms = $lv->get_domains() ?: [];
+$vms = $lv->get_domains();
 
 if (file_exists($txt)) {
   $prefs = parse_ini_file($txt); $sort = [];
