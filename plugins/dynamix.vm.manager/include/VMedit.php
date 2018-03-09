@@ -178,10 +178,10 @@ if (!empty($_GET['uuid'])) {
 		margin-top: 1px;
 	}
 	.basic {
-		/*Empty placeholder*/
+		display: none;
 	}
 	.advanced {
-		display: none;
+		/*Empty placeholder*/
 	}
 	.switch-button-label.off {
 		color: inherit;
@@ -339,7 +339,11 @@ if (!empty($_GET['uuid'])) {
 <script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
 <script>
 function isVMAdvancedMode() {
-	return ($.cookie('vmmanager_listview_mode') == 'advanced');
+	return true;
+}
+
+function isVMXMLMode() {
+	return ($.cookie('vmmanager_listview_mode') == 'xml');
 }
 
 $(function() {
@@ -354,13 +358,13 @@ $(function() {
 
 	$('.advancedview').switchButton({
 		labels_placement: "left",
-		on_label: 'Advanced View',
-		off_label: 'Basic View',
-		checked: isVMAdvancedMode()
+		on_label: 'XML View',
+		off_label: 'Form View',
+		checked: isVMXMLMode()
 	});
 	$('.advancedview').change(function () {
-		toggleRows('advanced', $(this).is(':checked'), 'basic');
-		$.cookie('vmmanager_listview_mode', $(this).is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
+		toggleRows('xmlview', $(this).is(':checked'), 'formview');
+		$.cookie('vmmanager_listview_mode', $(this).is(':checked') ? 'xml' : 'form', { expires: 3650 });
 	});
 
 	$('#template_img').click(function (){
@@ -389,19 +393,19 @@ $(function() {
 	$("#vmform input[data-pickroot]").fileTreeAttach();
 
 	var $el = $('#form_content');
-	var $advanced = $el.find('.advanced');
-	var $basic = $el.find('.basic');
+	var $xmlview = $el.find('.xmlview');
+	var $formview = $el.find('.formview');
 
-	if ($advanced.length || $basic.length) {
+	if ($xmlview.length || $formview.length) {
 		$('.advancedview_panel').fadeIn('fast');
-		if (isVMAdvancedMode()) {
-			$('.basic').hide();
-			$('.advanced').filter(function() {
+		if (isVMXMLMode()) {
+			$('.formview').hide();
+			$('.xmlview').filter(function() {
 				return (($(this).prop('style').display + '') === '');
 			}).show();
 		} else {
-			$('.advanced').hide();
-			$('.basic').filter(function() {
+			$('.xmlview').hide();
+			$('.formview').filter(function() {
 				return (($(this).prop('style').display + '') === '');
 			}).show();
 		}
