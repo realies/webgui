@@ -141,9 +141,11 @@ function loadlist() {
     var data = d.split(/\0/);
     $('#kvm_list').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
-<?
-$i=0;
-foreach ($vms as $vm) {
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize(true);});
+<?endif;?>
+<?$i=0; foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
   $uuid = $lv->domain_get_uuid($res);
 ?>  $('.vcpu<?=$i++?>').tooltipster({
@@ -188,10 +190,6 @@ foreach ($vms as $vm) {
       row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
       $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
     });
-<?if ($display['resize']):?>
-    resize();
-    $(window).bind('resize',function(){resize(true);});
-<?endif;?>
   });
 }
 $(function() {

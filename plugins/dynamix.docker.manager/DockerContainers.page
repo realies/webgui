@@ -77,6 +77,10 @@ function loadlist(update) {
     var data = d.split(/\0/);
     $('#docker_list').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize(true);});
+<?endif;?>
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
       $.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php",{action:'autostart',container:$(this).attr('container'),response:'json'},function(data){$(this).prop('checked',data.autostart);},'json');
@@ -94,10 +98,6 @@ function loadlist(update) {
     } else {
       $('input#checkAll').show(); $('input#updateAll').hide();      
     }
-<?if ($display['resize']):?>
-    resize();
-    $(window).bind('resize',function(){resize(true);});
-<?endif;?>
   });
 }
 $(function() {
