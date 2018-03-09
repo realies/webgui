@@ -113,9 +113,9 @@ th.five{width:5%}
 <thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th><th class="five"><i class="fa fa-sort"></i></th></tr></thead>
 <tbody id="kvm_list"><tr><td colspan='9' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving VM information</td></tr></tbody>
 </table>
-<input type="button" onclick="addVM()" id="btnAddVM" value="Add VM"/>
-<input type="button" onclick="startAll()" value="Start all VMs"/>
-<input type="button" onclick="stopAll()" value="Stop all VMs"/>
+<input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" disabled>
+<input type="button" onclick="startAll()" value="Start all VMs" disabled>
+<input type="button" onclick="stopAll()" value="Stop all VMs" disabled>
 
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
@@ -190,6 +190,7 @@ foreach ($vms as $vm) {
       var names = ''; var index = '';
       row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
       $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
+      $('input[type=button]').prop('disabled',false);
     });
   });
 }
