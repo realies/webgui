@@ -157,10 +157,6 @@ foreach ($vms as $vm) {
       functionBefore:function(instance,helper){instance.content("<?=showCPUs($uuid)?>");}
     });
 <?}?>
-<?if ($display['resize']):?>
-    resize();
-    $(window).bind('resize',function(){resize(true);});
-<?endif;?>
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
       $.post('/plugins/dynamix.vm.manager/include/VMajax.php',{action:'domain-autostart',uuid:$(this).attr('uuid'),autostart:$(this).prop('checked'),response:'json'},function(data){
@@ -192,6 +188,10 @@ foreach ($vms as $vm) {
       row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
       $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
     });
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize(true);});
+<?endif;?>
   });
 }
 $(function() {
