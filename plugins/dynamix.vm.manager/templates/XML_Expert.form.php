@@ -31,7 +31,7 @@
 
 
 	if (array_key_exists('createvm', $_POST)) {
-		$tmp = $lv->domain_define($_POST['xmldesc']);
+		$tmp = $lv->domain_define($_POST['xmldesc'], !empty($config['domain']['startnow']));
 		if (!$tmp){
 			$arrResponse = ['error' => $lv->get_last_error()];
 		} else {

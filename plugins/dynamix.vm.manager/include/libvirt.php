@@ -1463,7 +1463,7 @@
 			return $ret;
 		}
 
-		function domain_define($xml) {
+		function domain_define($xml, $autostart=false) {
 			if (strpos($xml,'<qemu:commandline>')) {
 				$tmp = explode("\n", $xml);
 				for ($i = 0; $i < sizeof($tmp); $i++)
@@ -1471,6 +1471,13 @@
 						$tmp[$i] = "<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>";
 				$xml = join("\n", $tmp);
 			}
+
+			if ($autostart) {
+				$tmp = libvirt_domain_create_xml($this->conn, $xml);
+				if (!$tmp)
+					return $this->_set_last_error();
+			}
+
 			$tmp = libvirt_domain_define_xml($this->conn, $xml);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
