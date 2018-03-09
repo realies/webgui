@@ -191,7 +191,6 @@ foreach ($vms as $vm) {
       var names = ''; var index = '';
       row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
       $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
-      $('input[type=button]').prop('disabled',false);
     });
   });
 }
