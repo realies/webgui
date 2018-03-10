@@ -7,25 +7,25 @@ Markdown="false"
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
-body{-webkit-overflow-scrolling: touch;}
-label{display:inline;}
-iframe{overflow:scroll;-webkit-overflow-scrolling:touch;}
-h2{color:#625D5D;letter-spacing:0;font-family:arimo;font-size:32px;line-height: 1.2em;font-weight:300;padding:0 0 20px;margin:0;}
-.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF;}
-.iconstatus.started{font-size:1.3em;}
-img.started{opacity:1.0;}
-img.stopped{opacity:0.3;}
-img.paused{opacity:1.0;}
-.started{color:#009900;}
-.paused{color:#F0DD33;}
-.stopped{color:#EF3D47;}
-.update{color:#3300FF;}
-.show{display:block;}
-div.Panel{float:none;display:inline-block;margin:0 18px 15px 0;height:90px;overflow:hidden;vertical-align:top;width:94px;word-wrap:break-word;border:none;}
-div.Panel:hover{overflow:visible;z-index:10;background-color:unset;}
-#noapps{display:none;font-style:italic;font-size:16px;opacity:0.5;padding:5px;}
-.switch-button-label.off{color:inherit;}
-.switch-button-label.on{color:#009900;}
+body{-webkit-overflow-scrolling:touch}
+label{display:inline}
+iframe{overflow:scroll;-webkit-overflow-scrolling:touch}
+h2{color:#625D5D;letter-spacing:0;font-family:arimo;font-size:32px;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF}
+.iconstatus.started{font-size:1.3em}
+img.started{opacity:1.0}
+img.stopped{opacity:0.3}
+img.paused{opacity:1.0}
+.started{color:#009900}
+.paused{color:#F0DD33}
+.stopped{color:#EF3D47}
+.update{color:#3300FF}
+.show{display:block}
+div.Panel{float:none;display:inline-block;margin:0 18px 15px 0;height:90px;overflow:hidden;vertical-align:top;width:94px;word-wrap:break-word;border:none}
+div.Panel:hover{overflow:visible;z-index:10;background-color:unset}
+#noapps{display:none;font-style:italic;font-size:16px;opacity:0.5;padding:5px}
+.switch-button-label.off{color:inherit}
+.switch-button-label.on{color:#009900}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
 <input type="hidden" id="cmdStartStop" name="#command" value="">
@@ -46,7 +46,7 @@ div.Panel:hover{overflow:visible;z-index:10;background-color:unset;}
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/vmmanager.js')?>"></script>
 <script>
 function loadlist() {
-  $.get('/webGui/include/DashboardApps.php',function(d) {
+  $.post('/webGui/include/DashboardApps.php',{display:'<?=$display['dashapps']?>'},function(d) {
     var data = d.split(/\0/);
     $('#apps_icons').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
