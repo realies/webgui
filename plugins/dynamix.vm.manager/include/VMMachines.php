@@ -24,7 +24,7 @@ if (empty($vms)) {
 }
 if (file_exists($cfg)) {
   $prefs = parse_ini_file($cfg); $sort = [];
-  foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?: 999;
+  foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?? 999;
   array_multisort($sort,SORT_NUMERIC,$vms);
 } else {
   natsort($vms);
