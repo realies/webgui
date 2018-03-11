@@ -448,7 +448,7 @@ $(function(){
 <?if ($mover):?>
  <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Disabled - Mover is running.</td>
 <?else:?>
- <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.</td>
+ <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.&nbsp;&nbsp;<a href='/Scheduler'>(Schedule)</a></td>
 <?endif;?>
  </tr>
 </table>
