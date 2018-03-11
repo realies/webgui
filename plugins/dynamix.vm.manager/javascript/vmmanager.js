@@ -70,9 +70,8 @@ function addVMContext(name, uuid, template, state, vncurl, log){
   if (log !== "") {
     opts.push({text:"Logs", icon:"fa-navicon", action:function(e){e.preventDefault(); openWindow('/webGui/scripts/tail_log&arg1='+log, 'Log for:'+name, 600, 900);}});
   }
+  opts.push({text:"Edit", icon:"fa-pencil", href:path+'/UpdateVM?uuid='+uuid});
   if (state == "shutoff") {
-    opts.push({text:"Edit", icon:"fa-pencil", href:path+'/UpdateVM?uuid='+uuid});
-    opts.push({text:"Edit XML", icon:"fa-code", href:path+'/UpdateVM?template=Custom&amp;uuid='+uuid});
     opts.push({divider:true});
     opts.push({text:"Remove VM", icon:"fa-minus", action:function(e) {
       e.preventDefault();
@@ -84,9 +83,6 @@ function addVMContext(name, uuid, template, state, vncurl, log){
         swal({title:"Are you sure?",text:"Completely REMOVE "+name+" disk image and definition",type:"warning",showCancelButton:true},function(){ajaxVMDispatch({action:"domain-delete",uuid:uuid});});
       }});
     }
-  } else {
-    opts.push({text:"Edit", icon:"fa-pencil", href:path+'/UpdateVM?uuid='+uuid});
-    opts.push({text:"View XML", icon:"fa-code", href:path+'/UpdateVM?template=Custom&amp;uuid='+uuid});
   }
   context.attach('#vm-'+uuid, opts);
 }

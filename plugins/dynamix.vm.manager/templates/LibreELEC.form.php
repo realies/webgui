@@ -980,8 +980,7 @@
 			</tr>
 		</table>
 		<blockquote class="inline_help">
-			<p>If you wish to assign any USB devices to your guest, you can select them from this list.<br>
-			NOTE:  USB hotplug support is not yet implemented, so devices must be attached before the VM is started to use them.</p>
+			<p>If you wish to assign any USB devices to your guest, you can select them from this list.</p>
 		</blockquote>
 
 		<table>
