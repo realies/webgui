@@ -17,14 +17,13 @@ require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-// Get the webGui configuration preferences
-extract(parse_plugin_cfg('dynamix',true));
+$display = $_POST['display'];
 
-if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='docker')) {
+if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $DockerClient    = new DockerClient();
   $DockerTemplates = new DockerTemplates();
   $containers      = $DockerClient->getDockerContainers() ?: [];
-  ksort($containers);
+  ksort($containers,SORT_NATURAL);
   $Allinfo = $DockerTemplates->getAllInfo();
   $menu = [];
   foreach ($containers as $ct) {
@@ -51,7 +50,7 @@ if (pgrep('dockerd')!==false && ($display['dashapps']=='icons' || $display['dash
   }
 }
 
-if (pgrep('libvirtd')!==false && ($display['dashapps']=='icons' || $display['dashapps']=='vms')) {
+if (pgrep('libvirtd')!==false && ($display=='icons' || $display=='vms')) {
   $txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
   $vms = $lv->get_domains();
   if (file_exists($txt)) {

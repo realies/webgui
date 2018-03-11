@@ -16,15 +16,15 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-$txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
+$cfg = '/boot/config/plugins/dynamix.vm.manager/userprefs.cfg';
 $vms = $lv->get_domains();
 if (empty($vms)) {
   echo '<tr><td colspan="8" style="text-align:center;padding-top:12px">No Virtual Machines installed</td></tr>';
   return;
 }
-if (file_exists($txt)) {
-  $prefs = parse_ini_file($txt); $sort = [];
-  foreach ($vms as $vm) $sort[] = $prefs[$vm] ?? 999;
+if (file_exists($cfg)) {
+  $prefs = parse_ini_file($cfg); $sort = [];
+  foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?? 999;
   array_multisort($sort,SORT_NUMERIC,$vms);
 } else {
   natsort($vms);
