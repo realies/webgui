@@ -29,8 +29,14 @@ foreach ($shares as $share) {
 $total = exec("awk '/^MemTotal/{print $2*1024/1.048576}' /proc/meminfo");
 exec("ls /sys/class/net|grep -Po '^(lo|(bond|eth)\d+)$'",$ports);
 
-$memory_installed = exec("dmidecode -t 17 | awk -F: '/^\tSize: [0-9]+ MB$/{t+=$2} /^\tSize: [0-9]+ GB$/{t+=$2*1024} END{print t}'")/1024;
-$memory_maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
+$memory_installed = exec("dmidecode -qt17|awk -F: '/^\tSize: [0-9]+ MB\$/{t+=\$2};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024};/^\tSize: [0-9]+ TB\$/{t+=\$2*1048576} END{print t}'");
+list($memory_maximum,$ecc_support) = array_map('trim',explode('#',exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024};/^\tMaximum Capacity: [0-9]+ TB\$/{t+=\$2*1048576};/^\tError Correction Type:/{e=\$2} END{print t\"#\"e}'")));
+if ($memory_installed >= 1024) {
+  $memory_installed = round($memory_installed/1024);
+  $memory_maximum = round($memory_maximum/1024);
+  $unit = 'GB';
+} else $unit = 'MB';
+
 // If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
 if ($memory_maximum < $memory_installed) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 
@@ -229,7 +235,7 @@ $dck = exec("df /var/lib/docker|grep -om1 '^/'");
 <tr class='wide'><td>flash log docker</td><td><div class='usage-disk sys'><span id='sys1' style='width:0'></span></div></td><td><div class='usage-disk sys'><span id='sys2' style='width:0'></span></div></td>
 <td><?if ($dck):?><div class='usage-disk sys'><span id='sys3' style='width:0'></span></div><?else:?>Not available<?endif;?></td></tr>
 <tr><td rowspan='2'>Memory size</td><td>allocated</td><td colspan='2' class='blue'><?=my_scale($total,$unit,3)." $unit"?></td></tr>
-<tr><td>installed</td><td colspan='2' class='blue'><?="$memory_installed GB (max. capacity $memory_maximum GB)"?></td></tr>
+<tr><td>installed</td><td colspan='2' class='blue'><?="$memory_installed $unit ".($ecc_support=='None'?'':$ecc_support)."<br>max. installable capacity $memory_maximum $unit"?></td></tr>
 </tbody>
 <tbody>
 <?if (count($ports)>1):?><tr class='view1'><td rowspan='<?=count($ports)?>'><?else:?><tr class='view1 wide'><td><?endif;?>Network</td>
