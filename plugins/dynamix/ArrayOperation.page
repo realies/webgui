@@ -255,7 +255,7 @@ $(function(){
         if ($var['mdResyncAction']=="check"):?>
           <tr><td></td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Read-Check</strong> of all array disks.</td></tr>
 <?      elseif (strstr($var['mdResyncAction'],"check")):?>
-          <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.
+          <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.&nbsp;&nbsp;<a href='/Scheduler'>(Schedule)</a>
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?      endif;?>
         <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td>
