@@ -746,6 +746,7 @@ $showAdditionalInfo = '';
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
 <link rel="stylesheet" type="text/css" href="/plugins/dynamix.docker.manager/styles/style-<?=$display['theme'];?>.css">
 <style>
+table {border-collapse:separate;}
 table.settings tr>td+td{white-space:normal;text-align:justify;padding-right:12px}
 option.list{padding:0 0 0 7px}
 optgroup.bold{font-weight:bold;margin-top:5px}
