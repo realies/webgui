@@ -55,7 +55,7 @@ function loadlist() {
       if ($('.Panel.started').length===0) $('#noapps').show();
     }
     if ($('.Panel').length===0) $('#noapps').show();
-    $('#apps_icons').slideDown('slow');
+    $('#apps_icons').slideDown('fast');
     context.init({preventDoubleContext:false});
   });
 }
