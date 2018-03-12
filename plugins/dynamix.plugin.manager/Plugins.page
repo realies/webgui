@@ -71,5 +71,5 @@ $(function() {
 </script>
 <table class='tablesorter plugins shift' id='plugin_table'>
 <thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th>Uninstall</th></tr></thead>
-<tbody id="plugin_list"><tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i><em>Please wait, retrieving and updating plugin information ...</em></td><tr></tbody>
+<tbody id="plugin_list"><tr><td colspan='6' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td><tr></tbody>
 </table>

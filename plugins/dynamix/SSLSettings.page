@@ -52,7 +52,7 @@ $tasks = find_tasks();
 <script>
 function provisionSSL(button) {
   var oldlabel = $.trim($(button).text());
-  $(button).prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\" aria-hidden=\"true\"></i> "+oldlabel+"ing");
+  $(button).prop("disabled", true).html("<i class=\"fa fa-circle-o-notch fa-spin\" aria-hidden=\"true\"></i> "+oldlabel+"ing");
   var msg = "Your Let's Encrypt SSL Certificate has been provisioned and a DNS record for local IP address <?=$internalip?> has been created on unraid.net.";
   var failure = function(data) {
     var status = data.status;
@@ -86,7 +86,7 @@ function provisionSSL(button) {
   $.post("/webGui/include/ProvisionCert.php",success_provision).fail(failure);
 }
 function updateDNS(button) {
-  $(button).prop("disabled", true).html("<i class=\"fa fa-spinner fa-spin\" aria-hidden=\"true\"></i> Updating DNS");
+  $(button).prop("disabled", true).html("<i class=\"fa fa-circle-o-notch fa-spin\" aria-hidden=\"true\"></i> Updating DNS");
   var failure = function(data) {
     var status = data.status;
     var obj = data.responseJSON;

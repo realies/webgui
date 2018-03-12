@@ -112,7 +112,7 @@ th.five{width:5%}
 </style>
 <table class="tablesorter shift kvm" id="kvm_table">
 <thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th><th class="five"><i class="fa fa-sort"></i></th></tr></thead>
-<tbody id="kvm_list"><tr><td colspan='9' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving VM information</td></tr></tbody>
+<tbody id="kvm_list"><tr><td colspan='9' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" style="display:none">
 <input type="button" onclick="startAll()" value="Start all VMs" style="display:none">

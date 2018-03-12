@@ -37,19 +37,19 @@ $(function(){
 <p class="notice">Warning: Your system has booted with the PCIe ACS Override setting enabled. The below list doesn't not reflect the way IOMMU would naturally group devices. To see natural IOMMU groups for your hardware, go to the <b><a href="/Settings/VMSettings">VM Settings</a></b> page and set the <b>PCIe ACS Override</b> setting to <b>No</b>.</p>
 <?endif;?>
 
-<pre><table id='t1' class='pre'><tr><td><i class='fa fa-spinner fa-spin'></i>&nbsp;Please wait... retrieving information!</td></tr></table></pre><br>
+<pre><table id='t1' class='pre'><tr><td><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></table></pre><br>
 
 **CPU Thread Pairings**
 
 > This displays a list of CPU thread pairings.
 
-<pre><table id='t2' class='pre'><tr><td><i class='fa fa-spinner fa-spin'></i>&nbsp;Please wait... retrieving information!</td></tr></table></pre><br>
+<pre><table id='t2' class='pre'><tr><td><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></table></pre><br>
 
 **USB Devices**
 
 > This displays the output of the `lsusb` command.  The numeric identifiers are used to configure PCI pass-through.
 
-<pre><table id='t3' class='pre'><tr><td><i class='fa fa-spinner fa-spin'></i>&nbsp;Please wait... retrieving information!</td></tr></table></pre><br>
+<pre><table id='t3' class='pre'><tr><td><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></table></pre><br>
 
 **SCSI Devices**
 
@@ -57,5 +57,5 @@ $(function(){
 >
 > Note that linux groups ATA, SATA and SAS devices with true SCSI devices.
 
-<pre><table id='t4' class='pre'><tr><td><i class='fa fa-spinner fa-spin'></i>&nbsp;Please wait... retrieving information!</td></tr></table></pre>
+<pre><table id='t4' class='pre'><tr><td><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></table></pre>
 <input type="button" value="Done" onclick="done()">
