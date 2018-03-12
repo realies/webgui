@@ -41,7 +41,7 @@ th.three{width:3%}
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
 <table class="tablesorter shift" id="docker_containers">
 <thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th class="three">Log</th></tr></thead>
-<tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i>Please wait... retrieving container information</td></tr></tbody>
+<tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start all Containers" style="display:none">

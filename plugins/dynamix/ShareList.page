@@ -19,7 +19,7 @@ Cond="$var['fsState']!='Stopped' && $var['shareUser']=='e'"
 function displayShares(all) {
   if (all == 'yes') {
     $.cookie('ssz','ssz',{path:'/'});
-    $('#share_list').html("<tr><td colspan='8' style='text-align:center'><i class='fa fa-spinner fa-spin icon'></i>Please wait... computing user shares!</td></tr>");
+    $('#share_list').html("<tr><td colspan='8' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr>");
   }
   $.get('/webGui/include/ShareList.php',{compute:all,path:'<?=addslashes(htmlspecialchars($path))?>',scale:'<?=$display['scale']?>',number:'<?=$display['number']?>',fill:$.cookie('ssz')},function(data){
     $.removeCookie('ssz',{path:'/'})

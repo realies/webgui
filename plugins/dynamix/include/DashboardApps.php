@@ -32,9 +32,9 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
     $id = $ct['Id'];
     $imageID = $ct['ImageId'];
     $is_autostart = $info['autostart'] ? 'true':'false';
-    $updateStatus = $info['updated']=='true'||$info[$name]['updated']=='undef' ? 'true':'false';
+    $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
     $running = $ct['Running'] ? 'true':'false';
-    $template = $info[$name]['template'];
+    $template = $info['template'];
     $webGui = html_entity_decode($info['url']);
     $support = html_entity_decode($info['Support']);
     $project = html_entity_decode($info['Project']);

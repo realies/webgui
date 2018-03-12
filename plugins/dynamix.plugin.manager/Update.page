@@ -15,7 +15,7 @@ Tag="thumbs-up"
  */
 ?>
 <?
-$empty = "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-spinner fa-spin icon'></i><em>Please wait, retrieving and updating system information ...</em></td><tr>";
+$empty = "<tr><td colspan='6' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td><tr>";
 $version = $date = 'unknown';
 
 if (file_exists('/boot/previous/changes.txt')) {

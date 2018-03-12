@@ -33,6 +33,6 @@ $(function(){
 </script>
 <table class="indexer tablesorter">
  <thead><tr><th>Type</th><th class='sorter-text'>Name</th><th>Size</th><th>Last Modified</th><th>Location</th></tr></thead>
- <tbody><tr><td colspan="5" style="text-align:center;padding-top:12px"><i class='fa fa-spinner fa-spin icon'></i><em>Please wait, loading information ...</em></td></tr></tbody>
+ <tbody><tr><td colspan="5" style="text-align:center;padding:24px"><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
 </table>
 <input type="button" value="Done" onclick="done('Browse')">
