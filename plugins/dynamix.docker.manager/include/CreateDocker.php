@@ -381,8 +381,8 @@ function xmlToCommand($xml, $create_paths=false) {
   global $var;
   global $docroot;
   $xml           = xmlToVar($xml);
-  $cmdName       = (strlen($xml['Name'])) ? '--name='.escapeshellarg($xml['Name']) : '';
-  $cmdPrivileged = (strtolower($xml['Privileged']) == 'true') ? '--privileged=true' : '';
+  $cmdName       = strlen($xml['Name']) ? '--name='.escapeshellarg($xml['Name']) : '';
+  $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
   $cmdNetwork    = '--net='.escapeshellarg(strtolower($xml['Network']));
   $cmdMyIP       = $xml['MyIP'] ? '--ip='.escapeshellarg($xml['MyIP']) : '';
   $Volumes       = [''];
@@ -434,9 +434,7 @@ function xmlToCommand($xml, $create_paths=false) {
                  $xml['ExtraParams'],
                  escapeshellarg($xml['Repository']),
                  $xml['PostArgs']);
-
-  $cmd = trim(preg_replace('/\s+/', ' ', $cmd));
-  return [$cmd, $xml['Name'], $xml['Repository']];
+  return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
 
 function execCommand($command) {
@@ -532,11 +530,10 @@ function getUsedIPs() {
 ##
 ##   CREATE CONTAINER
 ##
-
 if (isset($_POST['contName'])) {
-
   $postXML = postToXML($_POST, true);
-  $dry_run = ($_POST['dryRun'] == "true") ? true : false;
+  $dry_run = $_POST['dryRun']=='true' ? true : false;
+  $existing = $_POST['existingContainer'] ?? false;
   $create_paths = $dry_run ? false : true;
 
   // Get the command line
@@ -547,10 +544,8 @@ if (isset($_POST['contName'])) {
 
   // Saving the generated configuration file.
   $userTmplDir = $dockerManPaths['templates-user'];
-  if (!is_dir($userTmplDir)) {
-    mkdir($userTmplDir, 0777, true);
-  }
-  if (!empty($Name)) {
+  if (!is_dir($userTmplDir)) mkdir($userTmplDir, 0777, true);
+  if ($Name) {
     $filename = sprintf('%s/my-%s.xml', $userTmplDir, $Name);
     file_put_contents($filename, $postXML);
   }
@@ -591,7 +586,6 @@ if (isset($_POST['contName'])) {
   }
 
   // Remove old container if renamed
-  $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : false;
   if ($existing && $DockerClient->doesContainerExist($existing)) {
     // determine if the container is still running
     $oldContainerDetails = $DockerClient->getContainerDetails($existing);
@@ -605,6 +599,8 @@ if (isset($_POST['contName'])) {
 
     // force kill container if still running after 10 seconds
     removeContainer($existing);
+    // remove old template
+    @unlink("$userTmplDir/my-$existing.xml");
   }
 
   if ($startContainer) {

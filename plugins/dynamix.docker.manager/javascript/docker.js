@@ -37,7 +37,7 @@ function addDockerContainerContext(container, image, template, started, update, 
 function addDockerImageContext(image, imageTag) {
   var opts = [{header:'(orphan image)'}];
   opts.push({text:"Remove", icon:"fa-trash", action:function(e){e.preventDefault(); rmImage(image, imageTag);}});
-  context.attach('#context-'+image, opts);
+  context.attach('#'+image, opts);
 }
 function execUpContainer(container) {
   var title = "Updating the container: "+container;
@@ -70,8 +70,7 @@ function popupWithIframe(title, cmd, reload, func) {
   });
   $(".ui-dialog .ui-dialog-titlebar").addClass("menu");
   $(".ui-dialog .ui-dialog-title").css("text-align", "center").css("width", "100%");
-  $(".ui-dialog .ui-dialog-content").css("padding", "0");
-//$('.ui-widget-overlay').click(function() {$("#iframe-popup").dialog("close");});
+  $(".ui-dialog .ui-dialog-content").css("padding", "12");
 }
 function addContainer() {
   var path = location.pathname;
@@ -94,12 +93,13 @@ function updateContainer(container) {
     showCancelButton:true,
     confirmButtonColor:"#8CD4F5",
     confirmButtonText:"Yes, update it!"
-  }, function() {
+  },function(){
     execUpContainer(container);
   });
 }
 function rmContainer(container, image, id) {
   var body = "Remove container: "+container+"<br><br><label><input id=\"removeimagechk\" type=\"checkbox\" checked style=\"display:inline; width:unset; height:unset; margin-top:unset; margin-bottom:unset\">also remove image</label>";
+  $('input[type=button]').prop('disabled',true);
   swal({
     title:"Are you sure?",
     text:body,
@@ -108,18 +108,19 @@ function rmContainer(container, image, id) {
     showCancelButton:true,
     confirmButtonColor:"#DD6B55",
     confirmButtonText:"Yes, delete it!",
-    closeOnConfirm:false,
     showLoaderOnConfirm:true
-  }, function() {
+  },function(){
+    $('#'+id).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
     if ($("#removeimagechk").prop('checked')) {
-      eventControl({action:"remove_all", container:id, image:image});
+      eventControl({action:"remove_all", container:id, image:image},'loadlist');
     } else {
-      eventControl({action:"remove_container", container:id});
+      eventControl({action:"remove_container", container:id},'loadlist');
     }
   });
 }
 function rmImage(image, imageName) {
   var body = "Remove image: "+$('<textarea />').html(imageName).text();
+  $('input[type=button]').prop('disabled',true);
   swal({
     title:"Are you sure?",
     text:body,
@@ -127,32 +128,36 @@ function rmImage(image, imageName) {
     showCancelButton:true,
     confirmButtonColor:"#DD6B55",
     confirmButtonText:"Yes, delete it!",
-    closeOnConfirm:false,
     showLoaderOnConfirm:true
-  }, function() {
-    eventControl({action:"remove_image", image:image});
+  },function(){
+    $('#'+image).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
+    eventControl({action:"remove_image", image:image},'loadlist');
   });
 }
-function eventControl(params, reload) {
-  var spin = typeof reload != 'undefined';
+function eventControl(params, spin) {
   if (spin) $('#'+params['container']).find('i').addClass('fa-spin');
   $.post(eventURL, params, function(data) {
     if (data.success === true) {
-      if (spin) setTimeout(reload+'()',500); else location=window.location.href;
+      if (spin) setTimeout(spin+'()',500); else location=window.location.href;
     } else {
-      swal({title:"Execution error", text:data.success, type:"error"});
+      swal({
+        title:"Execution error",
+        text:data.success, type:"error"
+      },function(){
+        if (spin) setTimeout(spin+'()',500); else location=window.location.href;
+      });
     }
-  }, "json");
+  },'json');
 }
 function startAll() {
   $('input[type=button]').prop('disabled',true);
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'}, function(){loadlist();});
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'},function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
-  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'}, function(){loadlist();});
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'},function(){loadlist();});
 }
 function checkAll() {
   $('input[type=button]').prop('disabled',true);
@@ -169,7 +174,7 @@ function updateAll() {
 function containerLogs(container, id) {
   var height = 600;
   var width = 900;
-  var run = eventURL+"?action=log&container="+id+"&title=Log for:"+container;
+  var run = eventURL+'?action=log&container='+id+'&title=Log for: '+container;
   var top = (screen.height-height) / 2;
   var left = (screen.width-width) / 2;
   var options = 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left;
