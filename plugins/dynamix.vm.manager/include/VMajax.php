@@ -635,6 +635,41 @@ switch ($action) {
 		break;
 
 
+	case 'virtio-win-iso-remove':
+		$path = $_REQUEST['path'];
+		$file = $_REQUEST['file'];
+		$pid = pgrep('-f "VirtIOWin_' . basename($file, '.iso') . '_install.sh"', false);
+
+		if (empty($file) || substr($file, -4) !== '.iso') {
+			$arrResponse = ['success' => false];
+			break;
+		}
+		if ($pid !== false) {
+			$arrResponse = ['success' => false];
+			break;
+		}
+
+		if (is_file($file)) {
+			$arrResponse = ['success' => unlink($file)];
+			break;
+		}
+
+		if (empty($path) || !is_dir($path)) {
+			$path = '/mnt/user/isos/';
+		} else {
+			$path = str_replace('//', '/', $path.'/');
+		}
+		$file = $path.$file;
+
+		if (is_file($file)) {
+			$arrResponse = ['success' => unlink($file)];
+			break;
+		}
+
+		$arrResponse = ['success' => false];
+		break;
+
+
 	default:
 		$arrResponse = ['error' => 'Unknown action \'' . $action . '\''];
 		break;

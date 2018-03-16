@@ -81,9 +81,9 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 		cursor: pointer;
 		margin-left: -2px;
 		color: #08C;
-		font-size: 1.4em;
+		font-size: 1.2em;
 		display: none;
-		transform: translate(0px, 4px);
+		transform: translate(0px, 2px);
 	}
 	#download_button.fa-spin {
 		cursor: default;
@@ -96,6 +96,19 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	}
 	#download_button.fa-spin span {
 		display: none;
+	}
+	#remove_button {
+		cursor: pointer;
+		margin-left: -2px;
+		color: #EF3D47;
+		font-size: 1.2em;
+		display: none;
+		transform: translate(0px, 2px);
+	}
+	#remove_button span {
+		font-size: 12px;
+		font-family: arimo;
+		vertical-align: top;
 	}
 </style>
 <span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
@@ -203,7 +216,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 
 			echo mk_option($strMatch, 'manual', 'Manual');
 		?>
-		</select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
+		</select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-trash" id="remove_button" title="Remove Windows VirtIO driver ISO"> <span>Remove</span></i><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
 	</dd>
 </dl>
 <blockquote class="inline_help">
@@ -383,6 +396,7 @@ $(function(){
 				return;
 			if (data.error) {
 				$("#download_status").html('<span style="color: red">' + data.error + '</span>');
+				$button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
 			} else {
 				$("#download_status").html(data.status);
 
@@ -396,7 +410,6 @@ $(function(){
 				}
 			}
 
-			$button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
 		}, "json");
 	};
 
@@ -413,6 +426,22 @@ $(function(){
 		if (!$(this).hasClass('fa-spin')) {
 			checkOrInitDownload(false);
 		}
+	});
+
+	$("#remove_button").click(function removeVirtIOVersion() {
+		var postdata = {
+			action: "virtio-win-iso-remove",
+			path: $('#mediadir').val(),
+			file: $('#winvirtio_select').val()
+		};
+		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function( data ) {
+			if (postdata.file != $('#winvirtio_select').val())
+				return;
+
+			if (data.success) {
+				$("#winvirtio_select").change();
+			}
+		}, "json");
 	});
 
 	// Fire events below once upon showing page
@@ -436,6 +465,7 @@ $(function(){
 		$.get("/plugins/dynamix.vm.manager/include/VMajax.php", params, function( data ) {
 
 			if (!data.exists || data.pid) {
+				$("#remove_button").hide('fast');
 				$("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
 				$("#download_status").html('').show('fast');
 				if (data.pid) {
@@ -443,6 +473,7 @@ $(function(){
 				}
 			} else {
 				$("#download_button,#download_status").hide('fast');
+				$("#remove_button").show('fast');
 				$("#winvirtio").val(data.path);
 			}
 
