@@ -23,7 +23,6 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $DockerClient    = new DockerClient();
   $DockerTemplates = new DockerTemplates();
   $containers      = $DockerClient->getDockerContainers() ?: [];
-  ksort($containers,SORT_NATURAL);
   $Allinfo = $DockerTemplates->getAllInfo();
   $menu = [];
   foreach ($containers as $ct) {

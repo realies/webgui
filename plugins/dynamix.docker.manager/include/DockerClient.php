@@ -802,6 +802,7 @@ class DockerClient {
 				$this->allContainersCache[] = $c;
 			}
 		}
+		usort($this->allContainersCache, $this->build_sorter('Name'));
 		return $this->allContainersCache;
 	}
 
