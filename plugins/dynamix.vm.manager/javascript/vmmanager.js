@@ -1,13 +1,17 @@
-function ajaxVMDispatch(params, reload){
-  var spin = typeof reload != 'undefined';
+function ajaxVMDispatch(params, spin){
   if (spin) $('#vm-'+params['uuid']).find('i').addClass('fa-spin');
   $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data) {
     if (data.error) {
-      swal({title:"Execution error",text:data.error,type:"error"});
+      swal({
+        title:"Execution error",
+        text:data.error, type:"error"
+      },function(){
+        if (spin) setTimeout(spin+'()',500); else location=window.location.href;
+      });
     } else {
-      if (spin) setTimeout(reload+'()',500); else location=window.location.href;
+      if (spin) setTimeout(spin+'()',500); else location=window.location.href;
     }
-  }, "json");
+  },'json');
 }
 function addVMContext(name, uuid, template, state, vncurl, log){
   var opts = [{header:name, image:"/plugins/dynamix.vm.manager/images/dynamix.vm.manager.png"}];
@@ -75,12 +79,28 @@ function addVMContext(name, uuid, template, state, vncurl, log){
     opts.push({divider:true});
     opts.push({text:"Remove VM", icon:"fa-minus", action:function(e) {
       e.preventDefault();
-      swal({title:"Are you sure?",text:"Remove definition:"+name,type:"warning",showCancelButton:true},function(){ajaxVMDispatch({action:"domain-undefine",uuid:uuid});});
+      swal({
+        title:"Are you sure?",
+        text:"Remove definition:"+name,
+        type:"warning",
+        showCancelButton:true
+      },function(){
+        $('#vm-'+uuid).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
+        ajaxVMDispatch({action:"domain-undefine",uuid:uuid}, "loadlist");
+      });
     }});
     if (template != 'OpenELEC') {
       opts.push({text:"Remove VM & Disks", icon:"fa-trash", action:function(e) {
         e.preventDefault();
-        swal({title:"Are you sure?",text:"Completely REMOVE "+name+" disk image and definition",type:"warning",showCancelButton:true},function(){ajaxVMDispatch({action:"domain-delete",uuid:uuid});});
+        swal({
+          title:"Are you sure?",
+          text:"Completely REMOVE "+name+" disk image and definition",
+          type:"warning",
+          showCancelButton:true
+        },function(){
+          $('#vm-'+uuid).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
+          ajaxVMDispatch({action:"domain-delete",uuid:uuid}, "loadlist");
+        });
       }});
     }
   }
