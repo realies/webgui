@@ -37,7 +37,6 @@ $docker = ['var docker=[];'];
 foreach ($all_containers as $ct) {
   $name = $ct['Name'];
   $info = &$all[$name];
-  $mode = $ct['NetworkMode'];
   $id = $ct['Id'];
   $imageID = $ct['ImageId'];
   $is_autostart = $info['autostart'] ? 'true':'false';
@@ -53,8 +52,8 @@ foreach ($all_containers as $ct) {
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  if ($mode=='bridge') {
-    $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+  $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+  if (count($binds)>1) {
     $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null");
     foreach ($binds as $bind) {
       if (!$bind) continue;
