@@ -3,8 +3,8 @@ Title="Update OS"
 Tag="thumbs-up"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,6 +17,8 @@ Tag="thumbs-up"
 <?
 $empty = "<tr><td colspan='6' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td><tr>";
 $version = $date = 'unknown';
+$bzroot = file_exists('/boot/previous/bzroot');
+$check = $notify['unraidos'] ? 0 : 1;
 
 if (file_exists('/boot/previous/changes.txt')) {
   exec("head -n4 /boot/previous/changes.txt",$rows);
@@ -48,7 +50,7 @@ function downgrade() {
  $.get('/plugins/dynamix.plugin.manager/include/Downgrade.php',{version:'<?=$version?>'},function(){refresh();});
 }
 function loadlist(id) {
-  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{system:'true',audit:id},function(data) {
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{system:'true',audit:id,check:<?=$check?>},function(data) {
     if (id) {
       var tmp = id.split(':');
       var tr = 'tr#'+tmp[0].replace(/[\. _]/g,'');
@@ -63,14 +65,14 @@ function loadlist(id) {
 <?if (preg_match("/^\*\*(REBOOT REQUIRED|DOWNGRADE)/",@file_get_contents("$docroot/plugins/unRAIDServer/README.md",false,null,0,20))):?>
     $('#change_branch').prop('disabled',true);
 <?endif;?>
-<?if (file_exists('/boot/previous/bzroot')):?>
+<?if ($bzroot):?>
     $('#previous').show();
 <?endif;?>
   });
 }
 $(function() {
   loadlist();
-<?if (!$notify['unraidos']):?>
+<?if ($check):?>
   $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"Plugin Update Check\",490,430,true)'></span>");
 <?endif;?>
 });
@@ -79,7 +81,7 @@ $(function() {
 <table class='tablesorter plugins shift' id='os_table'>
 <thead><tr><th></th><th>Component</th><th>Author</th><th>Version</th><th>Status</th><th>Branch</th></tr></thead>
 <tbody id="os_list"><?=$empty?></tbody>
-<?if (file_exists('/boot/previous/bzroot')):?>
+<?if ($bzroot):?>
 <tbody id="previous" style="display:none"><tr><td><img src="/plugins/unRAIDServer/images/unRAIDServer.png"></td><td><b>unRAID Server OS (previous)</b></td><td>LimeTech</td><td><?=$version?></td><td><?=$date?></td><td><input type="button" value="Downgrade" onclick="downgrade()"></td></tbody>
 <?endif;?>
 </table>

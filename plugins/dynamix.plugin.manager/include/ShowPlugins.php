@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -18,6 +18,7 @@ require_once "$docroot/plugins/dynamix.plugin.manager/include/PluginHelpers.php"
 $system  = $_GET['system'] ?? false;
 $branch  = $_GET['branch'] ?? false;
 $audit   = $_GET['audit'] ?? false;
+$check   = $_GET['check'] ?? false;
 $empty   = true;
 $builtin = ['unRAIDServer'];
 $plugins = "/var/log/plugins/*.plg";
@@ -41,7 +42,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //switch between system and custom plugins
   if (($system && !$custom) || (!$system && $custom)) continue;
 //forced plugin check?
-  $checked = check_plugin(basename($plugin_file));
+  $checked = (!$audit && !$check) ? check_plugin(basename($plugin_file)) : true;
 //OS update?
   $os = $system && $name==$builtin[0];
   $toggle = false;
