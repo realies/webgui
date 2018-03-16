@@ -53,8 +53,8 @@ foreach ($all_containers as $ct) {
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
-  if ($binds) {
+  if ($mode=='bridge') {
+    $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
     $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null");
     foreach ($binds as $bind) {
       if (!$bind) continue;
@@ -63,12 +63,10 @@ foreach ($all_containers as $ct) {
     }
   } else {
     $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null"));
-    if ($binds) {
-      $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'];
-      foreach ($binds as $bind) {
-        if (!$bind) continue;
-        $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
-      }
+    $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'];
+    foreach ($binds as $bind) {
+      if (!$bind) continue;
+      $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
     }
   }
   $paths = [];
@@ -89,7 +87,7 @@ foreach ($all_containers as $ct) {
     echo htmlspecialchars($name);
   }
   echo "<div class='advanced' style='width:160px'>Container ID: ".htmlspecialchars($id)."</div>";
-  if ($ct['BaseImage']) echo "<div class='advanced' style='width:160px;'><i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."</div>";
+  if ($ct['BaseImage']) echo "<div class='advanced' style='width:160px;'><i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."</div>"; 
   echo "<div class='advanced' style='width:160px'>By:";
   $registry = $info['registry'];
   if ($registry) {
