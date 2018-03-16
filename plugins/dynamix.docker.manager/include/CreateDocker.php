@@ -433,7 +433,7 @@ function xmlToCommand($xml, $create_paths=false) {
                  implode(' --device=', $Devices),
                  $xml['ExtraParams'],
                  escapeshellarg($xml['Repository']),
-                 escapeshellarg($xml['PostArgs']));
+                 $xml['PostArgs']);
   return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
 
