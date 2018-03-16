@@ -376,10 +376,11 @@ $(function(){
 			checkonly: ((typeof checkonly === 'undefined') ? false : !!checkonly) ? 1 : 0
 		};
 
-		$form.find('input,select').prop('disabled', true);
 		$button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
 
 		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function( data ) {
+			if (postdata.download_version != $('#winvirtio_select').val())
+				return;
 			if (data.error) {
 				$("#download_status").html('<span style="color: red">' + data.error + '</span>');
 			} else {
@@ -396,7 +397,6 @@ $(function(){
 			}
 
 			$button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
-			$form.find('input,select').prop('disabled', false);
 		}, "json");
 	};
 
@@ -435,8 +435,8 @@ $(function(){
 
 		$.get("/plugins/dynamix.vm.manager/include/VMajax.php", params, function( data ) {
 
-			if (!data.exists) {
-				$("#download_button").show('fast');
+			if (!data.exists || data.pid) {
+				$("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
 				$("#download_status").html('').show('fast');
 				if (data.pid) {
 					checkOrInitDownload(true);

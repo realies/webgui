@@ -422,14 +422,15 @@ switch ($action) {
 	case 'virtio-win-iso-info':
 		$path = $_REQUEST['path'];
 		$file = $_REQUEST['file'];
+		$pid = pgrep('-f "VirtIOWin_' . basename($file, '.iso') . '_install.sh"', false);
 
 		if (empty($file)) {
-			$arrResponse = ['exists' => false];
+			$arrResponse = ['exists' => false, 'pid' => $pid];
 			break;
 		}
 
 		if (is_file($file)) {
-			$arrResponse = ['exists' => true, 'path' => $file];
+			$arrResponse = ['exists' => true, 'pid' => $pid, 'path' => $file];
 			break;
 		}
 
@@ -441,11 +442,11 @@ switch ($action) {
 		$file = $path.$file;
 
 		if (is_file($file)) {
-			$arrResponse = ['exists' => true, 'path' => $file];
+			$arrResponse = ['exists' => true, 'pid' => $pid, 'path' => $file];
 			break;
 		}
 
-		$arrResponse = ['exists' => false];
+		$arrResponse = ['exists' => false, 'pid' => $pid];
 		break;
 
 	case 'virtio-win-iso-download':
