@@ -37,6 +37,7 @@ $docker = ['var docker=[];'];
 foreach ($all_containers as $ct) {
   $name = $ct['Name'];
   $info = &$all[$name];
+  $mode = $ct['NetworkMode'];
   $id = $ct['Id'];
   $imageID = $ct['ImageId'];
   $is_autostart = $info['autostart'] ? 'true':'false';
