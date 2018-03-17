@@ -6,8 +6,8 @@ Tabs="true"
 Code="f1e6"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,6 +20,7 @@ Code="f1e6"
 <?
 // Remove stale /tmp/plugin/*.plg entries
 foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if (!file_exists("/var/log/plugins/".basename($entry))) @unlink($entry);
+$check = $notify['version'] ? 0 : 1;
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
 <style>#plugin_tree{width:33%;height:200px;overflow-y:scroll;}</style>
@@ -40,7 +41,7 @@ function resize(bind) {
 }
 <?endif;?>
 function loadlist(id) {
-  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id},function(data) {
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id,check:<?=$check?>},function(data) {
     if (id) {
       var tmp = id.split(':');
       var list = $('#plugin_list');
@@ -64,7 +65,7 @@ function loadlist(id) {
 $(function() {
   loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-<?if (!$notify['version']):?>
+<?if ($check):?>
   $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 <?endif;?>
 });

@@ -53,9 +53,9 @@ foreach ($all_containers as $ct) {
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  if ($mode=='bridge') {
-    $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
-    $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null");
+  $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+  if (count($binds)>1) {
+    $ip = $ct['Running'] ? exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       list($container_port,$host_port) = explode(':',$bind);
@@ -63,7 +63,7 @@ foreach ($all_containers as $ct) {
     }
   } else {
     $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null"));
-    $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'];
+    $ip = $ct['Running'] ? (exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0']) : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
@@ -113,15 +113,16 @@ foreach ($all_containers as $ct) {
 }
 foreach ($DockerClient->getDockerImages() as $image) {
   if (count($image['usedBy'])) continue;
-  $menu[] = sprintf("addDockerImageContext('%s','%s');",$image['Id'],implode(', ',$image['Tags']));
+  $id = $image['Id'];
+  $menu[] = sprintf("addDockerImageContext('%s','%s');",$id,implode(',',$image['Tags']));
   echo "<tr class='advanced'><td style='width:48px;padding:4px'>";
-  echo "<div id='context-{$image['Id']}' style='display:block;cursor:pointer'>";
+  echo "<div id='$id' style='display:block;cursor:pointer'>";
   echo "<div style='position:relative;width:48px;height:48px;margin:0 auto'>";
   echo "<img src='/webGui/images/disk.png' style='position:absolute;opacity:0.3;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
   echo "</div></div></td>";
-  echo "<td data-sort-value='ZZZZZZZZZZZ'><i>(orphan image)</i><div style='width:160px;'>Image ID: ".htmlspecialchars($image['Id'])."</div>";
-  if (strpos(implode($image['Tags']),"&lt;none&gt;:&lt;none&gt;")===false) echo "<div style='width:'160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div>";
-  echo "</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>";
+  echo "<td><i>(orphan image)</i><div style='width:160px;'>Image ID: $id</div>";
+  echo "<div style='width:160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div></td>";
+  echo "<td colspan=4'>&nbsp;</td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
 echo "\0".implode($menu).implode($docker);
