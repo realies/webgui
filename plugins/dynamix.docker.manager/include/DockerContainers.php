@@ -116,8 +116,8 @@ foreach ($all_containers as $ct) {
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
   echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
-  echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img src='/plugins/dynamix/icons/log.png'></a><span class='advanced' style='padding-left:8px'>";
-  echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</span><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></td>";
+  echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
+  echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td>";
   echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 }
 foreach ($DockerClient->getDockerImages() as $image) {
