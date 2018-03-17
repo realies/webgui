@@ -18,19 +18,28 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 $autostart_file = $dockerManPaths['autostart-file'];
 $user_prefs = $dockerManPaths['user-prefs'];
 
-$names = explode(';',$_POST['names']);
-$index = explode(';',$_POST['index']);
-$save  = []; $i = 0;
+if (isset($_POST['reset'])) {
+  @unlink($user_prefs);
+  if (file_exists($autostart_file)) {
+    $allAutoStart = file($autostart_file, FILE_IGNORE_NEW_LINES);
+    natcasesort($allAutoStart);
+    file_put_contents($autostart_file, implode(PHP_EOL, $allAutoStart).PHP_EOL);
+  }
+} else {
+  $names = explode(';',$_POST['names']);
+  $index = explode(';',$_POST['index']);
+  $save  = []; $i = 0;
 
-foreach ($names as $name) if ($name) $save[] = $index[$i++]."=\"".$name."\""; else $i++;
-file_put_contents($user_prefs, implode("\n",$save)."\n");
+  foreach ($names as $name) if ($name) $save[] = $index[$i++]."=\"".$name."\""; else $i++;
+  file_put_contents($user_prefs, implode("\n",$save)."\n");
 
-// sort containers for start-up
-if (file_exists($autostart_file)) {
-  $prefs = parse_ini_file($user_prefs); $sort = [];
-  $allAutoStart = file($autostart_file, FILE_IGNORE_NEW_LINES);
-  foreach ($allAutoStart as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
-  array_multisort($sort,SORT_NUMERIC,$allAutoStart);
-  file_put_contents($autostart_file, implode(PHP_EOL, $allAutoStart).PHP_EOL);
+  // sort containers for start-up
+  if (file_exists($autostart_file)) {
+    $prefs = parse_ini_file($user_prefs); $sort = [];
+    $allAutoStart = file($autostart_file, FILE_IGNORE_NEW_LINES);
+    foreach ($allAutoStart as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
+    array_multisort($sort,SORT_NUMERIC,$allAutoStart);
+    file_put_contents($autostart_file, implode(PHP_EOL, $allAutoStart).PHP_EOL);
+  }
 }
 ?>

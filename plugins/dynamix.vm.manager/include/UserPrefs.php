@@ -12,12 +12,17 @@
  */
 ?>
 <?
-$prefs = '/boot/config/plugins/dynamix.vm.manager';
-$names = explode(';',$_POST['names']);
-$index = explode(';',$_POST['index']);
-$save  = []; $i = 0;
+$user_prefs = '/boot/config/plugins/dynamix.vm.manager/userprefs.cfg';
 
-foreach ($names as $name) if ($name) $save[] = $index[$i++]."=\"".$name."\""; else $i++;
-if (!is_dir($prefs)) mkdir($prefs);
-file_put_contents("$prefs/userprefs.cfg", implode("\n",$save)."\n");
+if (isset($_POST['reset'])) {
+  @unlink($user_prefs);
+} else {
+  $names = explode(';',$_POST['names']);
+  $index = explode(';',$_POST['index']);
+  $save  = []; $i = 0;
+
+  foreach ($names as $name) if ($name) $save[] = $index[$i++]."=\"".$name."\""; else $i++;
+  if (!is_dir(dirname($user_prefs))) mkdir(dirname($user_prefs));
+  file_put_contents($user_prefs, implode("\n",$save)."\n");
+}
 ?>

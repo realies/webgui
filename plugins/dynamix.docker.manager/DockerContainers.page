@@ -41,7 +41,7 @@ th.eight{width:8%}
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
 <table class="tablesorter shift" id="docker_containers">
-<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th><th class="five" style="text-align:right;padding-right:24px"><i class="fa fa-sort"></i></th></tr></thead>
+<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
@@ -66,6 +66,10 @@ function resize(bind) {
   }
 }
 <?endif;?>
+function resetSorting() {
+  $('input[type=button]').prop('disabled',true);
+  $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
+}
 function listview() {
   if ($.cookie('docker_listview_mode')=='basic') {
     $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
