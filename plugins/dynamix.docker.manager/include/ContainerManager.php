@@ -12,16 +12,23 @@
  */
 ?>
 <?
-$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
 
-exec("docker ps -a --format='{{.Names}}'",$container);
+exec("docker ps -a --format='{{.Names}}'",$all_containers);
+
+if (file_exists($user_prefs)) {
+  $prefs = parse_ini_file($user_prefs); $sort = [];
+  foreach ($all_containers as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
+  array_multisort($sort,SORT_NUMERIC,$all_containers);
+}
 
 $action = $_POST['action'];
 switch ($action) {
-  case 'stop' : $state = 'true'; break;
+  case 'stop' : $state = 'true'; $all_containers = array_reverse($all_containers); break;
   case 'start': $state = 'false'; break;
 }
-foreach ($container as $ct) {
+
+foreach ($all_containers as $ct) {
   if (exec("docker inspect --format='{{.State.Running}}' $ct")==$state) exec("docker $action $ct >/dev/null");
 }
 ?>

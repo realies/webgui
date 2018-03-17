@@ -34,13 +34,14 @@ img.stopped{opacity:0.3}
 .started{color:#009900}
 .stopped{color:#EF3D47}
 .switch-button-label.off{color:inherit}
-th.three{width:3%}
+th.five{width:5%}
+th.eight{width:8%}
 </style>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
 <table class="tablesorter shift" id="docker_containers">
-<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th width="80px" style="text-align:center">Autostart</th><th class="three">Log</th></tr></thead>
+<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
@@ -65,6 +66,10 @@ function resize(bind) {
   }
 }
 <?endif;?>
+function resetSorting() {
+  $('input[type=button]').prop('disabled',true);
+  $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
+}
 function listview() {
   if ($.cookie('docker_listview_mode')=='basic') {
     $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
@@ -85,10 +90,6 @@ function loadlist(update) {
     $('.autostart').change(function() {
       $.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php",{action:'autostart',container:$(this).attr('container'),response:'json'},function(data){$(this).prop('checked',data.autostart);},'json');
     });
-    $('#docker_containers').tablesorter({
-      sortList:[[1,0]],headers:{0:{sorter:false},4:{sorter:false},5:{sorter:false},7:{sorter:false}},
-      textExtraction:{6:function(node,table,cellIndex){return $(node).find('input').prop('checked')?1:0;}}
-    });
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
     listview();
     context.init({preventDoubleContext:false});
@@ -98,6 +99,24 @@ function loadlist(update) {
     } else {
       $('input#checkAll').show(); $('input#updateAll').hide();      
     }
+    $('i.up,i.down').click(function() {
+      var row = $(this).parents('tr:first');
+      var color1 = row.css('background-color');
+      if ($(this).is('.up')) {
+        var color2 = row.prev().css('background-color');
+        row.prev().css('background-color',color1);
+        row.css('background-color',color2);
+        row.insertBefore(row.prev());
+      } else {
+        var color2 = row.next().css('background-color');
+        row.next().css('background-color',color1);
+        row.css('background-color',color2);
+        row.insertAfter(row.next());
+      }
+      var names = ''; var index = '';
+      row.parent().children().find('td.ct-name').each(function(){names+=$(this).text().replace(/Container ID.*$/,'')+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
+      $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{names:names,index:index});
+    });
   });
 }
 $(function() {

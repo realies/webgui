@@ -16,18 +16,18 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-$cfg = '/boot/config/plugins/dynamix.vm.manager/userprefs.cfg';
+$user_prefs = '/boot/config/plugins/dynamix.vm.manager/userprefs.cfg';
 $vms = $lv->get_domains();
 if (empty($vms)) {
   echo '<tr><td colspan="8" style="text-align:center;padding-top:12px">No Virtual Machines installed</td></tr>';
   return;
 }
-if (file_exists($cfg)) {
-  $prefs = parse_ini_file($cfg); $sort = [];
+if (file_exists($user_prefs)) {
+  $prefs = parse_ini_file($user_prefs); $sort = [];
   foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?? 999;
   array_multisort($sort,SORT_NUMERIC,$vms);
 } else {
-  natsort($vms);
+  natcasesort($vms);
 }
 $i = 0;
 $menu = [];
@@ -89,7 +89,7 @@ foreach ($vms as $vm) {
   echo "<td title='$diskdesc'>$disks</td>";
   echo "<td>$graphics</td>";
   echo "<td><input class='autostart' type='checkbox' name='auto_{$vm}' title='Toggle VM auostart' uuid='$uuid' $auto></td>";
-  echo "<td><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
+  echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 
   /* Disk device information */
   echo "<tr id='name".($i++)."' style='display:none'>";
