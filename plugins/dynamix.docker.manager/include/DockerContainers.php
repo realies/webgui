@@ -17,6 +17,7 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 // Add the Docker JSON client
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
+$user_prefs = $dockerManPaths['user-prefs'];
 $DockerClient = new DockerClient();
 $DockerTemplates = new DockerTemplates();
 
@@ -26,17 +27,23 @@ if (!$all_containers) {
   return;
 }
 
+if (file_exists($user_prefs)) {
+  $prefs = parse_ini_file($user_prefs); $sort = [];
+  foreach ($all_containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
+  array_multisort($sort,SORT_NUMERIC,$all_containers);
+}
+
 // Read network settings
 extract(parse_ini_file('state/network.ini',true));
 
 // Read container info
-$all = $DockerTemplates->getAllInfo();
+$all_info = $DockerTemplates->getAllInfo();
 $menu = [];
 $docker = ['var docker=[];'];
 
 foreach ($all_containers as $ct) {
   $name = $ct['Name'];
-  $info = &$all[$name];
+  $info = &$all_info[$name];
   $mode = $ct['NetworkMode'];
   $id = $ct['Id'];
   $imageID = $ct['ImageId'];
@@ -80,7 +87,7 @@ foreach ($all_containers as $ct) {
   echo "<div id='$id' style='display:block; cursor:pointer'><div style='position:relative;width:48px;height:48px;margin:0px auto'>";
   echo "<img src='".htmlspecialchars($icon)."' class='".htmlspecialchars($status)."' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
   echo "<i class='fa iconstatus fa-$shape $status' title='".htmlspecialchars($status)."'></i></div></div>";
-  echo "</td><td>";
+  echo "</td><td class='ct-name'>";
   if ($template) {
     echo "<a class='exec' onclick=\"editContainer('".addslashes(htmlspecialchars($name))."','".addslashes(htmlspecialchars($template))."')\">".htmlspecialchars($name)."</a>";
   } else {
@@ -109,7 +116,9 @@ foreach ($all_containers as $ct) {
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
   echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
-  echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced' style='width:124px;'>".htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced'>Created ".htmlspecialchars($ct['Created'])."</div></a></td></tr>";
+  echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
+  echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td>";
+  echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 }
 foreach ($DockerClient->getDockerImages() as $image) {
   if (count($image['usedBy'])) continue;

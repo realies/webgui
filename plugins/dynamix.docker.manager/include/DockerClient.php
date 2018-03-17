@@ -20,6 +20,7 @@ $dockerManPaths = [
 	'template-repos'    => '/boot/config/plugins/dockerMan/template-repos',
 	'templates-user'    => '/boot/config/plugins/dockerMan/templates-user',
 	'templates-storage' => '/boot/config/plugins/dockerMan/templates',
+	'user-prefs'        => '/boot/config/plugins/dockerMan/userprefs.cfg',
 	'images-ram'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/images',
 	'images-storage'    => '/boot/config/plugins/dockerMan/images',
 	'webui-info'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/docker.json',
@@ -569,6 +570,9 @@ class DockerUpdate{
 ######################################
 class DockerClient {
 
+	private static $allContainersCache = null;
+	private static $allImagesCache = null;
+
 	private function build_sorter($key) {
 		return function ($a, $b) use ($key) {
 			return strnatcmp(strtolower($a[$key]), strtolower($b[$key]));
@@ -660,7 +664,7 @@ class DockerClient {
 
 	public function startContainer($id) {
 		$this->getDockerJSON("/containers/${id}/start", 'POST', $code);
-		DockerUtil::$allContainersCache = null; // flush cache
+		$this::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'304' => 'Container already started',
@@ -672,7 +676,7 @@ class DockerClient {
 
 	public function stopContainer($id) {
 		$this->getDockerJSON("/containers/${id}/stop?t=10", 'POST', $code);
-		DockerUtil::$allContainersCache = null; // flush cache
+		$this::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'304' => 'Container already stopped',
@@ -684,7 +688,7 @@ class DockerClient {
 
 	public function restartContainer($id) {
 		$this->getDockerJSON("/containers/${id}/restart?t=10", 'POST', $code);
-		DockerUtil::$allContainersCache = null; // flush cache
+		$this::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'404' => 'No such container',
@@ -709,7 +713,7 @@ class DockerClient {
 		}
 		// Attempt to remove container
 		$this->getDockerJSON("/containers/${id}?force=1", 'DELETE', $code);
-		DockerUtil::$allContainersCache = null; // flush cache
+		$this::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'400' => 'Bad parameter',
@@ -721,7 +725,7 @@ class DockerClient {
 
 	public function pullImage($image, $callback = null) {
 		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback);
-		DockerUtil::$allImagesCache = null; // flush cache
+		$this::$allImagesCache = null; // flush cache
 		return $ret;
 	}
 
@@ -730,7 +734,7 @@ class DockerClient {
 		$image = $this->getImageName($id);
 		// Attempt to remove image
 		$this->getDockerJSON("/images/${id}?force=1", 'DELETE', $code);
-		DockerUtil::$allImagesCache = null; // flush cache
+		$this::$allImagesCache = null; // flush cache
 		if (in_array($code, ['200', '404'])) {
 			// Purge cached image information (only if delete was successful)
 			$image = DockerUtil::ensureImageTag($image);
@@ -755,8 +759,8 @@ class DockerClient {
 
 	public function getDockerContainers() {
 		// Return cached values
-		if (is_array(DockerUtil::$allContainersCache)) return DockerUtil::$allContainersCache;
-		DockerUtil::$allContainersCache = [];
+		if (is_array($this::$allContainersCache)) return $this::$allContainersCache;
+		$this::$allContainersCache = [];
 		foreach ($this->getDockerJSON("/containers/json?all=1") as $obj) {
 			$details = $this->getContainerDetails($obj['Id']);
 			$c = [];
@@ -778,10 +782,10 @@ class DockerClient {
 					$c['Ports'][] = ['IP' => $value[0]['HostIP'] ?? '0.0.0.0', 'PrivatePort' => $PrivatePort, 'PublicPort' => $value[0]['HostPort'], 'Type' => $Type ];
 				}
 			}
-			DockerUtil::$allContainersCache[] = $c;
+			$this::$allContainersCache[] = $c;
 		}
-		usort(DockerUtil::$allContainersCache, $this->build_sorter('Name'));
-		return DockerUtil::$allContainersCache;
+		usort($this::$allContainersCache, $this->build_sorter('Name'));
+		return $this::$allContainersCache;
 	}
 
 	public function getContainerID($Container) {
@@ -818,8 +822,8 @@ class DockerClient {
 
 	public function getDockerImages() {
 		// Return cached values
-		if (is_array(DockerUtil::$allImagesCache)) return DockerUtil::$allImagesCache;
-		DockerUtil::$allImagesCache = [];
+		if (is_array($this::$allImagesCache)) return $this::$allImagesCache;
+		$this::$allImagesCache = [];
 		foreach ($this->getDockerJSON('/images/json?all=0') as $obj) {
 			$c = [];
 			$c['Created']      = $this->humanTiming($obj['Created']);
@@ -830,14 +834,14 @@ class DockerClient {
 			$c['Tags']         = array_map('htmlspecialchars', $obj['RepoTags'] ?? []);
 			$c['Repository']   = vsprintf('%1$s/%2$s', preg_split("#[:\/]#", DockerUtil::ensureImageTag($obj['RepoTags'][0])));
 			$c['usedBy']       = $this->usedBy($c['Id']);
-			DockerUtil::$allImagesCache[$c['Id']] = $c;
+			$this::$allImagesCache[$c['Id']] = $c;
 		}
-		return DockerUtil::$allImagesCache;
+		return $this::$allImagesCache;
 	}
 
 	public function flushCaches() {
-		DockerUtil::$allContainersCache = null;
-		DockerUtil::$allImagesCache = null;
+		$this::$allContainersCache = null;
+		$this::$allImagesCache = null;
 	}
 }
 
@@ -845,9 +849,6 @@ class DockerClient {
 ##        DOCKERUTIL CLASS          ##
 ######################################
 class DockerUtil {
-
-	public static $allContainersCache = null;
-	public static $allImagesCache = null;
 
 	public static function ensureImageTag($image) {
 		list($strRepo, $strTag) = explode(':', $image.':');
