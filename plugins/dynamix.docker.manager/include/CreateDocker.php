@@ -374,7 +374,25 @@ function xmlToVar($xml) {
       }
     }
   }
+  xmlSecurity($out);
   return $out;
+}
+
+function xmlSecurity(&$template) {
+	foreach ($template as &$element) {
+		if ( is_array($element) ) {
+			xmlSecurity($element);
+		} else {
+			if ( is_string($element) ) {
+				$tempElement = htmlspecialchars_decode($element);
+				$tempElement = str_replace("[","<",$tempElement);
+				$tempElement = str_replace("]",">",$tempElement);
+				if ( preg_match('#<script(.*?)>(.*?)</script>#is',$tempElement) || preg_match('#<iframe(.*?)>(.*?)</iframe>#is',$tempElement) ) {
+					$element = "REMOVED";
+				}
+			}
+		}
+	}
 }
 
 function xmlToCommand($xml, $create_paths=false) {
