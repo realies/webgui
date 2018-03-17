@@ -20,6 +20,7 @@ $dockerManPaths = [
 	'template-repos'    => '/boot/config/plugins/dockerMan/template-repos',
 	'templates-user'    => '/boot/config/plugins/dockerMan/templates-user',
 	'templates-storage' => '/boot/config/plugins/dockerMan/templates',
+	'user-prefs'        => '/boot/config/plugins/dockerMan/userprefs.cfg',
 	'images-ram'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/images',
 	'images-storage'    => '/boot/config/plugins/dockerMan/images',
 	'webui-info'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/docker.json',

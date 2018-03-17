@@ -20,14 +20,22 @@ require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 $display = $_POST['display'];
 
 if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
-  $DockerClient    = new DockerClient();
+  $user_prefs = $dockerManPaths['user-prefs'];
+  $DockerClient = new DockerClient();
   $DockerTemplates = new DockerTemplates();
-  $containers      = $DockerClient->getDockerContainers() ?: [];
-  $Allinfo = $DockerTemplates->getAllInfo();
+  $all_containers = $DockerClient->getDockerContainers();
+  $all_info = $DockerTemplates->getAllInfo();
   $menu = [];
-  foreach ($containers as $ct) {
+
+  if (file_exists($user_prefs)) {
+    $prefs = parse_ini_file($user_prefs); $sort = [];
+    foreach ($all_containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
+    array_multisort($sort,SORT_NUMERIC,$all_containers);
+  }
+
+  foreach ($all_containers as $ct) {
     $name = $ct['Name'];
-    $info = &$Allinfo[$name];
+    $info = &$all_info[$name];
     $id = $ct['Id'];
     $imageID = $ct['ImageId'];
     $is_autostart = $info['autostart'] ? 'true':'false';
@@ -50,14 +58,14 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
 }
 
 if (pgrep('libvirtd')!==false && ($display=='icons' || $display=='vms')) {
-  $txt = '/boot/config/plugins/dynamix.vm.manager/userprefs.txt';
+  $user_prefs = '/boot/config/plugins/dynamix.vm.manager/userprefs.cfg';
   $vms = $lv->get_domains();
-  if (file_exists($txt)) {
-    $prefs = parse_ini_file($txt); $sort = [];
-    foreach ($vms as $vm) $sort[] = $prefs[$vm] ?? 999;
+  if (file_exists($user_prefs)) {
+    $prefs = parse_ini_file($user_prefs); $sort = [];
+    foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?? 999;
     array_multisort($sort,SORT_NUMERIC,$vms);
   } else {
-    natsort($vms);
+    natcasesort($vms);
   }
   foreach ($vms as $vm) {
     $res = $lv->get_domain_by_name($vm);
