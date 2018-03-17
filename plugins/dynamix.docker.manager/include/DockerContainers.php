@@ -55,7 +55,7 @@ foreach ($all_containers as $ct) {
   $ports = [];
   $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
   if (count($binds)>1) {
-    $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null");
+    $ip = $ct['Running'] ? exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       list($container_port,$host_port) = explode(':',$bind);
@@ -63,7 +63,7 @@ foreach ($all_containers as $ct) {
     }
   } else {
     $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null"));
-    $ip = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'];
+    $ip = $ct['Running'] ? (exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0']) : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
