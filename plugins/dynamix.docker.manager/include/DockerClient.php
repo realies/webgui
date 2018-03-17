@@ -576,10 +576,6 @@ class DockerUpdate{
 ######################################
 class DockerClient {
 
-	private $allContainersCache = null;
-
-	private $allImagesCache = null;
-
 	private function build_sorter($key) {
 		return function ($a, $b) use ($key) {
 			return strnatcmp(strtolower($a[$key]), strtolower($b[$key]));
@@ -677,7 +673,7 @@ class DockerClient {
 
 	public function startContainer($id) {
 		$this->getDockerJSON("/containers/${id}/start", 'POST', $code);
-		$this->allContainersCache = null; // flush cache
+		DockerUtil::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'304' => 'Container already started',
@@ -689,7 +685,7 @@ class DockerClient {
 
 	public function stopContainer($id) {
 		$this->getDockerJSON("/containers/${id}/stop?t=10", 'POST', $code);
-		$this->allContainersCache = null; // flush cache
+		DockerUtil::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'304' => 'Container already stopped',
@@ -701,7 +697,7 @@ class DockerClient {
 
 	public function restartContainer($id) {
 		$this->getDockerJSON("/containers/${id}/restart?t=10", 'POST', $code);
-		$this->allContainersCache = null; // flush cache
+		DockerUtil::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'404' => 'No such container',
@@ -730,7 +726,7 @@ class DockerClient {
 		}
 		// Attempt to remove container
 		$this->getDockerJSON("/containers/${id}?force=1", 'DELETE', $code);
-		$this->allContainersCache = null; // flush cache
+		DockerUtil::$allContainersCache = null; // flush cache
 		$codes = [
 			'204' => true, // No error
 			'400' => 'Bad parameter',
@@ -742,7 +738,7 @@ class DockerClient {
 
 	public function pullImage($image, $callback = null) {
 		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback);
-		$this->allImagesCache = null; // flush cache
+		DockerUtil::$allImagesCache = null; // flush cache
 		return $ret;
 	}
 
@@ -751,7 +747,7 @@ class DockerClient {
 		$image = $this->getImageName($id);
 		// Attempt to remove image
 		$this->getDockerJSON("/images/${id}?force=1", 'DELETE', $code);
-		$this->allImagesCache = null; // flush cache
+		DockerUtil::$allImagesCache = null; // flush cache
 		if (in_array($code, ['200', '404'])) {
 			// Purge cached image information (only if delete was successful)
 			$image = DockerUtil::ensureImageTag($image);
@@ -776,34 +772,33 @@ class DockerClient {
 
 	public function getDockerContainers() {
 		// Return cached values
-		if (!$this->allContainersCache) {
-			$this->allContainersCache = [];
-			foreach ($this->getDockerJSON("/containers/json?all=1") as $obj) {
-				$details = $this->getContainerDetails($obj['Id']);
-				$c = [];
-				$c['Image']       = DockerUtil::ensureImageTag($obj['Image']);
-				$c['ImageId']     = substr(str_replace('sha256:', '', $details['Image']), 0, 12);
-				$c['Name']        = substr($details['Name'], 1);
-				$c['Status']      = $obj['Status'] ?: 'None';
-				$c['Running']     = $details['State']['Running'];
-				$c['Cmd']         = $obj['Command'];
-				$c['Id']          = substr($obj['Id'], 0, 12);
-				$c['Volumes']     = $details['HostConfig']['Binds'];
-				$c['Created']     = $this->humanTiming($obj['Created']);
-				$c['NetworkMode'] = $details['HostConfig']['NetworkMode'];
-				$c['BaseImage']   = $obj['Labels']['BASEIMAGE'] ?? false;
-				$c['Ports']       = [];
-				if ($c['NetworkMode'] != 'host' && !empty($details['HostConfig']['PortBindings'])) {
-					foreach ($details['HostConfig']['PortBindings'] as $port => $value) {
-						list($PrivatePort, $Type) = explode('/', $port);
-						$c['Ports'][] = ['IP' => $value[0]['HostIP'] ?? '0.0.0.0', 'PrivatePort' => $PrivatePort, 'PublicPort' => $value[0]['HostPort'], 'Type' => $Type ];
-					}
+		if (is_array(DockerUtil::$allContainersCache)) return DockerUtil::$allContainersCache;
+		DockerUtil::$allContainersCache = [];
+		foreach ($this->getDockerJSON("/containers/json?all=1") as $obj) {
+			$details = $this->getContainerDetails($obj['Id']);
+			$c = [];
+			$c['Image']       = DockerUtil::ensureImageTag($obj['Image']);
+			$c['ImageId']     = substr(str_replace('sha256:', '', $details['Image']), 0, 12);
+			$c['Name']        = substr($details['Name'], 1);
+			$c['Status']      = $obj['Status'] ?: 'None';
+			$c['Running']     = $details['State']['Running'];
+			$c['Cmd']         = $obj['Command'];
+			$c['Id']          = substr($obj['Id'], 0, 12);
+			$c['Volumes']     = $details['HostConfig']['Binds'];
+			$c['Created']     = $this->humanTiming($obj['Created']);
+			$c['NetworkMode'] = $details['HostConfig']['NetworkMode'];
+			$c['BaseImage']   = $obj['Labels']['BASEIMAGE'] ?? false;
+			$c['Ports']       = [];
+			if ($c['NetworkMode'] != 'host' && !empty($details['HostConfig']['PortBindings'])) {
+				foreach ($details['HostConfig']['PortBindings'] as $port => $value) {
+					list($PrivatePort, $Type) = explode('/', $port);
+					$c['Ports'][] = ['IP' => $value[0]['HostIP'] ?? '0.0.0.0', 'PrivatePort' => $PrivatePort, 'PublicPort' => $value[0]['HostPort'], 'Type' => $Type ];
 				}
-				$this->allContainersCache[] = $c;
 			}
-			usort($this->allContainersCache, $this->build_sorter('Name'));
+			DockerUtil::$allContainersCache[] = $c;
 		}
-		return $this->allContainersCache;
+		usort(DockerUtil::$allContainersCache, $this->build_sorter('Name'));
+		return DockerUtil::$allContainersCache;
 	}
 
 	public function getContainerID($Container) {
@@ -850,27 +845,26 @@ class DockerClient {
 
 	public function getDockerImages() {
 		// Return cached values
-		if (!$this->allImagesCache) {
-			$this->allImagesCache = [];
-			foreach ($this->getDockerJSON('/images/json?all=0') as $obj) {
-				$c = [];
-				$c['Created']      = $this->humanTiming($obj['Created']);
-				$c['Id']           = substr(str_replace('sha256:', '', $obj['Id']), 0, 12);
-				$c['ParentId']     = substr(str_replace('sha256:', '', $obj['ParentId']), 0, 12);
-				$c['Size']         = $this->formatBytes($obj['Size']);
-				$c['VirtualSize']  = $this->formatBytes($obj['VirtualSize']);
-				$c['Tags']         = array_map('htmlspecialchars', $obj['RepoTags'] ?? []);
-				$c['Repository']   = vsprintf('%1$s/%2$s', preg_split("#[:\/]#", DockerUtil::ensureImageTag($obj['RepoTags'][0])));
-				$c['usedBy']       = $this->usedBy($c['Id']);
-				$this->allImagesCache[$c['Id']] = $c;
-			}
+		if (is_array(DockerUtil::$allImagesCache)) return DockerUtil::$allImagesCache;
+		DockerUtil::$allImagesCache = [];
+		foreach ($this->getDockerJSON('/images/json?all=0') as $obj) {
+			$c = [];
+			$c['Created']      = $this->humanTiming($obj['Created']);
+			$c['Id']           = substr(str_replace('sha256:', '', $obj['Id']), 0, 12);
+			$c['ParentId']     = substr(str_replace('sha256:', '', $obj['ParentId']), 0, 12);
+			$c['Size']         = $this->formatBytes($obj['Size']);
+			$c['VirtualSize']  = $this->formatBytes($obj['VirtualSize']);
+			$c['Tags']         = array_map('htmlspecialchars', $obj['RepoTags'] ?? []);
+			$c['Repository']   = vsprintf('%1$s/%2$s', preg_split("#[:\/]#", DockerUtil::ensureImageTag($obj['RepoTags'][0])));
+			$c['usedBy']       = $this->usedBy($c['Id']);
+			DockerUtil::$allImagesCache[$c['Id']] = $c;
 		}
-		return $this->allImagesCache;
+		return DockerUtil::$allImagesCache;
 	}
 
 	public function flushCaches() {
-		$this->allContainersCache = null;
-		$this->allImagesCache = null;
+		DockerUtil::$allContainersCache = null;
+		DockerUtil::$allImagesCache = null;
 	}
 }
 
@@ -878,6 +872,9 @@ class DockerClient {
 ##        DOCKERUTIL CLASS          ##
 ######################################
 class DockerUtil {
+
+	public static $allContainersCache = null;
+	public static $allImagesCache = null;
 
 	public static function ensureImageTag($image) {
 		list($strRepo, $strTag) = explode(':', $image.':');
