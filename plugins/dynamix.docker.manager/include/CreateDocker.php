@@ -439,6 +439,8 @@ function xmlToCommand($xml, $create_paths=false) {
 
 function execCommand($command) {
   // $command should have all its args already properly run through 'escapeshellarg'
+  $cmdTmp = explode(";",$command);
+  $command = $cmdTmp[0];
 
   $descriptorspec = [
     0 => ["pipe", "r"],   // stdin is a pipe that the child will read from
