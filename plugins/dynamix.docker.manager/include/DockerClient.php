@@ -36,7 +36,7 @@ $docker_cfgfile = '/boot/config/docker.cfg';
 $dockercfg = parse_ini_file($docker_cfgfile);
 
 ######################################
-##   	DOCKERTEMPLATES CLASS       ##
+##      DOCKERTEMPLATES CLASS       ##
 ######################################
 
 class DockerTemplates {
@@ -69,8 +69,7 @@ class DockerTemplates {
 
 	public function getTemplates($type) {
 		global $dockerManPaths;
-		$tmpls = [];
-		$dirs = [];
+		$tmpls = $dirs = [];
 		if ($type == 'all') {
 			$dirs[] = $dockerManPaths['templates-user'];
 			$dirs[] = $dockerManPaths['templates-storage'];
@@ -228,9 +227,7 @@ class DockerTemplates {
 			$doc = new DOMDocument('1.0', 'utf-8');
 			$doc->load($file['path']);
 			$Name = $doc->getElementsByTagName('Name')->item(0)->nodeValue;
-			if ($Name == $Container) {
-				return $file['path'];
-			}
+			if ($Name == $Container) return $file['path'];
 		}
 		return false;
 	}
@@ -345,7 +342,7 @@ class DockerTemplates {
 }
 
 ######################################
-##   	  DOCKERUPDATE CLASS        ##
+##       DOCKERUPDATE CLASS         ##
 ######################################
 class DockerUpdate{
 	public $verbose = false;
@@ -438,12 +435,8 @@ class DockerUpdate{
 		$image = DockerUtil::ensureImageTag($image);
 		$updateStatus = DockerUtil::loadJSON($dockerManPaths['update-status']);
 		if (isset($updateStatus[$image])) {
-			if (isset($updateStatus[$image]['status']) && $updateStatus[$image]['status']=='undef') {
-				return null;
-			}
-			if ($updateStatus[$image]['local'] || $updateStatus[$image]['remote']) {
-				return ($updateStatus[$image]['local'] == $updateStatus[$image]['remote']);
-			}
+			if (isset($updateStatus[$image]['status']) && $updateStatus[$image]['status']=='undef') return null;
+			if ($updateStatus[$image]['local'] || $updateStatus[$image]['remote']) return ($updateStatus[$image]['local']==$updateStatus[$image]['remote']);
 		}
 		return null;
 	}
@@ -572,7 +565,7 @@ class DockerUpdate{
 }
 
 ######################################
-##   	  DOCKERCLIENT CLASS        ##
+##       DOCKERCLIENT CLASS         ##
 ######################################
 class DockerClient {
 
@@ -624,9 +617,7 @@ class DockerClient {
 				$code = vsprintf('%2$s',preg_split("#\s+#", $line));
 			}
 			$headers .= $line;
-			if (rtrim($line) == '') {
-				break;
-			}
+			if (rtrim($line) == '') break;
 		}
 		$data = [];
 		while (($line = fgets($fp)) !== false) {
@@ -641,18 +632,14 @@ class DockerClient {
 
 	function doesContainerExist($container) {
 		foreach ($this->getDockerContainers() as $ct) {
-			if ($ct['Name'] == $container) {
-				return true;
-			}
+			if ($ct['Name'] == $container) return true;
 		}
 		return false;
 	}
 
 	function doesImageExist($image) {
 		foreach ($this->getDockerImages() as $img) {
-			if (strpos($img['Tags'][0], $image) !== false) {
-				return true;
-			}
+			if (strpos($img['Tags'][0], $image) !== false) return true;
 		}
 		return false;
 	}
@@ -714,12 +701,8 @@ class DockerClient {
 			if (isset($info[$id]['icon'])) {
 				$iconRam = $docroot.$info[$id]['icon'];
 				$iconFlash = str_replace($dockerManPaths['images-ram'], $dockerManPaths['images-storage'], $iconRam);
-				if (is_file($iconRam)) {
-					unlink($iconRam);
-				}
-				if (is_file($iconFlash)) {
-					unlink($iconFlash);
-				}
+				if (is_file($iconRam)) unlink($iconRam);
+				if (is_file($iconFlash)) unlink($iconFlash);
 			}
 			unset($info[$id]);
 			DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
@@ -803,22 +786,16 @@ class DockerClient {
 
 	public function getContainerID($Container) {
 		foreach ($this->getDockerContainers() as $ct) {
-			if (preg_match('%'.preg_quote($Container, '%').'%', $ct['Name'])) {
-				return $ct['Id'];
-			}
+			if (preg_match('%'.preg_quote($Container, '%').'%', $ct['Name'])) return $ct['Id'];
 		}
 		return null;
 	}
 
 	public function getImageID($Image) {
- 		if ( ! strpos($Image,':') ) {
-			$Image .= ':latest';
-		}
+		if (!strpos($Image,':')) $Image .= ':latest';
 		foreach ($this->getDockerImages() as $img) {
 			foreach ($img['Tags'] as $tag) {
-				if ( $Image == $tag ) {
-					return $img['Id'];
-				}
+				if ( $Image == $tag ) return $img['Id'];
 			}
 		}
 		return null;
@@ -826,9 +803,7 @@ class DockerClient {
 
 	public function getImageName($id) {
 		foreach ($this->getDockerImages() as $img) {
-			if ($img['Id'] == $id) {
-				return $img['Tags'][0];
-			}
+			if ($img['Id'] == $id) return $img['Tags'][0];
 		}
 		return null;
 	}
@@ -836,9 +811,7 @@ class DockerClient {
 	private function usedBy($imageId) {
 		$out = [];
 		foreach ($this->getDockerContainers() as $ct) {
-			if ($ct['ImageId'] == $imageId) {
-				$out[] = $ct['Name'];
-			}
+			if ($ct['ImageId'] == $imageId) $out[] = $ct['Name'];
 		}
 		return $out;
 	}
@@ -878,7 +851,6 @@ class DockerUtil {
 
 	public static function ensureImageTag($image) {
 		list($strRepo, $strTag) = explode(':', $image.':');
-
 		if (strpos($strRepo, 'sha256:') === 0) {
 			// sha256 was provided instead of actual repo name so truncate it for display:
 			$strRepo = substr(str_replace('sha256:', '', $strRepo), 0, 12);
@@ -886,25 +858,19 @@ class DockerUtil {
 			// Prefix library/ if there's no author (maybe a Docker offical image?)
 			$strRepo = 'library/'.$strRepo;
 		}
-
 		// Add :latest tag to image if it's absent
-		if (empty($strTag)) {
-			$strTag = 'latest';
-		}
-
+		if (empty($strTag)) $strTag = 'latest';
 		return trim($strRepo).':'.trim($strTag);
 	}
 
 	public static function loadJSON($path) {
 		$objContent = (is_file($path)) ? json_decode(file_get_contents($path), true) : [];
 		if (empty($objContent)) $objContent = [];
-
 		return $objContent;
 	}
 
 	public static function saveJSON($path, $content) {
 		if (!is_dir(dirname($path))) @mkdir(dirname($path), 0755, true);
-
 		return file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 	}
 }
