@@ -114,7 +114,7 @@ class DockerTemplates {
 		}
 		$urls = @file($Urls, FILE_IGNORE_NEW_LINES);
 		if (!is_array($urls)) return false;
-		$this->debug("\nURLs:\n   ".implode("\n   ", $urls));
+		//$this->debug("\nURLs:\n   ".implode("\n   ", $urls));
 		$github_api_regexes = [
 			'%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)/(.*)$%i',
 			'%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)$%i',
@@ -158,11 +158,11 @@ class DockerTemplates {
 				}
 			}
 			if (empty($github_api['url'])) {
-				$this->debug("\n Cannot parse URL ".$url." for Templates.");
+				//$this->debug("\n Cannot parse URL ".$url." for Templates.");
 				continue;
 			}
 			if ($this->download_url($github_api['url'], "$tmp_dir.tar.gz") === false) {
-				$this->debug("\n Download ".$github_api['url']." has failed.");
+				//$this->debug("\n Download ".$github_api['url']." has failed.");
 				@unlink("$tmp_dir.tar.gz");
 				return null;
 			} else {
@@ -171,22 +171,22 @@ class DockerTemplates {
 				unlink("$tmp_dir.tar.gz");
 			}
 			$tmplsStor = [];
-			$this->debug("\n Templates found in ".$github_api['url']);
+			//$this->debug("\n Templates found in ".$github_api['url']);
 			foreach ($this->getTemplates($tmp_dir) as $template) {
 				$storPath = sprintf('%s/%s', $Dest, str_replace($tmp_dir.'/', '', $template['path']));
 				$tmplsStor[] = $storPath;
 				if (!is_dir(dirname($storPath))) @mkdir(dirname($storPath), 0777, true);
 				if (is_file($storPath)) {
 					if (sha1_file($template['path']) === sha1_file($storPath)) {
-						$this->debug("   Skipped: ".$template['prefix'].'/'.$template['name']);
+						//$this->debug("   Skipped: ".$template['prefix'].'/'.$template['name']);
 						continue;
 					} else {
 						@copy($template['path'], $storPath);
-						$this->debug("   Updated: ".$template['prefix'].'/'.$template['name']);
+						//$this->debug("   Updated: ".$template['prefix'].'/'.$template['name']);
 					}
 				} else {
 					@copy($template['path'], $storPath);
-					$this->debug("   Added: ".$template['prefix'].'/'.$template['name']);
+					//$this->debug("   Added: ".$template['prefix'].'/'.$template['name']);
 				}
 			}
 			$repotemplates = array_merge($repotemplates, $tmplsStor);
@@ -197,12 +197,12 @@ class DockerTemplates {
 		foreach ($this->listDir($Dest, 'xml') as $arrLocalTemplate) {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
 				unlink($arrLocalTemplate['path']);
-				$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
+				//$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
 				// Any other files left in this template folder? if not delete the folder too
 				$files = array_diff(scandir(dirname($arrLocalTemplate['path'])), ['.', '..']);
 				if (empty($files)) {
 					rmdir(dirname($arrLocalTemplate['path']));
-					$this->debug("   Removed: ".$arrLocalTemplate['prefix']);
+					//$this->debug("   Removed: ".$arrLocalTemplate['prefix']);
 				}
 			}
 		}
@@ -317,8 +317,8 @@ class DockerTemplates {
 			if (!$tmp['template'] || $reload) $tmp['template'] = $this->getUserTemplate($name);
 			if ($reload) $DockerUpdate->updateUserTemplate($name);
 
-			$this->debug("\n$name");
-			foreach ($tmp as $c => $d) $this->debug(sprintf('   %-10s: %s', $c, $d));
+			//$this->debug("\n$name");
+			//foreach ($tmp as $c => $d) $this->debug(sprintf('   %-10s: %s', $c, $d));
 		}
 		DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
 		return $info;
@@ -380,7 +380,7 @@ class DockerUpdate{
 	public function getRemoteVersion($image) {
 		list($strRepo, $strTag) = explode(':', DockerUtil::ensureImageTag($image));
 		$apiUrl = sprintf('http://index.docker.io/v1/repositories/%s/tags/%s', $strRepo, $strTag);
-		$this->debug("API URL: $apiUrl");
+		//$this->debug("API URL: $apiUrl");
 		$apiContent = $this->download_url($apiUrl);
 		return ($apiContent === false) ? null : substr(json_decode($apiContent, true)[0]['id'], 0, 8);
 	}
@@ -391,21 +391,21 @@ class DockerUpdate{
 		// First - get auth token:
 		//   https://auth.docker.io/token?service=registry.docker.io&scope=repository:needo/nzbget:pull
 		$strAuthURL = sprintf('https://auth.docker.io/token?service=registry.docker.io&scope=repository:%s:pull', $strRepo);
-		$this->debug("Auth URL: $strAuthURL");
+		//$this->debug("Auth URL: $strAuthURL");
 		$arrAuth = json_decode($this->download_url($strAuthURL), true);
 		if (empty($arrAuth) || empty($arrAuth['token'])) {
-			$this->debug("Error: Auth Token was missing/empty");
+			//$this->debug("Error: Auth Token was missing/empty");
 			return null;
 		}
-		$this->debug("Auth Token: ".$arrAuth['token']);
+		//$this->debug("Auth Token: ".$arrAuth['token']);
 
 		// Next - get manifest:
 		//   curl -H 'Authorization: Bearer <TOKEN>' https://registry-1.docker.io/v2/needo/nzbget/manifests/latest
 		$strManifestURL = sprintf('https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag);
-		$this->debug("Manifest URL: $strManifestURL");
+		//$this->debug("Manifest URL: $strManifestURL");
 		$strManifest = $this->download_url_and_headers($strManifestURL, ['Accept: application/vnd.docker.distribution.manifest.v2+json', 'Authorization: Bearer '.$arrAuth['token']]);
 		if (empty($strManifest)) {
-			$this->debug("Error: Manifest response was empty");
+			//$this->debug("Error: Manifest response was empty");
 			return null;
 		}
 
@@ -419,11 +419,11 @@ class DockerUpdate{
 			}
 		}
 		if (empty($strDigest)) {
-			$this->debug("Error: Remote Digest was missing/empty");
+			//$this->debug("Error: Remote Digest was missing/empty");
 			return null;
 		}
 
-		$this->debug("Remote Digest: $strDigest");
+		//$this->debug("Remote Digest: $strDigest");
 		return $strDigest;
 	}
 
@@ -465,7 +465,7 @@ class DockerUpdate{
 				'remote' => $remoteVersion,
 				'status' => $status
 			];
-			$this->debug("Update status: Image='${img}', Local='${localVersion}', Remote='${remoteVersion}', Status='${status}'");
+			//$this->debug("Update status: Image='${img}', Local='${localVersion}', Remote='${remoteVersion}', Status='${status}'");
 		}
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
 	}
@@ -479,7 +479,7 @@ class DockerUpdate{
 			'remote' => $version,
 			'status' => 'true'
 		];
-		$this->debug("Update status: Image='${image}', Local='${version}', Remote='${version}', Status='true'");
+		//$this->debug("Update status: Image='${image}', Local='${version}', Remote='${version}', Status='true'");
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
 	}
 
@@ -491,25 +491,25 @@ class DockerUpdate{
 
 		// Get user template file and abort if fail
 		if ( ! $file = $DockerTemplates->getUserTemplate($Container) ) {
-			$this->debug("User template for container '$Container' not found, aborting.");
+			//$this->debug("User template for container '$Container' not found, aborting.");
 			return null;
 		}
 		// Load user template XML, verify if it's valid and abort if doesn't have TemplateURL element
 		$template = simplexml_load_file($file);
 		if ( empty($template->TemplateURL) ) {
-			$this->debug("Template doesn't have TemplateURL element, aborting.");
+			//$this->debug("Template doesn't have TemplateURL element, aborting.");
 			return null;
 		}
 		// Load a user template DOM for import remote template new Config
 		$dom_local = dom_import_simplexml($template);
 		// Try to download the remote template and abort if it fail.
 		if (! $dl = $this->download_url($this->xml_decode($template->TemplateURL))) {
-			$this->debug("Download of remote template failed, aborting.");
+			//$this->debug("Download of remote template failed, aborting.");
 			return null;
 		}
 		// Try to load the downloaded template and abort if fail.
 		if (! $remote_template = @simplexml_load_string($dl)) {
-			$this->debug("The downloaded template is not a valid XML file, aborting.");
+			//$this->debug("The downloaded template is not a valid XML file, aborting.");
 			return null;
 		}
 		// Loop through remote template elements and compare them to local ones
@@ -523,7 +523,7 @@ class DockerUpdate{
 				// Values changed, updating.
 				if ($value != $rvalue) {
 					$local_element[0] = $this->xml_encode($rvalue);
-					$this->debug("Updating $name from [$value] to [$rvalue]");
+					//$this->debug("Updating $name from [$value] to [$rvalue]");
 					$changed = true;
 				}
 			// Compare atributes on Config if they are in the validAttributes list
@@ -543,7 +543,7 @@ class DockerUpdate{
 						$value = $this->xml_decode($local_element[$key]);
 						// Values changed, updating.
 						if ($value != $rvalue && in_array($key, $validAttributes)) {
-							$this->debug("Updating $type '$target' attribute '$key' from [$value] to [$rvalue]");
+							//$this->debug("Updating $type '$target' attribute '$key' from [$value] to [$rvalue]");
 							$local_element[$key] = $this->xml_encode($rvalue);
 							$changed = true;
 						}
@@ -559,14 +559,14 @@ class DockerUpdate{
 		}
 		if ($changed) {
 			// Format output and save to file if there were any commited changes
-			$this->debug("Saving template modifications to '$file");
+			//$this->debug("Saving template modifications to '$file");
 			$dom = new DOMDocument('1.0');
 			$dom->preserveWhiteSpace = false;
 			$dom->formatOutput = true;
 			$dom->loadXML($template->asXML());
 			file_put_contents($file, $dom->saveXML());
 		} else {
-			$this->debug("Template is up to date.");
+			//$this->debug("Template is up to date.");
 		}
 	}
 }
