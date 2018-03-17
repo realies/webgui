@@ -580,7 +580,7 @@ if ($method == "update") {
   // verify previous check has been done
   $plugin_file = "/tmp/plugins/$plugin";
   if (!file_exists($plugin_file)) {
-    echo "plugin: $plugin_file does not exist, check first\n";
+    echo "plugin: $plugin_file does not exist, check for updates first\n";
     exit (1);
   }
   // bergware - check unRAID version dependency (if present)
