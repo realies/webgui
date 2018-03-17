@@ -422,7 +422,6 @@ function xmlToCommand($xml, $create_paths=false) {
       $Devices[] = escapeshellarg($hostConfig);
     }
   }
-  $postArgs = explode(";",$xml['PostArgs']);
   $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s',
                  $cmdName,
                  $cmdNetwork,
@@ -434,7 +433,7 @@ function xmlToCommand($xml, $create_paths=false) {
                  implode(' --device=', $Devices),
                  $xml['ExtraParams'],
                  escapeshellarg($xml['Repository']),
-                 $postArgs[0]);
+                 $xml['PostArgs']);
 
   $cmd = trim(preg_replace('/\s+/', ' ', $cmd));
   return [$cmd, $xml['Name'], $xml['Repository']];
@@ -442,7 +441,7 @@ function xmlToCommand($xml, $create_paths=false) {
 
 function execCommand($command) {
   // $command should have all its args already properly run through 'escapeshellarg'
- 
+
   $descriptorspec = [
     0 => ["pipe", "r"],   // stdin is a pipe that the child will read from
     1 => ["pipe", "w"],   // stdout is a pipe that the child will write to
