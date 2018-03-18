@@ -17,23 +17,19 @@ Tag="database"
 <script>
 function toggle_state(device,name,action) {
   var event = null;
+  var button = null;
   if (name) {
     if (name.match(/^(parity|disk)/)!==null) event = 'array_status';
     else if (name.match(/^cache/)!==null) event = 'cache_status';
     else if (name.match(/^flash/)!==null) event = 'boot_status';
     else event = 'open_status';
     $('#dev-'+name).addClass('fa-spin');
-    var button = null;
-  } else {
+  } else if (device!='Clear') {
     $('[id^="dev-"]').addClass('fa-spin');
-    var button = '[id^=button-]';
+    button = '[id^=button-]';
   }
   pauseEvents(event);
   $.post('/webGui/include/ToggleState.php',{device:device,name:name,action:action,state:'<?=$var['mdState']?>',csrf:'<?=$var['csrf_token']?>'},function(){resumeEvents(event);if (button) $(button).prop('disabled',false);});
-}
-function clear_stats() {
-  pauseEvents();
-  $.post('/webGui/include/ToggleState.php',{device:'Clear',name:'',action:'',state:'<?=$var['mdState']?>',csrf:'<?=$var['csrf_token']?>'},function(){resumeEvents();});
 }
 function display_diskio() {
   if ($.cookie('diskio')===undefined) {

@@ -435,7 +435,7 @@ $(function(){
 <table class="array_status">
  <tr><td></td><td><input type="button" id="button-down" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('down')" value="Spin Down"<?=$parity?' disabled':''?>><input type="button" id="button-up" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('up')" value="Spin Up"<?=$parity?' disabled':''?>></td>
  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
- <tr><td></td><td><input type="button" value="Clear Statistics" onclick="clear_stats()"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+ <tr><td></td><td><input type="button" value="Clear Statistics" onclick="toggle_state('Clear')"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
  <tr><td></td><td class="line" colspan="2"></td></tr>
 </table>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
