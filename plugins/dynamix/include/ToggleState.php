@@ -28,7 +28,6 @@ if ($device=='New') {
   $cmd  = $action=='up' ? 'S0' : ($action=='down' ? 'y' : false);
   if ($cmd && $name) exec("/usr/sbin/hdparm -$cmd /dev/$name >/dev/null 2>&1");
 } else {
-  $disks = parse_ini_file('state/disks.ini',true);
   if ($name) emhttpd("cmdSpin$action=$name"); else emhttpd("cmdSpin{$device}All=true");
 }
 ?>
