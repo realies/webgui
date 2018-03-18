@@ -14,20 +14,27 @@
 $device = $_POST['device'];
 $name   = $_POST['name'];
 $action = $_POST['action'];
+$state  = $_POST['state'];
 $csrf   = $_POST['csrf'];
 
 function emhttpd($cmd) {
-  global $csrf;
-  $ch = curl_init("http://127.0.0.1/update.htm?$cmd&csrf_token=$csrf");
+  global $state, $csrf;
+  $ch = curl_init("http://127.0.0.1/update.htm?$cmd&startState=$state&csrf_token=$csrf");
   curl_setopt_array($ch, [CURLOPT_UNIX_SOCKET_PATH => '/var/run/emhttpd.socket', CURLOPT_RETURNTRANSFER => true]);
   curl_exec($ch);
   curl_close($ch);
 }
 
-if ($device=='New') {
+switch ($device) {
+case 'New':
   $cmd  = $action=='up' ? 'S0' : ($action=='down' ? 'y' : false);
   if ($cmd && $name) exec("/usr/sbin/hdparm -$cmd /dev/$name >/dev/null 2>&1");
-} else {
+  break;
+case 'Clear':
+  emhttpd("clearStatistics=true");
+  break;
+default:
   if ($name) emhttpd("cmdSpin$action=$name"); else emhttpd("cmdSpin{$device}All=true");
+  break;
 }
 ?>
