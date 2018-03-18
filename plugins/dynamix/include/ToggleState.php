@@ -14,8 +14,7 @@
 $device = $_POST['device'];
 $name   = $_POST['name'];
 $action = $_POST['action'];
-$var    = parse_ini_file('state/var.ini');
-$csrf   = $var['csrf_token'];
+$csrf   = $_POST['csrf'];
 
 function emhttpd($cmd) {
   global $csrf;
