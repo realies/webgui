@@ -23,17 +23,11 @@ function open_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=addslashes(htmlspecialchars($path))?>',device:'open'},function(data) {
     if (data) {$('#open_devices').html(data); display_diskio();}
 <?if ($var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('<?=$tabX?>').is(':checked')) timer = setTimeout(open_status,3000);
-<?else:?>
-    setTimeout(open_status,3000);
-<?endif;?>
+    timers.open_status = setTimeout(open_status,3000);
 <?endif;?>
   });
 }
-<?if ($var['fsState']=='Started' && $tabbed):?>
-$('<?=$tabX?>').bind({click:function() {clearTimeout(timer); open_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('<?=$tabX?>').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 

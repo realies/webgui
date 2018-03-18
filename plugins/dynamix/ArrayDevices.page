@@ -15,8 +15,22 @@ Tag="database"
  */
 ?>
 <script>
-var timer = null;
-
+function toggle_state(device,name,action) {
+  var event = null;
+  if (name) {
+    if (name.match(/^(parity|disk)/)!==null) event = 'array_status';
+    else if (name.match(/^cache/)!==null) event = 'cache_status';
+    else if (name.match(/^flash/)!==null) event = 'boot_status';
+    else event = 'open_status';
+    $('#dev-'+name).addClass('fa-spin');
+    var button = null;
+  } else {
+    $('[id^="dev-"]').addClass('fa-spin');
+    var button = '[id^=button-]';
+  }
+  pauseEvents(event);
+  $.post('/webGui/include/ToggleState.php',{device:device,name:name,action:action},function(){resumeEvents(event);if (button) $(button).prop('disabled',false);});
+}
 function display_diskio() {
   if ($.cookie('diskio')===undefined) {
     $('span.number').show(); $('span.diskio').hide();
@@ -40,17 +54,11 @@ function array_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'array'},function(data) {
     if (data) {$('#array_devices').html(data); display_diskio();}
 <?if ($var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('#tab1').is(':checked')) timer = setTimeout(array_status,3000);
-<?else:?>
-    setTimeout(array_status,3000);
-<?endif;?>
+    timers.array_status = setTimeout(array_status,3000);
 <?endif;?>
   });
 }
-<?if ($var['fsState']=='Started' && $tabbed):?>
-$('#tab1').bind({click:function() {clearTimeout(timer); array_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('#tab1').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 

@@ -435,7 +435,7 @@ $(function(){
 <form name="otherOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=$var['mdState']?>">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
+ <tr><td></td><td><input type="button" id="button-down" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('down')" value="Spin Down"<?=$parity?' disabled':''?>><input type="button" id="button-up" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('up')" value="Spin Up"<?=$parity?' disabled':''?>></td>
  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
  <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
  <tr><td></td><td class="line" colspan="2"></td></tr>

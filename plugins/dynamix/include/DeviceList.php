@@ -41,8 +41,7 @@ function device_info(&$disk,$online) {
   $type = $disk['type']=='Flash' || $disk['type']=='New' ? $disk['type'] : 'Device';
   $action = strpos($disk['color'],'blink')===false ? 'down' : 'up';
   if ($var['fsState']=='Started' && $type!='Flash' && strpos($disk['status'],'_NP')===false) {
-    $cmd = $type=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=$action&arg2=$name" : "cmdSpin$action=$name";
-    $ctrl = "<a href='update.htm?$cmd&csrf_token={$var['csrf_token']}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
+    $ctrl = "<i id='dev-$name' class='fa fa-sort-$action spacing' style='cursor:pointer' title='Click to spin $action device' onclick=\"toggle_state('$type','$name','$action')\"></i>";
   } else
     $ctrl = '';
   switch ($disk['color']) {
