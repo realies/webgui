@@ -1,5 +1,5 @@
 function ajaxVMDispatch(params, spin){
-  if (spin) $('#vm-'+params['uuid']).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
+  if (spin) $('#vm-'+params['uuid']).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
   $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data) {
     if (data.error) {
       swal({
@@ -85,7 +85,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
         type:"warning",
         showCancelButton:true
       },function(){
-        $('#vm-'+uuid).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
+        $('#vm-'+uuid).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
         ajaxVMDispatch({action:"domain-undefine",uuid:uuid}, "loadlist");
       });
     }});
@@ -98,7 +98,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
           type:"warning",
           showCancelButton:true
         },function(){
-          $('#vm-'+uuid).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
+          $('#vm-'+uuid).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
           ajaxVMDispatch({action:"domain-delete",uuid:uuid}, "loadlist");
         });
       }});
