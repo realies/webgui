@@ -20,17 +20,11 @@ function cache_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'cache'},function(data) {
     if (data) {$('#cache_device').html(data); display_diskio();}
 <?if ($var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('#tab2').is(':checked')) timer = setTimeout(cache_status,3000);
-<?else:?>
-    setTimeout(cache_status,3000);
-<?endif;?>
+    timers.cache_status = setTimeout(cache_status,3000);
 <?endif;?>
   });
 }
-<?if ($var['fsState']=='Started' && $tabbed):?>
-$('#tab2').bind({click:function() {clearTimeout(timer); cache_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('#tab2').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 

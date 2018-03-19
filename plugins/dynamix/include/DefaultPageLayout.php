@@ -45,7 +45,6 @@ if (strstr('gray,azure',$display['theme'])) {
 </style>
 
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
-<script src="<?autov('/webGui/javascript/NchanSubscriber.js')?>"></script>
 <script>
 Shadowbox.init({skipSetup:true});
 
@@ -57,15 +56,15 @@ var before = new Date();
 // page timer events
 var timers = {};
 
-function pauseEvents(){
+function pauseEvents(id){
   $.each(timers, function(i, timer) {
-    clearTimeout(timer);
+    if (!id || i==id) clearTimeout(timer);
   });
 }
-function resumeEvents(){
-  var startDelay = 50;
+function resumeEvents(id,delay){
+  var startDelay = delay||50;
   $.each(timers, function(i, timer) {
-    timers[i] = setTimeout(i + '()', startDelay);
+    if (!id || i==id) timers[i] = setTimeout(i+'()', startDelay);
     startDelay += 50;
   });
 }

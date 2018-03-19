@@ -110,7 +110,7 @@ function rmContainer(container, image, id) {
     confirmButtonText:"Yes, delete it!",
     showLoaderOnConfirm:true
   },function(){
-    $('#'+id).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
+    $('#'+id).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
     if ($("#removeimagechk").prop('checked')) {
       eventControl({action:"remove_all", container:id, image:image},'loadlist');
     } else {
@@ -130,12 +130,12 @@ function rmImage(image, imageName) {
     confirmButtonText:"Yes, delete it!",
     showLoaderOnConfirm:true
   },function(){
-    $('#'+image).find('i').removeClass().addClass('iconstatus fa fa-trash orange-text');
+    $('#'+image).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
     eventControl({action:"remove_image", image:image},'loadlist');
   });
 }
 function eventControl(params, spin) {
-  if (spin) $('#'+params['container']).find('i').addClass('fa-spin');
+  if (spin) $('#'+params['container']).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
   $.post(eventURL, params, function(data) {
     if (data.success === true) {
       if (spin) setTimeout(spin+'()',500); else location=window.location.href;
@@ -151,17 +151,17 @@ function eventControl(params, spin) {
 }
 function startAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').addClass('fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='false') $('#'+ct.id).find('i').removeClass('fa-square').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'},function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').addClass('fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state=='true') $('#'+ct.id).find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'},function(){loadlist();});
 }
 function checkAll() {
   $('input[type=button]').prop('disabled',true);
-  $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
+  $(".updatecolumn").html("<span style='color:#267CA8'><i class='fa fa-refresh fa-spin'></i> checking...</span>");
   $.post('/plugins/dynamix.docker.manager/include/DockerUpdate.php',{check:true},function(u){loadlist(u);});
 }
 function updateAll() {

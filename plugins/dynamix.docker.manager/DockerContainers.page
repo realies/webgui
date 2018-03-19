@@ -71,10 +71,10 @@ function resetSorting() {
   $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
 }
 function listview() {
-  if ($.cookie('docker_listview_mode')=='basic') {
-    $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
-  } else {
+  if ($.cookie('docker_listview_mode')=='advanced') {
     $('.docker_readmore').readmore('destroy');
+  } else {
+    $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
   }
 }
 function loadlist(update) {

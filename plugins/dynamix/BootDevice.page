@@ -19,17 +19,11 @@ function boot_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'flash'},function(data) {
     if (data) {$('#boot_device').html(data); display_diskio();}
 <?if ($var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('#tab3').is(':checked')) timer = setTimeout(boot_status,3000);
-<?else:?>
-    setTimeout(boot_status,3000);
-<?endif;?>
+    timers.boot_status = setTimeout(boot_status,3000);
 <?endif;?>
   });
 }
-<?if ($var['fsState']=='Started' && $tabbed):?>
-$('#tab3').bind({click:function() {clearTimeout(timer); boot_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('#tab3').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 

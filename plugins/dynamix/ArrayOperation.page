@@ -255,7 +255,7 @@ $(function(){
         if ($var['mdResyncAction']=="check"):?>
           <tr><td></td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Read-Check</strong> of all array disks.</td></tr>
 <?      elseif (strstr($var['mdResyncAction'],"check")):?>
-          <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.&nbsp;&nbsp;<a href='/Scheduler'>(Schedule)</a>
+          <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.&nbsp;&nbsp;<a href="/Main/Scheduler"<?if ($tabbed):?> onclick="$.cookie('one','tab1',{path:'/'})"<?endif;?>>(Schedule)</a>
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?      endif;?>
         <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td>
@@ -432,15 +432,12 @@ $(function(){
 </table>
 </form>
 <?if ($var['fsState']=="Started"):?>
-<form name="otherOps" method="POST" action="/update.htm" target="progressFrame">
-<input type="hidden" name="startState" value="<?=$var['mdState']?>">
 <table class="array_status">
- <tr><td></td><td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$parity?' disabled':''?>><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$parity?' disabled':''?>></td>
+ <tr><td></td><td><input type="button" id="button-down" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('down')" value="Spin Down"<?=$parity?' disabled':''?>><input type="button" id="button-up" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('up')" value="Spin Up"<?=$parity?' disabled':''?>></td>
  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
- <tr><td></td><td><input type="submit" name="clearStatistics" value="Clear Statistics"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
+ <tr><td></td><td><input type="button" value="Clear Statistics" onclick="toggle_state('Clear')"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
  <tr><td></td><td class="line" colspan="2"></td></tr>
 </table>
-</form>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
 <table class="array_status">
@@ -448,7 +445,7 @@ $(function(){
 <?if ($mover):?>
  <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Disabled - Mover is running.</td>
 <?else:?>
- <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.&nbsp;&nbsp;<a href='/Scheduler'>(Schedule)</a></td>
+ <td><input type="submit" name="cmdStartMover" value="Move now"></td><td><strong>Move now</strong> will immediately invoke the Mover.&nbsp;&nbsp;<a href="/Main/Scheduler"<?if ($tabbed):?> onclick="$.cookie('one','tab2',{path:'/'})"<?endif;?>>(Schedule)</a></td>
 <?endif;?>
  </tr>
 </table>
