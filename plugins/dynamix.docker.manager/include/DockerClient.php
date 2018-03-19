@@ -480,7 +480,7 @@ class DockerUpdate{
 	public function updateUserTemplate($Container) {
 		$changed = false;
 		$DockerTemplates = new DockerTemplates();
-		$validElements = ['Support', 'Overview', 'Category', 'WebUI', 'Icon'];
+		$validElements = ['Support', 'Overview', 'Category', 'Icon'];
 		$validAttributes = ['Name', 'Default', 'Description', 'Display', 'Required', 'Mask'];
 
 		// Get user template file and abort if fail
