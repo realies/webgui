@@ -45,7 +45,6 @@ if (strstr('gray,azure',$display['theme'])) {
 </style>
 
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
-<script src="<?autov('/webGui/javascript/NchanSubscriber.js')?>"></script>
 <script>
 Shadowbox.init({skipSetup:true});
 
