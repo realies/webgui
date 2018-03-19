@@ -23,9 +23,9 @@ function toggle_state(device,name,action) {
     else if (name.match(/^cache/)!==null) event = 'cache_status';
     else if (name.match(/^flash/)!==null) event = 'boot_status';
     else event = 'open_status';
-    $('#dev-'+name).addClass('fa-spin');
+    $('#dev-'+name).removeClass('fa-sort-up fa-sort-down').addClass('fa-refresh fa-spin');
   } else if (device!='Clear') {
-    $('[id^="dev-"]').addClass('fa-spin');
+    $('[id^="dev-"]').removeClass('fa-sort-up fa-sort-down').addClass('fa-refresh fa-spin');
     button = '[id^=button-]';
   }
   pauseEvents(event);
