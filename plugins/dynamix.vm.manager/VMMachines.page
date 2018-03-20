@@ -149,10 +149,10 @@ function loadlist() {
     resize();
     $(window).bind('resize',function(){resize(true);});
 <?endif;?>
-<?$i=0; foreach ($vms as $vm) {
+<?foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
   $uuid = $lv->domain_get_uuid($res);
-?>  $('.vcpu<?=$i++?>').tooltipster({
+?>  $('.vcpu-<?=$uuid?>').tooltipster({
       trigger:'custom',
       triggerOpen:{mouseenter:true,click:true,touchstart:true},
       contentAsHTML:true,
