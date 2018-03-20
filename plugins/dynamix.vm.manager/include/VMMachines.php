@@ -84,7 +84,7 @@ foreach ($vms as $vm) {
   echo "<td style='width:48px;padding:4px'>".renderVMContentIcon($uuid, $vm, $vmicon, $state)."</td>";
   echo "<td class='vm-name'><a href='#' onclick='return toggle_id(\"name{$i}\")' title='click for more VM info'>$vm</a></td>";
   echo "<td>$desc</td>";
-  echo "<td><a class='vcpu{$i}' style='cursor:pointer'>$vcpu</a></td>";
+  echo "<td><a class='vcpu-$uuid' style='cursor:pointer'>$vcpu</a></td>";
   echo "<td>$mem</td>";
   echo "<td title='$diskdesc'>$disks</td>";
   echo "<td>$graphics</td>";
