@@ -56,7 +56,7 @@ if ($_GET['refresh']) {
 if ($subaction) {
   $vm = $lv->domain_get_name_by_uuid($uuid);
   if ($subaction == 'disk-resize') {
-    $capacity = str_replace(["KB","MB","GB","TB","PB"," ",","], ["K","M","G","T","P","",""], strtoupper($_POST['cap']));
+    $capacity = str_replace(["KB","MB","GB","TB","PB"," ",","], ["K","M","G","T","P","",""], strtoupper($_GET['cap']));
     $oldcap = str_replace(["KB","MB","GB","TB","PB"," ",","], ["K","M","G","T","P","",""], strtoupper($_GET['oldcap']));
     if (substr($oldcap,0,-1) < substr($capacity,0,-1)){
       shell_exec("qemu-img resize -q ".escapeshellarg($_GET['disk'])." ".escapeshellarg($capacity));
