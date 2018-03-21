@@ -14,6 +14,7 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $var     = parse_ini_file('state/var.ini');
+extract(parse_ini_file('state/network.ini',true));
 
 ignore_user_abort(true);
 
@@ -512,12 +513,9 @@ function getUsedPorts() {
   exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
-    $list['Name'] = strtolower($name);
-    $mode = exec("docker inspect --format='{{lower .HostConfig.NetworkMode}}' $name 2>/dev/null");
-    if ($mode == 'bridge')
-      $port = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
-    else
-      $port = explode('|',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null")));
+    $list['Name'] = $name;
+    $port = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+    if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null")));
     natsort($port);
     $list['Port'] = implode(' ',array_unique($port));
     $ports[] = $list;
@@ -526,13 +524,14 @@ function getUsedPorts() {
 }
 
 function getUsedIPs() {
+  global $eth0;
   $ips = [];
   exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
-    $list['Name'] = strtolower($name);
+    $list['Name'] = $name;
     $mode = exec("docker inspect --format='{{lower .HostConfig.NetworkMode}}' $name 2>/dev/null");
-    $list['ip'] = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null")." ($mode)";
+    $list['ip'] = (exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'])." ($mode)";
     $ips[] = $list;
   }
   return $ips;
@@ -1537,7 +1536,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="ipsused_toggle" class="readmore_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed IP addresses ...</a></td>
+        <td id="ipsused_toggle" class="readmore_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show assigned IP addresses ...</a></td>
       </tr>
     </table>
     <div id="configLocationIPs" style="display:none"></div><br>
@@ -1714,11 +1713,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     if ( readm.hasClass('readmore_collapsed') ) {
       readm.removeClass('readmore_collapsed').addClass('readmore_expanded');
       $('#configLocationIPs').slideDown('fast');
-      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed IP addresses ...');
+      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide assigned IP addresses ...');
     } else {
       $('#configLocationIPs').slideUp('fast');
       readm.removeClass('readmore_expanded').addClass('readmore_collapsed');
-      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed IP addresses ...');
+      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show assigned IP addresses ...');
     }
   }
   function load_contOverview() {
@@ -1786,7 +1785,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     // Add list of exposed host ports
     $("#configLocationPorts").html(makeUsedPorts(UsedPorts,$('input[name="contName"]').val()));
 
-    // Add list of exposed IP addresses
+    // Add list of assigned IP addresses
     $("#configLocationIPs").html(makeUsedIPs(UsedIPs,$('input[name="contName"]').val()));
 
     // Add switchButton
