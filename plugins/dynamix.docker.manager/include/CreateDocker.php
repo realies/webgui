@@ -1,8 +1,7 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Guilherme Jardim, Eric Schultz, Jon Panozzo.
- *
- * Adaptations by Bergware International (May 2016 / January 2018)
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -752,8 +751,9 @@ if ($_GET['xmlTemplate']) {
 }
 echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
 echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
-$authoringMode = ($dockercfg["DOCKER_AUTHORING_MODE"] == "yes") ? true : false;
+$authoringMode = $dockercfg["DOCKER_AUTHORING_MODE"] == "yes" ? true : false;
 $authoring     = $authoringMode ? 'advanced' : 'noshow';
+$disableEdit   = $authoringMode ? 'false' : 'true';
 $showAdditionalInfo = '';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
@@ -1006,10 +1006,10 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             Opts[e] = getVal(Element, e);
           });
           if (Opts.Display == "always-hide" || Opts.Display == "advanced-hide") {
-            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+",true)'> Edit</button> ";
+            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'> Edit</button> ";
             Opts.Buttons += "<button type='button' onclick='removeConfig("+num+");'> Remove</button></span>";
           } else {
-            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+num+",true)'> Edit</button> ";
+            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'> Edit</button> ";
             Opts.Buttons += "<button type='button' onclick='removeConfig("+num+");'> Remove</button>";
           }
           if (! Opts.Name ){
@@ -1096,7 +1096,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       mode.html("<dt>Connection Type:</dt><dd><select name='Mode' class='narrow'><option value='tcp'>TCP</option><option value='udp'>UDP</option></select></dd>");
       value.addClass("numbersOnly");
       if (network==0) {
-        if (target.val()) target.prop('disabled',true); else target.addClass("numbersOnly");
+        if (target.val()) target.prop('disabled',<?=$disableEdit?>); else target.addClass("numbersOnly");
         targetDiv.find('#dt1').text('Container Port:');
         targetDiv.show();
       } else {
@@ -1530,14 +1530,14 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="portsused_toggle" class="portsused_collapsed"><a onclick="togglePortsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed host ports ...</a></td>
+        <td id="portsused_toggle" class="readmore_collapsed"><a onclick="togglePortsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed host ports ...</a></td>
       </tr>
     </table>
     <div id="configLocationPorts" style="display:none"></div><br>
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="ipsused_toggle" class="ipsused_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed IP addresses ...</a></td>
+        <td id="ipsused_toggle" class="readmore_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed IP addresses ...</a></td>
       </tr>
     </table>
     <div id="configLocationIPs" style="display:none"></div><br>
@@ -1699,25 +1699,25 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   }
   function togglePortsUsed() {
     var readm = $('#portsused_toggle');
-    if ( readm.hasClass('portsused_collapsed') ) {
-      readm.removeClass('portsused_collapsed').addClass('portsused_expanded');
+    if ( readm.hasClass('readmore_collapsed') ) {
+      readm.removeClass('readmore_collapsed').addClass('readmore_expanded');
       $('#configLocationPorts').slideDown('fast');
       readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed host ports ...');
     } else {
       $('#configLocationPorts').slideUp('fast');
-      readm.removeClass('portsused_expanded').addClass('portsused_collapsed');
+      readm.removeClass('readmore_expanded').addClass('readmore_collapsed');
       readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed host ports ...');
     }
   }
   function toggleIPsUsed() {
     var readm = $('#ipsused_toggle');
-    if ( readm.hasClass('ipsused_collapsed') ) {
-      readm.removeClass('ipsused_collapsed').addClass('ipsused_expanded');
+    if ( readm.hasClass('readmore_collapsed') ) {
+      readm.removeClass('readmore_collapsed').addClass('readmore_expanded');
       $('#configLocationIPs').slideDown('fast');
       readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed IP addresses ...');
     } else {
       $('#configLocationIPs').slideUp('fast');
-      readm.removeClass('ipsused_expanded').addClass('ipsused_collapsed');
+      readm.removeClass('readmore_expanded').addClass('readmore_collapsed');
       readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed IP addresses ...');
     }
   }
@@ -1762,10 +1762,10 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         confNum += 1;
         Opts = Settings.Config[i];
         if (Opts.Display == "always-hide" || Opts.Display == "advanced-hide") {
-          Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",true)'> Edit</button> ";
+          Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'> Edit</button> ";
           Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
         } else {
-          Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",true)'> Edit</button> ";
+          Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'> Edit</button> ";
           Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button>";
         }
         Opts.Number = confNum;
@@ -1802,7 +1802,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   });
   if ( window.location.href.indexOf("/Apps/") > 0 ) {
     $(".TemplateDropDown").hide();
-  }		
+  }
 </script>
 <?END:?>
 
