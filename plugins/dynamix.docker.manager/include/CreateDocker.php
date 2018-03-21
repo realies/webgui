@@ -509,8 +509,8 @@ function setXmlVal(&$xml, $value, $el, $attr = null, $pos = 0) {
 }
 
 function getUsedPorts() {
+  global $names;
   $ports = [];
-  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
@@ -524,9 +524,8 @@ function getUsedPorts() {
 }
 
 function getUsedIPs() {
-  global $eth0;
+  global $names, $eth0;
   $ips = [];
-  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
@@ -748,6 +747,7 @@ if ($_GET['xmlTemplate']) {
     echo "<script>var Settings=".json_encode($xml).";</script>";
   }
 }
+exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
 echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
 echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
 $authoringMode = $dockercfg["DOCKER_AUTHORING_MODE"] == "yes" ? true : false;
