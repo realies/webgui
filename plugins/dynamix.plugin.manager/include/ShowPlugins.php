@@ -20,6 +20,7 @@ $branch  = $_GET['branch'] ?? false;
 $audit   = $_GET['audit'] ?? false;
 $check   = $_GET['check'] ?? false;
 $empty   = true;
+$updates = 0;
 $builtin = ['unRAIDServer'];
 $plugins = "/var/log/plugins/*.plg";
 
@@ -93,6 +94,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
           $version .= "<br><span class='red-text'>$latest</span>";
           $status = make_link("update",basename($plugin_file));
           $changes_file = $filename;
+          if (!$os) $updates++;
         } else {
           //status is considered outdated when older than 1 day
           $status = filectime($filename) > (time()-86400) ? 'up-to-date' : 'need check';
@@ -136,4 +138,5 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   @unlink("/var/log/plugins/$tmp_plg");
 }
 if ($empty) echo "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-check-square-o icon'></i> No plugins installed</td><tr>";
+echo "\0".$updates;
 ?>
