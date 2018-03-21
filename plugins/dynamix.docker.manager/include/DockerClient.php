@@ -575,7 +575,7 @@ class DockerClient {
 
 	private function build_sorter($key) {
 		return function ($a, $b) use ($key) {
-			return strnatcmp(strtolower($a[$key]), strtolower($b[$key]));
+			return strnatcasecmp($a[$key], $b[$key]);
 		};
 	}
 
