@@ -225,10 +225,10 @@ div.user-list{float:left;padding:10px;margin-right:10px;margin-bottom:24px;borde
 div.user-list img{width:auto;max-width:48px;height:48px;margin-bottom:16px}
 div.up{margin-top:-20px;border:1px solid #D0D0D0;padding:4px 6px;overflow:auto}
 div.spinner{height:32px;width:32px;margin:24px auto;
--webkit-animation: rotation .6s infinite linear;
--moz-animation: rotation .6s infinite linear;
--o-animation: rotation .6s infinite linear;
-animation: rotation .6s infinite linear;
+-webkit-animation: fa-spin .6s infinite linear;
+-moz-animation: fa-spin .6s infinite linear;
+-o-animation: fa-spin .6s infinite linear;
+animation: fa-spin .6s infinite linear;
 border-left:6px solid rgba(0,174,239,.15);
 border-right:6px solid rgba(0,174,239,.15);
 border-bottom:6px solid rgba(0,174,239,.15);
