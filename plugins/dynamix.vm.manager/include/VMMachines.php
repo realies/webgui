@@ -108,9 +108,13 @@ foreach ($vms as $vm) {
     echo "<tr><td>$disk</td><td>{$arrValidDiskBuses[$bus]}</td>";
     if ($state == 'shutoff') {
       echo "<td title='Click to increase Disk Size'>";
-      echo "<form method='post' action='?subaction=disk-resize&amp;uuid={$uuid}&amp;disk={$disk}&amp;oldcap={$capacity}'>";
+      echo "<form method='get' action=''>";
+      echo "<input type='hidden' name='subaction' value='disk-resize'>";
+      echo "<input type='hidden' name='uuid' value='".$uuid."'>";
+      echo "<input type='hidden' name='disk' value='".htmlspecialchars($disk)."'>";
+      echo "<input type='hidden' name='oldcap' value='".$capacity."'>";
       echo "<span class='diskresize' style='width:30px'>";
-      echo "<span class='text'><a href='#'>$capacity</a></span>";
+      echo "<span class='text'><a href='#' onclick='return false'>$capacity</a></span>";
       echo "<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden>";
       echo "</span></form></td>";
       echo "<td>$allocation</td>";
