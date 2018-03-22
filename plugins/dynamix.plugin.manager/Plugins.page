@@ -81,9 +81,9 @@ function loadlist(id) {
 $(function() {
   loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none'><input type='button' value='Update all Plugins' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\"0:return\")'></span>");
+  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none'><input type='button' value='Update all Plugins' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\":return\")'></span>");
 <?if ($check):?>
-  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check for Updates' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true,\"loadlist\",\"0:return\")' disabled></span>");
+  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check for Updates' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
 <?endif;?>
 });
 </script>
