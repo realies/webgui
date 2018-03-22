@@ -80,7 +80,7 @@ if (!empty($_GET['uuid'])) {
 	.fileTree {
 		width: 305px;
 		max-height: 150px;
-		overflow: scroll;
+		overflow-y: scroll;
 		position: absolute;
 		z-index: 100;
 		display: none;
@@ -213,7 +213,7 @@ if (!empty($_GET['uuid'])) {
 	#template_img_chooser {
 		width: 560px;
 		height: 300px;
-		overflow: scroll;
+		overflow-y: scroll;
 		position: relative;
 	}
 	#template_img_chooser div:hover {
