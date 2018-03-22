@@ -557,8 +557,8 @@ btrfs scrub status:
 </div>
 <?endif;?>
 
-<script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script>
 function prepareDocker(form) {
   $(form).find('input:hidden[name^="DOCKER_DHCP_"]').each(function(){
