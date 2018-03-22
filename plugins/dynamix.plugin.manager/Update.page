@@ -51,29 +51,33 @@ function downgrade() {
 }
 function loadlist(id) {
   $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{system:'true',audit:id,check:<?=$check?>},function(data) {
+    var list = $('#os_list');
     if (id) {
-      var tmp = id.split(':');
-      var tr = 'tr#'+tmp[0].replace(/[\. _]/g,'');
-      switch (tmp[1]) {
+      var cmd = id.split(':');
+      var tr = 'tr#'+cmd[0].replace(/[\. _]/g,'');
+      switch (cmd[1]) {
+        case 'return' : list.html(data); break;
         case 'update':
-        case 'install': $('#os_list').find(tr).remove(); $('#os_list').append(data).trigger('update'); break;
+        case 'install': $('#os_list').find(tr).remove(); $('#os_list').append(data); break;
       }
     } else {
-      $('#os_list').html(data);
+      list.html(data);
     }
-    $('#os_table').tablesorter({sortList:[[4,0],[1,0]],sortAppend:[[1,0]],headers:{0:{sorter:false},5:{sorter:false}},textAttribute:'data'});
 <?if (preg_match("/^\*\*(REBOOT REQUIRED|DOWNGRADE)/",@file_get_contents("$docroot/plugins/unRAIDServer/README.md",false,null,0,20))):?>
     $('#change_branch').prop('disabled',true);
 <?endif;?>
 <?if ($bzroot):?>
     $('#previous').show();
 <?endif;?>
+<?if ($check):?>
+    $('#checkos').prop('disabled',false);
+<?endif;?>
   });
 }
 $(function() {
   loadlist();
 <?if ($check):?>
-  $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"Plugin Update Check\",490,430,true)'></span>");
+  $('.tabs').append("<span class='status vhshift'><input type='button' id='checkos' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"System Update Check\",490,430,true,\"loadlist\",\"0:return\")' disabled></span>");
 <?endif;?>
 });
 </script>

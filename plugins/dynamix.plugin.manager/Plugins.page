@@ -43,9 +43,9 @@ function resize(bind) {
 function loadlist(id) {
   $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id,check:<?=$check?>},function(d) {
     var data = d.split(/\0/);
+    var list = $('#plugin_list');
     if (id) {
       var cmd = id.split(':');
-      var list = $('#plugin_list');
       var tr = 'tr#'+cmd[0].replace(/[\. _]/g,'');
       switch (cmd[1]) {
         case 'return' : $('div.spinner').hide('slow');list.html(data[0]); $('#plugin_table').trigger('destroy'); break;
@@ -54,7 +54,7 @@ function loadlist(id) {
         case 'install': if (!list.find(tr).length) list.append(data[0]).trigger('update'); break;
       }
     } else {
-      $('#plugin_list').html(data[0]);
+      list.html(data[0]);
     }
     if (data[1]>0) {
       $('#updateall').show();
