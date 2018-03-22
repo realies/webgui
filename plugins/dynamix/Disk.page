@@ -20,15 +20,15 @@ if (count($pages)==2) $tabbed = false;
 $refs = []; $n = 0;
 
 foreach ($disks as $ref) {
-  if ($ref['type']=='Flash') continue;
+  if ($ref['type']!='Data' && $ref['name']!='cache') continue;
   if ($ref['fsColor']=='grey-off') continue;
   $refs[] = $ref['name'];
   if ($ref['name']==$name) $i = $n;
   $n++;
 }
 $end  = count($refs)-1;
-$prev = $i>0 ? $refs[$i-1] : $refs[$end];
-$next = $i<$end ? $refs[$i+1] : $refs[0];
+$prev = urlencode($i>0 ? $refs[$i-1] : $refs[$end]);
+$next = urlencode($i<$end ? $refs[$i+1] : $refs[0]);
 ?>
 <style>
 div.clone1{position:absolute;right:0;margin-top:0}
