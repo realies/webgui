@@ -23,7 +23,23 @@ foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if 
 $check = $notify['version'] ? 0 : 1;
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<style>#plugin_tree{width:33%;height:200px;overflow-y:scroll;}</style>
+<style>
+#plugin_tree{width:33%;height:200px;overflow-y:scroll;}
+div.spinner{display:none;position:absolute;left:46%;top:64px;height:32px;width:32px;margin:0 auto;
+-webkit-animation: rotation .6s infinite linear;
+-moz-animation: rotation .6s infinite linear;
+-o-animation: rotation .6s infinite linear;
+animation: rotation .6s infinite linear;
+border-left:6px solid rgba(0,174,239,.15);
+border-right:6px solid rgba(0,174,239,.15);
+border-bottom:6px solid rgba(0,174,239,.15);
+border-top:6px solid rgba(0,174,239,.8);
+border-radius:100%;}
+@-webkit-keyframes rotation{from {-webkit-transform: rotate(0deg);} to {-webkit-transform: rotate(359deg);}}
+@-moz-keyframes rotation{from {-moz-transform: rotate(0deg);} to {-moz-transform: rotate(359deg);}}
+@-o-keyframes rotation{from {-o-transform: rotate(0deg);} to {-o-transform: rotate(359deg);}}
+@keyframes rotation{ from {transform: rotate(0deg);} to {transform: rotate(359deg);}}
+</style>
 
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script>
@@ -44,10 +60,11 @@ function loadlist(id) {
   $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id,check:<?=$check?>},function(d) {
     var data = d.split(/\0/);
     if (id) {
-      var tmp = id.split(':');
+      var cmd = id.split(':');
       var list = $('#plugin_list');
-      var tr = 'tr#'+tmp[0].replace(/[\. _]/g,'');
-      switch (tmp[1]) {
+      var tr = 'tr#'+cmd[0].replace(/[\. _]/g,'');
+      switch (cmd[1]) {
+        case 'return' : $('div.spinner').hide('slow');list.html(data[0]); $('#plugin_table').trigger('destroy'); break;
         case 'remove' : list.find(tr).remove(); break;
         case 'update' : list.find(tr).remove();
         case 'install': if (!list.find(tr).length) list.append(data[0]).trigger('update'); break;
@@ -55,7 +72,7 @@ function loadlist(id) {
     } else {
       $('#plugin_list').html(data[0]);
     }
-    if (data[1]>1) {
+    if (data[1]>0) {
       $('#updateall').show();
 <?if ($check):?>
       $('#checkall').hide();
@@ -80,9 +97,9 @@ function loadlist(id) {
 $(function() {
   loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none'><input type='button' value='Update all Plugins' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Plugin Update All Plugins\",490,430,true)'></span>");
+  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none'><input type='button' value='Update all Plugins' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\"0:return\")'></span>");
 <?if ($check):?>
-  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true)' disabled></span>");
+  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check for Updates' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true,\"loadlist\",\"0:return\")' disabled></span>");
 <?endif;?>
 });
 </script>
@@ -90,3 +107,4 @@ $(function() {
 <thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th>Uninstall</th></tr></thead>
 <tbody id="plugin_list"><tr><td colspan='6' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td><tr></tbody>
 </table>
+<div class="spinner"></div>

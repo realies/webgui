@@ -27,6 +27,7 @@ $plugins = "/var/log/plugins/*.plg";
 if ($audit) {
   list($plg,$action) = explode(':',$audit);
   switch ($action) {
+    case 'return' : $check = true; break;
     case 'remove' : return;
     case 'install':
     case 'update' : $plugins = "/var/log/plugins/$plg.plg"; break;
@@ -111,7 +112,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   if ($changes !== false) {
     $txtfile = "/tmp/plugins/".basename($plugin_file,'.plg').".txt";
     file_put_contents($txtfile,$changes);
-    $version .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900); return false\"><span class='fa fa-info-circle big blue-text'></span></a>";
+    $version .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900); return false\"><span class='fa fa-info-circle fa-fw big blue-text'></span></a>";
   }
 //write plugin information
   $empty = false;
