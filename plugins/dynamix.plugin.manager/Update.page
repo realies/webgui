@@ -81,7 +81,6 @@ $(function() {
 <?endif;?>
 });
 </script>
-
 <table class='tablesorter plugins shift' id='os_table'>
 <thead><tr><th></th><th>Component</th><th>Author</th><th>Version</th><th>Status</th><th>Branch</th></tr></thead>
 <tbody id="os_list"><?=$empty?></tbody>

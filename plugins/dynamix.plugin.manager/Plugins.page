@@ -87,8 +87,8 @@ $(function() {
 <?endif;?>
 });
 </script>
+<div class="spinner fixed"></div>
 <table class='tablesorter plugins shift' id='plugin_table'>
 <thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th>Uninstall</th></tr></thead>
 <tbody id="plugin_list"><tr><td colspan="6"><div class="spinner"></div></td><tr></tbody>
 </table>
-<div class="spinner fixed hide"></div>
