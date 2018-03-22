@@ -58,7 +58,7 @@ function loadlist(id) {
       switch (cmd[1]) {
         case 'return' : list.html(data); break;
         case 'update':
-        case 'install': $('#os_list').find(tr).remove(); $('#os_list').append(data); break;
+        case 'install': list.find(tr).remove(); list.append(data); break;
       }
     } else {
       list.html(data);
