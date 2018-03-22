@@ -3,8 +3,8 @@ Title="Management Access"
 Tag="expeditedssl"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -52,7 +52,7 @@ $tasks = find_tasks();
 <script>
 function provisionSSL(button) {
   var oldlabel = $.trim($(button).text());
-  $(button).prop("disabled", true).html("<i class=\"fa fa-circle-o-notch fa-spin\" aria-hidden=\"true\"></i> "+oldlabel+"ing");
+  $(button).prop("disabled", true).html("<i class='fa fa-circle-o-notch fa-spin fa-fw'></i> "+oldlabel+"ing");
   var msg = "Your Let's Encrypt SSL Certificate has been provisioned and a DNS record for local IP address <?=$internalip?> has been created on unraid.net.";
   var failure = function(data) {
     var status = data.status;
@@ -86,7 +86,7 @@ function provisionSSL(button) {
   $.post("/webGui/include/ProvisionCert.php",success_provision).fail(failure);
 }
 function updateDNS(button) {
-  $(button).prop("disabled", true).html("<i class=\"fa fa-circle-o-notch fa-spin\" aria-hidden=\"true\"></i> Updating DNS");
+  $(button).prop("disabled", true).html("<i class='fa fa-circle-o-notch fa-spin fa-fw'></i> Updating DNS");
   var failure = function(data) {
     var status = data.status;
     var obj = data.responseJSON;

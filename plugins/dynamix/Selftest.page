@@ -72,7 +72,7 @@ SMART extended self-test:
 > This feature is only available when the disk is in active mode.
 
 Last SMART test result:
-: <span id="test_result"><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></span>
+: <span id="test_result"><i class='fa fa-circle-o-notch fa-spin fa-fw'></i></span>
 
 > When no test is running it will show here the latest obtained self-test result (if available).
 > Otherwise a progress indicator (percentage value) is shown for a running test.

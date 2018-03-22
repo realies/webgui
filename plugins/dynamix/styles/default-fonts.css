@@ -12,3 +12,7 @@ src:url('bitstream.eot');src:url('bitstream.eot?#iefix') format('embedded-openty
 src:url('docker-icon.eot');src:url('docker-icon.eot?#iefix') format('embedded-opentype'),url('docker-icon.woff') format('woff'),url('docker-icon.ttf') format('truetype'),url('docker-icon.svg#docker-icon') format('svg')}
 [data-icon]:before{content:attr(data-icon)}
 [data-icon]:before,.fa-docker:before{font-family:docker-icon;content:'\f100'}
+@-webkit-keyframes rotation{from {-webkit-transform: rotate(0deg);} to {-webkit-transform: rotate(359deg);}}
+@-moz-keyframes rotation{from {-moz-transform: rotate(0deg);} to {-moz-transform: rotate(359deg);}}
+@-o-keyframes rotation{from {-o-transform: rotate(0deg);} to {-o-transform: rotate(359deg);}}
+@keyframes rotation{from {transform: rotate(0deg);} to {transform: rotate(359deg);}}
