@@ -3,8 +3,8 @@ Title="Add User"
 Tag="user"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -46,10 +46,6 @@ function restore() {
 
 function checkUsername(form) {
   var username = form.userName.value.trim();
-  if (username.length==0) {
-    swal({title:"Missing user name",text:"Please enter a user name",type:"error"});
-    return false;
-  }
   if (!username.match('^[a-z_][a-z0-9_-]*[$]?$')) {
     swal({title:"Invalid user name",text:"Use only lowercase letters, digits, underscores and dashes",type:"error"});
     return false;
@@ -123,7 +119,7 @@ $(function(){
 
 <form markdown="1" name="user_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this)">
 User name:
-: <input type="text" name="userName" maxlength="32">
+: <input type="text" name="userName" maxlength="32" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='')">
 
 > Usernames may be up to 32 characters long and must start with a **lower case letter** or an underscore,
 > followed by **lower case letters**, digits, underscores, or dashes. They can end with a dollar sign.
@@ -140,13 +136,13 @@ Custom image:
 > The image will be scaled to 48x48 pixels in size. The maximum image file upload size is 95 kB (97,280 bytes).
 
 Password:
-: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
+: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='' || this.form.userPassword.value!=this.form.userPasswordConf.value)">
 
 > Up to 128 characters.
 
 Retype password:
-: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
+: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='' || this.form.userPassword.value!=this.form.userPasswordConf.value)">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Add"><input type="button" value="Done" onclick="done('UserAdd')">
+: <input type="submit" name="cmdUserEdit" value="Add" disabled><input type="button" value="Done" onclick="done('UserAdd')">
 </form>

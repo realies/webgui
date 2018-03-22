@@ -5,8 +5,8 @@ Tag="columns"
 Markdown="false"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -286,7 +286,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 
 <dl>
 	<dt><?if (file_exists("/var/log/libvirt/libvirtd.log")):?><input type="button" class="advanced" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/><?endif;?>&nbsp;</dt>
-	<dd><input type="button" id="applyBtn" value="Apply"/><input type="button" value="Done" onclick="done()"></dd>
+	<dd><input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()"></dd>
 </dl>
 </form>
 

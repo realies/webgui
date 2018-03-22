@@ -4,8 +4,8 @@ Icon="disk-settings.png"
 Tag="database"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -221,7 +221,7 @@ Default critical disk temperature threshold (&deg;<?=$display['unit']?>):
 > A value of zero will disable the critical threshold (including notifications).
 
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeDisk" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <div id="title"><span class="left"><i class="title fa fa-plus-square"></i>Global SMART Settings</span></div>
@@ -293,5 +293,5 @@ Default SMART attribute notifications:
 > This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
 
 <input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="#apply" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>

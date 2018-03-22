@@ -248,7 +248,7 @@ Local TLD:
 > Enter your local Top Level Domain. May be blank.
 
 &nbsp;
-: <input type="button" value="Apply" onclick="checkPorts(this.form)"><input type="button" value="Done" onclick="done()">
+: <input type="button" value="Apply" onclick="checkPorts(this.form)" disabled><input type="button" value="Done" onclick="done()">
 
 </form>
 <div style="height:24px"></div>

@@ -513,7 +513,7 @@ IPv6 custom network on interface <?=$network?>:
 <?endif;?>
 
 &nbsp;
-: <input id="applyBtn" type="button" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input id="applyBtn" type="button" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <form id="removeForm" method="POST" action="/update.php" target="progressFrame">

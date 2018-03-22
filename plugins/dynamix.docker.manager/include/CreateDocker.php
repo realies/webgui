@@ -1551,11 +1551,8 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       <tr>
         <td></td>
         <td>
-          <input type="submit" value="<?=$xmlType=='edit' ? 'Apply' : ' Apply '?>">
-          <?if ($authoringMode):?>
-          <button type="submit" name="dryRun" value="true" onclick="$('*[required]').prop('required', null);">Save</button>
-          <?endif;?>
-          <input type="button" value="Done" onclick="done()">
+          <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+          <?if ($authoringMode):?><button type="submit" name="dryRun" value="true" onclick="$('*[required]').prop('required', null);">Save</button><?endif;?>
         </td>
       </tr>
     </table>
