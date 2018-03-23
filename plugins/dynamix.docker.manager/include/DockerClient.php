@@ -32,10 +32,10 @@ if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_fi
 
 # controlled docker execution
 function docker($cmd) {
-  return exec("timeout 20 docker $cmd 2>/dev/null");
+	return exec("timeout 20 docker $cmd 2>/dev/null");
 }
 
-// Docker configuration file - guaranteed to exist
+# Docker configuration file - guaranteed to exist
 $docker_cfgfile = '/boot/config/docker.cfg';
 $dockercfg = parse_ini_file($docker_cfgfile);
 
