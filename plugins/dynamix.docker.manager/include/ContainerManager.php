@@ -15,11 +15,11 @@
 $user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
 
 # controlled docker execution
-function docker($cmd) {
-  return exec("timeout 20 docker $cmd 2>/dev/null");
+function docker($cmd, &$var=null) {
+  return $var===null ? exec("timeout 20 docker $cmd 2>/dev/null") : exec("timeout 20 docker $cmd 2>/dev/null",$var);
 }
 
-exec("timeout 20 docker ps -a --format='{{.Names}}' 2>/dev/null",$all_containers);
+$all_containers=[]; docker("ps -a --format='{{.Names}}'",$all_containers);
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];

@@ -33,8 +33,7 @@ $DockerTemplates = new DockerTemplates();
 
 $echo = function($m){echo "<pre>".print_r($m, true)."</pre>";};
 
-unset($custom);
-exec("timeout 20 docker network ls --filter driver='macvlan' --format='{{.Name}}' 2>/dev/null", $custom);
+$custom=[]; docker("network ls --filter driver='macvlan' --format='{{.Name}}'", $custom);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
 foreach ($custom as $network) $subnet[$network] = substr(docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
@@ -747,7 +746,7 @@ if ($_GET['xmlTemplate']) {
     echo "<script>var Settings=".json_encode($xml).";</script>";
   }
 }
-exec("timeout 20 docker ps --format='{{.Names}}' 2>/dev/null",$names);
+$names=[]; docker("ps --format='{{.Names}}'", $names);
 echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
 echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
 $authoringMode = $dockercfg["DOCKER_AUTHORING_MODE"] == "yes" ? true : false;

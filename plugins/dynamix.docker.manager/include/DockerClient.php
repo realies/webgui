@@ -31,8 +31,8 @@ $dockerManPaths = [
 if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_file("$docroot/state/network.ini",true));
 
 # controlled docker execution
-function docker($cmd) {
-	return exec("timeout 20 docker $cmd 2>/dev/null");
+function docker($cmd, &$var=null) {
+	return $var===null ? exec("timeout 20 docker $cmd 2>/dev/null") : exec("timeout 20 docker $cmd 2>/dev/null",$var);
 }
 
 # Docker configuration file - guaranteed to exist
