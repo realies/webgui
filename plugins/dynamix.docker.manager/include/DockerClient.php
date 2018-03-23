@@ -27,9 +27,12 @@ $dockerManPaths = [
 	'update-status'     => '/var/lib/docker/unraid-update-status.json'
 ];
 
-#load network variables if needed.
-if (!isset($eth0) && is_file("$docroot/state/network.ini")) {
-	extract(parse_ini_file("$docroot/state/network.ini",true));
+# load network variables if needed.
+if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_file("$docroot/state/network.ini",true));
+
+# controlled docker execution
+function docker($cmd) {
+  return exec("timeout 20 docker $cmd 2>/dev/null");
 }
 
 // Docker configuration file - guaranteed to exist
@@ -248,7 +251,7 @@ class DockerTemplates {
 		$myIP = $this->getTemplateValue($Repository, 'MyIP');
 		$network = $this->getTemplateValue($Repository, 'Network');
 		if (!$myIP && preg_match("%^(br|eth|bond)[0-9]%",$network)) {
-			$myIP = exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name");
+			$myIP = docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name");
 		}
 		if (preg_match("%\[IP\]%", $WebUI)) {
 			$WebUI = preg_replace("%\[IP\]%", $myIP ?: $eth0['IPADDR:0'], $WebUI);

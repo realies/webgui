@@ -14,7 +14,12 @@
 <?
 $user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
 
-exec("docker ps -a --format='{{.Names}}'",$all_containers);
+# controlled docker execution
+function docker($cmd) {
+  return exec("timeout 20 docker $cmd 2>/dev/null");
+}
+
+exec("timeout 20 docker ps -a --format='{{.Names}}' 2>/dev/null",$all_containers);
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
@@ -29,6 +34,6 @@ switch ($action) {
 }
 
 foreach ($all_containers as $ct) {
-  if (exec("docker inspect --format='{{.State.Running}}' $ct")==$state) exec("docker $action $ct >/dev/null");
+  if (docker("inspect --format='{{.State.Running}}' $ct")==$state) docker("$action $ct >/dev/null");
 }
 ?>
