@@ -227,7 +227,7 @@ function plugin($method, $plugin_file, &$error) {
   }
 
   // release notes
-  if ($method == 'changes') {
+  if ($method == "changes") {
     if (!$xml->CHANGES) return false;
     return trim($xml->CHANGES);
   }
@@ -374,6 +374,7 @@ $builtin = ['unRAIDServer'];
 //
 if ($method == "checkall") {
   foreach (glob("/var/log/plugins/*", GLOB_NOSORT) as $link) {
+    // skip OS related plugins
     if (in_array(basename($link,'.plg'),$builtin)) continue;
     // only consider symlinks
     $installed_plugin_file = @readlink($link);
@@ -382,6 +383,29 @@ if ($method == "checkall") {
     $plugin = basename($installed_plugin_file);
     echo "plugin: checking $plugin ...\n";
     exec(realpath($argv[0]) . " check $plugin", $output, $retval);
+  }
+  exit(0);
+}
+
+// plugin updateall
+// update all installed plugins, which have a update available
+//
+if ($method == "updateall") {
+  foreach (glob("/var/log/plugins/*", GLOB_NOSORT) as $link) {
+    // skip OS related plugins
+    if (in_array(basename($link,'.plg'),$builtin)) continue;
+    // only consider symlinks
+    $installed_plugin_file = @readlink($link);
+    if ($installed_plugin_file === false) continue;
+    if (plugin("pluginURL", $installed_plugin_file, $error) === false) continue;
+    $version = plugin("version", $installed_plugin_file, $error);
+    $plugin = basename($installed_plugin_file);
+    $latest = plugin("version", "/tmp/plugins/$plugin", $error);
+    // update only when newer
+    if (strcmp($latest,$version) > 0) {
+      echo "plugin: updating $plugin ...\n";
+      exec(realpath($argv[0]) . " update $plugin", $output, $retval);
+    }
   }
   exit(0);
 }

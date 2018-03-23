@@ -4,8 +4,8 @@ Tag="user-circle-o"
 Cond="$var['fsState']!='Stopped' && $var['shareDisk']!='no'"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,7 +19,7 @@ Cond="$var['fsState']!='Stopped' && $var['shareDisk']!='no'"
 function displayDisks(all) {
   if (all == 'yes') {
     $.cookie('ssz','ssz',{path:'/'});
-    $('#disk_list').html("<tr><td colspan='8' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr>");
+    $('#disk_list').html("<tr><td colspan='8'><div class='spinner'></div></td></tr>");
   }
   $.get('/webGui/include/DiskList.php',{compute:all,path:'<?=$path?>',scale:'<?=$display['scale']?>',number:'<?=$display['number']?>',fill:$.cookie('ssz')},function(data){
     $.removeCookie('ssz',{path:'/'})

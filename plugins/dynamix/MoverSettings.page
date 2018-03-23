@@ -3,8 +3,8 @@ Title="Mover Settings"
 Tag="calendar-check-o"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -118,7 +118,7 @@ Mover logging:
 > Write mover messages to the syslog file.
 
 &nbsp;
-: <input type="submit" name="changeMover" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeMover" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 &nbsp;

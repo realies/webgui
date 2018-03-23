@@ -95,11 +95,11 @@ if (empty($vms)) {
 }
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style type="text/css">
 body{-webkit-overflow-scrolling:touch;}
-.fileTree{width:305px;max-height:150px;overflow:scroll;position:absolute;z-index:100;display:none;}
+.fileTree{width:305px;max-height:150px;overflow-y:scroll;position:absolute;z-index:100;display:none;}
 div.four{font-family:arimo;font-size:12px;color:#A0A0A0;width:300px}
 div.four label{float:left;display:table-cell;width:25%}
 div.four label:nth-child(4n+4){float:none;clear:both}
@@ -110,9 +110,9 @@ div.Panel:hover{background-color:unset;}
 div.PanelText{display:none;}
 th.five{width:5%}
 </style>
-<table class="tablesorter shift kvm" id="kvm_table">
+<table id="kvm_table" class="tablesorter shift">
 <thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
-<tbody id="kvm_list"><tr><td colspan='9' style='text-align:center;padding:24px'><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td></tr></tbody>
+<tbody id="kvm_list"><tr><td colspan='9'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" style="display:none">
 <input type="button" onclick="startAll()" value="Start all VMs" style="display:none">

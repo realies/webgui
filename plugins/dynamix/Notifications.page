@@ -5,8 +5,8 @@ Icon="notifications.png"
 Tag="phone-square"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -266,5 +266,5 @@ Notification entity:
 > Choose for each classification how you want to be notified.
 
 <input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
+: <input type="submit" name="#apply" value="Apply" disabled><input type="button" value="Done" onclick="done()"></td>
 </form>

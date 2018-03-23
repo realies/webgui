@@ -23,11 +23,10 @@ $vms = $lv->get_domains();
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
   foreach ($vms as $vm) $sort[] = array_search($vm,$prefs) ?? 999;
-  array_multisort($sort,SORT_NUMERIC,$vms);
+  array_multisort($sort, ($act=='start'?SORT_ASC:SORT_DESC), SORT_NUMERIC, $vms);
 } else {
-  natcasesort($vms);
+  array_multisort($vms, ($act=='start'?SORT_ASC:SORT_DESC), SORT_NATURAL|SORT_FLAG_CASE);
 }
-if ($act=='stop') $vms = array_reverse($vms);
 
 foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);

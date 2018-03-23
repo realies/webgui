@@ -31,5 +31,5 @@ $(getUPSstatus);
 
 <table class="tablesorter shift">
 <thead><tr><th style="width:15%">Key</th><th style="width:35%">Value</th><th style="width:15%">Key</th><th style="width:35%">Value</th></tr></thead>
-<tbody id="ups_status"><tr><td colspan="4" style="text-align:center;padding:24px"><i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i></td></tr></tbody>
+<tbody id="ups_status"><tr><td colspan="4"><div class="spinner"></div></td></tr></tbody>
 </table>

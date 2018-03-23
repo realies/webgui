@@ -2,6 +2,18 @@ Menu="Notifications:3"
 Title="Notification Agents"
 Tag="rss-square"
 ---
+<?PHP
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
 <script>
 var scripts = new Object();
 var enabledAgents = new Object();
@@ -135,7 +147,7 @@ foreach ($xml->Agent as $agent) {
     echo '</dd></dl>';
     if ($vHelp) echo '<blockquote class="inline_help">'.$vHelp.'</blockquote>';
   }
-  echo '<dl><dt>&nbsp;</dt><dd><input type="submit" value="Apply" onclick="prepareService(this, \''.$name.'\')">';
+  echo '<dl><dt>&nbsp;</dt><dd><input type="submit" value="Apply" onclick="prepareService(this, \''.$name.'\')" disabled>';
   echo '<input type="button" value="Done" onclick="done()">';
   if (is_file($file)) {
     echo '<input type="button" value="Delete" onclick="execCmd(\'delete\',\''.$name.'\')">';

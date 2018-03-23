@@ -4,8 +4,8 @@ Tag="windows"
 Cond="(($var['shareSMBEnabled']!='no') && (isset($name)?array_key_exists($name,$sec):0))"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -101,7 +101,7 @@ Security:
 > read-only access.
 
 &nbsp;
-: <input type="submit" name="changeShareSecurity" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShareSecurity" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <?if ($sec[$name]['security'] == 'secure'):?>
@@ -149,7 +149,7 @@ foreach ($rows as $row) echo $row;
 <?input_secure_users($sec);?>
 
 &nbsp;
-: <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShareAccess" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <?elseif ($sec[$name]['security'] == 'private'):?>
@@ -197,7 +197,7 @@ foreach ($rows as $row) echo $row;
 <?input_private_users($sec);?>
 
 &nbsp;
-: <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShareAccess" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 <?endif;?>
 

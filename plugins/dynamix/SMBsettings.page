@@ -3,8 +3,8 @@ Title="SMB Settings"
 Tag="windows"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -40,11 +40,6 @@ Hide "dot" files:
 
 > If set to 'No' then dot files will appear in folder lists the same as any other file.
 
-<?if ($var['fsState']=="Started"):?>
 &nbsp;
-: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">Array must be <span class="strong big">Stopped</span> to change
-<?else:?>
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
-<?endif;?>
+: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()"><?if ($var['fsState']=="Started"):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
 </form>

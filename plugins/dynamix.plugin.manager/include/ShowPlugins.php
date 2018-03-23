@@ -20,12 +20,14 @@ $branch  = $_GET['branch'] ?? false;
 $audit   = $_GET['audit'] ?? false;
 $check   = $_GET['check'] ?? false;
 $empty   = true;
+$updates = 0;
 $builtin = ['unRAIDServer'];
 $plugins = "/var/log/plugins/*.plg";
 
 if ($audit) {
   list($plg,$action) = explode(':',$audit);
   switch ($action) {
+    case 'return' : $check = true; break;
     case 'remove' : return;
     case 'install':
     case 'update' : $plugins = "/var/log/plugins/$plg.plg"; break;
@@ -93,6 +95,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
           $version .= "<br><span class='red-text'>$latest</span>";
           $status = make_link("update",basename($plugin_file));
           $changes_file = $filename;
+          if (!$os) $updates++;
         } else {
           //status is considered outdated when older than 1 day
           $status = filectime($filename) > (time()-86400) ? 'up-to-date' : 'need check';
@@ -109,7 +112,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   if ($changes !== false) {
     $txtfile = "/tmp/plugins/".basename($plugin_file,'.plg').".txt";
     file_put_contents($txtfile,$changes);
-    $version .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900); return false\"><span class='fa fa-info-circle big blue-text'></span></a>";
+    $version .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900); return false\"><span class='fa fa-info-circle fa-fw big blue-text'></span></a>";
   }
 //write plugin information
   $empty = false;
@@ -136,4 +139,5 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   @unlink("/var/log/plugins/$tmp_plg");
 }
 if ($empty) echo "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-check-square-o icon'></i> No plugins installed</td><tr>";
+echo "\0".$updates;
 ?>

@@ -33,10 +33,9 @@ $DockerTemplates = new DockerTemplates();
 
 $echo = function($m){echo "<pre>".print_r($m, true)."</pre>";};
 
-unset($custom);
-exec("docker network ls --filter driver='macvlan' --format='{{.Name}}'", $custom);
+$custom=[]; docker("network ls --filter driver='macvlan' --format='{{.Name}}'", $custom);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
-foreach ($custom as $network) $subnet[$network] = substr(exec("docker network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
+foreach ($custom as $network) $subnet[$network] = substr(docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
 function stopContainer($name) {
   global $DockerClient;
@@ -509,13 +508,13 @@ function setXmlVal(&$xml, $value, $el, $attr = null, $pos = 0) {
 }
 
 function getUsedPorts() {
+  global $names;
   $ports = [];
-  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
-    $port = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
-    if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null")));
+    $port = explode('|',docker("inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name"));
+    if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',docker("inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name")));
     natsort($port);
     $list['Port'] = implode(' ',array_unique($port));
     $ports[] = $list;
@@ -524,14 +523,13 @@ function getUsedPorts() {
 }
 
 function getUsedIPs() {
-  global $eth0;
+  global $names, $eth0;
   $ips = [];
-  exec("docker ps --format='{{.Names}}' 2>/dev/null",$names);
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
-    $mode = exec("docker inspect --format='{{lower .HostConfig.NetworkMode}}' $name 2>/dev/null");
-    $list['ip'] = (exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0'])." ($mode)";
+    $mode = docker("inspect --format='{{lower .HostConfig.NetworkMode}}' $name");
+    $list['ip'] = (docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") ?: $eth0['IPADDR:0'])." ($mode)";
     $ips[] = $list;
   }
   return $ips;
@@ -748,6 +746,7 @@ if ($_GET['xmlTemplate']) {
     echo "<script>var Settings=".json_encode($xml).";</script>";
   }
 }
+$names=[]; docker("ps --format='{{.Names}}'", $names);
 echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
 echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
 $authoringMode = $dockercfg["DOCKER_AUTHORING_MODE"] == "yes" ? true : false;
@@ -777,9 +776,9 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 .switch-button-label.off{color:inherit;}
 .selectVariable{width:320px}
 </style>
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js')?>"></script>
 <script type="text/javascript">
   var this_tab = $('input[name$="tabs"]').length;
   $(function() {
@@ -1551,11 +1550,8 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       <tr>
         <td></td>
         <td>
-          <input type="submit" value="<?=$xmlType=='edit' ? 'Apply' : ' Apply '?>">
-          <?if ($authoringMode):?>
-          <button type="submit" name="dryRun" value="true" onclick="$('*[required]').prop('required', null);">Save</button>
-          <?endif;?>
-          <input type="button" value="Done" onclick="done()">
+          <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+          <?if ($authoringMode):?><button type="submit" name="dryRun" value="true" onclick="$('*[required]').prop('required', null);">Save</button><?endif;?>
         </td>
       </tr>
     </table>

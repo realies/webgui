@@ -60,24 +60,24 @@ foreach ($all_containers as $ct) {
   $status = $ct['Running'] ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name 2>/dev/null"));
+  $binds = explode('|',docker("inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name"));
   if (count($binds)>1) {
-    $ip = $ct['Running'] ? exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") : '0.0.0.0';
+    $ip = $ct['Running'] ? docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       list($container_port,$host_port) = explode(':',$bind);
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $container_port, $eth0['IPADDR:0'], $host_port);
     }
   } else {
-    $binds = explode('|',exec("docker inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name 2>/dev/null"));
-    $ip = $ct['Running'] ? (exec("docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name 2>/dev/null") ?: $eth0['IPADDR:0']) : '0.0.0.0';
+    $binds = explode('|',docker("inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name"));
+    $ip = $ct['Running'] ? (docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") ?: $eth0['IPADDR:0']) : '0.0.0.0';
     foreach ($binds as $bind) {
       if (!$bind) continue;
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
     }
   }
   $paths = [];
-  $mounts = explode('|',exec("docker inspect --format='{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name 2>/dev/null"));
+  $mounts = explode('|',docker("inspect --format='{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name"));
   foreach ($mounts as $mount) {
     if (!$mount) continue;
     list($host_path,$container_path,$access_mode) = explode(':',$mount);

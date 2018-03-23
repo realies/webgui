@@ -80,7 +80,7 @@ if (!empty($_GET['uuid'])) {
 	.fileTree {
 		width: 305px;
 		max-height: 150px;
-		overflow: scroll;
+		overflow-y: scroll;
 		position: absolute;
 		z-index: 100;
 		display: none;
@@ -213,7 +213,7 @@ if (!empty($_GET['uuid'])) {
 	#template_img_chooser {
 		width: 560px;
 		height: 300px;
-		overflow: scroll;
+		overflow-y: scroll;
 		position: relative;
 	}
 	#template_img_chooser div:hover {
@@ -333,10 +333,10 @@ if (!empty($_GET['uuid'])) {
 	</form>
 </div>
 
-<script src="/webGui/javascript/jquery.filedrop.js"></script>
-<script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filedrop.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js')?>"></script>
 <script>
 function isVMAdvancedMode() {
 	return true;

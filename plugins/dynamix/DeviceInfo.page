@@ -3,8 +3,8 @@ Title="$name Settings"
 Tag="hdd-o"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -152,9 +152,9 @@ function setGlue(form,reset) {
 }
 $(function() {
 <?if (count($sheets)>1):?>
-  var ctrl  = "<span class='status vhshift'><span class='waitmsg' style='display:none;font-size:small;font-style:italic;margin-right:8px'>please wait...</span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
-      ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-left'></i></button></a>";
-      ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-right'></i></button></a></span>";
+  var ctrl  = "<span class='status vhshift'><span class='waitmsg fa fa-circle-o-notch fa-span fa-fw' style='display:none;margin-right:8px'></span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
+      ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-left fa-fw'></i></button></a>";
+      ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-right fa-fw'></i></button></a></span>";
 <?if ($tabbed):?>
   $('.tabs').append(ctrl);
 <?else:?>
@@ -275,7 +275,7 @@ Critical disk utilization threshold (%):
 
 <?endif;?>
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeDisk" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <?if (strpos($disk['fsType'],"btrfs")!==false):?>
@@ -598,5 +598,5 @@ SMART attribute notifications:
 > Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 <input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="#apply" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>

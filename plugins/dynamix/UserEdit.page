@@ -3,8 +3,8 @@ Title="Edit User"
 Tag="user"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -148,19 +148,19 @@ Custom image:
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply"><input type="button" value="Done" onclick="done('UserEdit')">
+: <input type="submit" name="cmdUserEdit" value="Apply" disabled><input type="button" value="Done" onclick="done('UserEdit')">
 </form>
 <br><br>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkPassword(this)">
 <input type="hidden" name="userName" value="<?=htmlspecialchars($name)?>">
 Password:
-: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value != this.form.userPasswordConf.value);">
 
 > Up to 128 characters.
 
 Retype password:
-: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value != this.form.userPasswordConf.value);">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done('UserEdit')">
+: <input type="submit" name="cmdUserEdit" value="Change" disabled><input type="button" value="Done" onclick="done('UserEdit')">
 </form>

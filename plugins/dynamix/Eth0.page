@@ -3,8 +3,8 @@ Title="Interface eth0"
 Tag="tag"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -898,5 +898,5 @@ IPv6 privacy extensions:
 </script>
 
 &nbsp;
-: <input type="submit" value="Apply" onclick="$('#wait_eth0').show()"><input type="button" value="Done" onclick="done()"><?=$service ? "$service must be <span class='strong big'>Stopped</span> to change (see Settings)" : ""?>
+: <input type="submit" value="Apply" onclick="$('#wait_eth0').show()" disabled><input type="button" value="Done" onclick="done()"><?=$service ? "$service must be <span class='strong big'>Stopped</span> to change (see Settings)" : ""?>
 </form>

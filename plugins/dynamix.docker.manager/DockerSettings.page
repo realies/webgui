@@ -513,7 +513,7 @@ IPv6 custom network on interface <?=$network?>:
 <?endif;?>
 
 &nbsp;
-: <input id="applyBtn" type="button" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input id="applyBtn" type="button" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 <form id="removeForm" method="POST" action="/update.php" target="progressFrame">
@@ -557,8 +557,8 @@ btrfs scrub status:
 </div>
 <?endif;?>
 
-<script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script>
 function prepareDocker(form) {
   $(form).find('input:hidden[name^="DOCKER_DHCP_"]').each(function(){

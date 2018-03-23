@@ -3,8 +3,8 @@ Title="Share Settings"
 Tag="share-alt-square"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -244,7 +244,7 @@ Share status:
 > Share does *not* contain any data and may be deleted if not needed any longer.
 
 Delete<input type="checkbox" name="confirmDelete" onchange="chkDelete(this.form, this.form.cmdEditShare);">
-: <input type="submit" name="cmdEditShare" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdEditShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 <?else:?>
 Share status:
 : <span class="big">Share contains data</span>
@@ -252,7 +252,7 @@ Share status:
 > Share can *not* be deleted as long as it contains data. Be aware that some data can be hidden. See also [SMB Settings](/Settings/SMB) -> Hide "dot" files.
 
 &nbsp;
-: <input type="submit" name="cmdEditShare" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdEditShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>
 <script>

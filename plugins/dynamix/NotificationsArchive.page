@@ -3,8 +3,8 @@ Title="Archived Notifications"
 Tag="list"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -81,6 +81,6 @@ $(function(){
 </script>
 <table class="tablesorter left shift" id="archive_table">
 <thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th>Importance</th><th><?if ($files):?><a href="#" onclick="askConfirmation();return false" title="Delete all notifications"><i class="fa fa-trash"></i></a><?endif;?></th></tr></thead>
-<tbody id="archive_list"><tr><td></td><td colspan="4" style="text-align:center;padding:24px"><i class='fa fa-circle-o-notch fa-spin fa-3x fa-fw'></i></td><td></td></tr></tbody>
+<tbody id="archive_list"><tr><td></td><td colspan="4"><div class="spinner"></div></td><td></td></tr></tbody>
 </table>
 <input type="button" value="Done" onclick="done()">
