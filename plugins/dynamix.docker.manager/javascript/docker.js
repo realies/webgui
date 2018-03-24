@@ -166,6 +166,7 @@ function checkAll() {
 }
 function updateAll() {
   $('input[type=button]').prop('disabled',true);
+  $('div.spinner').show('slow');
   var list = '';
   for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') list += '&ct[]='+ct.name;
   var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true"+list;

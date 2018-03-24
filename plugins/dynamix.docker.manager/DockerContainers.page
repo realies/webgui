@@ -40,6 +40,7 @@ th.eight{width:8%}
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
+<div class="spinner fixed"></div>
 <table class="tablesorter shift" id="docker_containers">
 <thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
 <tbody id="docker_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
@@ -80,6 +81,7 @@ function listview() {
 function loadlist(update) {
   $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
     var data = d.split(/\0/);
+    $('div.spinner').hide('slow');
     $('#docker_list').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
 <?if ($display['resize']):?>
@@ -94,11 +96,7 @@ function loadlist(update) {
     listview();
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false).show('slow');
-    if (update) {
-      $('input#checkAll').hide(); $('input#updateAll').show();
-    } else {
-      $('input#checkAll').show(); $('input#updateAll').hide();      
-    }
+    if (!update) $('input#updateAll').hide();
     $('i.up,i.down').click(function() {
       var row = $(this).parents('tr:first');
       var color1 = row.css('background-color');
