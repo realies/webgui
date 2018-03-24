@@ -56,32 +56,22 @@ function loadlist(id) {
     } else {
       list.html(data[0]);
     }
-    if (data[1]>0) {
-      $('#updateall').show();
-<?if ($check):?>
-      $('#checkall').hide();
-<?endif;?>
-    } else {
-      $('#updateall').hide();
-<?if ($check):?>
-      $('#checkall').show();
-<?endif;?>
-    }
 <?if ($display['resize']):?>
     resize();
     $(window).bind('resize',function(){resize(true);});
 <?endif;?>
     $('#plugin_table').tablesorter({sortList:[[4,0],[1,0]],sortAppend:[[1,0]],headers:{0:{sorter:false},5:{sorter:false}},textAttribute:'data'});
     $('.desc_readmore').readmore({maxHeight:66,moreLink:"<a href='#'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#'><i class='fa fa-chevron-up'></i></a>"});
+    if (data[1]>0) $('#updateall').show(); else $('#updateall').hide();
 <?if ($check):?>
-    $('#checkall').find('input').prop('disabled',false);
+    $('#checkall').find('input').prop('disabled',false).show();
 <?endif;?>
   });
 }
 $(function() {
   loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none'><input type='button' value='Update all Plugins' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\":return\")'></span>");
+  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none;margin-left:12px'><input type='button' value='Update all Plugins' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\":return\")'></span>");
 <?if ($check):?>
   $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check for Updates' onclick='$(\"div.spinner\").show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
 <?endif;?>
