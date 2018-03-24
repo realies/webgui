@@ -32,6 +32,8 @@ if (file_exists($user_prefs)) {
 $i = 0;
 $menu = [];
 $kvm = ['var kvm=[];'];
+$show = explode(',',$_GET['show']) ?? [];
+
 foreach ($vms as $vm) {
   $res = $lv->get_domain_by_name($vm);
   $desc = $lv->domain_get_description($res);
@@ -92,7 +94,7 @@ foreach ($vms as $vm) {
   echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 
   /* Disk device information */
-  echo "<tr id='name".($i++)."' style='display:none'>";
+  echo "<tr id='name{$i}".(in_array('name'.$i++,$show) ? "'>" : "' style='display:none'>");
   echo "<td colspan='7' style='overflow:hidden'>";
   echo "<table class='tablesorter domdisk' id='domdisk_table'>";
   echo "<thead><tr><th><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th><th>Actions</th></tr></thead>";
@@ -102,7 +104,7 @@ foreach ($vms as $vm) {
   foreach ($lv->get_disk_stats($res) as $arrDisk) {
     $capacity = $lv->format_size($arrDisk['capacity'], 0);
     $allocation = $lv->format_size($arrDisk['allocation'], 0);
-    $disk = (array_key_exists('file', $arrDisk)) ? $arrDisk['file'] : $arrDisk['partition'];
+    $disk = array_key_exists('file', $arrDisk) ? $arrDisk['file'] : $arrDisk['partition'];
     $dev = $arrDisk['device'];
     $bus = $arrDisk['bus'];
     echo "<tr><td>$disk</td><td>{$arrValidDiskBuses[$bus]}</td>";
@@ -118,7 +120,7 @@ foreach ($vms as $vm) {
       echo "<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden>";
       echo "</span></form></td>";
       echo "<td>$allocation</td>";
-      echo "<td>detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: $vm',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'$uuid',dev:'$dev'});});return false;\" title='detach disk from VM'><i class='fa fa-eject blue'></i></a></td>";
+      echo "<td>detach <i class='fa fa-eject blue' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:'true',showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i></td>";
     } else {
       echo "<td>$capacity</td><td>$allocation</td><td>N/A</td>";
     }
@@ -135,7 +137,7 @@ foreach ($vms as $vm) {
     $bus = $arrCD['bus'];
     echo "<tr><td>$disk</td><td>{$arrValidDiskBuses[$bus]}</td><td>$capacity</td><td>$allocation</td><td>";
     if ($state == 'shutoff')
-      echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: $vm',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'$uuid',dev:'$dev'});});return false;\" title='detach disk from VM'><i class='fa fa-eject blue'></i></a>";
+      echo "detach <i class='fa fa-eject blue' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:'true',showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i>";
     else
       echo "N/A";
     echo "</td></tr>";

@@ -25,19 +25,12 @@ function requireLibvirt() {
 	}
 }
 
-$arrSizePrefix = [
-	0 => '',
-	1 => 'K',
-	2 => 'M',
-	3 => 'G',
-	4 => 'T',
-	5 => 'P'
-];
+$arrSizePrefix = [0 => '', 1 => 'K', 2 => 'M', 3 => 'G', 4 => 'T', 5 => 'P'];
 
 $_REQUEST = array_merge($_GET, $_POST);
 
-$action = array_key_exists('action', $_REQUEST) ? $_REQUEST['action'] : '';
-$uuid = array_key_exists('uuid', $_REQUEST) ? $_REQUEST['uuid'] : '';
+$action = $_REQUEST['action'] ?: '';
+$uuid = $_REQUEST['uuid'] ?: '';
 
 if ($uuid) {
 	requireLibvirt();
