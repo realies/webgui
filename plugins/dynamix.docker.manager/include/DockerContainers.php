@@ -31,6 +31,7 @@ if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
   foreach ($all_containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
   array_multisort($sort,SORT_NUMERIC,$all_containers);
+  unset($sort);
 }
 
 // Read network settings
@@ -38,9 +39,13 @@ extract(parse_ini_file('state/network.ini',true));
 
 // Read container info
 $all_info = $DockerTemplates->getAllInfo();
-$menu = [];
 $docker = ['var docker=[];'];
+$menu = $ids = $names = [];
+foreach ($all_containers as $ct) $ids[] = $ct['Name'];
+docker("inspect --format='{{.State.Running}}#{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' ".implode(' ',$ids),$names);
+unset($ids);
 
+$n = 0;
 foreach ($all_containers as $ct) {
   $name = $ct['Name'];
   $info = &$all_info[$name];
@@ -53,7 +58,7 @@ foreach ($all_containers as $ct) {
   $webGui = html_entity_decode($info['url']);
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
-  list($running,$bind1,$bind2,$ip,$mounts) = explode('#',docker("inspect --format='{{.State.Running}}#{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name"));
+  list($running,$bind1,$bind2,$ip,$mounts) = explode('#',$names[$n++]);
   $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
   $docker[] = "docker.push({name:'$name',id:'$id',state:'$running',update:'$updateStatus'});";
   $running = $running=='true';
