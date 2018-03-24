@@ -29,7 +29,7 @@ function toggle_state(device,name,action) {
     button = '[id^=button-]';
   }
   pauseEvents(event);
-  $.post('/webGui/include/ToggleState.php',{device:device,name:name,action:action,state:'<?=$var['mdState']?>',csrf:'<?=$var['csrf_token']?>'},function(){setTimeout(function(){resumeEvents(event);},500);if (button) $(button).prop('disabled',false);});
+  $.post('/webGui/include/ToggleState.php',{device:device,name:name,action:action,state:'<?=$var['mdState']?>',csrf:'<?=$var['csrf_token']?>'},function(){resumeEvents(event,500);if (button) $(button).prop('disabled',false);});
 }
 function display_diskio() {
   if ($.cookie('diskio')===undefined) {
