@@ -49,36 +49,34 @@ foreach ($all_containers as $ct) {
   $imageID = $ct['ImageId'];
   $is_autostart = $info['autostart'] ? 'true':'false';
   $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
-  $running = $ct['Running'] ? 'true':'false';
   $template = $info['template'];
   $webGui = html_entity_decode($info['url']);
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
+  list($running,$bind1,$bind2,$ip,$mounts) = explode('#',docker("inspect --format='{{.State.Running}}#{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name"));
   $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
   $docker[] = "docker.push({name:'$name',id:'$id',state:'$running',update:'$updateStatus'});";
-  $shape = $ct['Running'] ? 'play':'square';
-  $status = $ct['Running'] ? 'started':'stopped';
+  $running = $running=='true';
+  $shape = $running ? 'play':'square';
+  $status = $running ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  $binds = explode('|',docker("inspect --format='{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}' $name"));
-  if (count($binds)>1) {
-    $ip = $ct['Running'] ? docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") : '0.0.0.0';
-    foreach ($binds as $bind) {
+  if ($bind1) {
+    $ip = $running ? $ip : '0.0.0.0';
+    foreach (explode('|',$bind1) as $bind) {
       if (!$bind) continue;
       list($container_port,$host_port) = explode(':',$bind);
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $container_port, $eth0['IPADDR:0'], $host_port);
     }
-  } else {
-    $binds = explode('|',docker("inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name"));
-    $ip = $ct['Running'] ? (docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") ?: $eth0['IPADDR:0']) : '0.0.0.0';
-    foreach ($binds as $bind) {
+  } elseif ($bind2) {
+    $ip = $running ? ($ip ?: $eth0['IPADDR:0']) : '0.0.0.0';
+    foreach (explode('|',$bind2) as $bind) {
       if (!$bind) continue;
       $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
     }
   }
   $paths = [];
-  $mounts = explode('|',docker("inspect --format='{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' $name"));
-  foreach ($mounts as $mount) {
+  foreach (explode('|',$mounts) as $mount) {
     if (!$mount) continue;
     list($host_path,$container_path,$access_mode) = explode(':',$mount);
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
