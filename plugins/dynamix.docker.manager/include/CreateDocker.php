@@ -13,7 +13,7 @@
 ?>
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-$var     = parse_ini_file('state/var.ini');
+$var = parse_ini_file('state/var.ini');
 extract(parse_ini_file('state/network.ini',true));
 
 ignore_user_abort(true);
@@ -40,14 +40,11 @@ foreach ($custom as $network) $subnet[$network] = substr(docker("network inspect
 function stopContainer($name) {
   global $DockerClient;
   $waitID = mt_rand();
-
   echo "<p class=\"logLine\" id=\"logBody\"></p>";
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Stopping container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
   @flush();
-
   $retval = $DockerClient->stopContainer($name);
   $out = ($retval === true) ? "Successfully stopped container '$name'" : "Error: ".$retval;
-
   echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
   @flush();
 }
@@ -55,14 +52,11 @@ function stopContainer($name) {
 function removeContainer($name) {
   global $DockerClient;
   $waitID = mt_rand();
-
   echo "<p class=\"logLine\" id=\"logBody\"></p>";
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
   @flush();
-
   $retval = $DockerClient->removeContainer($name);
   $out = ($retval === true) ? "Successfully removed container '$name'" : "Error: ".$retval;
-
   echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
   @flush();
 }
@@ -70,14 +64,11 @@ function removeContainer($name) {
 function removeImage($image) {
   global $DockerClient;
   $waitID = mt_rand();
-
   echo "<p class=\"logLine\" id=\"logBody\"></p>";
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing orphan image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
   @flush();
-
   $retval = $DockerClient->removeImage($image);
   $out = ($retval === true) ? "Successfully removed image '$image'" : "Error: ".$retval;
-
   echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
   @flush();
 }
@@ -86,32 +77,25 @@ function pullImage($name, $image) {
   global $DockerClient, $DockerTemplates, $DockerUpdate;
   $waitID = mt_rand();
   if (!preg_match("/:\S+$/", $image)) $image .= ":latest";
-
   echo "<p class=\"logLine\" id=\"logBody\"></p>";
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
   @flush();
-
   $alltotals = [];
   $laststatus = [];
   $strError = '';
-
   $DockerClient->pullImage($image, function ($line) use (&$alltotals, &$laststatus, &$waitID, &$strError, $image, $DockerClient, $DockerUpdate) {
     $cnt = json_decode($line, true);
     $id = (isset($cnt['id'])) ? trim($cnt['id']) : '';
     $status = (isset($cnt['status'])) ? trim($cnt['status']) : '';
-
     if (isset($cnt['error'])) {
       $strError = $cnt['error'];
     }
-
     if ($waitID !== false) {
       echo "<script>stop_Wait($waitID);</script>\n";
       @flush();
       $waitID = false;
     }
-
     if (empty($status)) return;
-
     if (!empty($id)) {
       if (!empty($cnt['progressDetail']) && !empty($cnt['progressDetail']['total'])) {
         $alltotals[$id] = $cnt['progressDetail']['total'];
@@ -119,13 +103,10 @@ function pullImage($name, $image) {
       if (empty($laststatus[$id])) {
         $laststatus[$id] = '';
       }
-
       switch ($status) {
-
         case 'Waiting':
           // Omit
           break;
-
         case 'Downloading':
           if ($laststatus[$id] != $status) {
             echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
@@ -137,12 +118,11 @@ function pullImage($name, $image) {
             echo "<script>progress('${id}',' ".$percentage."% of ".$DockerClient->formatBytes($total)."');</script>\n";
           } else {
             // Docker must not know the total download size (http-chunked or something?)
-            //  just show the current download progress without the percentage
+            // just show the current download progress without the percentage
             $alltotals[$id] = $current;
             echo "<script>progress('${id}',' ".$DockerClient->formatBytes($current)."');</script>\n";
           }
           break;
-
         default:
           if ($laststatus[$id] == "Downloading") {
             echo "<script>progress('${id}',' 100% of ".$DockerClient->formatBytes($alltotals[$id])."');</script>\n";
@@ -152,9 +132,7 @@ function pullImage($name, $image) {
           }
           break;
       }
-
       $laststatus[$id] = $status;
-
     } else {
       if (strpos($status, 'Status: ') === 0) {
         echo "<script>addLog('".addslashes(htmlspecialchars($status))."');</script>\n";
@@ -165,37 +143,35 @@ function pullImage($name, $image) {
     }
     @flush();
   });
-
   echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . $DockerClient->formatBytes(array_sum($alltotals)) . "');</script>\n";
   @flush();
-
   if (!empty($strError)) {
     echo "<script>addLog('<br><span class=\"error\"><b>Error:</b> ".addslashes(htmlspecialchars($strError))."</span>');</script>\n";
     @flush();
     return false;
   }
-
   return true;
 }
 
 function xml_encode($string) {
   return htmlspecialchars($string, ENT_XML1, 'UTF-8');
 }
+
 function xml_decode($string) {
   return strval(html_entity_decode($string, ENT_XML1, 'UTF-8'));
 }
 
-function postToXML($post, $setOwnership = false) {
+function postToXML($post, $setOwnership=false) {
   $dom = new domDocument;
   $dom->appendChild($dom->createElement("Container"));
   $xml = simplexml_import_dom($dom);
-  $xml["version"]          = 2;
+  $xml['version']          = 2;
   $xml->Name               = xml_encode(preg_replace('/\s+/', '', $post['contName']));
   $xml->Repository         = xml_encode(trim($post['contRepository']));
   $xml->Registry           = xml_encode(trim($post['contRegistry']));
   $xml->Network            = xml_encode($post['contNetwork']);
   $xml->MyIP               = xml_encode($post['contMyIP']);
-  $xml->Privileged         = (strtolower($post["contPrivileged"]) == 'on') ? 'true' : 'false';
+  $xml->Privileged         = strtolower($post['contPrivileged'])=='on' ? 'true' : 'false';
   $xml->Support            = xml_encode($post['contSupport']);
   $xml->Project            = xml_encode($post['contProject']);
   $xml->Overview           = xml_encode($post['contOverview']);
@@ -212,13 +188,13 @@ function postToXML($post, $setOwnership = false) {
   $xml->MinVer             = xml_encode($post['contMinVer']);
 
   # V1 compatibility
-  $xml->Description      = xml_encode($post['contOverview']);
-  $xml->Networking->Mode = xml_encode($post['contNetwork']);
+  $xml->Description        = xml_encode($post['contOverview']);
+  $xml->Networking->Mode   = xml_encode($post['contNetwork']);
   $xml->Networking->addChild("Publish");
   $xml->addChild("Data");
   $xml->addChild("Environment");
 
-  for ($i = 0; $i < count($post["confName"]); $i++) {
+  for ($i = 0; $i < count($post['confName']); $i++) {
     $Type                  = $post['confType'][$i];
     $config                = $xml->addChild('Config', xml_encode($post['confValue'][$i]));
     $config['Name']        = xml_encode($post['confName'][$i]);
@@ -308,13 +284,11 @@ function xmlToVar($xml) {
   }
   # check if network exists
   if (!key_exists($out['Network'],$subnet)) $out['Network'] = 'none';
-
   # V1 compatibility
-  if ($xml["version"] != "2") {
+  if ($xml['version'] != '2') {
     if (isset($xml->Description)) {
       $out['Overview'] = stripslashes(xml_decode($xml->Description));
     }
-
     if (isset($xml->Networking->Publish->Port)) {
       $portNum = 0;
       foreach ($xml->Networking->Publish->Port as $port) {
@@ -457,13 +431,11 @@ function xmlToCommand($xml, $create_paths=false) {
 
 function execCommand($command) {
   // $command should have all its args already properly run through 'escapeshellarg'
-
   $descriptorspec = [
-    0 => ["pipe", "r"],   // stdin is a pipe that the child will read from
-    1 => ["pipe", "w"],   // stdout is a pipe that the child will write to
-    2 => ["pipe", "w"]    // stderr is a pipe that the child will write to
+    0 => ['pipe', 'r'],   // stdin is a pipe that the child will read from
+    1 => ['pipe', 'w'],   // stdout is a pipe that the child will write to
+    2 => ['pipe', 'w']    // stderr is a pipe that the child will write to
   ];
-
   $id = mt_rand();
   echo '<p class="logLine" id="logBody"></p>';
   echo '<script>addLog(\'<fieldset style="margin-top:1px;" class="CMD"><legend>Command:</legend>';
@@ -484,13 +456,13 @@ function execCommand($command) {
   return $retval===0;
 }
 
-function getXmlVal($xml, $element, $attr = null, $pos = 0) {
+function getXmlVal($xml, $element, $attr=null, $pos=0) {
   $xml = (is_file($xml)) ? simplexml_load_file($xml) : simplexml_load_string($xml);
   $element = $xml->xpath("//$element")[$pos];
   return isset($element) ? (isset($element[$attr]) ? strval($element[$attr]) : strval($element)) : "";
 }
 
-function setXmlVal(&$xml, $value, $el, $attr = null, $pos = 0) {
+function setXmlVal(&$xml, $value, $el, $attr=null, $pos=0) {
   global $echo;
   $xml = (is_file($xml)) ? simplexml_load_file($xml) : simplexml_load_string($xml);
   $element = $xml->xpath("//$el")[$pos];
@@ -509,14 +481,15 @@ function setXmlVal(&$xml, $value, $el, $attr = null, $pos = 0) {
 
 function getUsedPorts() {
   global $names;
-  $ports = [];
+  $ports = $docker = [];
+  docker("inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' ".implode(' ',$names),$docker); $n = 0;
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
-    $port = explode('|',docker("inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}' $name"));
-    if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',docker("inspect --format='{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' $name")));
-    natsort($port);
-    $list['Port'] = implode(' ',array_unique($port));
+    [$port1,$port2] = explode('#',$docker[$n++]);
+    $port = explode('|',$port1);
+    if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',$port2));
+    $list['Port'] = implode(' ',array_unique($port,SORT_NUMERIC));
     $ports[] = $list;
   }
   return $ports;
@@ -524,12 +497,13 @@ function getUsedPorts() {
 
 function getUsedIPs() {
   global $names, $eth0;
-  $ips = [];
+  $ips = $docker = [];
+  docker("inspect --format='{{.HostConfig.NetworkMode}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ".implode(' ',$names),$docker); $n = 0;
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
-    $mode = docker("inspect --format='{{lower .HostConfig.NetworkMode}}' $name");
-    $list['ip'] = (docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $name") ?: $eth0['IPADDR:0'])." ($mode)";
+    [$mode,$ip] = explode('#',$docker[$n++]);
+    $list['ip'] = ($ip ?: $eth0['IPADDR:0'])." ($mode)";
     $ips[] = $list;
   }
   return $ips;
@@ -542,21 +516,18 @@ function getUsedIPs() {
 #   ╚██████╗╚██████╔╝██████╔╝███████╗
 #    ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
 
-##
-##   CREATE CONTAINER
-##
+##########################
+##   CREATE CONTAINER   ##
+##########################
 if (isset($_POST['contName'])) {
   $postXML = postToXML($_POST, true);
   $dry_run = $_POST['dryRun']=='true' ? true : false;
   $existing = $_POST['existingContainer'] ?? false;
   $create_paths = $dry_run ? false : true;
-
   // Get the command line
   list($cmd, $Name, $Repository) = xmlToCommand($postXML, $create_paths);
-
   readfile("$docroot/plugins/dynamix.docker.manager/log.htm");
   @flush();
-
   // Saving the generated configuration file.
   $userTmplDir = $dockerManPaths['templates-user'];
   if (!is_dir($userTmplDir)) mkdir($userTmplDir, 0777, true);
@@ -564,7 +535,6 @@ if (isset($_POST['contName'])) {
     $filename = sprintf('%s/my-%s.xml', $userTmplDir, $Name);
     file_put_contents($filename, $postXML);
   }
-
   // Run dry
   if ($dry_run) {
     echo "<h2>XML</h2>";
@@ -575,7 +545,6 @@ if (isset($_POST['contName'])) {
     echo "<button type='button' onclick='done()'>Done</button></div><br>";
     goto END;
   }
-
   // Will only pull image if it's absent
   if (!$DockerClient->doesImageExist($Repository)) {
     // Pull image
@@ -584,9 +553,7 @@ if (isset($_POST['contName'])) {
       goto END;
     }
   }
-
   $startContainer = true;
-
   // Remove existing container
   if ($DockerClient->doesContainerExist($Name)) {
     // attempt graceful stop of container first
@@ -595,11 +562,9 @@ if (isset($_POST['contName'])) {
       // attempt graceful stop of container first
       stopContainer($Name);
     }
-
     // force kill container if still running after 10 seconds
     removeContainer($Name);
   }
-
   // Remove old container if renamed
   if ($existing && $DockerClient->doesContainerExist($existing)) {
     // determine if the container is still running
@@ -611,30 +576,25 @@ if (isset($_POST['contName'])) {
       // old container was stopped already, ensure newly created container doesn't start up automatically
       $startContainer = false;
     }
-
     // force kill container if still running after 10 seconds
     removeContainer($existing);
     // remove old template
     @unlink("$userTmplDir/my-$existing.xml");
   }
-
   if ($startContainer) {
     $cmd = str_replace('/plugins/dynamix.docker.manager/scripts/docker create ', '/plugins/dynamix.docker.manager/scripts/docker run -d ', $cmd);
   }
-
   execCommand($cmd);
-
   echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;
 }
 
-##
-##   UPDATE CONTAINER
-##
+##########################
+##   UPDATE CONTAINER   ##
+##########################
 if ($_GET['updateContainer']){
   readfile("$docroot/plugins/dynamix.docker.manager/log.htm");
   @flush();
-
   foreach ($_GET['ct'] as $value) {
     $tmpl = $DockerTemplates->getUserTemplate(urldecode($value));
     if (!$tmpl) {
@@ -642,70 +602,55 @@ if ($_GET['updateContainer']){
       @flush();
       continue;
     }
-
     $xml = file_get_contents($tmpl);
     list($cmd, $Name, $Repository) = xmlToCommand($tmpl);
     $Registry = getXmlVal($xml, "Registry");
-
     $oldImageID = $DockerClient->getImageID($Repository);
-
     // Pull image
-    if (!pullImage($Name, $Repository)) {
-      continue;
-    }
-
+    if (!pullImage($Name, $Repository)) continue;
     $oldContainerDetails = $DockerClient->getContainerDetails($Name);
-
     // determine if the container is still running
     if (!empty($oldContainerDetails) && !empty($oldContainerDetails['State']) && !empty($oldContainerDetails['State']['Running'])) {
       // since container was already running, put it back it to a running state after update
       $cmd = str_replace('/plugins/dynamix.docker.manager/scripts/docker create ', '/plugins/dynamix.docker.manager/scripts/docker run -d ', $cmd);
-
       // attempt graceful stop of container first
       stopContainer($Name);
     }
-
     // force kill container if still running after 10 seconds
     removeContainer($Name);
-
     execCommand($cmd);
-
     $DockerClient->flushCaches();
-
     $newImageID = $DockerClient->getImageID($Repository);
     if ($oldImageID && $oldImageID != $newImageID) {
       // remove old orphan image since it's no longer used by this container
       removeImage($oldImageID);
     }
   }
-
   echo '<div style="text-align:center"><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');">Done</button></div><br>';
   goto END;
 }
 
-##
-##   REMOVE TEMPLATE
-##
-
+#########################
+##   REMOVE TEMPLATE   ##
+#########################
 if ($_GET['rmTemplate']) {
   unlink($_GET['rmTemplate']);
 }
 
-##
-##   LOAD TEMPLATE
-##
-
+#########################
+##    LOAD TEMPLATE    ##
+#########################
 if ($_GET['xmlTemplate']) {
   list($xmlType, $xmlTemplate) = explode(':', urldecode($_GET['xmlTemplate']));
   if (is_file($xmlTemplate)) {
     $xml = xmlToVar($xmlTemplate);
-    $templateName = $xml["Name"];
+    $templateName = $xml['Name'];
     if ($xmlType == "default") {
-      if (!empty($dockercfg["DOCKER_APP_CONFIG_PATH"]) && file_exists($dockercfg["DOCKER_APP_CONFIG_PATH"])) {
+      if (!empty($dockercfg['DOCKER_APP_CONFIG_PATH']) && file_exists($dockercfg['DOCKER_APP_CONFIG_PATH'])) {
         // override /config
         foreach ($xml['Config'] as &$arrConfig) {
           if ($arrConfig['Type'] == 'Path' && strtolower($arrConfig['Target']) == '/config') {
-            $arrConfig['Default'] = $arrConfig['Value'] = realpath($dockercfg["DOCKER_APP_CONFIG_PATH"]).'/'.$xml["Name"];
+            $arrConfig['Default'] = $arrConfig['Value'] = realpath($dockercfg['DOCKER_APP_CONFIG_PATH']).'/'.$xml['Name'];
             if (empty($arrConfig['Display']) || preg_match("/^Host Path\s\d/", $arrConfig['Name'])) {
               $arrConfig['Display'] = 'advanced-hide';
             }
@@ -715,12 +660,12 @@ if ($_GET['xmlTemplate']) {
           }
         }
       }
-      if (!empty($dockercfg["DOCKER_APP_UNRAID_PATH"]) && file_exists($dockercfg["DOCKER_APP_UNRAID_PATH"])) {
+      if (!empty($dockercfg['DOCKER_APP_UNRAID_PATH']) && file_exists($dockercfg['DOCKER_APP_UNRAID_PATH'])) {
         // override /unraid
         $boolFound = false;
         foreach ($xml['Config'] as &$arrConfig) {
           if ($arrConfig['Type'] == 'Path' && strtolower($arrConfig['Target']) == '/unraid') {
-            $arrConfig['Default'] = $arrConfig['Value'] = realpath($dockercfg["DOCKER_APP_UNRAID_PATH"]);
+            $arrConfig['Default'] = $arrConfig['Value'] = realpath($dockercfg['DOCKER_APP_UNRAID_PATH']);
             $arrConfig['Display'] = 'hidden';
             $arrConfig['Name'] = 'unRAID Share Path';
             $boolFound = true;
@@ -730,8 +675,8 @@ if ($_GET['xmlTemplate']) {
           $xml['Config'][] = [
             'Name'        => 'unRAID Share Path',
             'Target'      => '/unraid',
-            'Default'     => realpath($dockercfg["DOCKER_APP_UNRAID_PATH"]),
-            'Value'       => realpath($dockercfg["DOCKER_APP_UNRAID_PATH"]),
+            'Default'     => realpath($dockercfg['DOCKER_APP_UNRAID_PATH']),
+            'Value'       => realpath($dockercfg['DOCKER_APP_UNRAID_PATH']),
             'Mode'        => 'rw',
             'Description' => '',
             'Type'        => 'Path',
@@ -749,7 +694,7 @@ if ($_GET['xmlTemplate']) {
 $names=[]; docker("ps --format='{{.Names}}'", $names);
 echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
 echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
-$authoringMode = $dockercfg["DOCKER_AUTHORING_MODE"] == "yes" ? true : false;
+$authoringMode = $dockercfg['DOCKER_AUTHORING_MODE'] == "yes" ? true : false;
 $authoring     = $authoringMode ? 'advanced' : 'noshow';
 $disableEdit   = $authoringMode ? 'false' : 'true';
 $showAdditionalInfo = '';
@@ -1745,12 +1690,10 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       for (var i = 0; i < categories.length; i++) {
         $("#catSelect option[value='"+categories[i]+"']").prop("selected", true);
       }
-
       // Remove empty description
       if (!Settings.Description.length) {
         $('#canvas').find('#Overview:first').hide();
       }
-
       // Load config info
       var network = $('select[name="contNetwork"]')[0].selectedIndex;
       for (var i = 0; i < Settings.Config.length; i++) {
@@ -1774,22 +1717,16 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     } else {
       $('#canvas').find('#Overview:first').hide();
     }
-
     // Show associated subnet with fixed IP (if existing)
     showSubnet($('select[name="contNetwork"]').val());
-
     // Add list of exposed host ports
     $("#configLocationPorts").html(makeUsedPorts(UsedPorts,$('input[name="contName"]').val()));
-
     // Add list of assigned IP addresses
     $("#configLocationIPs").html(makeUsedIPs(UsedIPs,$('input[name="contName"]').val()));
-
     // Add switchButton
     $('.switch-on-off').each(function(){var checked = $(this).is(":checked");$(this).switchButton({labels_placement: "right", checked:checked});});
-
     // Add dropdownchecklist to Select Categories
     $("#catSelect").dropdownchecklist({emptyText:'Select categories...', maxDropHeight:200, width:300, explicitClose:'...close'});
-
     <?if ($authoringMode){
       echo "$('.advanced-switch').prop('checked','true'); $('.advanced-switch').change();";
       echo "$('.advanced-switch').siblings('.switch-button-background').click();";
@@ -1800,4 +1737,3 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   }
 </script>
 <?END:?>
-
