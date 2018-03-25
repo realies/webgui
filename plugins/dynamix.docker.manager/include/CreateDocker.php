@@ -479,34 +479,21 @@ function setXmlVal(&$xml, $value, $el, $attr=null, $pos=0) {
   $xml = $dom->saveXML();
 }
 
-function getUsedPorts() {
-  global $names;
-  $ports = $docker = [];
-  docker("inspect --format='{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' ".implode(' ',$names),$docker); $n = 0;
+function getAllocations() {
+  global $eth0;
+  $names = $docker = $ports = [];
+  docker("ps --format='{{.Names}}'", $names);
+  docker("inspect --format='{{.HostConfig.NetworkMode}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' ".implode(' ',$names),$docker); $n = 0;
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
-    [$port1,$port2] = explode('#',$docker[$n++]);
+    [$mode,$ip,$port1,$port2] = explode('#',$docker[$n++]);
     $port = explode('|',$port1);
     if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',$port2));
-    $list['Port'] = implode(' ',array_unique($port,SORT_NUMERIC));
+    $list['Port'] = (strstr('host,bridge',$mode) ? $eth0['IPADDR:0'] : $ip).' : '.(implode(' ',array_unique($port,SORT_NUMERIC)) ?: '???')." -- $mode";
     $ports[] = $list;
   }
   return $ports;
-}
-
-function getUsedIPs() {
-  global $names, $eth0;
-  $ips = $docker = [];
-  docker("inspect --format='{{.HostConfig.NetworkMode}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ".implode(' ',$names),$docker); $n = 0;
-  foreach ($names as $name) {
-    $list = [];
-    $list['Name'] = $name;
-    [$mode,$ip] = explode('#',$docker[$n++]);
-    $list['ip'] = ($ip ?: $eth0['IPADDR:0'])." ($mode)";
-    $ips[] = $list;
-  }
-  return $ips;
 }
 
 #    ██████╗ ██████╗ ██████╗ ███████╗
@@ -691,9 +678,7 @@ if ($_GET['xmlTemplate']) {
     echo "<script>var Settings=".json_encode($xml).";</script>";
   }
 }
-$names=[]; docker("ps --format='{{.Names}}'", $names);
-echo "<script>var UsedPorts=".json_encode(getUsedPorts()).";</script>";
-echo "<script>var UsedIPs=".json_encode(getUsedIPs()).";</script>";
+echo "<script>var Allocations=".json_encode(getAllocations()).";</script>";
 $authoringMode = $dockercfg['DOCKER_AUTHORING_MODE'] == "yes" ? true : false;
 $authoring     = $authoringMode ? 'advanced' : 'noshow';
 $disableEdit   = $authoringMode ? 'false' : 'true';
@@ -814,20 +799,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     return newConfig.prop('outerHTML');
   }
 
-  function makeUsedPorts(container,current) {
+  function makeAllocations(container,current) {
     var html = [];
     for (var i=0; i < container.length; i++) {
       var highlight = container[i].Name.toLowerCase()==current.toLowerCase() ? "font-weight:bold" : "";
-      html.push($("#templateUsedPorts").html().format(highlight,container[i].Name,container[i].Port));
-    }
-    return html.join('');
-  }
-
-  function makeUsedIPs(container,current) {
-    var html = [];
-    for (var i=0; i < container.length; i++) {
-      var highlight = container[i].Name.toLowerCase()==current.toLowerCase() ? "font-weight:bold" : "";
-      html.push($("#templateUsedIPs").html().format(highlight,container[i].Name,container[i].ip));
+      html.push($("#templateAllocations").html().format(highlight,container[i].Name,container[i].Port));
     }
     return html.join('');
   }
@@ -1473,17 +1449,10 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td id="portsused_toggle" class="readmore_collapsed"><a onclick="togglePortsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show exposed host ports ...</a></td>
+        <td id="allocations_toggle" class="readmore_collapsed"><a onclick="toggleAllocations()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show docker allocations ...</a></td>
       </tr>
     </table>
-    <div id="configLocationPorts" style="display:none"></div><br>
-    <table class="settings wide">
-      <tr>
-        <td></td>
-        <td id="ipsused_toggle" class="readmore_collapsed"><a onclick="toggleIPsUsed()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show assigned IP addresses ...</a></td>
-      </tr>
-    </table>
-    <div id="configLocationIPs" style="display:none"></div><br>
+    <div id="dockerAllocations" style="display:none"></div><br>
     <table class="settings wide">
       <tr>
         <td></td>
@@ -1593,13 +1562,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
   </table>
 </div>
 
-<div id="templateUsedPorts" style="display:none">
-<table class='settings wide'>
-  <tr><td></td><td style="{0}"><span style="width:160px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
-</table>
-</div>
-
-<div id="templateUsedIPs" style="display:none">
+<div id="templateAllocations" style="display:none">
 <table class='settings wide'>
   <tr><td></td><td style="{0}"><span style="width:160px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
 </table>
@@ -1637,28 +1600,16 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       readm.find('a').html('<i class="fa fa-chevron-down"></i> Show more settings ...');
     }
   }
-  function togglePortsUsed() {
-    var readm = $('#portsused_toggle');
+  function toggleAllocations() {
+    var readm = $('#allocations_toggle');
     if ( readm.hasClass('readmore_collapsed') ) {
       readm.removeClass('readmore_collapsed').addClass('readmore_expanded');
-      $('#configLocationPorts').slideDown('fast');
-      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide exposed host ports ...');
+      $('#dockerAllocations').slideDown('fast');
+      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide docker allocations ...');
     } else {
-      $('#configLocationPorts').slideUp('fast');
+      $('#dockerAllocations').slideUp('fast');
       readm.removeClass('readmore_expanded').addClass('readmore_collapsed');
-      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show exposed host ports ...');
-    }
-  }
-  function toggleIPsUsed() {
-    var readm = $('#ipsused_toggle');
-    if ( readm.hasClass('readmore_collapsed') ) {
-      readm.removeClass('readmore_collapsed').addClass('readmore_expanded');
-      $('#configLocationIPs').slideDown('fast');
-      readm.find('a').html('<i class="fa fa-chevron-up"></i> Hide assigned IP addresses ...');
-    } else {
-      $('#configLocationIPs').slideUp('fast');
-      readm.removeClass('readmore_expanded').addClass('readmore_collapsed');
-      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show assigned IP addresses ...');
+      readm.find('a').html('<i class="fa fa-chevron-down"></i> Show docker allocations ...');
     }
   }
   function load_contOverview() {
@@ -1719,10 +1670,8 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     }
     // Show associated subnet with fixed IP (if existing)
     showSubnet($('select[name="contNetwork"]').val());
-    // Add list of exposed host ports
-    $("#configLocationPorts").html(makeUsedPorts(UsedPorts,$('input[name="contName"]').val()));
-    // Add list of assigned IP addresses
-    $("#configLocationIPs").html(makeUsedIPs(UsedIPs,$('input[name="contName"]').val()));
+    // Add list of docker allocations
+    $("#dockerAllocations").html(makeAllocations(Allocations,$('input[name="contName"]').val()));
     // Add switchButton
     $('.switch-on-off').each(function(){var checked = $(this).is(":checked");$(this).switchButton({labels_placement: "right", checked:checked});});
     // Add dropdownchecklist to Select Categories
