@@ -32,16 +32,16 @@ if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_fi
 
 # controlled docker execution
 function docker($cmd, &$var=null) {
-	return exec("timeout 20 /usr/bin/docker $cmd 2>/dev/null",$var);
+	return exec("docker $cmd 2>/dev/null", $var);
 }
 
 # Docker configuration file - guaranteed to exist
 $docker_cfgfile = '/boot/config/docker.cfg';
 $dockercfg = parse_ini_file($docker_cfgfile);
 
-######################################
-##      DOCKERTEMPLATES CLASS       ##
-######################################
+#######################################
+##       DOCKERTEMPLATES CLASS       ##
+#######################################
 
 class DockerTemplates {
 
@@ -321,7 +321,7 @@ class DockerTemplates {
 			//$this->debug("\n$name");
 			//foreach ($tmp as $c => $d) $this->debug(sprintf('   %-10s: %s', $c, $d));
 		}
-		DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
+		if ($reload) DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
 		return $info;
 	}
 
@@ -345,9 +345,9 @@ class DockerTemplates {
 	}
 }
 
-######################################
-##       DOCKERUPDATE CLASS         ##
-######################################
+####################################
+##       DOCKERUPDATE CLASS       ##
+####################################
 class DockerUpdate{
 	public $verbose = false;
 
@@ -456,12 +456,8 @@ class DockerUpdate{
 				$localVersion = $updateStatus[$img]['local'];
 			}
 			$remoteVersion = $this->getRemoteVersionV2($img);
-			$status        = ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? 'true' : 'false') : 'undef';
-			$updateStatus[$img] = [
-				'local'  => $localVersion,
-				'remote' => $remoteVersion,
-				'status' => $status
-			];
+			$status = ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? 'true' : 'false') : 'undef';
+			$updateStatus[$img] = ['local' => $localVersion, 'remote' => $remoteVersion, 'status' => $status];
 			//$this->debug("Update status: Image='${img}', Local='${localVersion}', Remote='${remoteVersion}', Status='${status}'");
 		}
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
@@ -471,11 +467,7 @@ class DockerUpdate{
 		global $dockerManPaths;
 		$image = DockerUtil::ensureImageTag($image);
 		$updateStatus = DockerUtil::loadJSON($dockerManPaths['update-status']);
-		$updateStatus[$image] = [
-			'local'  => $version,
-			'remote' => $version,
-			'status' => 'true'
-		];
+		$updateStatus[$image] = ['local' => $version, 'remote' => $version, 'status' => 'true'];
 		//$this->debug("Update status: Image='${image}', Local='${version}', Remote='${version}', Status='true'");
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
 	}
@@ -568,9 +560,9 @@ class DockerUpdate{
 	}
 }
 
-######################################
-##       DOCKERCLIENT CLASS         ##
-######################################
+####################################
+##       DOCKERCLIENT CLASS       ##
+####################################
 class DockerClient {
 
 	private static $allContainersCache = null;
@@ -584,15 +576,7 @@ class DockerClient {
 
 	public function humanTiming($time) {
 		$time = time() - $time; // to get the time since that moment
-		$tokens = [
-			31536000 => 'year',
-			2592000  => 'month',
-			604800   => 'week',
-			86400    => 'day',
-			3600     => 'hour',
-			60       => 'minute',
-			1        => 'second'
-		];
+		$tokens = [31536000 => 'year', 2592000 => 'month', 604800 => 'week', 86400 => 'day',3600 => 'hour', 60 => 'minute', 1 => 'second'];
 		foreach ($tokens as $unit => $text) {
 			if ($time < $unit) continue;
 			$numberOfUnits = floor($time / $unit);
@@ -848,9 +832,9 @@ class DockerClient {
 	}
 }
 
-######################################
-##        DOCKERUTIL CLASS          ##
-######################################
+##################################
+##       DOCKERUTIL CLASS       ##
+##################################
 class DockerUtil {
 
 	public static function ensureImageTag($image) {
@@ -875,7 +859,7 @@ class DockerUtil {
 
 	public static function saveJSON($path, $content) {
 		if (!is_dir(dirname($path))) @mkdir(dirname($path), 0755, true);
-		return file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+		return file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
 	}
 }
 ?>
