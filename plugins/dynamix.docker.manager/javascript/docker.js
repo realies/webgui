@@ -141,7 +141,7 @@ function eventControl(params, spin) {
       if (spin) setTimeout(spin+'()',500); else location=window.location.href;
     } else {
       swal({
-        title:"Execution error",
+        title:"Execution error", html:true,
         text:data.success, type:"error"
       },function(){
         if (spin) setTimeout(spin+'()',500); else location=window.location.href;
