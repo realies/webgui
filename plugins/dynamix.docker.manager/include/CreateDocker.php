@@ -49,13 +49,13 @@ function stopContainer($name) {
   @flush();
 }
 
-function removeContainer($name) {
+function removeContainer($name, $remove=false) {
   global $DockerClient;
   $waitID = mt_rand();
   echo "<p class=\"logLine\" id=\"logBody\"></p>";
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
   @flush();
-  $retval = $DockerClient->removeContainer($name);
+  $retval = $DockerClient->removeContainer($name, $remove);
   $out = ($retval === true) ? "Successfully removed container '$name'" : "Error: ".$retval;
   echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
   @flush();
@@ -566,7 +566,7 @@ if (isset($_POST['contName'])) {
       $startContainer = false;
     }
     // force kill container if still running after 10 seconds
-    removeContainer($existing);
+    removeContainer($existing,1);
     // remove old template
     @unlink("$userTmplDir/my-$existing.xml");
   }
