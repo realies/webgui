@@ -484,13 +484,15 @@ function getAllocations() {
   $names = $docker = $ports = [];
   docker("ps --format='{{.Names}}'", $names);
   docker("inspect --format='{{.HostConfig.NetworkMode}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.PortBindings}}{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}' ".implode(' ',$names),$docker); $n = 0;
+  natcasesort($names);
   foreach ($names as $name) {
     $list = [];
     $list['Name'] = $name;
     [$mode,$ip,$port1,$port2] = explode('#',$docker[$n++]);
     $port = explode('|',$port1);
     if (count($port)<2) $port = explode('|',str_replace(['/tcp','/udp'],'',$port2));
-    $list['Port'] = (strstr('host,bridge',$mode) ? $eth0['IPADDR:0'] : $ip).' : '.(implode(' ',array_unique($port,SORT_NUMERIC)) ?: '???')." -- $mode";
+    sort($port);
+    $list['Port'] = (strstr('host,bridge',$mode) ? $eth0['IPADDR:0'] : $ip).' : '.(implode(' ',array_unique($port)) ?: '???')." -- $mode";
     $ports[] = $list;
   }
   return $ports;
@@ -801,9 +803,9 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 
   function makeAllocations(container,current) {
     var html = [];
-    for (var i=0; i < container.length; i++) {
-      var highlight = container[i].Name.toLowerCase()==current.toLowerCase() ? "font-weight:bold" : "";
-      html.push($("#templateAllocations").html().format(highlight,container[i].Name,container[i].Port));
+    for (var i=0,ct; ct=container[i]; i++) {
+      var highlight = ct.Name.toLowerCase()==current.toLowerCase() ? "font-weight:bold" : "";
+      html.push($("#templateAllocations").html().format(highlight,ct.Name,ct.Port));
     }
     return html.join('');
   }
