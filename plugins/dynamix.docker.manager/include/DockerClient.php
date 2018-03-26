@@ -359,7 +359,7 @@ class DockerUpdate{
 
 	public function download_url($url, $path='', $bg=false) {
 		exec('curl --max-time 30 --silent --insecure --location --fail '.($path ? ' -o '.escapeshellarg($path) : '').' '.escapeshellarg($url).' '.($bg ? '>/dev/null 2>&1 &' : '2>/dev/null'), $out, $exit_code);
-		return ($exit_code === 0) ? implode("\n", $out) : false;
+		return ($exit_code===0) ? implode("\n", $out) : false;
 	}
 
 	public function download_url_and_headers($url, $headers=[], $path='', $bg=false) {
@@ -368,7 +368,7 @@ class DockerUpdate{
 			$strHeaders .= ' -H '.escapeshellarg($header);
 		}
 		exec('curl --max-time 30 --silent --insecure --location --fail -i '.$strHeaders.($path ? ' -o '.escapeshellarg($path) : '').' '.escapeshellarg($url).' '.($bg ? '>/dev/null 2>&1 &' : '2>/dev/null'), $out, $exit_code);
-		return ($exit_code === 0) ? implode("\n", $out) : false;
+		return ($exit_code===0) ? implode("\n", $out) : false;
 	}
 
 	// DEPRECATED: Only used for Docker Index V1 type update checks
@@ -377,7 +377,7 @@ class DockerUpdate{
 		$apiUrl = sprintf('http://index.docker.io/v1/repositories/%s/tags/%s', $strRepo, $strTag);
 		//$this->debug("API URL: $apiUrl");
 		$apiContent = $this->download_url($apiUrl);
-		return ($apiContent === false) ? null : substr(json_decode($apiContent, true)[0]['id'], 0, 8);
+		return ($apiContent===false) ? null : substr(json_decode($apiContent, true)[0]['id'], 0, 8);
 	}
 
 	public function getRemoteVersionV2($image) {
@@ -658,16 +658,16 @@ class DockerClient {
 		return $this::$codes[$code] ?: 'Error code '.$code;
 	}
 
-	public function removeContainer($id) {
+	public function removeContainer($id, $remove=false) {
 		global $docroot, $dockerManPaths;
 		// Purge cached container information
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
 		if (isset($info[$id])) {
-			if (isset($info[$id]['icon'])) {
+			if ($remove && isset($info[$id]['icon'])) {
 				$iconRam = $docroot.$info[$id]['icon'];
 				$iconFlash = str_replace($dockerManPaths['images-ram'], $dockerManPaths['images-storage'], $iconRam);
-				if (is_file($iconRam)) unlink($iconRam);
-				if (is_file($iconFlash)) unlink($iconFlash);
+				if ($remove>=1 && is_file($iconRam)) unlink($iconRam);
+				if ($remove==2 && is_file($iconFlash)) unlink($iconFlash);
 			}
 			unset($info[$id]);
 			DockerUtil::saveJSON($dockerManPaths['webui-info'], $info);
