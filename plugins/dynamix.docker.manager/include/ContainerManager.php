@@ -16,7 +16,7 @@ $user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
 
 # controlled docker execution
 function docker($cmd, &$var=null) {
-  return exec("timeout 20 /usr/bin/docker $cmd 2>/dev/null",$var);
+  return exec("docker $cmd 2>/dev/null", $var);
 }
 $action = $_POST['action'];
 $status = $action=='start' ? 'exited' : 'running';

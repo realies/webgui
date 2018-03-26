@@ -69,9 +69,7 @@ foreach ($file as $row) {
     'disk' => my_name($disk).$luks
   ];
 }
-$sort = [];
-foreach ($list as $row) $sort[] = $row['type'];
-array_multisort($sort,$list);
+array_multisort(array_column($list,'type'),$list);
 
 echo "<tbody>";
 $dirs=0; $files=0; $total=0;

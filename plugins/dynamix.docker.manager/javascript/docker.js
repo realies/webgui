@@ -141,7 +141,7 @@ function eventControl(params, spin) {
       if (spin) setTimeout(spin+'()',500); else location=window.location.href;
     } else {
       swal({
-        title:"Execution error",
+        title:"Execution error", html:true,
         text:data.success, type:"error"
       },function(){
         if (spin) setTimeout(spin+'()',500); else location=window.location.href;
@@ -166,6 +166,7 @@ function checkAll() {
 }
 function updateAll() {
   $('input[type=button]').prop('disabled',true);
+  $('div.spinner').show('slow');
   var list = '';
   for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') list += '&ct[]='+ct.name;
   var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true"+list;

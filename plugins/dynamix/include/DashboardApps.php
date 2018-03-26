@@ -18,6 +18,7 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 $display = $_POST['display'];
+$menu = [];
 
 if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $user_prefs = $dockerManPaths['user-prefs'];
@@ -25,7 +26,6 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $DockerTemplates = new DockerTemplates();
   $all_containers = $DockerClient->getDockerContainers();
   $all_info = $DockerTemplates->getAllInfo();
-  $menu = [];
 
   if (file_exists($user_prefs)) {
     $prefs = parse_ini_file($user_prefs); $sort = [];

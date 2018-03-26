@@ -22,6 +22,12 @@ $diskio= @parse_ini_file('state/diskload.ini');
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'ioReads'=>0, 'ioWrites'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
 
+function model($id) {
+  return substr($id,0,strrpos($id,'_'));
+}
+// sort unassigned devices on disk identification
+if (count($devs)>1) array_multisort(array_column($devs,'sectors'),SORT_DESC,array_map('model',array_column($devs,'id')),SORT_NATURAL|SORT_FLAG_CASE,array_column($devs,'device'),$devs);
+
 require_once "$docroot/webGui/include/CustomMerge.php";
 
 function in_parity_log($log,$timestamp) {
@@ -109,10 +115,7 @@ function assignment(&$disk) {
     $out .= "<option value=''>$empty</option>";
   } else
     $out .= "<option value='' selected>$empty</option>";
-  if ($disk['type']=='Cache')
-    foreach ($devs as $dev) {$out .= "<option value=\"{$dev['id']}\">".device_desc($dev)."</option>";}
-  else
-    foreach ($devs as $dev) if ($dev['tag']==0) {$out .= "<option value=\"{$dev['id']}\">".device_desc($dev)."</option>";}
+  foreach ($devs as $dev) if ($disk['type']=='Cache' || $dev['tag']==0) {$out .= "<option value=\"{$dev['id']}\">".device_desc($dev)."</option>";}
   return "$out</select></form>";
 }
 function vfs_type($fs) {
