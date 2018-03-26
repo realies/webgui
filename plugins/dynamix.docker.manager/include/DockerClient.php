@@ -566,12 +566,6 @@ class DockerClient {
 		'500' => 'Server error'
 	];
 
-	private function buildSorter($key) {
-		return function ($a, $b) use ($key) {
-			return strnatcasecmp($a[$key], $b[$key]);
-		};
-	}
-
 	private function flushCache(&$cache) {
 		$cache = null;
 	}
@@ -739,7 +733,7 @@ class DockerClient {
 			}
 			$this::$containersCache[] = $c;
 		}
-		usort($this::$containersCache, $this->buildSorter('Name'));
+		array_multisort(array_column($this::$containersCache,'Name'), SORT_NATURAL|SORT_FLAG_CASE, $this::$containersCache);
 		return $this::$containersCache;
 	}
 
