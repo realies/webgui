@@ -104,10 +104,10 @@ foreach ($vms as $vm) {
   foreach ($lv->get_disk_stats($res) as $arrDisk) {
     $capacity = $lv->format_size($arrDisk['capacity'], 0);
     $allocation = $lv->format_size($arrDisk['allocation'], 0);
-    $disk = array_key_exists('file', $arrDisk) ? $arrDisk['file'] : $arrDisk['partition'];
+    $disk = $arrDisk['file'] ?? $arrDisk['partition'];
     $dev = $arrDisk['device'];
-    $bus = $arrDisk['bus'];
-    echo "<tr><td>$disk</td><td>{$arrValidDiskBuses[$bus]}</td>";
+    $bus = $arrValidDiskBuses[$arrDisk['bus']] ?? 'VirtIO';
+    echo "<tr><td>$disk</td><td>$bus</td>";
     if ($state == 'shutoff') {
       echo "<td title='Click to increase Disk Size'>";
       echo "<form method='get' action=''>";
@@ -119,12 +119,10 @@ foreach ($vms as $vm) {
       echo "<span class='text'><a href='#' onclick='return false'>$capacity</a></span>";
       echo "<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden>";
       echo "</span></form></td>";
-      echo "<td>$allocation</td>";
-      echo "<td>detach <i class='fa fa-eject blue' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:'true',showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i></td>";
     } else {
-      echo "<td>$capacity</td><td>$allocation</td><td>N/A</td>";
+      echo "<td>$capacity</td>";
     }
-    echo "</tr>";
+    echo "<td>$allocation</td><td><i class='fa fa-lock fa-fw grey-text'></i> locked</td></tr>";
   }
   /* end Display VM disks */
 
@@ -132,15 +130,15 @@ foreach ($vms as $vm) {
   foreach ($lv->get_cdrom_stats($res) as $arrCD) {
     $capacity = $lv->format_size($arrCD['capacity'], 0);
     $allocation = $lv->format_size($arrCD['allocation'], 0);
-    $disk = (array_key_exists('file', $arrCD)) ? $arrCD['file'] : $arrCD['partition'];
+    $disk = $arrCD['file'] ?? $arrCD['partition'];
     $dev = $arrCD['device'];
-    $bus = $arrCD['bus'];
-    echo "<tr><td>$disk</td><td>{$arrValidDiskBuses[$bus]}</td><td>$capacity</td><td>$allocation</td><td>";
+    $bus = $arrValidDiskBuses[$arrCD['bus']] ?? 'VirtIO';
+    echo "<tr><td>$disk</td><td>$bus</td><td>$capacity</td><td>$allocation</td>";
     if ($state == 'shutoff')
-      echo "detach <i class='fa fa-eject blue' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:'true',showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i>";
+      echo "<td><i class='fa fa-lock fa-fw grey-text'></i> locked </td>";
     else
-      echo "N/A";
-    echo "</td></tr>";
+      echo "<td><i class='fa fa-eject fa-fw blue-text' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:true,showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i> detach</td>";
+    echo "</tr>";
   }
 
   /* end Display VM cdroms */
