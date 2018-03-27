@@ -194,6 +194,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->addChild("Data");
   $xml->addChild("Environment");
 
+  $post["confName"] = is_array($post["confName"]) ? $post["confName"] : array();
   for ($i = 0; $i < count($post['confName']); $i++) {
     $Type                  = $post['confType'][$i];
     $config                = $xml->addChild('Config', xml_encode($post['confValue'][$i]));
