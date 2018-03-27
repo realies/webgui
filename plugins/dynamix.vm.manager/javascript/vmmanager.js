@@ -3,7 +3,7 @@ function ajaxVMDispatch(params, spin){
   $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data) {
     if (data.error) {
       swal({
-        title:"Execution error",
+        title:"Execution error", html:true,
         text:data.error, type:"error"
       },function(){
         if (spin) setTimeout(spin+'()',500); else location=window.location.href;
