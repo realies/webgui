@@ -194,7 +194,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->addChild("Data");
   $xml->addChild("Environment");
 
-  $post["confName"] = is_array($post["confName"]) ? $post["confName"] : array();
+  $post['confName'] = $post['confName'] ?? [];
   for ($i = 0; $i < count($post['confName']); $i++) {
     $Type                  = $post['confType'][$i];
     $config                = $xml->addChild('Config', xml_encode($post['confValue'][$i]));
@@ -1467,7 +1467,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       <tr>
         <td></td>
         <td>
-          <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+          <input type="submit" value="<?=$xmlType=='edit' ? 'Apply':' Apply '?>"><input type="button" value="Done" onclick="done()">
           <?if ($authoringMode):?><button type="submit" name="dryRun" value="true" onclick="$('*[required]').prop('required', null);">Save</button><?endif;?>
         </td>
       </tr>
