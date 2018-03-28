@@ -191,9 +191,11 @@ switch ($action) {
 
 	case 'disk-remove':
 		requireLibvirt();
-		$arrResponse = ($lv->domain_disk_remove($domName, $_REQUEST['dev'])) ?
+		// libvirt-php has an issue with detaching a disk, use virsh tool instead
+		exec("virsh detach-disk " . escapeshellarg($uuid) . " " . escapeshellarg($_REQUEST['dev']) . " 2>&1", $arrOutput, $intReturnCode);
+		$arrResponse = ($intReturnCode == 0) ?
 						['success' => true] :
-						['error' => $lv->get_last_error()];
+						['error' => str_replace('error: ', '', implode('. ', $arrOutput))];
 		break;
 
 	case 'snap-create':
