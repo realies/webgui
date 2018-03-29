@@ -367,7 +367,7 @@ if ($argc < 2) {
   exit(1);
 }
 $method = $argv[1];
-$builtin = ['unRAIDServer'];
+$builtin = ['unRAIDServer','unRAIDServer-'];
 
 // plugin checkall
 // check all installed plugins, except built-in
