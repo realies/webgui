@@ -112,9 +112,9 @@ function rmContainer(container, image, id) {
   },function(){
     $('#'+id).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
     if ($("#removeimagechk").prop('checked')) {
-      eventControl({action:"remove_all", container:id, image:image},'loadlist');
+      eventControl({action:"remove_all", container:container, image:image},'loadlist');
     } else {
-      eventControl({action:"remove_container", container:id},'loadlist');
+      eventControl({action:"remove_container", container:container},'loadlist');
     }
   });
 }
