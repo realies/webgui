@@ -194,8 +194,8 @@ function postToXML($post, $setOwnership=false) {
   $xml->addChild("Data");
   $xml->addChild("Environment");
 
-  $post['confName'] = $post['confName'] ?? [];
-  for ($i = 0; $i < count($post['confName']); $i++) {
+  $size = is_array($post['confName']) ? count($post['confName']) : 0;
+  for ($i = 0; $i < $size; $i++) {
     $Type                  = $post['confType'][$i];
     $config                = $xml->addChild('Config', xml_encode($post['confValue'][$i]));
     $config['Name']        = xml_encode($post['confName'][$i]);
@@ -208,21 +208,21 @@ function postToXML($post, $setOwnership=false) {
     $config['Required']    = xml_encode($post['confRequired'][$i]);
     $config['Mask']        = xml_encode($post['confMask'][$i]);
     # V1 compatibility
-    if ($Type == "Port") {
+    if ($Type == 'Port') {
       $port                = $xml->Networking->Publish->addChild("Port");
       $port->HostPort      = $post['confValue'][$i];
       $port->ContainerPort = $post['confTarget'][$i];
       $port->Protocol      = $post['confMode'][$i];
-    } elseif ($Type == "Path") {
-      $path               = $xml->Data->addChild("Volume");
-      $path->HostDir      = $post['confValue'][$i];
-      $path->ContainerDir = $post['confTarget'][$i];
-      $path->Mode         = $post['confMode'][$i];
-    } elseif ($Type == "Variable") {
-      $variable        = $xml->Environment->addChild("Variable");
-      $variable->Value = $post['confValue'][$i];
-      $variable->Name  = $post['confTarget'][$i];
-      $variable->Mode  = $post['confMode'][$i];
+    } elseif ($Type == 'Path') {
+      $path                = $xml->Data->addChild("Volume");
+      $path->HostDir       = $post['confValue'][$i];
+      $path->ContainerDir  = $post['confTarget'][$i];
+      $path->Mode          = $post['confMode'][$i];
+    } elseif ($Type == 'Variable') {
+      $variable            = $xml->Environment->addChild("Variable");
+      $variable->Value     = $post['confValue'][$i];
+      $variable->Name      = $post['confTarget'][$i];
+      $variable->Mode      = $post['confMode'][$i];
     }
   }
   $dom = new DOMDocument('1.0');
@@ -635,7 +635,7 @@ if ($_GET['xmlTemplate']) {
   if (is_file($xmlTemplate)) {
     $xml = xmlToVar($xmlTemplate);
     $templateName = $xml['Name'];
-    if ($xmlType == "default") {
+    if ($xmlType == 'default') {
       if (!empty($dockercfg['DOCKER_APP_CONFIG_PATH']) && file_exists($dockercfg['DOCKER_APP_CONFIG_PATH'])) {
         // override /config
         foreach ($xml['Config'] as &$arrConfig) {
@@ -1117,7 +1117,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 <div id="canvas">
   <form method="POST" autocomplete="off" onsubmit="prepareConfig(this)">
     <table class="settings">
-      <? if ($xmlType == "edit"):
+      <? if ($xmlType == 'edit'):
       if ($DockerClient->doesContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
       else:?>
       <tr class='TemplateDropDown'>
