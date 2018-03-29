@@ -151,11 +151,7 @@ function tab0() {
 function parityStatus() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'parity'},function(data) {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
-<?if ($tabbed):?>
-    if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parityStatus,3000);
-<?else:?>
-    setTimeout(parityStatus,3000);
-<?endif;?>
+    timers.parityStatus = setTimeout(parityStatus,3000);
     if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel') {
       $('#cancelButton').val('Done').unbind().bind({click:function(){refresh();}});
       $('#cancelText').html('');
@@ -194,7 +190,7 @@ parityStatus();
 <?if ($tabbed):?>
 $('.tabs').append(ctrl);
 if ($.cookie('tab')=='tab0') $('i.toggle').hide();
-$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parityStatus(); tab0(); $('i.toggle').hide('slow');}});
+$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {tab0(); $('i.toggle').hide('slow');}});
 <?else:?>
 $('div[id=title]:not(":last, .disable_diskio")').each(function(){$(this).append(ctrl);});
 <?endif;?>
