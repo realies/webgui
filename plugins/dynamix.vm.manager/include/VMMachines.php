@@ -97,7 +97,7 @@ foreach ($vms as $vm) {
   echo "<tr id='name{$i}".(in_array('name'.$i++,$show) ? "'>" : "' style='display:none'>");
   echo "<td colspan='7' style='overflow:hidden'>";
   echo "<table class='tablesorter domdisk' id='domdisk_table'>";
-  echo "<thead><tr><th><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th><th>Actions</th></tr></thead>";
+  echo "<thead><tr><th><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th></tr></thead>";
   echo "<tbody id='domdisk_list'>";
 
   /* Display VM disks */
@@ -119,11 +119,10 @@ foreach ($vms as $vm) {
       echo "<span class='text'><a href='#' onclick='return false'>$capacity</a></span>";
       echo "<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden>";
       echo "</span></form></td>";
-      echo "<td>$allocation</td><td><i class='fa fa-lock fa-fw grey-text'></i> locked</td>";
     } else {
-      echo "<td>$capacity</td><td>$allocation</td>";
-      echo "<td><i class='fa fa-eject fa-fw blue-text' style='cursor:pointer' onclick=\"swal({title:'Are you sure?',text:'Detach: ".basename($disk)."<br><i>from VM: $vm</i>',type:'warning',html:true,showCancelButton:true},function(){\$('div.spinner').show('slow');setTimeout(function(){ajaxVMDispatch({action:'disk-remove',uuid:'$uuid',dev:'$dev'},'loadlist');},100);})\" title='detach disk from VM'></i> detach</td>";
+      echo "<td>$capacity</td>";
     }
+    echo "<td>$allocation</td></tr>";
   }
   /* end Display VM disks */
 
@@ -134,9 +133,7 @@ foreach ($vms as $vm) {
     $disk = $arrCD['file'] ?? $arrCD['partition'];
     $dev = $arrCD['device'];
     $bus = $arrValidDiskBuses[$arrCD['bus']] ?? 'VirtIO';
-    echo "<tr><td>$disk</td><td>$bus</td><td>$capacity</td><td>$allocation</td>";
-    echo "<td><i class='fa fa-lock fa-fw grey-text'></i> locked </td>";
-    echo "</tr>";
+    echo "<tr><td>$disk</td><td>$bus</td><td>$capacity</td><td>$allocation</td></tr>";
   }
 
   /* end Display VM cdroms */
