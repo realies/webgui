@@ -13,75 +13,56 @@
 ?>
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-
-// Add the Docker JSON client
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-$user_prefs = $dockerManPaths['user-prefs'];
-$DockerClient = new DockerClient();
+$DockerClient    = new DockerClient();
 $DockerTemplates = new DockerTemplates();
+$containers      = $DockerClient->getDockerContainers();
+$user_prefs      = $dockerManPaths['user-prefs'];
 
-$all_containers = $DockerClient->getDockerContainers();
-if (!$all_containers) {
+if (!$containers) {
   echo "<tr><td colspan='8' style='text-align:center;padding-top:12px'>No Docker containers installed</td></tr>";
   return;
 }
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
-  foreach ($all_containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
-  array_multisort($sort,SORT_NUMERIC,$all_containers);
+  foreach ($containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
+  array_multisort($sort,SORT_NUMERIC,$containers);
   unset($sort);
 }
 
-// Read network settings
-extract(parse_ini_file('state/network.ini',true));
-
 // Read container info
-$all_info = $DockerTemplates->getAllInfo();
+$allInfo = $DockerTemplates->getAllInfo();
 $docker = ['var docker=[];'];
-$menu = $ids = $names = [];
-foreach ($all_containers as $ct) $ids[] = $ct['Name'];
-docker("inspect --format='{{.State.Running}}#{{range \$p,\$c := .HostConfig.PortBindings}}{{\$p}}:{{(index \$c 0).HostPort}}|{{end}}#{{range \$p,\$c := .Config.ExposedPorts}}{{\$p}}|{{end}}#{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}#{{range \$c := .HostConfig.Binds}}{{\$c}}|{{end}}' ".implode(' ',$ids),$names);
-unset($ids);
+$null = '0.0.0.0';
+$menu = [];
 
 $n = 0;
-foreach ($all_containers as $ct) {
+foreach ($containers as $ct) {
   $name = $ct['Name'];
-  $info = &$all_info[$name];
-  $mode = $ct['NetworkMode'];
   $id = $ct['Id'];
-  $imageID = $ct['ImageId'];
+  $running = $ct['Running'] ? 1 : 0;
+  $info = &$allInfo[$name];
   $is_autostart = $info['autostart'] ? 'true':'false';
   $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
   $template = $info['template'];
   $webGui = html_entity_decode($info['url']);
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
-  list($running,$bind1,$bind2,$ip,$mounts) = explode('#',$names[$n++]);
-  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
-  $docker[] = "docker.push({name:'$name',id:'$id',state:'$running',update:'$updateStatus'});";
-  $running = $running=='true';
+  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+  $docker[] = "docker.push({name:'$name',id:'$id',state:$running,update:'$updateStatus'});";
   $shape = $running ? 'play':'square';
   $status = $running ? 'started':'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
-  if ($bind1) {
-    $ip = $running ? $ip : '0.0.0.0';
-    foreach (explode('|',$bind1) as $bind) {
-      if (!$bind) continue;
-      list($container_port,$host_port) = explode(':',$bind);
-      $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $container_port, $eth0['IPADDR:0'], $host_port);
-    }
-  } elseif ($bind2) {
-    $ip = $running ? ($ip ?: $eth0['IPADDR:0']) : '0.0.0.0';
-    foreach (explode('|',$bind2) as $bind) {
-      if (!$bind) continue;
-      $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s',$ip, $bind, $ip, str_replace(['/tcp','/udp'],'',$bind));
-    }
+  foreach ($ct['Ports'] as $port) {
+    $intern = $running ? ($ct['NetworkMode']=='host' ? $host : $port['IP']) : $null;
+    $extern = $running ? ($port['NAT'] ? $host : $intern) : $null;
+    $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $intern, $port['PrivatePort'], $extern, $port['PublicPort']);
   }
   $paths = [];
-  foreach (explode('|',$mounts) as $mount) {
+  foreach ($ct['Volumes'] as $mount) {
     if (!$mount) continue;
     list($host_path,$container_path,$access_mode) = explode(':',$mount);
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
@@ -115,7 +96,7 @@ foreach ($all_containers as $ct) {
     echo "<span style='color:#FF2400;white-space:nowrap;'><i class='fa fa-exclamation-triangle'></i> not available</span>";
     echo "<div class='advanced'><a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download'></i> force update</span></a></div>";
   }
-  echo "</td><td>$mode</td>";
+  echo "</td><td>{$ct['NetworkMode']}</td>";
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
   echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
@@ -126,7 +107,7 @@ foreach ($all_containers as $ct) {
 foreach ($DockerClient->getDockerImages() as $image) {
   if (count($image['usedBy'])) continue;
   $id = $image['Id'];
-  $menu[] = sprintf("addDockerImageContext('%s','%s');",$id,implode(',',$image['Tags']));
+  $menu[] = sprintf("addDockerImageContext('%s','%s');", $id, implode(',',$image['Tags']));
   echo "<tr class='advanced'><td style='width:48px;padding:4px'>";
   echo "<div id='$id' style='display:block;cursor:pointer'>";
   echo "<div style='position:relative;width:48px;height:48px;margin:0 auto'>";
