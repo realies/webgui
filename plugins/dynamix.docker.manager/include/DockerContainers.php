@@ -63,7 +63,6 @@ foreach ($containers as $ct) {
   }
   $paths = [];
   foreach ($ct['Volumes'] as $mount) {
-    if (!$mount) continue;
     list($host_path,$container_path,$access_mode) = explode(':',$mount);
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
   }
