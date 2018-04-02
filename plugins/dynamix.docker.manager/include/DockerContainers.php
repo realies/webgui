@@ -59,7 +59,7 @@ foreach ($containers as $ct) {
   foreach ($ct['Ports'] as $port) {
     $intern = $running ? ($ct['NetworkMode']=='host' ? $host : $port['IP']) : $null;
     $extern = $running ? ($port['NAT'] ? $host : $intern) : $null;
-    $ports[] = sprintf('%s:%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $intern, $port['PrivatePort'], $extern, $port['PublicPort']);
+    $ports[] = sprintf('%s:%s/%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $intern, $port['PrivatePort'], strtoupper($port['Type']), $extern, $port['PublicPort']);
   }
   $paths = [];
   foreach ($ct['Volumes'] as $mount) {
