@@ -181,7 +181,7 @@ foreach ($devices as $device) {
   }
   $port = port_name($port);
   $status = $find['status'] == "DISK_OK" ? "" : " - {$find['status']}";
-  exec("smartctl -x $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port)$status"));
+  exec("smartctl -x $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port)$status.txt"));
 }
 // create cache pool information
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
