@@ -511,6 +511,8 @@ $(function() {
   showUpgrade('<b>Reboot required</b> to downgrade unRAID OS');
 <?elseif ($version = plugin_update_available('unRAIDServer',true)):?>
   showUpgrade('unRAID OS v<?=$version?> is available. <a>Download Now</a>','unRAIDServer');
+<?elseif (!$notify['system']):?>
+  $('.upgrade_notice').html('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.').show();
 <?endif;?>
 <?endif;?>
 <?if ($notify['display']):?>
