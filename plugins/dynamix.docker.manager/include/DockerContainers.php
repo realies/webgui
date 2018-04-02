@@ -18,9 +18,10 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 $DockerClient    = new DockerClient();
 $DockerTemplates = new DockerTemplates();
 $containers      = $DockerClient->getDockerContainers();
+$images          = $DockerClient->getDockerImages();
 $user_prefs      = $dockerManPaths['user-prefs'];
 
-if (!$containers) {
+if (!$containers && !$images) {
   echo "<tr><td colspan='8' style='text-align:center;padding-top:12px'>No Docker containers installed</td></tr>";
   return;
 }
@@ -103,7 +104,7 @@ foreach ($containers as $ct) {
   echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td>";
   echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
 }
-foreach ($DockerClient->getDockerImages() as $image) {
+foreach ($images as $image) {
   if (count($image['usedBy'])) continue;
   $id = $image['Id'];
   $menu[] = sprintf("addDockerImageContext('%s','%s');", $id, implode(',',$image['Tags']));
