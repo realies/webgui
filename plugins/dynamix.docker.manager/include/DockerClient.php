@@ -626,8 +626,8 @@ class DockerClient {
 	}
 
 	public function getInfo() {
-		$info = $this->getDockerJSON('/info');
-		$version = $this->getDockerJSON('/version');
+		$info = $this->getDockerJSON("/info");
+		$version = $this->getDockerJSON("/version");
 		return array_merge($info, $version);
 	}
 
@@ -646,13 +646,13 @@ class DockerClient {
 	}
 
 	public function stopContainer($id) {
-		$this->getDockerJSON("/containers/$id/stop?t=10", 'POST', $code);
+		$this->getDockerJSON("/containers/$id/stop", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
 
 	public function restartContainer($id) {
-		$this->getDockerJSON("/containers/$id/restart?t=10", 'POST', $code);
+		$this->getDockerJSON("/containers/$id/restart", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
@@ -766,7 +766,7 @@ class DockerClient {
 		// Return cached values
 		if (is_array($this::$imagesCache)) return $this::$imagesCache;
 		$this::$imagesCache = [];
-		foreach ($this->getDockerJSON('/images/json?all=0') as $ct) {
+		foreach ($this->getDockerJSON("/images/json?all=0") as $ct) {
 			$c = [];
 			$c['Created']     = $this->humanTiming($ct['Created']);
 			$c['Id']          = $this->extractID($ct['Id']);
