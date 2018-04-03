@@ -15,18 +15,20 @@
 $user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
 
 # controlled docker execution
-function docker($cmd, &$var=null) {
-  return exec("docker $cmd 2>/dev/null", $var);
+function docker($cmd) {
+  $data = exec("docker $cmd 2>/dev/null", $array);
+  return count($array)>1 ? $array : $data;
 }
+
 $action = $_POST['action'];
 $status = $action=='start' ? 'exited' : 'running';
-$all_containers=[]; docker("ps -a --filter status='$status' --format='{{.Names}}'", $all_containers);
+$containers = docker("ps -a --filter status='$status' --format='{{.Names}}'");
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
-  foreach ($all_containers as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
-  array_multisort($sort, ($action=='start'?SORT_ASC:SORT_DESC), SORT_NUMERIC, $all_containers);
+  foreach ($containers as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
+  array_multisort($sort, ($action=='start'?SORT_ASC:SORT_DESC), SORT_NUMERIC, $containers);
 }
 
-foreach ($all_containers as $ct) docker("$action $ct >/dev/null");
+foreach ($containers as $ct) docker("$action $ct >/dev/null");
 ?>

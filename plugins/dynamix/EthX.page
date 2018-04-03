@@ -23,14 +23,14 @@ if (!$locked && isset($ethX)) foreach ($ethX as $key => $val) if (strpos($key,$v
 
 $cmd = 'Down';
 $more = true;
-if (!exec("ip link show ethX|grep -om1 'UP>'")) {
+if (strpos($locked,'bond')===0 || strpos($locked,'br')===0) {
+  list($master_ethX,$root) = explode(' ',$locked);
+  $reason = "Interface is member of ".$master_ethX." (see interface ".$root.")";
+  $class = 'big green';
+} elseif (!exec("ip link show ethX|grep -om1 'UP>'")) {
   $reason = "Interface is shutdown (inactive)";
   $class = 'big blue';
   $cmd = 'Up';
-} elseif (strpos($locked,'bond')===0 || strpos($locked,'br')===0) {
-  $root = explode(' ',$locked);
-  $reason = "Interface is member of ".$root[0]." (see interface ".$root[1].")";
-  $class = 'big green';
 } elseif (empty($ethX)) {
   $reason = "Interface is not configured";
   $class = 'big red';
@@ -71,7 +71,10 @@ $(function() {
     if ($(this).text().indexOf('Interface ethX')==0) $(this).append("<span id='wait_ethX' class='status red' style='display:none;font-size:small;font-style:italic'>Please wait... configuring interfaces</span>");
   });
 <?endif;?>
-<?if ($locked || $service):?>
+<?if ($master_ethX):?>
+  $('div.slave-ethX').hide();
+  disableForm(form);
+<?elseif ($service):?>
   disableForm(form);
 <?endif;?>
 <?if ($no_eth0):?>
@@ -92,14 +95,15 @@ $(function() {
 <input type="hidden" name="BRSTP" value="no">
 <input type="hidden" name="BRFD" value="0">
 <?foreach ($vlan_ethX as $i):?>
-<div id="index-ethX-<?=$i?>" markdown="1">
 <?if ($i==0):?>
+<div id="index-ethX-<?=$i?>" markdown="1">
 MAC address:
 : <span class="<?=$class?>"><?=strtoupper(exec("ip link show ethX|grep -Pom1 'ether \K\S+'"))?><?if ($more):?> - <?=$reason?><?endif;?></span>
 
 > This is the hardware address of the interface.
 > When tagging is enabled all VLANs on this interface will share the same hardware address.
 
+<div class="slave-ethX" markdown="1">
 Enable bonding:
 : <select name="BONDING" size="1" onchange="checkBondingSettings(this.form,1,'ethX')">
   <?=mk_option($ethX['BONDING'], "no", "No");?>
@@ -192,11 +196,13 @@ Bridging members of brX:
 > Select which interfaces are member of the *bridged* interface. By default ethX is a member, while other interfaces are optional.
 
 </div>
+</div>
 Interface description:
 : <input type="text" name="DESCRIPTION:<?=$i?>" maxlength="80" value="<?=htmlspecialchars($ethX["DESCRIPTION:$i"])?>" onchange="exitCode(this.form,true)">
 
 > Use this field to give addditional information about the purpose of the connection.
 
+<div class="slave-ethX" markdown="1">
 Network protocol:
 : <select name="PROTOCOL:<?=$i?>" size="1" onchange="selectProtocol(this.form,'ethX',<?=$i?>)">
   <?=mk_option($ethX["PROTOCOL:$i"], 'ipv4', 'IPv4 only');?>
@@ -295,7 +301,10 @@ Enable VLANs:
   <?=mk_option($ethX['TYPE'], 'access', 'No');?>
   <?=mk_option($ethX['TYPE'], 'trunk', 'Yes');?>
   </select><?if (!$service):?><span class="pin access-ethX" style="display:none" onclick="addVLAN('ethX')"><i class="fa fa-plus-circle green"></i><em>add VLAN</em></span><?endif;?>
+</div>
+</div>
 <?else:?>
+<div id="index-ethX-<?=$i?>" markdown="1">
 <div class="access-ethX shade-<?=$display['theme']?>" style="display:none" markdown="1">
 VLAN number:
 : <input type="number" name="VLANID:<?=$i?>" min="1" max="4095" value="<?=$ethX["VLANID:$i"]?>" class="narrow gap" required>
@@ -396,8 +405,8 @@ IPv6 privacy extensions:
 </div>
 </div>
 </div>
-<?endif;?>
 </div>
+<?endif;?>
 <?endforeach;?>
 
 <script type="text/html" id="network-template-ethX" markdown="1">

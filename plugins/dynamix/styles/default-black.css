@@ -32,7 +32,7 @@ select{font-family:arimo;font-size:12px;min-width:150px;max-width:320px;color:#A
 select[disabled]{color:#505050;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);box-shadow:0 2px 0 #202020;cursor:default}
 select[name=enter_view]{padding:0;float:right}
 select[name=enter_share]{padding:0;float:right}
-select option{background-color:#000000}
+select option{color:#A0A0A0;background-color:#000000}
 select.narrow{min-width:69px}
 select.auto{min-width:auto}
 select.slot{min-width:400px;max-width:400px}

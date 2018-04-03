@@ -24,30 +24,29 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $user_prefs = $dockerManPaths['user-prefs'];
   $DockerClient = new DockerClient();
   $DockerTemplates = new DockerTemplates();
-  $all_containers = $DockerClient->getDockerContainers();
+  $containers = $DockerClient->getDockerContainers();
   $all_info = $DockerTemplates->getAllInfo();
 
   if (file_exists($user_prefs)) {
     $prefs = parse_ini_file($user_prefs); $sort = [];
-    foreach ($all_containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
-    array_multisort($sort,SORT_NUMERIC,$all_containers);
+    foreach ($containers as $ct) $sort[] = array_search($ct['Name'],$prefs) ?? 999;
+    array_multisort($sort,SORT_NUMERIC,$containers);
   }
 
-  foreach ($all_containers as $ct) {
+  foreach ($containers as $ct) {
     $name = $ct['Name'];
-    $info = &$all_info[$name];
     $id = $ct['Id'];
-    $imageID = $ct['ImageId'];
+    $running = $ct['Running'] ? 1:0;
+    $info = &$all_info[$name];
     $is_autostart = $info['autostart'] ? 'true':'false';
     $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
-    $running = $ct['Running'] ? 'true':'false';
     $template = $info['template'];
     $webGui = html_entity_decode($info['url']);
     $support = html_entity_decode($info['Support']);
     $project = html_entity_decode($info['Project']);
-    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');",addslashes($name),addslashes($imageID),addslashes($template),$running,$updateStatus,$is_autostart,addslashes($webGui),$id,addslashes($support),addslashes($project));
-    $shape = $ct['Running'] ? 'play':'square';
-    $status = $ct['Running'] ? 'started':'stopped';
+    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+    $shape = $running ? 'play':'square';
+    $status = $running ? 'started':'stopped';
     $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
     echo "<div class='Panel $status'>";
     echo "<div id='$id' style='display:block; cursor:pointer'>";
@@ -84,7 +83,7 @@ if (pgrep('libvirtd')!==false && ($display=='icons' || $display=='vms')) {
     $template = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@name');
     if (empty($template)) $template = 'Custom';
     $log = (is_file("/var/log/libvirt/qemu/$vm.log") ? "libvirt/qemu/$vm.log" : '');
-    $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');",addslashes($vm),addslashes($uuid),addslashes($template),$state,addslashes($vnc),addslashes($log));
+    $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');", addslashes($vm), addslashes($uuid), addslashes($template), $state, addslashes($vnc), addslashes($log));
     $vmicon = $lv->domain_get_icon_url($res);
     echo renderVMContentIcon($uuid, $vm, $vmicon, $state);
   }
