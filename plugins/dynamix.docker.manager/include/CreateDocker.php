@@ -1390,11 +1390,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <td>Network Type:</td>
         <td>
           <select name="contNetwork" class="narrow" onchange="showSubnet(this.value)">
-          <?=mk_option(0,'bridge','Bridge')?>
-          <?=mk_option(0,'host','Host')?>
-          <?=mk_option(0,'none','None')?>
+          <?=mk_option(1,'bridge','Bridge')?>
+          <?=mk_option(1,'host','Host')?>
+          <?=mk_option(1,'none','None')?>
           <?foreach ($custom as $network):?>
-          <?=mk_option(0,$network,"Custom : $network")?>
+          <?=mk_option(1,$network,"Custom : $network")?>
           <?endforeach;?>
           </select>
         </td>
