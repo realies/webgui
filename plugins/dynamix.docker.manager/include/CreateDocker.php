@@ -31,6 +31,7 @@ $DockerTemplates = new DockerTemplates();
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
 $custom = $DockerClient->docker("network ls --filter driver='macvlan' --format='{{.Name}}'");
+$custom = is_array($custom) ? $custom : array($custom);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
 foreach ($custom as $network) $subnet[$network] = substr($DockerClient->docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
