@@ -232,9 +232,9 @@ class DockerTemplates {
 		return false;
 	}
 
-	public function getControlURL(&$DockerClient, &$ct) {
+	private function getControlURL(&$DockerClient, &$ct) {
 		global $host;
-		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($DockerClient->myIP($ct['Name']) ?: $host));
+		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($ct['Ports'][0]['IP'] ?: $DockerClient->myIP($ct['Name']) ?: $host));
 		$WebUI = preg_replace("%\[IP\]%", $myIP, $this->getTemplateValue($ct['Image'], 'WebUI'));
 		if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
 			$ConfigPort = $matches[1];
@@ -247,20 +247,21 @@ class DockerTemplates {
 	}
 
 	public function getAllInfo($reload=false) {
-		global $dockerManPaths;
+		global $dockerManPaths, $host;
 		$DockerClient = new DockerClient();
 		$DockerUpdate = new DockerUpdate();
 		//$DockerUpdate->verbose = $this->verbose;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
-		$allAutoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
+		$autoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
 		foreach ($DockerClient->getDockerContainers() as $ct) {
 			$name = $ct['Name'];
 			$image = $ct['Image'];
 			$tmp = &$info[$name] ?? [];
 			$tmp['running'] = $ct['Running'];
-			$tmp['autostart'] = in_array($name, $allAutoStart);
+			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
-			$tmp['url'] = $this->getControlURL($DockerClient, $ct);
+			$ip = $ct['Ports'][0]['NAT'] ? $host : $ct['Ports'][0]['IP'];
+			$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($DockerClient, $ct);
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
 			$tmp['Project'] = $tmp['Project'] ?? $this->getTemplateValue($image, 'Project');
