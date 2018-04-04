@@ -23,6 +23,7 @@ function docker($cmd) {
 $action = $_POST['action'];
 $status = $action=='start' ? 'exited' : 'running';
 $containers = docker("ps -a --filter status='$status' --format='{{.Names}}'");
+$containers = is_array($containers) ? $containers : array($containers);
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
