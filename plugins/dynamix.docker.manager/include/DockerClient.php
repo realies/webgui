@@ -232,21 +232,10 @@ class DockerTemplates {
 		return false;
 	}
 
-	public function getControlURL($name) {
+	public function getControlURL(&$DockerClient, &$ct) {
 		global $host;
-		$DockerClient = new DockerClient();
-		foreach ($DockerClient->getDockerContainers() as $ct) if ($ct['Name']==$name) break;
-		$WebUI = $this->getTemplateValue($ct['Image'], 'WebUI');
-		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP');
-		if (!$myIP) {
-			foreach ($ct['Ports'] as $port) {
-				$myIP = $port['NAT'] ? $host : $port['IP'];
-				if ($myIP) break;
-			}
-		}
-		if (preg_match("%\[IP\]%", $WebUI)) {
-			$WebUI = preg_replace("%\[IP\]%", $myIP ?: $DockerClient->myIP($name) ?: $host, $WebUI);
-		}
+		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($DockerClient->myIP($ct['Name']) ?: $host));
+		$WebUI = preg_replace("%\[IP\]%", $myIP, $this->getTemplateValue($ct['Image'], 'WebUI'));
 		if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
 			$ConfigPort = $matches[1];
 			foreach ($ct['Ports'] as $port) {
@@ -271,7 +260,7 @@ class DockerTemplates {
 			$tmp['running'] = $ct['Running'];
 			$tmp['autostart'] = in_array($name, $allAutoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
-			$tmp['url'] = $tmp['url'] ?? $this->getControlURL($name);
+			$tmp['url'] = $this->getControlURL($DockerClient, $ct);
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
 			$tmp['Project'] = $tmp['Project'] ?? $this->getTemplateValue($image, 'Project');
@@ -527,7 +516,8 @@ class DockerClient {
 	private static $imagesCache = null;
 	private static $codes = [
 		'200' => true, // No error
-		'204' => true, // No error
+		'201' => true,
+		'204' => true,
 		'304' => 'Container already started',
 		'400' => 'Bad parameter',
 		'404' => 'No such container',
