@@ -15,10 +15,9 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-$user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
-
-$action = $_POST['action'];
-$status = $action=='start' ? 'exited' : 'running';
+$user_prefs = $dockerManPaths['user-prefs'];
+$action     = $_POST['action'];
+$status     = $action=='start' ? 'exited' : 'running';
 $containers = DockerUtil::docker("ps -a --filter status='$status' --format='{{.Names}}'",true);
 
 if (file_exists($user_prefs)) {
