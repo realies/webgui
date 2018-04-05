@@ -580,8 +580,8 @@ class DockerClient {
 		// Strip headers out
 		$headers = '';
 		while (($line = fgets($fp)) !== false) {
-			if (strpos($line, 'HTTP/1') !== false) {$tmp = vsprintf('%2$s',preg_split("#\s+#", $line)); $code = $this::$codes[$tmp] ?? "Error code $tmp";}
-			$headers .= $line;
+			if (strpos($line, 'HTTP/1') !== false) {$error = vsprintf('%2$s',preg_split("#\s+#", $line)); $code = $this::$codes[$error] ?? "Error code $error";}
+			//$headers .= $line;
 			if (rtrim($line)=='') break;
 		}
 		$data = [];
