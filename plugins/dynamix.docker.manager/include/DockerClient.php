@@ -796,11 +796,8 @@ class DockerUtil {
 	}
 
 	public static function myIP($name, $version=4) {
-		$networks = explode('|', DockerUtil::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}|{{end}}' $name"));
-		foreach ($networks as $network) {
-			if ($version==4 && strpos($network,'.')!==false) return $network;
-			if ($version==6 && strpos($network,':')!==false) return $network;
-		}
+		$ipaddr = $version==4 ? 'IPAddress' : 'GlobalIPv6Address';
+		return DockerUtil::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
 	}
 }
 ?>
