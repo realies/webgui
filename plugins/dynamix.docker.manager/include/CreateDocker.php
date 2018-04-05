@@ -30,10 +30,9 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = $DockerClient->docker("network ls --filter driver='macvlan' --format='{{.Name}}'");
-$custom = is_array($custom) ? $custom : array($custom);
+$custom = DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
-foreach ($custom as $network) $subnet[$network] = substr($DockerClient->docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
+foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
 function stopContainer($name) {
   global $DockerClient;
@@ -479,7 +478,7 @@ function getAllocations() {
       $port[] = $tmp['PublicPort'];
     }
     sort($port);
-    $ip = $nat ? $host : ($ip ?: $DockerClient->myIP($ct['Name']) ?: $host);
+    $ip = $nat ? $host : ($ip ?: DockerUtil::myIP($ct['Name']) ?: $host);
     $list['Port'] = "$ip : ".(implode(' ',array_unique($port)) ?: '???')." -- {$ct['NetworkMode']}";
     $ports[] = $list;
   }

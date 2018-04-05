@@ -232,9 +232,9 @@ class DockerTemplates {
 		return false;
 	}
 
-	private function getControlURL(&$DockerClient, &$ct) {
+	private function getControlURL(&$ct) {
 		global $host;
-		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($ct['Ports'][0]['IP'] ?: $DockerClient->myIP($ct['Name']) ?: $host));
+		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($ct['Ports'][0]['IP'] ?: DockerUtil::myIP($ct['Name']) ?: $host));
 		$WebUI = preg_replace("%\[IP\]%", $myIP, $this->getTemplateValue($ct['Image'], 'WebUI'));
 		if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
 			$ConfigPort = $matches[1];
@@ -261,7 +261,7 @@ class DockerTemplates {
 			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
 			$ip = $ct['Ports'][0]['NAT'] ? $host : $ct['Ports'][0]['IP'];
-			$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($DockerClient, $ct);
+			$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($ct);
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
 			$tmp['Project'] = $tmp['Project'] ?? $this->getTemplateValue($image, 'Project');
@@ -547,19 +547,6 @@ class DockerClient {
 		$this->flushCache($this::$imagesCache);
 	}
 
-	public function docker($cmd) {
-		$data = exec("docker $cmd 2>/dev/null", $array);
-		return count($array)>1 ? $array : $data;
-	}
-
-	public function myIP($name, $version=4) {
-		$networks = explode('|', $this->docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}|{{end}}' $name"));
-		foreach ($networks as $network) {
-			if ($version==4 && strpos($network,'.')!==false) return $network;
-			if ($version==6 && strpos($network,':')!==false) return $network;
-		}
-	}
-
 	public function humanTiming($time) {
 		$time = time() - $time; // to get the time since that moment
 		$tokens = [31536000 => 'year', 2592000 => 'month', 604800 => 'week', 86400 => 'day',3600 => 'hour', 60 => 'minute', 1 => 'second'];
@@ -801,6 +788,19 @@ class DockerUtil {
 	public static function saveJSON($path, $content) {
 		if (!is_dir(dirname($path))) mkdir(dirname($path), 0755, true);
 		return file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+	}
+
+	public static function docker($cmd, $a=false) {
+		$data = exec("docker $cmd 2>/dev/null", $array);
+		return $a ? $array : $data;
+	}
+
+	public static function myIP($name, $version=4) {
+		$networks = explode('|', DockerUtil::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}|{{end}}' $name"));
+		foreach ($networks as $network) {
+			if ($version==4 && strpos($network,'.')!==false) return $network;
+			if ($version==6 && strpos($network,':')!==false) return $network;
+		}
 	}
 }
 ?>
