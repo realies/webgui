@@ -232,21 +232,11 @@ class DockerTemplates {
 		return false;
 	}
 
-	public function getControlURL($name) {
+	private function getControlURL(&$ct, $myIP) {
 		global $host;
-		$DockerClient = new DockerClient();
-		foreach ($DockerClient->getDockerContainers() as $ct) if ($ct['Name']==$name) break;
-		$WebUI = $this->getTemplateValue($ct['Image'], 'WebUI');
-		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP');
-		if (!$myIP) {
-			foreach ($ct['Ports'] as $port) {
-				$myIP = $port['NAT'] ? $host : $port['IP'];
-				if ($myIP) break;
-			}
-		}
-		if (preg_match("%\[IP\]%", $WebUI)) {
-			$WebUI = preg_replace("%\[IP\]%", $myIP ?: $DockerClient->myIP($name) ?: $host, $WebUI);
-		}
+		$port = &$ct['Ports'][0];
+		$myIP = $myIP ?: $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : ($port['IP'] ?: DockerUtil::myIP($ct['Name'])));
+		$WebUI = preg_replace("%\[IP\]%", $myIP, $this->getTemplateValue($ct['Image'], 'WebUI'));
 		if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
 			$ConfigPort = $matches[1];
 			foreach ($ct['Ports'] as $port) {
@@ -258,20 +248,24 @@ class DockerTemplates {
 	}
 
 	public function getAllInfo($reload=false) {
-		global $dockerManPaths;
+		global $dockerManPaths, $host;
 		$DockerClient = new DockerClient();
 		$DockerUpdate = new DockerUpdate();
 		//$DockerUpdate->verbose = $this->verbose;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
-		$allAutoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
+		$autoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
 		foreach ($DockerClient->getDockerContainers() as $ct) {
 			$name = $ct['Name'];
 			$image = $ct['Image'];
 			$tmp = &$info[$name] ?? [];
 			$tmp['running'] = $ct['Running'];
-			$tmp['autostart'] = in_array($name, $allAutoStart);
+			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
-			$tmp['url'] = $tmp['url'] ?? $this->getControlURL($name);
+			if ($ct['Running']) {
+				$port = &$ct['Ports'][0];
+				$ip = ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : $port['IP']);
+				$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($ct, $ip);
+			}
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
 			$tmp['Project'] = $tmp['Project'] ?? $this->getTemplateValue($image, 'Project');
@@ -527,7 +521,8 @@ class DockerClient {
 	private static $imagesCache = null;
 	private static $codes = [
 		'200' => true, // No error
-		'204' => true, // No error
+		'201' => true,
+		'204' => true,
 		'304' => 'Container already started',
 		'400' => 'Bad parameter',
 		'404' => 'No such container',
@@ -554,19 +549,6 @@ class DockerClient {
 	public function flushCaches() {
 		$this->flushCache($this::$containersCache);
 		$this->flushCache($this::$imagesCache);
-	}
-
-	public function docker($cmd) {
-		$data = exec("docker $cmd 2>/dev/null", $array);
-		return count($array)>1 ? $array : $data;
-	}
-
-	public function myIP($name, $version=4) {
-		$networks = explode('|', $this->docker("inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}|{{end}}' $name"));
-		foreach ($networks as $network) {
-			if ($version==4 && strpos($network,'.')!==false) return $network;
-			if ($version==6 && strpos($network,':')!==false) return $network;
-		}
 	}
 
 	public function humanTiming($time) {
@@ -598,8 +580,8 @@ class DockerClient {
 		// Strip headers out
 		$headers = '';
 		while (($line = fgets($fp)) !== false) {
-			if (strpos($line, 'HTTP/1') !== false) {$tmp = vsprintf('%2$s',preg_split("#\s+#", $line)); $code = $this::$codes[$tmp] ?? "Error code $tmp";}
-			$headers .= $line;
+			if (strpos($line, 'HTTP/1') !== false) {$error = vsprintf('%2$s',preg_split("#\s+#", $line)); $code = $this::$codes[$error] ?? "Error code $error";}
+			//$headers .= $line;
 			if (rtrim($line)=='') break;
 		}
 		$data = [];
@@ -810,6 +792,16 @@ class DockerUtil {
 	public static function saveJSON($path, $content) {
 		if (!is_dir(dirname($path))) mkdir(dirname($path), 0755, true);
 		return file_put_contents($path, json_encode($content, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+	}
+
+	public static function docker($cmd, $a=false) {
+		$data = exec("docker $cmd 2>/dev/null", $array);
+		return $a ? $array : $data;
+	}
+
+	public static function myIP($name, $version=4) {
+		$ipaddr = $version==4 ? 'IPAddress' : 'GlobalIPv6Address';
+		return static::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
 	}
 }
 ?>

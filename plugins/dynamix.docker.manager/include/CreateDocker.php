@@ -16,7 +16,6 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
 $var = parse_ini_file('state/var.ini');
-extract(parse_ini_file('state/network.ini',true));
 ignore_user_abort(true);
 
 $DockerClient    = new DockerClient();
@@ -30,9 +29,9 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = $DockerClient->docker("network ls --filter driver='macvlan' --format='{{.Name}}'");
+$custom = DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
-foreach ($custom as $network) $subnet[$network] = substr($DockerClient->docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
+foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
 function stopContainer($name) {
   global $DockerClient;
@@ -478,7 +477,7 @@ function getAllocations() {
       $port[] = $tmp['PublicPort'];
     }
     sort($port);
-    $ip = $nat ? $host : ($ip ?: $DockerClient->myIP($ct['Name']) ?: $host);
+    $ip = $ct['NetworkMode']=='host'||$nat ? $host : ($ip ?: DockerUtil::myIP($ct['Name']));
     $list['Port'] = "$ip : ".(implode(' ',array_unique($port)) ?: '???')." -- {$ct['NetworkMode']}";
     $ports[] = $list;
   }
@@ -1389,11 +1388,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <td>Network Type:</td>
         <td>
           <select name="contNetwork" class="narrow" onchange="showSubnet(this.value)">
-          <?=mk_option(0,'bridge','Bridge')?>
-          <?=mk_option(0,'host','Host')?>
-          <?=mk_option(0,'none','None')?>
+          <?=mk_option(1,'bridge','Bridge')?>
+          <?=mk_option(1,'host','Host')?>
+          <?=mk_option(1,'none','None')?>
           <?foreach ($custom as $network):?>
-          <?=mk_option(0,$network,"Custom : $network")?>
+          <?=mk_option(1,$network,"Custom : $network")?>
           <?endforeach;?>
           </select>
         </td>

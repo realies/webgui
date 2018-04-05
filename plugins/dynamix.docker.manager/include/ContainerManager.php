@@ -12,17 +12,13 @@
  */
 ?>
 <?
-$user_prefs = '/boot/config/plugins/dockerMan/userprefs.cfg';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-# controlled docker execution
-function docker($cmd) {
-  $data = exec("docker $cmd 2>/dev/null", $array);
-  return count($array)>1 ? $array : $data;
-}
-
-$action = $_POST['action'];
-$status = $action=='start' ? 'exited' : 'running';
-$containers = docker("ps -a --filter status='$status' --format='{{.Names}}'");
+$user_prefs = $dockerManPaths['user-prefs'];
+$action     = $_POST['action'];
+$status     = $action=='start' ? 'exited' : 'running';
+$containers = DockerUtil::docker("ps -a --filter status='$status' --format='{{.Names}}'",true);
 
 if (file_exists($user_prefs)) {
   $prefs = parse_ini_file($user_prefs); $sort = [];
@@ -30,5 +26,5 @@ if (file_exists($user_prefs)) {
   array_multisort($sort, ($action=='start'?SORT_ASC:SORT_DESC), SORT_NUMERIC, $containers);
 }
 
-foreach ($containers as $ct) docker("$action $ct >/dev/null");
+foreach ($containers as $ct) DockerUtil::docker("$action $ct >/dev/null");
 ?>
