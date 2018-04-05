@@ -774,33 +774,33 @@ function checkDHCP() {
   return good;
 }
 function checkIP() {
-  var validIP4 = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-  var validIP6 = /^((?:[0-9A-F]{1,4}))((?::[0-9A-F]{1,4}))*::((?:[0-9A-F]{1,4}))((?::[0-9A-F]{1,4}))*|((?:[0-9A-F]{1,4}))((?::[0-9A-F]{1,4})){7}$/i;
-  var error = null;
+  var validIP4 = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+  var validIP6 = /^((?=.*::)(?!.*::.+::)(::)?([\dA-F]{1,4}:(:|\b)|){5}|([\dA-F]{1,4}:){6})((([\dA-F]{1,4}((?!\3)::|:\b|$))|(?!\2\3)){2}|(((2[0-4]|1\d|[1-9])?\d|25[0-5])\.?\b){4})$/i;
+  var error = false;
   $('#settingsForm').find('input[name^="DOCKER_SUBNET_"]').each(function(){
-    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 address';
+    if ($(this).val() && !validIP4.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv4 subnet','Please enter a valid subnet','error'); return false;}
   $('#settingsForm').find('input[name^="DOCKER_GATEWAY_"]').each(function(){
-    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 gateway';
+    if ($(this).val() && !validIP4.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv4 gateway','Please enter a valid gateway','error'); return false;}
   $('#settingsForm').find('input[name^="DOCKER_RANGE_"]').each(function(){
-    if ($(this).val() && !validIP4.test($(this).val())) error = 'IPv4 range';
+    if ($(this).val() && !validIP4.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv4 range','Please enter a valid range','error'); return false;}
   $('#settingsForm').find('input[name^="DOCKER_SUBNET6_"]').each(function(){
-    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 address';
+    if ($(this).val() && !validIP6.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv6 subnet','Please enter a valid subnet','error'); return false;}
   $('#settingsForm').find('input[name^="DOCKER_GATEWAY6_"]').each(function(){
-    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 gateway';
+    if ($(this).val() && !validIP6.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv6 gateway','Please enter a valid gateway','error'); return false;}
   $('#settingsForm').find('input[name^="DOCKER_RANGE6_"]').each(function(){
-    if ($(this).val() && !validIP6.test($(this).val())) error = 'IPv6 range';
+    if ($(this).val() && !validIP6.test($(this).val())) error = true;
   });
-  if (error) {swal('Invalid '+error,'Please enter a valid address','error'); return false;}
+  if (error) {swal('Invalid IPv6 range','Please enter a valid range','error'); return false;}
   return true;
 }
 function showLogOptions(log) {
