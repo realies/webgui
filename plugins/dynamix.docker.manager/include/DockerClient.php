@@ -232,9 +232,10 @@ class DockerTemplates {
 		return false;
 	}
 
-	private function getControlURL(&$ct) {
+	private function getControlURL(&$ct, $myIP) {
 		global $host;
-		$myIP = $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['Ports'][0]['NAT'] ? $host : ($ct['Ports'][0]['IP'] ?: DockerUtil::myIP($ct['Name']) ?: $host));
+		$port = &$ct['Ports'][0];
+		$myIP = $myIP ?: $this->getTemplateValue($ct['Image'], 'MyIP') ?: ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : ($port['IP'] ?: DockerUtil::myIP($ct['Name'])));
 		$WebUI = preg_replace("%\[IP\]%", $myIP, $this->getTemplateValue($ct['Image'], 'WebUI'));
 		if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
 			$ConfigPort = $matches[1];
@@ -260,8 +261,11 @@ class DockerTemplates {
 			$tmp['running'] = $ct['Running'];
 			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
-			$ip = $ct['Ports'][0]['NAT'] ? $host : $ct['Ports'][0]['IP'];
-			$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($ct);
+			if ($ct['Running']) {
+				$port = &$ct['Ports'][0];
+				$ip = ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : $port['IP']);
+				$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($ct, $ip);
+			}
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
 			$tmp['Project'] = $tmp['Project'] ?? $this->getTemplateValue($image, 'Project');
@@ -797,7 +801,7 @@ class DockerUtil {
 
 	public static function myIP($name, $version=4) {
 		$ipaddr = $version==4 ? 'IPAddress' : 'GlobalIPv6Address';
-		return self::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
+		return static::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
 	}
 }
 ?>
