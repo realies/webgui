@@ -16,7 +16,6 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
 $var = parse_ini_file('state/var.ini');
-extract(parse_ini_file('state/network.ini',true));
 ignore_user_abort(true);
 
 $DockerClient    = new DockerClient();
