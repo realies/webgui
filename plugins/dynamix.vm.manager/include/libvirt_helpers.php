@@ -835,6 +835,7 @@
 	function getValidDiskBuses() {
 		$arrValidDiskBuses = [
 			'virtio' => 'VirtIO',
+			'scsi' => 'SCSI',
 			'sata' => 'SATA',
 			'ide' => 'IDE',
 			'usb' => 'USB'
@@ -846,6 +847,7 @@
 
 	function getValidCdromBuses() {
 		$arrValidCdromBuses = [
+			'scsi' => 'SCSI',
 			'sata' => 'SATA',
 			'ide' => 'IDE',
 			'usb' => 'USB'

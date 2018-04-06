@@ -426,6 +426,8 @@
 			}
 			$arrUsedBootOrders = [];
 
+			$needSCSIController = false;
+
 			//media settings
 			$bus = "ide";
 			if ($machine_type == 'q35'){
@@ -436,10 +438,14 @@
 			if (!empty($media['cdrom'])) {
 				unset($arrAvailableDevs['hda']);
 				$arrUsedBootOrders[] = 2;
+				$media['cdrombus'] = $media['cdrombus'] ?: $bus;
+				if ($media['cdrombus'] == 'scsi') {
+					$needSCSIController = true;
+				}
 				$mediastr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
 								<source file='" . htmlspecialchars($media['cdrom'], ENT_QUOTES | ENT_XML1) . "'/>
-								<target dev='hda' bus='" . (!empty($media['cdrombus']) ? $media['cdrombus'] : $bus) . "'/>
+								<target dev='hda' bus='" . $media['cdrombus'] . "'/>
 								<readonly/>
 								<boot order='2'/>
 							</disk>";
@@ -448,10 +454,14 @@
 			$driverstr = '';
 			if (!empty($media['drivers']) && $os_type == "windows") {
 				unset($arrAvailableDevs['hdb']);
+				$media['driversbus'] = $media['driversbus'] ?: $bus;
+				if ($media['driversbus'] == 'scsi') {
+					$needSCSIController = true;
+				}
 				$driverstr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
 								<source file='" . htmlspecialchars($media['drivers'], ENT_QUOTES | ENT_XML1) . "'/>
-								<target dev='hdb' bus='" . (!empty($media['driversbus']) ? $media['driversbus'] : $bus) . "'/>
+								<target dev='hdb' bus='" . $media['driversbus'] . "'/>
 								<readonly/>
 							</disk>";
 			}
@@ -534,8 +544,10 @@
 							$disk = $arrReturn;
 						}
 
-						if (empty($disk['bus'])) {
-							$disk['bus'] = 'virtio';
+						$disk['bus'] = $disk['bus'] ?: 'virtio';
+
+						if ($disk['bus'] == 'scsi') {
+							$needSCSIController = true;
 						}
 
 						if (empty($disk['dev']) || !in_array($disk['dev'], $arrAvailableDevs)) {
@@ -569,6 +581,11 @@
 						}
 					}
 				}
+			}
+
+			$scsicontroller = '';
+			if ($needSCSIController) {
+				$scsicontroller = "<controller type='scsi' index='0' model='virtio-scsi'/>";
 			}
 
 			$netstr = '';
@@ -760,6 +777,7 @@
 							$netstr
 							$vnc
 							<console type='pty'/>
+							$scsicontroller
 							$pcidevs
 							$usbstr
 							<channel type='unix'>
