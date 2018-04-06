@@ -506,7 +506,6 @@ IPv6 custom network on interface <?=$network?>:
 : <span class="gw6">**Subnet:** <?=$subnet6?>/<?=$mask6?></span>
   <span class="gw6">**Gateway:** <?=$dockercfg["DOCKER_GATEWAY6_$port"]?></span>
   **DHCP pool:** <?=$range6?"$range6/$size6":"not set"?>
-
 <?endif;?>
 <?endforeach;?>
 </div>
