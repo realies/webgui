@@ -550,6 +550,7 @@ if ($method == "remove") {
   // remove the plugin file
   move($installed_plugin_file, "/boot/config/plugins-removed");
   echo "plugin: removed\n";
+  exec("/usr/local/sbin/update_cron");
   exit(0);
 }
 
