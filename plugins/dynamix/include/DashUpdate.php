@@ -123,21 +123,24 @@ function stage($i) {
     }
   } else {
     $d = $i ? ($now ? $D : today($i)) : today(last_day()-6);
-    $D = mkdate($d, $i?:last_day()-6);
+    $i = $i ?: last_day()-6;
+    $D = mkdate($d, $i);
     $t = mktime($h,$m,0,$M,$D,$Y)-$time; // first day
     if ($t < 0) {
-      $D = mkdate(next_day($d), $i?:last_day()-6);
+      $D = mkdate(next_day($d), $i);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next day
     }
     if ($t < 0) {
       $M = find_month($M+1);
-      $D = mkdate(today($i?:last_day()-6), $i?:last_day()-6);
+      $i = $i ?: last_day()-6;
+      $D = mkdate(today($i), $i);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next month
     }
     if ($t < 0) {
       $Y++;
       $M = find_month(1);
-      $D = mkdate(today($i?:last_day()-6), $i?:last_day()-6);
+      $i = $i ?: last_day()-6;
+      $D = mkdate(today($i), $i);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next year
     }
   }
@@ -333,7 +336,7 @@ case 'parity':
       if ($last) $D = last_day();
       $t = mktime($h,$m,0,$M,$D,$Y)-$time;
       if ($t < 0) {
-        if ($M < 12) $M++; else {$M =1; $Y++;}
+        if ($M < 12) $M++; else {$M = 1; $Y++;}
         if ($last) $D = last_day();
         $t = mktime($h,$m,0,$M,$D,$Y)-$time;
       }
