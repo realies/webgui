@@ -3,8 +3,8 @@ Title="Statistics"
 Tag="pie-chart"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -478,11 +478,9 @@ function update30() {
   });
 }
 function update60() {
-<?if ($var['mdNumInvalid']==0 && $var['mdResync']>0):?>
-  $.post('<?=$url?>',{cmd:'parity'},function(data) {
+  $.post('<?=$url?>',{cmd:'parity',time:'<?=$display['date'].($display['date']!='%c'?", {$display['time']}":"")?>'},function(data) {
     if (data) $('#parity').html(data);
   });
-<?endif;?>
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible');}}).text(v);});
     setTimeout(update60,60000);
