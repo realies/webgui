@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -68,8 +68,88 @@ function plus($val,$word,$last) {
 function active_disks($disk) {
   return substr($disk['status'],0,7)!='DISK_NP' && preg_match('/^(Parity|Data|Cache)$/',$disk['type']);
 }
+function find_day($D) {
+  global $days;
+  if ($days[0] == '*') return $D;
+  foreach ($days as $d) if ($d >= $D) return $d;
+  return $days[0];
+}
+function find_month($M) {
+  global $months, $Y;
+  if ($M > 12) {$M = 1; $Y++;}
+  if ($months[0] == '*') return $M;
+  foreach ($months as $m) if ($m >= $M) return $m;
+  return $months[0];
+}
+function today($D) {
+  global $days, $M, $Y;
+  if ($days[0]=='*') return date('w',mktime(0,0,0,$M,$D,$Y));
+  for ($d = $D; $d < $D+7; $d++) {
+    $day = date('w',mktime(0,0,0,$M,$d,$Y));
+    if (in_array($day,$days)) return $day;
+  }
+}
+function next_day($D) {
+  return find_day(($D+1)%7);
+}
+function last_day() {
+  global $M, $Y;
+  return date('t',mktime(0,0,0,$M,1,$Y));
+}
+function mkdate($D, $s) {
+  global $M, $Y;
+  if ($s > last_day()) {$s = 1; $M = find_month($M+1);}
+  for ($d = $s; $d < $s+7; $d++) if ($D == date('w',mktime(0,0,0,$M,$d,$Y))) return $d;
+}
+function stage($i) {
+  global $h, $m, $D, $M, $Y, $time, $now;
+  if ($i < 0) {
+    $d = $now ? $D : today(1);
+    $s = $now ? date('j',$time) : 1;
+    $D = mkdate($d, $s);
+    $t = mktime($h,$m,0,$M,$D,$Y)-$time; // first day
+    if ($t < 0) {
+      $D = mkdate(next_day($d), $s+1);
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next day
+    }
+    if ($t < 0) {
+      $s += 7;
+      if ($s > last_day()) {
+        $s -= last_day();
+        $M = find_month($M+1);
+      }
+      $D = mkdate(today($d), $s);
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next week
+    }
+  } else {
+    $d = $i ? ($now ? $D : today($i)) : today(last_day()-6);
+    $i = $i ?: last_day()-6;
+    $D = mkdate($d, $i);
+    $t = mktime($h,$m,0,$M,$D,$Y)-$time; // first day
+    if ($t < 0) {
+      $D = mkdate(next_day($d), $i);
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next day
+    }
+    if ($t < 0) {
+      $M = find_month($M+1);
+      $i = $i ?: last_day()-6;
+      $D = mkdate(today($i), $i);
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next month
+    }
+    if ($t < 0) {
+      $Y++;
+      $M = find_month(1);
+      $i = $i ?: last_day()-6;
+      $D = mkdate(today($i), $i);
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next year
+    }
+  }
+  return $t;
+}
+
 $path   = '/webGui/images';
 $failed = ['FAILED','NOK'];
+
 switch ($_POST['cmd']) {
 case 'disk':
   $i = 1;
@@ -217,18 +297,90 @@ case 'port':
 break;
 case 'parity':
   $var  = parse_ini_file("state/var.ini");
-  $mode = '';
-  if (strstr($var['mdResyncAction'],"recon")) {
-    $mode = 'Parity-Sync / Data-Rebuild';
-  } elseif (strstr($var['mdResyncAction'],"clear")) {
-    $mode = 'Clearing';
-  } elseif ($var['mdResyncAction']=="check") {
-    $mode = 'Read-Check';
-  } elseif (strstr($var['mdResyncAction'],"check")) {
-    $mode = 'Parity-Check';
+  if ($var['mdNumInvalid']==0 && $var['mdResync']>0) {
+    $mode = '';
+    if (strstr($var['mdResyncAction'],"recon")) {
+      $mode = 'Parity-Sync / Data-Rebuild';
+    } elseif (strstr($var['mdResyncAction'],"clear")) {
+      $mode = 'Clearing';
+    } elseif ($var['mdResyncAction']=="check") {
+      $mode = 'Read-Check';
+    } elseif (strstr($var['mdResyncAction'],"check")) {
+      $mode = 'Parity-Check';
+    }
+    echo "<span class='orange p0'><strong>".$mode." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>";
+    echo "<br><em>Elapsed time: ".my_clock(floor((time()-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
+  } elseif ($var['mdNumInvalid']==0) {
+    extract(parse_plugin_cfg('dynamix', true));
+    list($m,$h) = explode(' ', $parity['hour']);
+    $time = time();
+    switch ($parity['mode']) {
+    case 0: // check disabled
+      echo "<i class='fa fa-warning'></i> Scheduled parity check is disabled";
+      return;
+    case 1: // daily check
+      $t = mktime($h,$m,0)-$time;
+      if ($t < 0) $t += 86400;
+      break;
+    case 2: // weekly check
+      $t = $parity['day']-date('w',$time);
+      if ($t < 0) $t += 7;
+      $t = mktime($h,$m,0)+$t*86400-$time;
+      if ($t < 0) $t += 86400*7;
+      break;
+    case 3: // monthly check
+      $D = $parity['dotm'];
+      $M = date('n',$time);
+      $Y = date('Y',$time);
+      $last = ($D == '28-31');
+      if ($last) $D = last_day();
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time;
+      if ($t < 0) {
+        if ($M < 12) $M++; else {$M = 1; $Y++;}
+        if ($last) $D = last_day();
+        $t = mktime($h,$m,0,$M,$D,$Y)-$time;
+      }
+      break;
+    case 4: // yearly check
+      $D = $parity['dotm'];
+      $M = $parity['month'];
+      $Y = date('Y',$time);
+      $last = ($D == '28-31');
+      if ($last) $D = last_day();
+      $t = mktime($h,$m,0,$M,$D,$Y)-$time;
+      if ($t < 0) {
+        $Y++;
+        if ($last) $D = last_day();
+        $t = mktime($h,$m,0,$M,$D,$Y)-$time;
+      }
+      break;
+    case 5: // custom check
+      $days = explode(',',$parity['day']);
+      $months = explode(',',$parity['month']);
+      $today = date('w',$time);
+      $date = date('n',$time);
+      $D = find_day($today);
+      $M = find_month($date);
+      $Y = date('Y',$time);
+      $now = $M==$date;
+      if ($M < $date) $Y++;
+      switch ($parity['dotm']) {
+      case '*' : $t = stage(-1); break;
+      case 'W1': $t = stage(1); break;
+      case 'W2': $t = stage(8); break;
+      case 'W3': $t = stage(15); break;
+      case 'W4': $t = stage(22); break;
+      case 'WL': $t = stage(0); break;}
+      break;
+    }
+    echo "Next check scheduled on <strong>";
+    echo strftime($_POST['time'],$time+$t);
+    echo "</strong><br><i class='fa fa-clock-o'></i> <em>Due in: ";
+    echo my_clock(floor($t/60));
+    echo "</em>";
+  } else {
+    echo "<i class='fa fa-warning'></i> Array contains {$var['mdNumInvalid']} invalid disk(s)";
   }
-  echo "<span class='orange p0'><strong>".$mode." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>";
-  echo "<br><em>Elapsed time: ".my_clock(floor((time()-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
 break;
 case 'shares':
    $names = explode(',',$_POST['names']);

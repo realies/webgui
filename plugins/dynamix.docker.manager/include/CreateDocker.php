@@ -1106,6 +1106,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 
 <div id="canvas">
   <form method="POST" autocomplete="off" onsubmit="prepareConfig(this)">
+    <input type="hidden" name="csrf_token" value="<?=$var['csrf_token']?>">
     <table class="settings">
       <? if ($xmlType == 'edit'):
       if ($DockerClient->doesContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
