@@ -42,9 +42,9 @@ function strip($name) {
   return str_replace('unRAID ','',$name);
 }
 
-function file_date($file, $version) {
+function file_date($file) {
   //file is considered outdated when older than 1 day
-  return ($version < 0 || !file_exists($file)) ? 'unknown' : (filectime($file) > (time()-86400) ? 'up-to-date' : 'outdated');
+  return file_exists($file) ? (filectime($file) > (time()-86400) ? 'up-to-date' : 'outdated') : 'unknown';
 }
 
 foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
@@ -135,7 +135,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
         } else {
           $style2 = "style='display:none'";
         }
-        $status = "<span id='os-status' $style1>".file_date($filename,$latest)."</span>";
+        $status = "<span id='os-status' $style1>".file_date($filename)."</span>";
         $status .= "<span id='os-upgrade' $style2>".make_link('update', $plugin_file, null, 'upgrade')."</span>";
         $status .= "<span id='os-downgrade' style='display:none'>".make_link('install', $plugin_file, 'forced', 'downgrade')."</span>";
       }
@@ -146,7 +146,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
         $changes_file = $filename;
         $updates++;
       } else {
-        $status = file_date($filename,$latest);
+        $status = file_date($filename);
       }
     }
   }
@@ -154,7 +154,8 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   if ($changes !== false) {
     $txtfile = "/tmp/plugins/".basename($plugin_file,'.plg').".txt";
     file_put_contents($txtfile,$changes);
-    $version .= "<i class='fa fa-info-circle fa-fw big blue-text' style='cursor:pointer' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900)\"></i>";
+    $version .= "<i class='fa fa-info-circle fa-fw big blue-text' style='cursor:pointer' title='View Release Notes' ";
+    $version .= "onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900)\"></i>";
   }
 //write plugin information
   $empty = false;
