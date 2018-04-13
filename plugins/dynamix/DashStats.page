@@ -522,7 +522,7 @@ function toggle_CPU(init) {
   }
   $.cookie('cpu')===undefined ? $('.cpu_open').show() : $('.cpu_open').hide();
 }
-var cpuload = new NchanSubscriber('/sub/cpuload');
+var cpuload = new NchanSubscriber('/sub/cpuload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 cpuload.on('message',function(data) {
 /*
 message should be something like: {"cpuload": {"cpu":[0,0],"cpu0":[0,0],"cpu1":[0,0],"cpu2":[0,0],"cpu3":[0,0]}}
