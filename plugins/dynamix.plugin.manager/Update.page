@@ -110,5 +110,5 @@ $(function() {
 </script>
 <table class='tablesorter plugins shift' id='os_table'>
 <thead><tr><th></th><th>Component</th><th>Author</th><th>Installed</th><th>Available</th><th>Status</th><th>Branch</th></tr></thead>
-<tbody id="os_list"><tr><td colspan="6"><div class="spinner"></div></td><tr></tbody>
+<tbody id="os_list"><tr><td colspan="7"><div class="spinner"></div></td><tr></tbody>
 </table>
