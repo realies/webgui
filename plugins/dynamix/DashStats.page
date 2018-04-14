@@ -110,6 +110,7 @@ function parity_status() {
     } else {
       echo "<tr><td colspan='2'><span class='red p0'><strong>Data is invalid</strong></span></td></tr>";
     }
+    echo "<tr><td id='parity' colspan='2'></td></tr>";
   }
 }
 function truncate($string,$len) {
