@@ -396,13 +396,15 @@ function xmlToCommand($xml, $create_paths=false) {
         @chgrp($hostConfig, 100);
       }
     } elseif ($confType == 'port') {
-      // Export ports as variable if Network is set to host
-      if (preg_match('/^(host|eth[0-9]|br[0-9]|bond[0-9])/',strtolower($xml['Network']))) {
+      $net = strtolower($xml['Network']);
+      // Export ports as variable if network is set to host or macvlan
+      if (preg_match('/^(host|eth[0-9]|br[0-9]|bond[0-9])/',$net) || strpos($net,'bridge')!==false) {
         $Variables[] = strtoupper(escapeshellarg($Mode.'_PORT_'.$containerConfig).'='.escapeshellarg($hostConfig));
-      // Export ports as port if Network is set to bridge
-      } elseif (strtolower($xml['Network'])== 'bridge') {
+      // No export of ports if network is set to none
+      } elseif ($net == 'none') {
+      // Export ports as port if network is set to (custom) bridge
+      } else {
         $Ports[] = escapeshellarg($hostConfig.':'.$containerConfig.'/'.$Mode);
-      // No export of ports if Network is set to none
       }
     } elseif ($confType == "variable") {
       $Variables[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);
