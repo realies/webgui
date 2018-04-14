@@ -288,6 +288,7 @@ function checkDNSSettings6(form) {
     form.DNS6_SERVER1.disabled = disabled;
     form.DNS6_SERVER2.disabled = disabled;
     form.DNS6_SERVER3.disabled = disabled;
+    if (!form.DNS6_SERVER1.value && disabled) $('#dns6server1').hide(); else $('#dns6server1').show();
     if (!form.DNS6_SERVER2.value && disabled) $('#dns6server2').hide(); else $('#dns6server2').show();
     if (!form.DNS6_SERVER3.value && disabled) $('#dns6server3').hide(); else $('#dns6server3').show();
   }
