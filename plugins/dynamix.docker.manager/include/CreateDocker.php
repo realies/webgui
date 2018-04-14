@@ -398,15 +398,19 @@ function xmlToCommand($xml, $create_paths=false) {
         @chgrp($hostConfig, 100);
       }
     } elseif ($confType == 'port') {
-      $type = $driver[$xml['Network']];
-      // Export ports as variable if network is set to host or macvlan
-      if ($type=='host' || $type=='macvlan') {
+      switch ($driver[$xml['Network']]) {
+      case 'host':
+      case 'macvlan':
+        // Export ports as variable if network is set to host or macvlan
         $Variables[] = strtoupper(escapeshellarg($Mode.'_PORT_'.$containerConfig).'='.escapeshellarg($hostConfig));
-      } elseif ($type == 'bridge') {
-      // Export ports as port if network is set to (custom) bridge
+        break;
+      case 'bridge':
+        // Export ports as port if network is set to (custom) bridge
         $Ports[] = escapeshellarg($hostConfig.':'.$containerConfig.'/'.$Mode);
+        break;
+      case 'none':
+        // No export of ports if network is set to none
       }
-      // No export of ports if network is set to none
     } elseif ($confType == "variable") {
       $Variables[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);
     } elseif ($confType == "device") {
