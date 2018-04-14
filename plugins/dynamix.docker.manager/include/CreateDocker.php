@@ -34,10 +34,7 @@ $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
 $driver = [];
 
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
-foreach (DockerUtil::docker("network ls --format='{{.Name}}|{{.Driver}}'",true) as $network) {
-  list($name,$type) = explode('|',$network);
-  $driver[$name] = $type;
-}
+foreach (DockerUtil::docker("network ls --format='{{.Name}}|{{.Driver}}'",true) as $network) {list($name,$type) = explode('|',$network); $driver[$name] = $type;}
 
 function stopContainer($name) {
   global $DockerClient;
