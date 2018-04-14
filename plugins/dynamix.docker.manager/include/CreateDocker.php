@@ -29,7 +29,7 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true);
+$custom = array_merge(DockerUtil::docker("network ls --filter driver='bridge' --format='{{.Name}}'|grep -v '^bridge$'",true),DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true));
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
