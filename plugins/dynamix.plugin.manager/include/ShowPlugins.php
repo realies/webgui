@@ -136,13 +136,13 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
           $style2 = "style='display:none'";
         }
         $status = "<span id='os-status' $style1>".file_date($filename)."</span>";
-        $status .= "<span id='os-upgrade' $style2>".make_link('update', $plugin_file, null, 'upgrade')."</span>";
+        $status .= "<span id='os-upgrade' $style2>".make_link('update', basename($plugin_file))."</span>";
         $status .= "<span id='os-downgrade' style='display:none'>".make_link('install', $plugin_file, 'forced', 'downgrade')."</span>";
       }
     } else {
       if (strcmp($latest,$version) > 0) {
         $version .= "<br><span class='red-text'>$latest</span>";
-        $status = make_link('update', basename($plugin_file), null, 'upgrade');
+        $status = make_link('update', basename($plugin_file));
         $changes_file = $filename;
         $updates++;
       } else {

@@ -30,7 +30,7 @@ if (file_exists('/boot/previous/changes.txt')) {
   }
 }
 ?>
-<style>input[type=button].not('#checkos'){margin:0}</style>
+<style>input[id$='install'],input[id$='update']{margin:0}</style>
 <script>
 
 function change_branch(source,branch) {
