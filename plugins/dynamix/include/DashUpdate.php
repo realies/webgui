@@ -310,7 +310,7 @@ case 'parity':
     }
     echo "<span class='orange p0'><strong>".$mode." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>";
     echo "<br><i class='fa fa-clock-o'></i> <em>Elapsed time: ".my_clock(floor((time()-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
-  } elseif ($var['mdNumInvalid']==0) {
+  } else {
     extract(parse_plugin_cfg('dynamix', true));
     list($m,$h) = explode(' ', $parity['hour']);
     $time = time();
