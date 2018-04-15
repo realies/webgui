@@ -195,7 +195,7 @@ span.heat-text{font-size:12px;color:#F0000C}
 span.cpu-speed{display:block;color:#3B5998}
 span.status{float:right;font-size:15px}
 span.status.vhshift{margin-top:-16px;margin-right:-20px}
-span.status.hshift{margin-right:0}
+span.status.hshift{margin-right:-20px}
 span.diskinfo{float:left;clear:both;margin-top:5px;padding-left:10px}
 span.bitstream{font-family:bitstream;font-size:11px}
 span.p0{padding-left:0}
