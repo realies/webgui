@@ -681,7 +681,7 @@ IPv6 DNS server 3:
 </div>
 </div>
 Desired MTU:
-: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow">
+: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow" placeholder="1500">
 
 > This is the MTU size to use on the physical Ethernet interface.
 > If left blank, the MTU will automatically be determined (by default 1500 bytes).
