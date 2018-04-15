@@ -379,7 +379,7 @@ case 'parity':
     echo my_clock(floor($t/60));
     echo "</em>";
   } else {
-    echo "<i class='fa fa-warning'></i> Please start a Parity-sync immediately";
+    echo "<i class='fa fa-warning'></i> Please start a Parity-Sync immediately";
   }
 break;
 case 'shares':

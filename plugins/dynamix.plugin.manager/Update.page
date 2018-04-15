@@ -30,7 +30,7 @@ if (file_exists('/boot/previous/changes.txt')) {
   }
 }
 ?>
-<style>input[type=button]{margin:0}</style>
+<style>input[type=button].not('#checkos'){margin:0}</style>
 <script>
 
 function change_branch(source,branch) {
@@ -104,7 +104,7 @@ function loadlist(id) {
 $(function() {
   loadlist();
 <?if ($check):?>
-  $('.tabs').append("<span class='status hshift'><input type='button' id='checkos' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"System Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
+  $('.tabs').append("<span class='status vhshift'><input type='button' id='checkos' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"System Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
 <?endif;?>
 });
 </script>
