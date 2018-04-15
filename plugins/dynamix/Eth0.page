@@ -366,7 +366,7 @@ function portcheck_eth0() {
 function portToggle(port,cmd) {
   $.post('/webGui/include/PortToggle.php',{port:port,cmd:cmd},function(){refresh();});
 }
-var watchDHCP = new NchanSubscriber('/sub/dhcp');
+var watchDHCP = new NchanSubscriber('/sub/dhcp', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchDHCP.on('message', function(data) {
   data = data.split(' ');
   for (var i=0,row; row=data[i]; i++) {

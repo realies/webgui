@@ -435,7 +435,7 @@ function parseINI(data){
   });
   return value;
 }
-var watchdog = new NchanSubscriber('/sub/var');
+var watchdog = new NchanSubscriber('/sub/var', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchdog.on('message', function(data) {
   var ini = parseINI(data);
   var state = ini['fsState'];
