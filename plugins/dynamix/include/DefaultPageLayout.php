@@ -190,7 +190,7 @@ function hideUpgrade(set) {
 }
 function openUpgrade(plugin) {
   swal({title:'Upgrade unRAID OS',text:'Do you want to download and install the new version?',type:'warning',showCancelButton:true},function(){
-    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2='+plugin+'.plg','Update Plugin',600,900,true);
+    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2='+plugin+'.plg','Update unRAID OS',600,900,true);
   });
 }
 function notifier() {
