@@ -291,7 +291,7 @@ IPv6 privacy extensions:
 </div>
 </div>
 Desired MTU:
-: <input type="number" name="MTU" min="68" max="9198" value="<?=$locked?$ethX['MTU']:$ethX['MTU']?>" class="narrow">
+: <input type="number" name="MTU" min="68" max="9198" value="<?=$locked?$ethX['MTU']:$ethX['MTU']?>" class="narrow" placeholder="<?=exec("ip link show dev ethX|grep -Pom1 'mtu \K\d+'")?>">
 
 > This is the MTU size to use on the physical Ethernet interface.
 > If left blank, the MTU will automatically be determined (by default 1500 bytes).

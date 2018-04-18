@@ -29,9 +29,12 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true);
+$custom = DockerUtil::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
+$driver = [];
+
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
+foreach (DockerUtil::docker("network ls --format='{{.Name}}|{{.Driver}}'",true) as $network) {list($name,$type) = explode('|',$network); $driver[$name] = $type;}
 
 function stopContainer($name) {
   global $DockerClient;
@@ -366,8 +369,7 @@ function xmlSecurity(&$template) {
 }
 
 function xmlToCommand($xml, $create_paths=false) {
-  global $var;
-  global $docroot;
+  global $docroot, $var, $driver;
   $xml           = xmlToVar($xml);
   $cmdName       = strlen($xml['Name']) ? '--name='.escapeshellarg($xml['Name']) : '';
   $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
@@ -396,13 +398,18 @@ function xmlToCommand($xml, $create_paths=false) {
         @chgrp($hostConfig, 100);
       }
     } elseif ($confType == 'port') {
-      // Export ports as variable if Network is set to host
-      if (preg_match('/^(host|eth[0-9]|br[0-9]|bond[0-9])/',strtolower($xml['Network']))) {
+      switch ($driver[$xml['Network']]) {
+      case 'host':
+      case 'macvlan':
+        // Export ports as variable if network is set to host or macvlan
         $Variables[] = strtoupper(escapeshellarg($Mode.'_PORT_'.$containerConfig).'='.escapeshellarg($hostConfig));
-      // Export ports as port if Network is set to bridge
-      } elseif (strtolower($xml['Network'])== 'bridge') {
+        break;
+      case 'bridge':
+        // Export ports as port if network is set to (custom) bridge
         $Ports[] = escapeshellarg($hostConfig.':'.$containerConfig.'/'.$Mode);
-      // No export of ports if Network is set to none
+        break;
+      case 'none':
+        // No export of ports if network is set to none
       }
     } elseif ($confType == "variable") {
       $Variables[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);

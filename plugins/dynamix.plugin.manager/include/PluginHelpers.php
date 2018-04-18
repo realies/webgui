@@ -25,11 +25,11 @@ function check_plugin($arg, $dns='8.8.8.8') {
   return exec("ping -qnl2 -c2 -W3 $dns 2>/dev/null|awk '/received/{print $4}'") ? plugin('check',$arg) : false;
 }
 
-function make_link($method, $arg, $extra='') {
+function make_link($method, $arg, $extra=null, $title=null) {
   $plg = basename($arg,'.plg').':'.$method;
   $id = str_replace(['.',' ','_'],'',$plg);
   $check = $method=='remove' ? "<input type='checkbox' onClick='document.getElementById(\"$id\").disabled=!this.checked'>" : "";
-  $disabled = $check ? ' disabled' : '';
+  $disabled = ($check || $extra=='disabled') ? ' disabled' : '';
   if ($method == 'delete') {
     $cmd = "/plugins/dynamix.plugin.manager/scripts/plugin_rm&arg1=$arg";
     $exec = $plg = "";
@@ -37,7 +37,8 @@ function make_link($method, $arg, $extra='') {
     $cmd = "/plugins/dynamix.plugin.manager/scripts/plugin&arg1=$method&arg2=$arg".($extra?"&arg3=$extra":"");
     $exec = "loadlist";
   }
-  return "$check<input type='button' id='$id' value='".ucfirst($method)."' onclick='openBox(\"$cmd\",\"".ucwords($method)." Plugin\",600,900,true,\"$exec\",\"$plg\");'$disabled>";
+  $title = $title ?: $method;
+  return "$check<input type='button' id='$id' value='".ucfirst($title)."' onclick='openBox(\"$cmd\",\"".ucwords($title)." Plugin\",600,900,true,\"$exec\",\"$plg\");'$disabled>";
 }
 
 // trying our best to find an icon
@@ -54,6 +55,8 @@ function icon($name) {
   $icon = "plugins/{$plugin}/{$plugin}.png";
   if (file_exists($icon)) return $icon;
   $icon = "plugins/{$plugin}/{$name}.png";
+  if (file_exists($icon)) return $icon;
+  $icon = "plugins/{$name}.png";
   if (file_exists($icon)) return $icon;
 // last resort - plugin manager icon
   return "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
