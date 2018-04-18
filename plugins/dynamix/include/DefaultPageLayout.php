@@ -177,7 +177,7 @@ function showNotice(data,plugin) {
   $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a "+href+">$1</a>"));
 }
 function showUpgrade(data,plugin) {
-  var href = "href=\"#\" onclick=\"hideUpgrade();openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2="+plugin+".plg','Update Plugin',600,900,true)\"";
+  var href = "href=\"#\" onclick=\"hideUpgrade();openUpgrade('"+plugin+"')\"";
   if ($.cookie('os_upgrade')==null)
     $('.upgrade_notice').html(data.replace(/<a(.*)>(.*)<\/a>/,"<a "+href+"$1>$2</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
 }
@@ -187,6 +187,11 @@ function hideUpgrade(set) {
     $.cookie('os_upgrade','true',{path:'/'});
   else
     $.removeCookie('os_upgrade',{path:'/'});
+}
+function openUpgrade(plugin) {
+  swal({title:'Upgrade unRAID OS',text:'Do you want to download and install the new version?',type:'warning',showCancelButton:true},function(){
+    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2='+plugin+'.plg','Update Plugin',600,900,true);
+  });
 }
 function notifier() {
   var tub1 = 0, tub2 = 0, tub3 = 0;
