@@ -169,17 +169,12 @@ function showFooter(data, id) {
   if (id !== undefined) $('#'+id).remove();
   $('#copyright').prepend(data);
 }
-function showNotice(data,plugin) {
-  if (plugin)
-    var href = "href=\"#\" onclick=\"openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2="+plugin+".plg','Update Plugin',600,900,true)\"";
-  else
-    var href = "href=\"/Plugins\"";
-  $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a "+href+">$1</a>"));
+function showNotice(data) {
+  $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='/Plugins'>$1</a>"));
 }
-function showUpgrade(data,plugin) {
-  var href = "href=\"#\" onclick=\"hideUpgrade();openUpgrade('"+plugin+"')\"";
+function showUpgrade(data) {
   if ($.cookie('os_upgrade')==null)
-    $('.upgrade_notice').html(data.replace(/<a(.*)>(.*)<\/a>/,"<a "+href+"$1>$2</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
+    $('.upgrade_notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='#' onclick='hideUpgrade();openUpgrade()'>$1</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
 }
 function hideUpgrade(set) {
   $('.upgrade_notice').hide();
@@ -188,9 +183,9 @@ function hideUpgrade(set) {
   else
     $.removeCookie('os_upgrade',{path:'/'});
 }
-function openUpgrade(plugin) {
-  swal({title:'Upgrade unRAID OS',text:'Do you want to download and install the new version?',type:'warning',showCancelButton:true},function(){
-    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2='+plugin+'.plg','Update unRAID OS',600,900,true);
+function openUpgrade() {
+  swal({title:'Update unRAID OS',text:'Do you want to update to the new version?',type:'warning',showCancelButton:true},function(){
+    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2=unRAIDServer.plg','Update unRAID OS',600,900,true);
   });
 }
 function notifier() {
@@ -515,7 +510,7 @@ $(function() {
 <?elseif (strpos($readme,'DOWNGRADE')!==false):?>
   showUpgrade('<b>Reboot required</b> to downgrade unRAID OS');
 <?elseif ($version = plugin_update_available('unRAIDServer',true)):?>
-  showUpgrade('unRAID OS v<?=$version?> is available. <a>Download Now</a>','unRAIDServer');
+  showUpgrade('unRAID OS v<?=$version?> is available. <a>Update Now</a>');
 <?elseif (!$notify['system']):?>
   $('.upgrade_notice').html('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.').show();
 <?endif;?>
