@@ -356,13 +356,13 @@
 			$ctrl = '';
 			switch ($usbmode) {
 				case 'usb3':
-					$ctrl = "<controller type='usb' index='0' model='nec-xhci'>
+					$ctrl = "<controller type='usb' index='0' model='nec-xhci' ports='15'>
 								<address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
 							</controller>";
 					break;
 
 				case 'usb3-qemu':
-					$ctrl = "<controller type='usb' index='0' model='qemu-xhci'>
+					$ctrl = "<controller type='usb' index='0' model='qemu-xhci' ports='15'>
 								<address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
 							</controller>";
 					break;
