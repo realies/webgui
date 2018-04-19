@@ -15,18 +15,14 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Markdown.php";
 require_once "$docroot/plugins/dynamix.plugin.manager/include/PluginHelpers.php";
 
-$system   = $_GET['system'] ?? false;
-$branch   = $_GET['branch'] ?? false;
-$source   = $_GET['source'] ?? false;
-$audit    = $_GET['audit'] ?? false;
-$check    = $_GET['check'] ?? false;
-$release  = $_GET['release'] ?? false;
-$empty    = true;
-$updates  = 0;
-$missing  = "None";
-$builtin  = "unRAIDServer";
-$plugins  = $system ? "/var/log/plugins/$builtin.plg" : "/var/log/plugins/*.plg";
-$limetech = "https://s3.amazonaws.com/dnld.lime-technology.com";
+$system  = $_GET['system'] ?? false;
+$branch  = $_GET['branch'] ?? false;
+$audit   = $_GET['audit'] ?? false;
+$check   = $_GET['check'] ?? false;
+$empty   = true;
+$updates = 0;
+$builtin = ['unRAIDServer'];
+$plugins = "/var/log/plugins/*.plg";
 
 if ($audit) {
   list($plg,$action) = explode(':',$audit);
@@ -38,66 +34,33 @@ if ($audit) {
   }
 }
 
-function strip($name) {
-  return str_replace('unRAID ','',$name);
-}
-
-function file_date($file) {
-  //file is considered outdated when older than 1 day
-  return file_exists($file) ? (filectime($file) > (time()-86400) ? 'up-to-date' : 'outdated') : 'unknown';
-}
-
 foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //only consider symlinks
   $plugin_file = @readlink($plugin_link);
   if ($plugin_file === false) continue;
 //plugin name
   $name = plugin('name',$plugin_file) ?: basename($plugin_file,".plg");
-//upgrade or downgrade selected release
-  if ($release) {
-    extract(parse_ini_file('/etc/unraid-version'));
-    $tmp_file = "/var/tmp/$name.plg";
-    if ($release != $version) {
-      exec("sed -ri 's|^(<!ENTITY version).*|\\1   \"$release\">|' $tmp_file");
-      echo "$plugin_file\0$tmp_file";
-    } else {
-      echo "$tmp_file\0$plugin_file";
-    }
-    return;
-  }
-//skip system when doing user plugins
-  if (!$system && strpos($name,$builtin)===0) continue;
+  $custom = in_array($name,$builtin);
+//switch between system and custom plugins
+  if (($system && !$custom) || (!$system && $custom)) continue;
 //forced plugin check?
-  $forced = !$audit && !$check;
-  $checked = $forced ? check_plugin(basename($plugin_file)) : true;
-//switch stable/next/test release?
-  if ($system) {
-    //current version
-    extract(parse_ini_file('/etc/unraid-version'));
-    //category
-    $category = $branch ?: plugin('category',$plugin_file) ?: (strpos($version,'-')===false ? 'stable' : 'next');
-    if (!$branch && !$source) $source = $category;
-    $releases = [];
-    exec("curl -m 15 $limetech/$category/releases.json 2>/dev/null", $releases);
-    if ($releases) $releases = json_decode(implode("\n",$releases),true); else $releases[] = ['name' => $missing];
-    $release = strip($releases[0]['name']);
-    if ($release != $missing) {
-      $tmp_plg = "$name-.plg";
-      $tmp_file = "/var/tmp/$name.plg";
-      copy($plugin_file,$tmp_file);
-      if ($branch) exec("sed -ri 's|^(<!ENTITY category).*|\\1  \"$branch\">|' $tmp_file");
-      symlink($tmp_file,"/var/log/plugins/$tmp_plg");
-      if ($release != $version && $branch) {
-        if (check_plugin($tmp_plg)) copy("/tmp/plugins/$tmp_plg", $tmp_file);
-        exec("sed -ri 's|^(<!ENTITY version).*|\\1   \"$release\">|' $tmp_file");
-        $plugin_file = $tmp_file;
-      }
+  $checked = (!$audit && !$check) ? check_plugin(basename($plugin_file)) : true;
+//OS update?
+  $os = $system && $name==$builtin[0];
+  $toggle = false;
+//toggle stable/next release?
+  if ($os && $branch) {
+    $toggle = plugin('version',$plugin_file);
+    $tmp_plg = "$name-.plg";
+    $tmp_file = "/var/tmp/$name.plg";
+    copy($plugin_file,$tmp_file);
+    exec("sed -ri 's|^(<!ENTITY category).*|\\1 \"{$branch}\">|' $tmp_file");
+    symlink($tmp_file,"/var/log/plugins/$tmp_plg");
+    if (check_plugin($tmp_plg)) {
+      copy("/tmp/plugins/$tmp_plg",$tmp_file);
+      $plugin_file = $tmp_file;
     }
-  } else {
-    //plugin version
-    $version = plugin('version',$plugin_file) ?: 'unknown';
   }
-  $save = $version;
 //link/icon
   $icon = icon($name);
   if ($launch = plugin('launch',$plugin_file))
@@ -111,51 +74,45 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   else
     $desc = Markdown("**{$name}**");
 //author
-  $author = plugin('author',$plugin_file) ?: 'anonymous';
+  $author = plugin('author',$plugin_file) ?: "anonymous";
+//version
+  $version = plugin('version',$plugin_file) ?: "unknown";
+  $date = str_replace('.','',$version);
+//category
+  $category = plugin('category',$plugin_file) ?: (strpos($version,'-')!==false ? 'next' : 'stable');
 //status
+  $status = 'unknown';
   $changes_file = $plugin_file;
   $url = plugin('pluginURL',$plugin_file);
   if ($url !== false) {
-    $extra = $branch && $branch != $source;
-    $filename = "/tmp/plugins/".(($system && $extra) ? $tmp_plg : basename($url));
-    $latest = ($checked && file_exists($filename)) ? plugin('version',$filename) : 0;
-    if ($system) {
-      $release = strip($releases[0]['name']);
-      $other = ($release != $missing);
-      if ($extra) {
-        if ($other) $version .= "<br><span id='os-release' class='red-text'>$release</span>";
-        $status = "<span id='os-install'>".make_link('install', $plugin_file,$other?'forced':'disabled')."</span>";
+    $filename = "/tmp/plugins/".(($os && $branch) ? $tmp_plg : basename($url));
+    if ($checked && file_exists($filename)) {
+      if ($toggle && $toggle != $version) {
+        $status = make_link('install',$plugin_file,'forced');
       } else {
-        $style1 = $style2 = "";
-        if ($forced && $other && $latest===0) $latest = $release;
-        if (version_compare($latest,$version,'>')) {
-          $style1 = "style='display:none'";
-          $version .= "<br><span id='os-release' class='red-text'>$latest</span>";
+        $latest = plugin('version',$filename);
+        if ($os ? version_compare($latest,$version,'>') : strcmp($latest,$version) > 0) {
+          $version .= "<br><span class='red-text'>$latest</span>";
+          $status = make_link("update",basename($plugin_file));
           $changes_file = $filename;
+          if (!$os) $updates++;
         } else {
-          $style2 = "style='display:none'";
+          //status is considered outdated when older than 1 day
+          $status = filectime($filename) > (time()-86400) ? 'up-to-date' : 'need check';
         }
-        $status = "<span id='os-status' $style1>".file_date($filename)."</span>";
-        $status .= "<span id='os-upgrade' $style2>".make_link('update', basename($plugin_file))."</span>";
-        $status .= "<span id='os-downgrade' style='display:none'>".make_link('install', $plugin_file, 'forced', 'downgrade')."</span>";
-      }
-    } else {
-      if (strcmp($latest,$version) > 0) {
-        $version .= "<br><span class='red-text'>$latest</span>";
-        $status = make_link('update', basename($plugin_file));
-        $changes_file = $filename;
-        $updates++;
-      } else {
-        $status = file_date($filename);
       }
     }
   }
-  $changes = strpos($version,$missing)===false ? plugin('changes',$changes_file) : false;
+  if (strpos($status,'update')!==false) $rank = '0';
+  elseif (strpos($status,'install')!==false) $rank = '1';
+  elseif ($status=='need check') $rank = '2';
+  elseif ($status=='up-to-date') $rank = '3';
+  else $rank = '4';
+  $changes = plugin('changes',$changes_file);
   if ($changes !== false) {
     $txtfile = "/tmp/plugins/".basename($plugin_file,'.plg').".txt";
     file_put_contents($txtfile,$changes);
-    $version .= "<i class='fa fa-info-circle fa-fw big blue-text' style='cursor:pointer' title='View Release Notes' ";
-    $version .= "onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900)\"></i>";
+    $version .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=".urlencode($txtfile)."','Release Notes',600,900); return false\"><span class='fa fa-info-circle fa-fw big blue-text'></span></a>";
   }
 //write plugin information
   $empty = false;
@@ -163,36 +120,24 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   echo "<td style='vertical-align:top;width:64px'><p style='text-align:center'>$link</p></td>";
   echo "<td><span class='desc_readmore' style='display:block'>$desc</span></td>";
   echo "<td>$author</td>";
-  echo "<td data='$save'>$version</td>";
+  echo "<td data='$date'>$version</td>";
+  echo "<td data='$rank'>$status</td>";
+  echo "<td>";
   if ($system) {
-    // available releases
-    $branch = $branch ?: $source;
-    echo "<td><select id='change-version' class='narrow' onchange='change_version(\"$save\",this.value,\"$branch\")'>";
-    if ($latest===0)
-      echo mk_options(0,$missing);
-    else
-      foreach ($releases as $release) echo mk_options($version, strip($release['name']));
-    echo "</select></td>";
-    echo "<td data='0'>$status</td>";
-    echo "<td><select id='change-branch' class='auto' onchange='change_branch(\"$source\",this.value)'>";
-    echo mk_options($category,'stable');
-    echo mk_options($category,'next');
-    echo mk_options($category,'test');
-    echo "</select></td>";
+    if ($os) {
+      echo "<select id='change_branch' class='auto' onchange='update_table(this.value)'>";
+      echo mk_options($category,'stable');
+      echo mk_options($category,'next');
+      echo "</select>";
+    }
   } else {
-    if (strpos($status,'upgrade')!==false) $rank = 0;
-    elseif ($status=='outdated') $rank = 1;
-    elseif ($status=='up-to-date') $rank = 2;
-    else $rank = 3;
-    echo "<td data='$rank'>$status</td>";
-    echo "<td>";
-    echo make_link('remove', basename($plugin_file));
-    echo "</td>";
+    echo make_link('remove',basename($plugin_file));
   }
+  echo "</td>";
   echo "</tr>";
 //remove temporary symlink
-  if ($tmp_plg) unlink("/var/log/plugins/$tmp_plg");
+  @unlink("/var/log/plugins/$tmp_plg");
 }
-if ($empty) echo "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-fw fa-check-square-o'></i> No plugins installed</td><tr>";
+if ($empty) echo "<tr><td colspan='6' style='text-align:center;padding-top:12px'><i class='fa fa-check-square-o icon'></i> No plugins installed</td><tr>";
 echo "\0".$updates;
 ?>
