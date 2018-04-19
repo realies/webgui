@@ -6,6 +6,10 @@ function addDockerContainerContext(container, image, template, started, update, 
     opts.push({text:'WebUI', icon:'fa-globe', href:webui, target:'_blank'});
     opts.push({divider:true});
   }
+  if (started) {
+    opts.push({text:'Console', icon:'fa-terminal', action:function(e){e.preventDefault(); dockerTerminal(container);}});
+    opts.push({divider:true});
+  }
   if (!update) {
     opts.push({text:'Update', icon:'fa-arrow-down', action:function(e){e.preventDefault(); execUpContainer(container);}});
     opts.push({divider:true});
@@ -38,6 +42,14 @@ function addDockerImageContext(image, imageTag) {
   var opts = [{header:'(orphan image)'}];
   opts.push({text:'Remove', icon:'fa-trash', action:function(e){e.preventDefault(); rmImage(image, imageTag);}});
   context.attach('#'+image, opts);
+}
+function dockerTerminal(container) {
+  var height = 600;
+  var width = 900;
+  var top = (screen.height-height)/2;
+  var left = (screen.width-width)/2;
+  $.get(eventURL,{action:'terminal',name:container});
+  setTimeout(function(){window.open('/dockerterminal/'+container+'/', container, 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();},150);
 }
 function execUpContainer(container) {
   var title = 'Updating the container: '+container;
