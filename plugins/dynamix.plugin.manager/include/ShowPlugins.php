@@ -173,25 +173,22 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
     else
       foreach ($releases as $release) echo mk_options($version, strip($release['name']));
     echo "</select></td>";
-    $rank = 0;
+    echo "<td data='0'>$status</td>";
+    echo "<td><select id='change-branch' class='auto' onchange='change_branch(\"$source\",this.value)'>";
+    echo mk_options($category,'stable');
+    echo mk_options($category,'next');
+    echo mk_options($category,'test');
+    echo "</select></td>";
   } else {
     if (strpos($status,'upgrade')!==false) $rank = 0;
     elseif ($status=='outdated') $rank = 1;
     elseif ($status=='up-to-date') $rank = 2;
     else $rank = 3;
-  }
-  echo "<td data='$rank'>$status</td>";
-  echo "<td>";
-  if ($system) {
-    echo "<select id='change-branch' class='auto' onchange='change_branch(\"$source\",this.value)'>";
-    echo mk_options($category,'stable');
-    echo mk_options($category,'next');
-    echo mk_options($category,'test');
-    echo "</select>";
-  } else {
+    echo "<td data='$rank'>$status</td>";
+    echo "<td>";
     echo make_link('remove', basename($plugin_file));
+    echo "</td>";
   }
-  echo "</td>";
   echo "</tr>";
 //remove temporary symlink
   if ($tmp_plg) unlink("/var/log/plugins/$tmp_plg");
