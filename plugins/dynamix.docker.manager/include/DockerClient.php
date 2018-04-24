@@ -710,6 +710,7 @@ class DockerClient {
 				$nat = false;
 			}
 			$ip = $ct['NetworkSettings']['Networks'][$c['NetworkMode']]['IPAddress'];
+			$ports = is_array($ports) ? $ports : array();
 			foreach ($ports as $port => $value) {
 				list($PrivatePort, $Type) = explode('/', $port);
 				$c['Ports'][] = ['IP' => $ip, 'PrivatePort' => $PrivatePort, 'PublicPort' => $nat ? $value[0]['HostPort']:$PrivatePort, 'NAT' => $nat, 'Type' => $Type ];
