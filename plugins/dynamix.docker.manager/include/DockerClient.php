@@ -72,6 +72,7 @@ class DockerTemplates {
 		foreach ($iter as $path => $fileinfo) {
 			$fext = $fileinfo->getExtension();
 			if ($ext && $ext != $fext) continue;
+			if (substr(basename($path),0,1) == ".")  continue;
 			if ($fileinfo->isFile()) $paths[] = ['path' => $path, 'prefix' => basename(dirname($path)), 'name' => $fileinfo->getBasename(".$fext")];
 		}
 		return $paths;
