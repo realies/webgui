@@ -28,7 +28,7 @@ $dockerManPaths = [
 ];
 
 // load network variables if needed.
-if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_file("$docroot/state/network.ini",true));
+if (!isset($eth0)) extract(parse_ini_file("$docroot/state/network.ini",true));
 $host = $eth0['IPADDR:0'] ?? '0.0.0.0';
 
 // Docker configuration file - guaranteed to exist
