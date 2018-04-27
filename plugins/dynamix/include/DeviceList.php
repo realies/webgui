@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -381,7 +381,7 @@ case 'cache':
 case 'open':
   foreach ($devs as $disk) {
     $dev = $disk['device'];
-    $data = explode(' ',$diskio[$dev] ?? '0 0');
+    $data = explode(' ',$diskio[$dev] ?? '0 0 0 0');
     $disk['name'] = $dev;
     $disk['type'] = 'New';
     $disk['color'] = read_disk($dev,'color');
@@ -406,7 +406,7 @@ case 'parity':
   if ($var['mdResync']>0) {
     $data[] = my_scale($var['mdResync']*1024,$unit,-1)." $unit";
     $data[] = my_clock(floor((time()-$var['sbUpdated'])/60));
-    $data[] = my_scale($var['mdResyncPos']*1024,$unit)." $unit (".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),1,substr($display['number'],0,1),'')." %)";
+    $data[] = my_scale($var['mdResyncPos']*1024,$unit)." $unit (".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),1,$display['number'][0],'')." %)";
     $data[] = my_scale($var['mdResyncDb']*1024/$var['mdResyncDt'],$unit, 1)." $unit/sec";
     $data[] = my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0));
     $data[] = $var['sbSyncErrs'];
