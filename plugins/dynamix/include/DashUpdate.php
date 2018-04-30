@@ -123,24 +123,24 @@ function stage($i) {
     }
   } else {
     $d = $i ? ($now ? $D : today($i)) : today(last_day()-6);
-    $x = $i ?: last_day()-6;
-    $D = mkdate($d, $x);
+    $s = $i ?: last_day()-6;
+    $D = mkdate($d, $s);
     $t = mktime($h,$m,0,$M,$D,$Y)-$time; // first day
     if ($t < 0) {
-      $D = mkdate(next_day($d), $x);
+      $D = mkdate(next_day($d), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next day
     }
     if ($t < 0) {
       $M = find_month($M+1);
-      $x = $i ?: last_day()-6;
-      $D = mkdate(today($x), $x);
+      $s = $i ?: last_day()-6;
+      $D = mkdate(today($s), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next month
     }
     if ($t < 0) {
       $Y++;
       $M = find_month(1);
-      $x = $i ?: last_day()-6;
-      $D = mkdate(today($x), $x);
+      $s = $i ?: last_day()-6;
+      $D = mkdate(today($s), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next year
     }
   }
