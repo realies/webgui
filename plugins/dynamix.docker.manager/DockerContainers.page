@@ -49,6 +49,8 @@ th.eight{width:8%}
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start all Containers" style="display:none">
 <input type="button" onclick="stopAll()" value="Stop all Containers" style="display:none">
+<input type="button" onclick="pauseAll()" value="Pause all Containers" style="display:none">
+<input type="button" onclick="resumeAll()" value="Resume all Containers" style="display:none">
 <input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll" style="display:none">
 <input type="button" onclick="updateAll()" value="Update all Containers" id="updateAll" style="display:none">
 

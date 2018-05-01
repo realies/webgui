@@ -173,6 +173,16 @@ function stopAll() {
   for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1) $('#'+ct.id).find('i').removeClass('fa-play fa-pause').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'},function(){loadlist();});
 }
+function pauseAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==0) $('#'+ct.id).find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'pause'},function(){loadlist();});
+}
+function resumeAll() {
+  $('input[type=button]').prop('disabled',true);
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==1) $('#'+ct.id).find('i').removeClass('fa-pause').addClass('fa-refresh fa-spin');
+  $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'unpause'},function(){loadlist();});
+}
 function checkAll() {
   $('input[type=button]').prop('disabled',true);
   $('.updatecolumn').html('<span style="color:#267CA8"><i class="fa fa-refresh fa-spin"></i> checking...</span>');
