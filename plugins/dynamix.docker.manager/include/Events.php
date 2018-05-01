@@ -27,8 +27,14 @@ switch ($action) {
 	case 'start':
 		if ($container) $arrResponse = ['success' => $DockerClient->startContainer($container)];
 		break;
+	case 'pause':
+		if ($container) $arrResponse = ['success' => $DockerClient->pauseContainer($container)];
+		break;
 	case 'stop':
 		if ($container) $arrResponse = ['success' => $DockerClient->stopContainer($container)];
+		break;
+	case 'resume':
+		if ($container) $arrResponse = ['success' => $DockerClient->resumeContainer($container)];
 		break;
 	case 'restart':
 		if ($container) $arrResponse = ['success' => $DockerClient->restartContainer($container)];
@@ -85,8 +91,13 @@ switch ($action) {
 			exit;
 		}
 		break;
+	case 'terminal':
+		exec("kill \$(pgrep -a ttyd|awk '/\/$name\.sock/{print \$1}') 2>/dev/null");
+		@unlink("/var/tmp/$name.sock");
+		exec("exec ttyd -d 0 -i '/var/tmp/$name.sock' docker exec -it '$name' sh &>/dev/null &");
+		break;
 	default:
-		$arrResponse = ['error' => 'Unknown action \'' . $action . '\''];
+		$arrResponse = ['error' => "Unknown action '$action'"];
 		break;
 }
 

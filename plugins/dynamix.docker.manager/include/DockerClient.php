@@ -260,6 +260,7 @@ class DockerTemplates {
 			$image = $ct['Image'];
 			$tmp = &$info[$name] ?? [];
 			$tmp['running'] = $ct['Running'];
+			$tmp['paused'] = $ct['Paused'];
 			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
 			if ($ct['Running']) {
@@ -628,8 +629,20 @@ class DockerClient {
 		return $code;
 	}
 
+	public function pauseContainer($id) {
+		$this->getDockerJSON("/containers/$id/pause", 'POST', $code);
+		$this->flushCache($this::$containersCache);
+		return $code;
+	}
+
 	public function stopContainer($id) {
 		$this->getDockerJSON("/containers/$id/stop", 'POST', $code);
+		$this->flushCache($this::$containersCache);
+		return $code;
+	}
+
+	public function resumeContainer($id) {
+		$this->getDockerJSON("/containers/$id/unpause", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
@@ -696,6 +709,7 @@ class DockerClient {
 			$c['Name']        = substr($info['Name'], 1);
 			$c['Status']      = $ct['Status'] ?: 'None';
 			$c['Running']     = $info['State']['Running'];
+			$c['Paused']      = $info['State']['Paused'];
 			$c['Cmd']         = $ct['Command'];
 			$c['Id']          = $this->extractID($ct['Id']);
 			$c['Volumes']     = $info['HostConfig']['Binds'];

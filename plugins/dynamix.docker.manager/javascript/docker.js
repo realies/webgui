@@ -1,9 +1,10 @@
 var eventURL = '/plugins/dynamix.docker.manager/include/Events.php';
 
-function addDockerContainerContext(container, image, template, started, update, autostart, webui, id, Support, Project) {
+function addDockerContainerContext(container, image, template, started, paused, update, autostart, webui, id, Support, Project) {
   var opts = [{header:container, image:'/plugins/dynamix.docker.manager/images/dynamix.docker.manager.png'}];
-  if (started && (webui !== '' && webui != '#')) {
-    opts.push({text:'WebUI', icon:'fa-globe', href:webui, target:'_blank'});
+  if (started && !paused) {
+    if (webui !== '' && webui != '#') opts.push({text:'WebUI', icon:'fa-globe', href:webui, target:'_blank'});
+    opts.push({text:'Console', icon:'fa-terminal', action:function(e){e.preventDefault(); dockerTerminal(container);}});
     opts.push({divider:true});
   }
   if (!update) {
@@ -11,7 +12,12 @@ function addDockerContainerContext(container, image, template, started, update, 
     opts.push({divider:true});
   }
   if (started) {
-    opts.push({text:'Stop', icon:'fa-stop', action:function(e){e.preventDefault(); eventControl({action:'stop', container:id}, 'loadlist');}});
+    if (paused) {
+      opts.push({text:'Resume', icon:'fa-play', action:function(e){e.preventDefault(); eventControl({action:'resume', container:id}, 'loadlist');}});
+    } else {
+      opts.push({text:'Pause', icon:'fa-pause', action:function(e){e.preventDefault(); eventControl({action:'pause', container:id}, 'loadlist');}});
+      opts.push({text:'Stop', icon:'fa-stop', action:function(e){e.preventDefault(); eventControl({action:'stop', container:id}, 'loadlist');}});
+    }
     opts.push({text:'Restart', icon:'fa-refresh', action:function(e){e.preventDefault(); eventControl({action:'restart', container:id}, 'loadlist');}});
   } else {
     opts.push({text:'Start', icon:'fa-play', action:function(e){e.preventDefault(); eventControl({action:'start', container:id}, 'loadlist');}});
@@ -38,6 +44,14 @@ function addDockerImageContext(image, imageTag) {
   var opts = [{header:'(orphan image)'}];
   opts.push({text:'Remove', icon:'fa-trash', action:function(e){e.preventDefault(); rmImage(image, imageTag);}});
   context.attach('#'+image, opts);
+}
+function dockerTerminal(container) {
+  var height = 600;
+  var width = 900;
+  var top = (screen.height-height)/2;
+  var left = (screen.width-width)/2;
+  $.get(eventURL,{action:'terminal',name:container});
+  setTimeout(function(){window.open('/dockerterminal/'+container+'/', container, 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();},180);
 }
 function execUpContainer(container) {
   var title = 'Updating the container: '+container;
@@ -135,7 +149,7 @@ function rmImage(image, imageName) {
   });
 }
 function eventControl(params, spin) {
-  if (spin) $('#'+params['container']).find('i').removeClass('fa-play fa-square').addClass('fa-refresh fa-spin');
+  if (spin) $('#'+params['container']).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
   $.post(eventURL, params, function(data) {
     if (data.success === true) {
       if (spin) setTimeout(spin+'()',500); else location=window.location.href;
@@ -156,7 +170,7 @@ function startAll() {
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1) $('#'+ct.id).find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1) $('#'+ct.id).find('i').removeClass('fa-play fa-pause').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'},function(){loadlist();});
 }
 function checkAll() {

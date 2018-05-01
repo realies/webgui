@@ -43,18 +43,19 @@ $n = 0;
 foreach ($containers as $ct) {
   $name = $ct['Name'];
   $id = $ct['Id'];
-  $running = $ct['Running'] ? 1 : 0;
   $info = &$allInfo[$name];
+  $running = $info['running'] ? 1 : 0;
+  $paused = $info['paused'] ? 1 : 0;
   $is_autostart = $info['autostart'] ? 'true':'false';
   $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
   $template = $info['template'];
   $webGui = html_entity_decode($info['url']);
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
-  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
   $docker[] = "docker.push({name:'$name',id:'$id',state:$running,update:'$updateStatus'});";
-  $shape = $running ? 'play':'square';
-  $status = $running ? 'started':'stopped';
+  $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
+  $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
   $ports = [];
   foreach ($ct['Ports'] as $port) {
@@ -69,15 +70,15 @@ foreach ($containers as $ct) {
   }
   echo "<tr><td style='width:48px;padding:4px'>";
   echo "<div id='$id' style='display:block; cursor:pointer'><div style='position:relative;width:48px;height:48px;margin:0px auto'>";
-  echo "<img src='".htmlspecialchars($icon)."' class='".htmlspecialchars($status)."' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
-  echo "<i class='fa iconstatus fa-$shape $status' title='".htmlspecialchars($status)."'></i></div></div>";
+  echo "<img src='".htmlspecialchars($icon)."' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
+  echo "<i class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
   echo "</td><td class='ct-name'>";
   if ($template) {
     echo "<a class='exec' onclick=\"editContainer('".addslashes(htmlspecialchars($name))."','".addslashes(htmlspecialchars($template))."')\">".htmlspecialchars($name)."</a>";
   } else {
     echo htmlspecialchars($name);
   }
-  echo "<div class='advanced' style='width:160px'>Container ID: ".htmlspecialchars($id)."</div>";
+  echo "<div class='advanced' style='width:160px'>Container ID: $id</div>";
   if ($ct['BaseImage']) echo "<div class='advanced' style='width:160px;'><i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."</div>"; 
   echo "<div class='advanced' style='width:160px'>By:";
   $registry = $info['registry'];

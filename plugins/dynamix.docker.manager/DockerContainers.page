@@ -33,6 +33,7 @@ img.stopped{opacity:0.3}
 .iconstatus.stopped{font-size:1.2em}
 .started{color:#009900}
 .stopped{color:#EF3D47}
+.paused{color:#F0DD33}
 .switch-button-label.off{color:inherit}
 th.five{width:5%}
 th.eight{width:8%}
