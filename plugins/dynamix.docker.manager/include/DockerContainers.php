@@ -68,7 +68,7 @@ foreach ($containers as $ct) {
     list($host_path,$container_path,$access_mode) = explode(':',$mount);
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
   }
-  echo "<tr><td style='width:48px;padding:4px'>";
+  echo "<tr class='sortable'><td style='width:48px;padding:4px'>";
   echo "<div id='$id' style='display:block; cursor:pointer'><div style='position:relative;width:48px;height:48px;margin:0px auto'>";
   echo "<img src='".htmlspecialchars($icon)."' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
   echo "<i class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
@@ -102,8 +102,7 @@ foreach ($containers as $ct) {
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
   echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
-  echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td>";
-  echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
+  echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td></tr>";
 }
 foreach ($images as $image) {
   if (count($image['usedBy'])) continue;
@@ -116,7 +115,7 @@ foreach ($images as $image) {
   echo "</div></div></td>";
   echo "<td><i>(orphan image)</i><div style='width:160px;'>Image ID: $id</div>";
   echo "<div style='width:160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div></td>";
-  echo "<td colspan=4'>&nbsp;</td>";
+  echo "<td colspan=3'>&nbsp;</td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
 echo "\0".implode($menu).implode($docker);

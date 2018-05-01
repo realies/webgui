@@ -17,8 +17,8 @@ Markdown="false"
  * all copies or substantial portions of the Software.
  */
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
@@ -37,14 +37,15 @@ img.stopped{opacity:0.3}
 .switch-button-label.off{color:inherit}
 th.five{width:5%}
 th.eight{width:8%}
+tbody > tr.sortable:hover{cursor:move}
 </style>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
 <div class="spinner fixed"></div>
-<table class="tablesorter shift" id="docker_containers">
-<thead><tr><th></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
-<tbody id="docker_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
+<table id="docker_containers" class="tablesorter shift">
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
+<tbody id="docker_list"><tr><td colspan='7'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start all Containers" style="display:none">
@@ -81,11 +82,22 @@ function listview() {
     $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
   }
 }
+var sortableHelper = function(e,i){
+  i.children().each(function(){
+    $(this).width($(this).width());
+  });
+  return i;
+};
 function loadlist(update) {
   $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
     var data = d.split(/\0/);
     $('div.spinner').hide('slow');
-    $('#docker_list').html(data[0]);
+    $('#docker_list').html(data[0]).sortable({helper:sortableHelper,items:'tr.sortable',opacity:0.4,update:function(e,i){
+      var row = $('#docker_list').find('tr:first');
+      var names = ''; var index = '';
+      row.parent().children().find('td.ct-name').each(function(){names+=$(this).text().replace(/Container ID.*$/,'')+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
+      $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{names:names,index:index});
+    }});
     $('head').append('<script>'+data[1]+'<\/script>');
 <?if ($display['resize']):?>
     resize();
@@ -100,24 +112,6 @@ function loadlist(update) {
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false).show('slow');
     if (!update) $('input#updateAll').hide();
-    $('i.up,i.down').click(function() {
-      var row = $(this).parents('tr:first');
-      var color1 = row.css('background-color');
-      if ($(this).is('.up')) {
-        var color2 = row.prev().css('background-color');
-        row.prev().css('background-color',color1);
-        row.css('background-color',color2);
-        row.insertBefore(row.prev());
-      } else {
-        var color2 = row.next().css('background-color');
-        row.next().css('background-color',color1);
-        row.css('background-color',color2);
-        row.insertAfter(row.next());
-      }
-      var names = ''; var index = '';
-      row.parent().children().find('td.ct-name').each(function(){names+=$(this).text().replace(/Container ID.*$/,'')+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
-      $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{names:names,index:index});
-    });
   });
 }
 $(function() {
