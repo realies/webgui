@@ -115,7 +115,7 @@ foreach ($images as $image) {
   echo "</div></div></td>";
   echo "<td><i>(orphan image)</i><div style='width:160px;'>Image ID: $id</div>";
   echo "<div style='width:160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div></td>";
-  echo "<td colspan=3'>&nbsp;</td>";
+  echo "<td colspan='4'>&nbsp;</td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
 echo "\0".implode($menu).implode($docker);
