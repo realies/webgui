@@ -15,8 +15,8 @@ function addDockerContainerContext(container, image, template, started, paused, 
     if (paused) {
       opts.push({text:'Resume', icon:'fa-play', action:function(e){e.preventDefault(); eventControl({action:'resume', container:id}, 'loadlist');}});
     } else {
-      opts.push({text:'Pause', icon:'fa-pause', action:function(e){e.preventDefault(); eventControl({action:'pause', container:id}, 'loadlist');}});
       opts.push({text:'Stop', icon:'fa-stop', action:function(e){e.preventDefault(); eventControl({action:'stop', container:id}, 'loadlist');}});
+      opts.push({text:'Pause', icon:'fa-pause', action:function(e){e.preventDefault(); eventControl({action:'pause', container:id}, 'loadlist');}});
     }
     opts.push({text:'Restart', icon:'fa-refresh', action:function(e){e.preventDefault(); eventControl({action:'restart', container:id}, 'loadlist');}});
   } else {
