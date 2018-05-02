@@ -45,7 +45,7 @@ tbody > tr.sortable:hover{cursor:move}
 <div class="spinner fixed"></div>
 <table id="docker_containers" class="tablesorter shift">
 <thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
-<tbody id="docker_list"><tr><td colspan='7'><div class="spinner"></div></td></tr></tbody>
+<tbody id="docker_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start all Containers" style="display:none">
