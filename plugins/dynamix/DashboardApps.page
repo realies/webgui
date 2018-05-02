@@ -38,7 +38,7 @@ div.Panel:hover{overflow:visible;z-index:10;background-color:unset}
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top:-44px; margin-right:<?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
+<span class="status" style="margin-top:-44px; margin-right:0"><input type="checkbox" class="appview"></span>
 <div id="apps_icons" style="display:none"></div><div id="noapps">No apps available to show</div>
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
@@ -51,8 +51,8 @@ function loadlist() {
     $('#apps_icons').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
     if ($.cookie('dashapps_view_mode')=='startedonly') {
-      $('.Panel').not('.started').hide();
-      if ($('.Panel.started').length===0) $('#noapps').show();
+      $('.Panel.stopped').hide();
+      if ($('.Panel.started').length===0 && $('.Panel.paused').length===0) $('#noapps').show();
     }
     if ($('.Panel').length===0) $('#noapps').show();
     $('#apps_icons').slideDown('fast');
@@ -62,8 +62,8 @@ function loadlist() {
 $(function() {
   $('.appview').switchButton({labels_placement:"left", on_label:'Started Only', off_label:'All Apps', checked:$.cookie('dashapps_view_mode') == 'startedonly'});
   $('.appview').change(function() {
-    $('.Panel').not('.started').finish().toggle('fast');
-    if ($('.Panel').length===0 || ($('.appview').is(':checked') && $('.Panel.started').length===0)) {
+    $('.Panel.stopped').finish().toggle('fast');
+    if ($('.Panel').length===0 || ($('.appview').is(':checked') && $('.Panel.started').length===0 && $('.Panel.paused').length===0)) {
       $('#noapps').slideDown('fast');
     } else {
       $('#noapps').slideUp('fast');
