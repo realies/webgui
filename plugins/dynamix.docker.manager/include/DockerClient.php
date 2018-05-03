@@ -31,11 +31,9 @@ $dockerManPaths = [
 if (!isset($eth0)) extract(parse_ini_file("$docroot/state/network.ini",true));
 $host = $eth0['IPADDR:0'] ?? '0.0.0.0';
 
-// get network drivers
-$driver = DockerUtil::driver();
-
 // Docker configuration file - guaranteed to exist
-$dockercfg = parse_ini_file('/boot/config/docker.cfg');
+$docker_cfgfile = '/boot/config/docker.cfg';
+$dockercfg = parse_ini_file($docker_cfgfile);
 
 #######################################
 ##       DOCKERTEMPLATES CLASS       ##
@@ -700,7 +698,6 @@ class DockerClient {
 	}
 
 	public function getDockerContainers() {
-		global $driver;
 		// Return cached values
 		if (is_array($this::$containersCache)) return $this::$containersCache;
 		$this::$containersCache = [];
@@ -720,7 +717,7 @@ class DockerClient {
 			$c['NetworkMode'] = $ct['HostConfig']['NetworkMode'];
 			$c['BaseImage']   = $ct['Labels']['BASEIMAGE'] ?? false;
 			$c['Ports']       = [];
-			if ($driver[$c['NetworkMode']]=='bridge') {
+			if (!empty($info['HostConfig']['PortBindings'])) {
 				$ports = &$info['HostConfig']['PortBindings'];
 				$nat = true;
 			} else {
@@ -821,11 +818,6 @@ class DockerUtil {
 	public static function myIP($name, $version=4) {
 		$ipaddr = $version==4 ? 'IPAddress' : 'GlobalIPv6Address';
 		return static::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
-	}
-	public static function driver() {
-		$list = [];
-		foreach (static::docker("network ls --format='{{.Name}}={{.Driver}}'",true) as $network) {list($name,$driver) = explode('=',$network); $list[$name] = $driver;}
-		return $list;
 	}
 }
 ?>
