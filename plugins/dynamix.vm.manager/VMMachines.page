@@ -113,7 +113,7 @@ th.five{width:5%}
 tbody > tr.sortable:hover{cursor:move}
 </style>
 <div class="spinner fixed"></div>
-<table id="kvm_table" class="tablesorter shift">
+<table id="kvm_table" class="tablesorter four shift">
 <thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th></tr></thead>
 <tbody id="kvm_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
 </table>

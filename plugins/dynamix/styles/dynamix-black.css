@@ -54,6 +54,7 @@ table.tablesorter thead tr .tablesorter-headerAsc{background-image:url(../images
 table.tablesorter thead tr .tablesorter-headerDesc{background-image:url(../images/sort-desc.png)}
 table.tablesorter thead tr .tablesorter-headerAsc, table.tablesorter thead tr .tablesorter-headerDesc{background-color:#101010}
 table.tablesorter tbody tr:nth-child(even){background-color:#0C0C0C}
+table.tablesorter.four tbody tr:nth-child(4n-1){background-color:#0C0C0C}
 table.tablesorter tbody tr.tr_last{background:#181818;border-top:1px solid #202020;border-bottom:1px solid #202020}
 table.tablesorter tbody tr.tr_last td{padding:8px 20px 8px 6px}
 table.tablesorter tbody td{padding:4px 20px 4px 6px;vertical-align:middle;text-align:justify}
