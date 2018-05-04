@@ -3,8 +3,8 @@ Title="Syslinux Configuration"
 Tag="edit"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,46 +14,136 @@ Tag="edit"
  * all copies or substantial portions of the Software.
  */
 ?>
-> Use this page to make changes to your `syslinux.cfg` file.  You will
-> need to reboot your server for these changes to take effect.
+> Use this page to make changes to your `syslinux.cfg` file.
+> You will need to reboot your server for these changes to take effect.
 
 <?
-$file = "/boot/syslinux/syslinux.cfg";
-$text = file_get_contents($file);
-$default_text = @file_get_contents("$file-");
-if ($default_text === false) $default_text = $text;
+function strip($area) {
+  return preg_replace(["/\r\n/","/\r/","/^  /","/\n  /","/\n\n/","/\n$/"],["\n","\n","","\n","\n",""],$area);
+}
+$file    = '/boot/syslinux/syslinux.cfg';
+$menu    = file_get_contents($file);
+$default = @file_get_contents("$file-") ?: $menu;
+$menu    = array_map('strip',explode('label ',$menu));
+$default = array_map('strip',explode('label ',$default));
+
+$global  = 'Global Configuration';
+$boot    = 'menu default';
 ?>
+<style>
+<?
+switch ($display['theme']) {
+case 'gray':
+case 'azure':
+  echo "span.array,span.system{margin-left:33.33%;width:65.5%;padding:2px 10px;font-weight:bold;border:solid 1px #606E7F;border-bottom:none}\n";
+  echo "textarea{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none}\n";
+  break;
+case 'white':
+  echo "span.array,span.system{margin-left:33.33%;width:65.66%;padding:1px 8px;font-weight:bold;border:solid 1px #E0E0E0;border-bottom:none}\n";
+  echo "textarea{margin-left:33.33%;width:65.66%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  break;
+case 'black':
+  echo "span.array,span.system{margin-left:33.33%;width:65.66%;padding:1px 8px;font-weight:bold;border:solid 1px #404040;border-bottom:none}\n";
+  echo "textarea{margin-left:33.33%;width:65.66%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  break;
+}
+?>
+</style>
 <script>
-function setArg(boot) {
-  $('input[name="#arg[1]"]').val(boot?1:0);
+const boot = '<?=$boot?>';
+const global = '<?=$global?>';
+
+function prepareMenu(form) {
+  $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
+  var header = [], area = [];
+  $(form).find('span[id^=header]').each(function(){
+    header.push($(this).text());
+  });
+  $(form).find('textarea').each(function(i){
+    var start = $('#checkbox-'+i).prop('checked') ? boot+'\n' : '';
+    area.push(start+$(this).val());
+  });
+  var menu = '';
+  for (var i=0; i < header.length; i++) {
+    if (i==0) {
+      menu += area[i]+'\n';
+    } else {
+      menu += 'label '+header[i]+'\n';
+      menu += area[i].replace(/^/,'  ').replace(/\n/g,'\n  ')+'\n';
+    }
+  }
+  form.text.value = menu;
 }
 function setDefault(form) {
-  form.elements['text'].value = <?=json_encode($default_text);?>;
+  var menu = [<?foreach ($default as $field) echo '"'.str_replace("\n",'|',$field).'",'?>];
+  var max = menu.length;
+  $(form).find('textarea').each(function(i){
+    if (i < max) {
+      var field = menu[i].split('|');
+      var title = (i) ? field.shift():global;
+      var start = (field[0]==boot);
+      var checked = start ? ' checked':'';
+      if (i) title += "<span style='float:right'><input type='checkbox' id='checkbox-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id)'"+checked+"></span>";
+      $('#header-'+i).html(title).attr('class',start ? 'array':'system');
+      if (start) field.shift();
+      $(this).val(field.join('\n')).trigger('change');
+    } else {
+      $('#header-'+i).remove();
+      $(this).remove();
+    }
+  });
 }
+function changeMenu(form,id) {
+  $(form).find('input[type=checkbox]').each(function(){
+    var i = $(this).prop('id');
+    var header = $('#'+i.replace('checkbox','header'));
+    if (i == id) {
+      header.attr('class','array');
+      $(this).prop('checked',true);
+    } else {
+      header.attr('class','system');
+      $(this).prop('checked',false);
+    }
+  });
+}
+$(function(){
+  $('form').find('textarea').each(function(){$(this).on('input change',function(){
+    $(this).attr('rows',($(this).val().match(/\n/g)||[]).length+1);
+  });});
+});
 </script>
-<form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="setArg(this.boot.checked)">
+<form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareMenu(this)">
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
 <input type="hidden" name="#command" value="/webGui/scripts/bootmode">
 <input type="hidden" name="#arg[1]" value="">
+<input type="hidden" name="text" value="">
 Syslinux configuration:
-
-: <textarea spellcheck="false" cols="80" rows="22" maxlength="2048" name="text" style="font-family:bitstream;width:66%"><?=$text;?></textarea>
+: <?$i=0;
+  foreach ($menu as $area):
+  $field = explode("\n", $area);
+  $title = ($i) ? array_shift($field):$global;
+  $start = in_array($boot,$field);
+  if ($start) unset($field[array_search($boot,$field)]);
+?><span id="header-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$title?>
+  <?if ($i):?><span style="float:right"><input type="checkbox" id="checkbox-<?=$i?>" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id)"></span><?endif;?></span>
+  <textarea spellcheck="false" cols="80" rows="<?=count($field)?>" maxlength="2048"><?=implode("\n",$field)?></textarea><?$i++?>
+  <?endforeach;?>
 
 Server boot mode:
 : <?=is_dir('/sys/firmware/efi') ? 'UEFI' : 'Legacy'?>
 
-Permit UEFI boot mode <input type="checkbox" name="boot" <?=is_dir('/boot/EFI') ? 'checked' : ''?>>
+Permit UEFI boot mode <input type="checkbox" name="boot" <?=is_dir('/boot/EFI')?'checked':''?>>
 : *Boot system in UEFI mode. Please check your system settings to support UEFI boot mode.*
 
 <input type="button" value="Default" onclick="setDefault(this.form)">
-: <input type="submit" value="Apply"/><input type="button" value="Done" onclick="done()">
+: <input type="submit" value="Apply"><input type="button" value="Done" onclick="done()">
 
-> Click the **Apply** button to commit the current edits.  Click **Reset** to
-> undo any changes you make (before Saving). Click **Done** to exit this page.
->
 > Click the **Default** button to initialize the edit box with the
 > factory-default contents.  You still need to click **Apply** in order to
 >commit the change.
+>
+> Click the **Apply** button to commit the current edits.  Click **Reset** to
+> undo any changes you make (before Saving). Click **Done** to exit this page.
 
 </form>
