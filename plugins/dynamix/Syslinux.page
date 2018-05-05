@@ -60,10 +60,10 @@ const boot = '<?=$boot?>';
 const global = '<?=$global?>';
 
 function prepareMenu(form) {
-  if ($.cookie('syslinux_view_mode')!='advanced') {
+  $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
+  if ($.cookie('syslinux_viewmode')!='advanced') {
     form.text.value = form.text2.value;
   } else {
-    $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
     var header = [], area = [];
     $(form).find('span[id^=header]').each(function(){
       header.push($(this).text());
@@ -72,24 +72,24 @@ function prepareMenu(form) {
       var start = $('#checkbox-'+i).prop('checked') ? boot+'\n' : '';
       area.push(start+$(this).val());
     });
-    var menu = '';
+    var text = '';
     for (var i=0; i < header.length; i++) {
       if (i==0) {
-        menu += area[i]+'\n';
+        text += area[i]+'\n';
       } else {
-        menu += 'label '+header[i]+'\n';
-        menu += area[i].replace(/^/,'  ').replace(/\n/g,'\n  ')+'\n';
+        text += 'label '+header[i]+'\n';
+        text += area[i].replace(/^/,'  ').replace(/\n/g,'\n  ')+'\n';
       }
     }
-    form.text.value = menu;
+    form.text.value = text;
   }
   form.text2.disabled = true;
 }
 function setDefault(form) {
-  var menu = [<?foreach ($default as $area) echo '"'.str_replace("\n",'|',$area).'",'?>];
+  var text = [<?foreach ($default as $area) echo '"'.str_replace("\n",'|',$area).'",'?>];
   $(form).find('textarea.menu').each(function(i){
-    if (i < menu.length) {
-      var field = menu[i].split('|');
+    if (i < text.length) {
+      var field = text[i].split('|');
       var title = (i) ? field.shift():global;
       var start = (field[0]==boot);
       var checked = start ? ' checked':'';
@@ -106,7 +106,7 @@ function setDefault(form) {
   $(form).find('textarea.text').trigger('change');
 }
 function changeMenu(form,id) {
-  $(form).find('input[type=checkbox]').each(function(){
+  $(form).find('input.menu').each(function(){
     var i = $(this).prop('id');
     var header = $('#'+i.replace('checkbox','header'));
     if (i == id) {
@@ -117,12 +117,31 @@ function changeMenu(form,id) {
       $(this).prop('checked',false);
     }
   });
+  if ($.cookie('syslinux_viewmode')=='advanced') {
+    var n = 0, o = 0, x = id.split('-')[1];
+    var text = form.text2.value.split('\n');
+    for (var i=0; i < text.length; i++) {
+      if (text[i].indexOf('label ') >= 0) if (++n == x) o = i + 1;
+      if (text[i].indexOf(boot) >= 0) text.splice(i,1);
+    }
+    if (o) text.splice(o,0,'  '+boot);
+    form.text2.value = text.join('\n');
+  }
 }
 $(function(){
   $('form').find('textarea').each(function(){$(this).on('input change',function(){
     $(this).attr('rows',($(this).val().match(/\n/g)||[]).length+1);
+    if ($(this).attr('class')=='text') {
+      var n = 0, id = null;
+      var text = $(this).val().split('\n');
+      for (var i=0; i < text.length; i++) {
+        if (text[i].indexOf('label ') >= 0) n++;
+        if (text[i].indexOf(boot) >= 0) {id = 'checkbox-'+n; break;}
+      }
+      if (id) changeMenu($(this).closest('form'),id);
+    }
   });});
-  if ($.cookie('syslinux_view_mode')=='advanced') {
+  if ($.cookie('syslinux_viewmode')=='advanced') {
     $('.advanced').show();
     $('.basic').hide();
   }
@@ -130,12 +149,12 @@ $(function(){
     labels_placement: 'left',
     on_label: 'Advanced View',
     off_label: 'Basic View',
-    checked: $.cookie('syslinux_view_mode')=='advanced'
+    checked: $.cookie('syslinux_viewmode')=='advanced'
   });
   $('.advancedview').change(function() {
     $('.advanced').toggle('slow');
     $('.basic').toggle('slow');
-    $.cookie('syslinux_view_mode', $('.advancedview').is(':checked') ? 'advanced':'basic', {expires:3650});
+    $.cookie('syslinux_viewmode', $('.advancedview').is(':checked') ? 'advanced':'basic', {expires:3650});
   });
 });
 </script>
@@ -161,7 +180,7 @@ Syslinux configuration:
   $start = in_array($boot,$field);
   if ($start) unset($field[array_search($boot,$field)]);
 ?><span id="header-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$title?>
-  <?if ($i):?><span style="float:right"><input type="checkbox" id="checkbox-<?=$i?>" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id)"></span><?endif;?></span>
+  <?if ($i):?><span style="float:right"><input type="checkbox" id="checkbox-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id)"></span><?endif;?></span>
   <textarea class="menu" spellcheck="false" cols="80" rows="<?=count($field)?>" maxlength="2048"><?=implode("\n",$field)?></textarea><?$i++?>
   <?endforeach;?>
 
