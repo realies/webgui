@@ -34,8 +34,8 @@ $boot    = 'menu default';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
-.basic{display:block}
-.advanced{display:none;white-space:nowrap}
+div.basic{display:block}
+div.advanced{display:none}
 <?
 switch ($display['theme']) {
 case 'gray':
@@ -171,7 +171,7 @@ Syslinux configuration:
 : <textarea class="text" name="text2" spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" style="resize:none;font-family:bitstream;width:65.5%"><?=$text?></textarea>
 
 </div>
-<div markdown="1" class="advanced" style="display:none">
+<div markdown="1" class="advanced">
 Syslinux configuration:
 : <?$i=0;
   foreach ($menu as $area):
