@@ -94,10 +94,10 @@ function prepareMenu(form) {
   form.text2.disabled = true;
 }
 function setDefault(form) {
-  var text = [<?foreach ($default as $area) echo '"'.str_replace("\n",'|',$area).'",'?>];
+  var text = [<?foreach ($default as $area) echo json_encode($area).','?>];
   $(form).find('textarea.menu').each(function(i){
     if (i < text.length) {
-      var field = text[i].split('|');
+      var field = text[i].split('\n');
       var title = (i) ? field.shift():global;
       var start = (field[0]==boot);
       var checked = start ? ' checked':'';
