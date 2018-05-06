@@ -19,7 +19,7 @@ Tag="edit"
 
 <?
 function strip($area) {
-  return preg_replace(["/^  /","/\n  /","/\n$/"],["","\n",""],$area);
+  return preg_replace(["/^|(\n)  /","/\n$/"],["$1",""],$area);
 }
 $file    = '/boot/syslinux/syslinux.cfg';
 $menu    = file_get_contents($file);
