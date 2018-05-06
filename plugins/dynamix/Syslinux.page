@@ -60,8 +60,8 @@ const boot = '<?=$boot?>';
 const global = '<?=$global?>';
 const label = 'label ';
 
-Array.prototype.indent = function(s) {
-  for (var i=0; i < this.length; i++) this[i] = s+this[i];
+Array.prototype.indent = function(o) {
+  if (o) for (var i=0; i < this.length; i++) this[i] = '  '+this[i];
   return this;
 };
 Array.prototype.spliceArray = function(i,n,a) {
@@ -136,7 +136,7 @@ function changeMenu(form,id,update) {
       if (text[i].indexOf(boot) >= 0) text.splice(i,1);
     }
     if (o) text.splice(o,0,'  '+boot);
-    form.text2.value = text.join('\n');
+    $(form).find('textarea.text').val(text.join('\n')).prop('rows',text.length);
   }
 }
 $(function(){
@@ -159,8 +159,8 @@ $(function(){
         if (text[i].indexOf(boot) >= 0) o++;
         if (x) break;
       }
-      text.spliceArray(o,(x||text.length)-o,area.indent('  '));
-      text2.val(text.join('\n'));
+      text.spliceArray(o,(x||text.length)-o,area.indent(o));
+      text2.val(text.join('\n')).prop('rows',text.length);
     } else {
       // basic mode -> update menu
       var n = 0, id = null, area = [];
