@@ -19,15 +19,15 @@ Tag="edit"
 
 <?
 function strip($area) {
-  return preg_replace(["/\r\n/","/\r/","/^  /","/\n  /","/\n\n/","/\n$/"],["\n","\n","","\n","\n",""],$area);
+  return preg_replace(["/^  /","/\n  /","/\n$/"],["","\n",""],$area);
 }
 $file    = '/boot/syslinux/syslinux.cfg';
 $menu    = file_get_contents($file);
 $default = @file_get_contents("$file-") ?: $menu;
-$text    = preg_replace(["/\r\n/","/\r/"],"\n",$menu);
-$text2   = preg_replace(["/\r\n/","/\r/"],"\n",$default);
-$menu    = array_map('strip',explode('label ',$menu));
-$default = array_map('strip',explode('label ',$default));
+$text    = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$menu);
+$text2   = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$default);
+$menu    = array_map('strip',explode('label ',$text));
+$default = array_map('strip',explode('label ',$text2));
 
 $global  = 'Global Configuration';
 $boot    = 'menu default';
@@ -58,18 +58,26 @@ case 'black':
 <script>
 const boot = '<?=$boot?>';
 const global = '<?=$global?>';
+const label = 'label ';
 
+Array.prototype.indent = function(s) {
+  for (var i=0; i < this.length; i++) this[i] = s+this[i];
+  return this;
+};
+Array.prototype.spliceArray = function(i,n,a) {
+  return Array.prototype.splice.apply(this,[i,n].concat(a));
+};
 function prepareMenu(form) {
   $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
   if ($.cookie('syslinux_viewmode')!='advanced') {
-    form.text.value = form.text2.value;
+    form.text.value = form.text2.value+'\n';
   } else {
     var header = [], area = [];
     $(form).find('span[id^=header]').each(function(){
       header.push($(this).text());
     });
     $(form).find('textarea.menu').each(function(i){
-      var start = $('#checkbox-'+i).prop('checked') ? boot+'\n' : '';
+      var start = $('#input-'+i).prop('checked') ? boot+'\n' : '';
       area.push(start+$(this).val());
     });
     var text = '';
@@ -77,8 +85,8 @@ function prepareMenu(form) {
       if (i==0) {
         text += area[i]+'\n';
       } else {
-        text += 'label '+header[i]+'\n';
-        text += area[i].replace(/^/,'  ').replace(/\n/g,'\n  ')+'\n';
+        text += label+header[i]+'\n';
+        text += area[i].replace(/^|(\n)/g,'$1  ')+'\n';
       }
     }
     form.text.value = text;
@@ -93,8 +101,8 @@ function setDefault(form) {
       var title = (i) ? field.shift():global;
       var start = (field[0]==boot);
       var checked = start ? ' checked':'';
-      if (i) title += "<span style='float:right'><input type='checkbox' id='checkbox-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id)'"+checked+"></span>";
-      $('#header-'+i).html(title).attr('class',start ? 'array':'system');
+      if (i) title += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
+      $('#header-'+i).html(title).prop('class',start ? 'array':'system');
       if (start) field.shift();
       $(this).val(field.join('\n')).trigger('change');
     } else {
@@ -105,23 +113,26 @@ function setDefault(form) {
   form.text2.value = <?=json_encode($text2)?>;
   $(form).find('textarea.text').trigger('change');
 }
-function changeMenu(form,id) {
+function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
+    // highlight default boot menu
     var i = $(this).prop('id');
-    var header = $('#'+i.replace('checkbox','header'));
+    var header = $('#'+i.replace('input','header'));
     if (i == id) {
-      header.attr('class','array');
+      header.prop('class','array');
       $(this).prop('checked',true);
     } else {
-      header.attr('class','system');
+      header.prop('class','system');
       $(this).prop('checked',false);
     }
   });
-  if ($.cookie('syslinux_viewmode')=='advanced') {
-    var n = 0, o = 0, x = id.split('-')[1];
+  if (update) {
+    // advanced mode -> update text
+    var n = 0, o = null;
+    var x = id.split('-')[1];
     var text = form.text2.value.split('\n');
     for (var i=0; i < text.length; i++) {
-      if (text[i].indexOf('label ') >= 0) if (++n == x) o = i + 1;
+      if (text[i].indexOf(label) >= 0) if (++n == x) o = i + 1;
       if (text[i].indexOf(boot) >= 0) text.splice(i,1);
     }
     if (o) text.splice(o,0,'  '+boot);
@@ -129,16 +140,42 @@ function changeMenu(form,id) {
   }
 }
 $(function(){
-  $('form').find('textarea').each(function(){$(this).on('input change',function(){
-    $(this).attr('rows',($(this).val().match(/\n/g)||[]).length+1);
-    if ($(this).attr('class')=='text') {
-      var n = 0, id = null;
+  $('form').find('textarea').each(function(){$(this).on('input change',function(event){
+    $(this).prop('rows',($(this).val().match(/\n/g)||[]).length+1);
+    if (event.type == 'input') return;
+    // propogate changes to 'other' view mode
+    var form = $(this).closest('form');
+    if ($(this).prop('class')=='menu') {
+      // advanced mode -> update text
+      var n = 0, o = 0, x = null;
+      var id = $(this).prop('id').split('-')[1];
+      var area = $(this).val().split('\n');
+      var text2 = form.find('textarea.text');
+      var text = text2.val().split('\n');
+      for (var i=0; i < text.length; i++) {
+        if (text[i].indexOf(label) >= 0) {
+          if (n++ == id) x = i; else o = i + 1;
+        }
+        if (text[i].indexOf(boot) >= 0) o++;
+        if (x) break;
+      }
+      text.spliceArray(o,(x||text.length)-o,area.indent('  '));
+      text2.val(text.join('\n'));
+    } else {
+      // basic mode -> update menu
+      var n = 0, id = null, area = [];
       var text = $(this).val().split('\n');
       for (var i=0; i < text.length; i++) {
-        if (text[i].indexOf('label ') >= 0) n++;
-        if (text[i].indexOf(boot) >= 0) {id = 'checkbox-'+n; break;}
+        if (text[i].indexOf(label) >= 0) {
+          $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
+          area = [];
+          n++;
+        } else {
+          if (text[i].indexOf(boot) >= 0) id = 'input-'+n; else if (text[i].length) area.push(text[i].replace(/^  /,''));
+        }
       }
-      if (id) changeMenu($(this).closest('form'),id);
+      $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
+      if (id) changeMenu(form,id,false);
     }
   });});
   if ($.cookie('syslinux_viewmode')=='advanced') {
@@ -180,8 +217,8 @@ Syslinux configuration:
   $start = in_array($boot,$field);
   if ($start) unset($field[array_search($boot,$field)]);
 ?><span id="header-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$title?>
-  <?if ($i):?><span style="float:right"><input type="checkbox" id="checkbox-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id)"></span><?endif;?></span>
-  <textarea class="menu" spellcheck="false" cols="80" rows="<?=count($field)?>" maxlength="2048"><?=implode("\n",$field)?></textarea><?$i++?>
+  <?if ($i):?><span style="float:right"><input type="checkbox" id="input-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id,true)"></span><?endif;?></span>
+  <textarea class="menu" id="text-<?=$i?>" spellcheck="false" cols="80" rows="<?=count($field)?>" maxlength="2048"><?=implode("\n",$field)?></textarea><?$i++?>
   <?endforeach;?>
 
 </div>
