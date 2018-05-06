@@ -28,7 +28,7 @@ $current = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$current);
 $default = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$default);
 
 $global  = 'Global Configuration';
-$boot    = 'menu default';
+$menu    = 'menu default';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
@@ -54,7 +54,7 @@ case 'black':
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script>
-const boot = '<?=$boot?>';
+const menu = '<?=$menu?>';
 const global = '<?=$global?>';
 const mark = 'label ';
 
@@ -75,7 +75,7 @@ function prepareMenu(form) {
       label.push($(this).text());
     });
     $(form).find('textarea.menu').each(function(i){
-      var start = $('#input-'+i).prop('checked') ? boot+'\n' : '';
+      var start = $('#input-'+i).prop('checked') ? menu+'\n' : '';
       area.push(start+$(this).val());
     });
     var text = '';
@@ -97,7 +97,7 @@ function setDefault(form) {
     if (i < text.length) {
       var area = text[i].split('\n');
       var label = (i) ? area.shift():global;
-      var start = (area[0]==boot);
+      var start = (area[0]==menu);
       var checked = start ? ' checked':'';
       if (i) label += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
       $('#label-'+i).html(label).prop('class',start ? 'array':'system');
@@ -130,9 +130,9 @@ function changeMenu(form,id,update) {
     var text = form.basic.value.split('\n');
     for (var i=0; i < text.length; i++) {
       if (text[i].indexOf(mark) >= 0) if (++n == x) o = i + 1;
-      if (text[i].indexOf(boot) >= 0) text.splice(i,1);
+      if (text[i].indexOf(menu) >= 0) text.splice(i,1);
     }
-    if (o) text.splice(o,0,'  '+boot);
+    if (o) text.splice(o,0,'  '+menu);
     $(form).find('textarea.text').val(text.join('\n')).prop('rows',text.length);
   }
 }
@@ -153,7 +153,7 @@ $(function(){
         if (text[i].indexOf(mark) >= 0) {
           if (n++ == id) x = i; else o = i + 1;
         }
-        if (text[i].indexOf(boot) >= 0) o++;
+        if (text[i].indexOf(menu) >= 0) o++;
         if (x) break;
       }
       text.spliceArray(o,(x||text.length)-o,area.indent(o));
@@ -168,7 +168,7 @@ $(function(){
           area = [];
           n++;
         } else {
-          if (text[i].indexOf(boot) >= 0) id = 'input-'+n; else if (text[i].length) area.push(text[i].replace(/^  /,''));
+          if (text[i].indexOf(menu) >= 0) id = 'input-'+n; else if (text[i].length) area.push(text[i].replace(/^  /,''));
         }
       }
       $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
@@ -211,8 +211,8 @@ Syslinux configuration:
   foreach (array_map('strip',explode('label ',$current)) as $area):
   $area = explode("\n", $area);
   $label = ($i) ? array_shift($area):$global;
-  $start = in_array($boot,$area);
-  if ($start) unset($area[array_search($boot,$area)]);
+  $start = in_array($menu,$area);
+  if ($start) unset($area[array_search($menu,$area)]);
 ?><span id="label-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$label?>
   <?if ($i):?><span style="float:right"><input type="checkbox" id="input-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id,true)"></span><?endif;?></span>
   <textarea class="menu" id="text-<?=$i++?>" spellcheck="false" cols="80" rows="<?=count($area)?>" maxlength="2048"><?=implode("\n",$area)?></textarea>
