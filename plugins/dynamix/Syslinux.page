@@ -111,7 +111,7 @@ function setDefault(form) {
     }
   });
   form.text2.value = <?=json_encode($text2)?>;
-  $(form).find('textarea.text').trigger('change');
+  $(form).find('textarea.text').prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
 }
 function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
