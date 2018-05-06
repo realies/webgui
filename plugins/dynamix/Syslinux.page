@@ -104,14 +104,13 @@ function setDefault(form) {
       if (i) title += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
       $('#header-'+i).html(title).prop('class',start ? 'array':'system');
       if (start) field.shift();
-      $(this).val(field.join('\n')).trigger('change');
+      $(this).val(field.join('\n')).prop('rows',field.length).trigger('change');
     } else {
       $('#header-'+i).remove();
       $(this).remove();
     }
   });
-  form.text2.value = <?=json_encode($text2)?>;
-  $(form).find('textarea.text').prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
+  $(form).find('textarea.text').val(<?=json_encode($text2)?>).prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
 }
 function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
