@@ -95,14 +95,14 @@ function setDefault(form) {
   var text = <?=json_encode(array_map('strip',explode('label ',$default)))?>;
   $(form).find('textarea.menu').each(function(i){
     if (i < text.length) {
-      var field = text[i].split('\n');
-      var title = (i) ? field.shift():global;
-      var start = (field[0]==boot);
+      var area = text[i].split('\n');
+      var title = (i) ? area.shift():global;
+      var start = (area[0]==boot);
       var checked = start ? ' checked':'';
       if (i) title += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
       $('#header-'+i).html(title).prop('class',start ? 'array':'system');
-      if (start) field.shift();
-      $(this).val(field.join('\n')).prop('rows',field.length).trigger('change');
+      if (start) area.shift();
+      $(this).val(area.join('\n')).prop('rows',area.length).trigger('change');
     } else {
       $('#header-'+i).remove();
       $(this).remove();
@@ -209,13 +209,13 @@ Syslinux configuration:
 Syslinux configuration:
 : <?$i=0;
   foreach (array_map('strip',explode('label ',$current)) as $area):
-  $field = explode("\n", $area);
-  $title = ($i) ? array_shift($field):$global;
-  $start = in_array($boot,$field);
-  if ($start) unset($field[array_search($boot,$field)]);
+  $area = explode("\n", $area);
+  $title = ($i) ? array_shift($area):$global;
+  $start = in_array($boot,$area);
+  if ($start) unset($area[array_search($boot,$area)]);
 ?><span id="header-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$title?>
   <?if ($i):?><span style="float:right"><input type="checkbox" id="input-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id,true)"></span><?endif;?></span>
-  <textarea class="menu" id="text-<?=$i?>" spellcheck="false" cols="80" rows="<?=count($field)?>" maxlength="2048"><?=implode("\n",$field)?></textarea><?$i++?>
+  <textarea class="menu" id="text-<?=$i++?>" spellcheck="false" cols="80" rows="<?=count($area)?>" maxlength="2048"><?=implode("\n",$area)?></textarea>
   <?endforeach;?>
 
 </div>
