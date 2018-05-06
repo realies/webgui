@@ -69,7 +69,7 @@ Array.prototype.spliceArray = function(i,n,a) {
 };
 function prepareMenu(form) {
   $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
-  if ($.cookie('syslinux_viewmode')!='advanced') {
+  if ($('div.basic').is(':visible')) {
     form.text.value = form.text2.value+'\n';
   } else {
     var header = [], area = [];
