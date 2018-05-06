@@ -24,8 +24,8 @@ function strip($area) {
 $file    = '/boot/syslinux/syslinux.cfg';
 $current = file_get_contents($file);
 $default = @file_get_contents("$file-") ?: $current;
-$text    = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$current);
-$text2   = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$default);
+$current = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$current);
+$default = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$default);
 
 $global  = 'Global Configuration';
 $boot    = 'menu default';
@@ -68,7 +68,7 @@ Array.prototype.spliceArray = function(i,n,a) {
 function prepareMenu(form) {
   $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
   if ($('div.basic').is(':visible')) {
-    form.text.value = form.text2.value+'\n';
+    form.text.value = form.basic.value+'\n';
   } else {
     var header = [], area = [];
     $(form).find('span[id^=header]').each(function(){
@@ -89,10 +89,10 @@ function prepareMenu(form) {
     }
     form.text.value = text;
   }
-  form.text2.disabled = true;
+  form.basic.disabled = true;
 }
 function setDefault(form) {
-  var text = <?=json_encode(array_map('strip',explode('label ',$text2)))?>;
+  var text = <?=json_encode(array_map('strip',explode('label ',$default)))?>;
   $(form).find('textarea.menu').each(function(i){
     if (i < text.length) {
       var field = text[i].split('\n');
@@ -108,7 +108,7 @@ function setDefault(form) {
       $(this).remove();
     }
   });
-  $(form).find('textarea.text').val(<?=json_encode($text2)?>).prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
+  $(form).find('textarea.text').val(<?=json_encode($default)?>).prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
 }
 function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
@@ -124,10 +124,10 @@ function changeMenu(form,id,update) {
     }
   });
   if (update) {
-    // advanced mode -> update text
+    // advanced view -> update basic view
     var n = 0, o = null;
     var x = id.split('-')[1];
-    var text = form.text2.value.split('\n');
+    var text = form.basic.value.split('\n');
     for (var i=0; i < text.length; i++) {
       if (text[i].indexOf(label) >= 0) if (++n == x) o = i + 1;
       if (text[i].indexOf(boot) >= 0) text.splice(i,1);
@@ -143,12 +143,12 @@ $(function(){
     // propogate changes to 'other' view mode
     var form = $(this).closest('form');
     if ($(this).prop('class')=='menu') {
-      // advanced mode -> update text
+      // advanced view -> update basic view
       var n = 0, o = 0, x = null;
       var id = $(this).prop('id').split('-')[1];
       var area = $(this).val().split('\n');
-      var text2 = form.find('textarea.text');
-      var text = text2.val().split('\n');
+      var basic = form.find('textarea.text');
+      var text = basic.val().split('\n');
       for (var i=0; i < text.length; i++) {
         if (text[i].indexOf(label) >= 0) {
           if (n++ == id) x = i; else o = i + 1;
@@ -157,9 +157,9 @@ $(function(){
         if (x) break;
       }
       text.spliceArray(o,(x||text.length)-o,area.indent(o));
-      text2.val(text.join('\n')).prop('rows',text.length);
+      basic.val(text.join('\n')).prop('rows',text.length);
     } else {
-      // basic mode -> update menu
+      // basic view -> update advanced view
       var n = 0, id = null, area = [];
       var text = $(this).val().split('\n');
       for (var i=0; i < text.length; i++) {
@@ -202,13 +202,13 @@ $(function(){
 <input type="hidden" name="text" value="">
 <div markdown="1" class="basic">
 Syslinux configuration:
-: <textarea class="text" name="text2" spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" style="resize:none;font-family:bitstream;width:65.5%"><?=$text?></textarea>
+: <textarea class="text" name="basic" spellcheck="false" cols="80" rows="<?=substr_count($current,"\n")+1?>" maxlength="2048" style="resize:none;font-family:bitstream;width:65.5%"><?=$current?></textarea>
 
 </div>
 <div markdown="1" class="advanced">
 Syslinux configuration:
 : <?$i=0;
-  foreach (array_map('strip',explode('label ',$text)) as $area):
+  foreach (array_map('strip',explode('label ',$current)) as $area):
   $field = explode("\n", $area);
   $title = ($i) ? array_shift($field):$global;
   $start = in_array($boot,$field);
