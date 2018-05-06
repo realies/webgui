@@ -29,6 +29,7 @@ $default = preg_replace(["/\r\n/","/\r/","/\n$/"],["\n","\n",""],$default);
 
 $global  = 'Global Configuration';
 $menu    = 'menu default';
+$mark    = 'label ';
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
@@ -56,7 +57,7 @@ case 'black':
 <script>
 const menu = '<?=$menu?>';
 const global = '<?=$global?>';
-const mark = 'label ';
+const mark = '<?=$mark?>';
 
 Array.prototype.indent = function(o) {
   if (o) for (var i=0; i < this.length; i++) this[i] = '  '+this[i];
@@ -92,7 +93,7 @@ function prepareMenu(form) {
   form.basic.disabled = true;
 }
 function setDefault(form) {
-  var text = <?=json_encode(array_map('strip',explode('label ',$default)))?>;
+  var text = <?=json_encode(array_map('strip',explode($mark,$default)))?>;
   $(form).find('textarea.menu').each(function(i){
     if (i < text.length) {
       var area = text[i].split('\n');
@@ -208,7 +209,7 @@ Syslinux configuration:
 <div markdown="1" class="advanced">
 Syslinux configuration:
 : <?$i=0;
-  foreach (array_map('strip',explode('label ',$current)) as $area):
+  foreach (array_map('strip',explode($mark,$current)) as $area):
   $area = explode("\n", $area);
   $label = ($i) ? array_shift($area):$global;
   $start = in_array($menu,$area);
