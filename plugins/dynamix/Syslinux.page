@@ -56,7 +56,7 @@ case 'black':
 <script>
 const boot = '<?=$boot?>';
 const global = '<?=$global?>';
-const label = 'label ';
+const mark = 'label ';
 
 Array.prototype.indent = function(o) {
   if (o) for (var i=0; i < this.length; i++) this[i] = '  '+this[i];
@@ -70,20 +70,20 @@ function prepareMenu(form) {
   if ($('div.basic').is(':visible')) {
     form.text.value = form.basic.value+'\n';
   } else {
-    var header = [], area = [];
-    $(form).find('span[id^=header]').each(function(){
-      header.push($(this).text());
+    var label = [], area = [];
+    $(form).find('span[id^=label]').each(function(){
+      label.push($(this).text());
     });
     $(form).find('textarea.menu').each(function(i){
       var start = $('#input-'+i).prop('checked') ? boot+'\n' : '';
       area.push(start+$(this).val());
     });
     var text = '';
-    for (var i=0; i < header.length; i++) {
+    for (var i=0; i < label.length; i++) {
       if (i==0) {
         text += area[i]+'\n';
       } else {
-        text += label+header[i]+'\n';
+        text += mark+label[i]+'\n';
         text += area[i].replace(/^|(\n)/g,'$1  ')+'\n';
       }
     }
@@ -96,15 +96,15 @@ function setDefault(form) {
   $(form).find('textarea.menu').each(function(i){
     if (i < text.length) {
       var area = text[i].split('\n');
-      var title = (i) ? area.shift():global;
+      var label = (i) ? area.shift():global;
       var start = (area[0]==boot);
       var checked = start ? ' checked':'';
-      if (i) title += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
-      $('#header-'+i).html(title).prop('class',start ? 'array':'system');
+      if (i) label += "<span style='float:right'><input type='checkbox' id='input-"+i+"' title='Set default boot menu' onchange='changeMenu(this.form,this.id,true)'"+checked+"></span>";
+      $('#label-'+i).html(label).prop('class',start ? 'array':'system');
       if (start) area.shift();
       $(this).val(area.join('\n')).prop('rows',area.length).trigger('change');
     } else {
-      $('#header-'+i).remove();
+      $('#label-'+i).remove();
       $(this).remove();
     }
   });
@@ -114,12 +114,12 @@ function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
     // highlight default boot menu
     var i = $(this).prop('id');
-    var header = $('#'+i.replace('input','header'));
+    var label = $('#'+i.replace('input','label'));
     if (i == id) {
-      header.prop('class','array');
+      label.prop('class','array');
       $(this).prop('checked',true);
     } else {
-      header.prop('class','system');
+      label.prop('class','system');
       $(this).prop('checked',false);
     }
   });
@@ -129,7 +129,7 @@ function changeMenu(form,id,update) {
     var x = id.split('-')[1];
     var text = form.basic.value.split('\n');
     for (var i=0; i < text.length; i++) {
-      if (text[i].indexOf(label) >= 0) if (++n == x) o = i + 1;
+      if (text[i].indexOf(mark) >= 0) if (++n == x) o = i + 1;
       if (text[i].indexOf(boot) >= 0) text.splice(i,1);
     }
     if (o) text.splice(o,0,'  '+boot);
@@ -150,7 +150,7 @@ $(function(){
       var basic = form.find('textarea.text');
       var text = basic.val().split('\n');
       for (var i=0; i < text.length; i++) {
-        if (text[i].indexOf(label) >= 0) {
+        if (text[i].indexOf(mark) >= 0) {
           if (n++ == id) x = i; else o = i + 1;
         }
         if (text[i].indexOf(boot) >= 0) o++;
@@ -163,7 +163,7 @@ $(function(){
       var n = 0, id = null, area = [];
       var text = $(this).val().split('\n');
       for (var i=0; i < text.length; i++) {
-        if (text[i].indexOf(label) >= 0) {
+        if (text[i].indexOf(mark) >= 0) {
           $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
           area = [];
           n++;
@@ -210,10 +210,10 @@ Syslinux configuration:
 : <?$i=0;
   foreach (array_map('strip',explode('label ',$current)) as $area):
   $area = explode("\n", $area);
-  $title = ($i) ? array_shift($area):$global;
+  $label = ($i) ? array_shift($area):$global;
   $start = in_array($boot,$area);
   if ($start) unset($area[array_search($boot,$area)]);
-?><span id="header-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$title?>
+?><span id="label-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$label?>
   <?if ($i):?><span style="float:right"><input type="checkbox" id="input-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id,true)"></span><?endif;?></span>
   <textarea class="menu" id="text-<?=$i++?>" spellcheck="false" cols="80" rows="<?=count($area)?>" maxlength="2048"><?=implode("\n",$area)?></textarea>
   <?endforeach;?>
