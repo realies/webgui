@@ -20,7 +20,7 @@ Tag="share-alt-square"
 
 <?
 $file = "/boot/config/smb-extra.conf";
-$text = @file_get_contents($file);
+$text = @file_get_contents($file) ?: '';
 $text = preg_replace(["/\r\n/","/\r/"],"\n",$text);
 ?>
 <script>
@@ -34,7 +34,6 @@ $(function(){
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
 Samba extra configuration:
-
 : <textarea spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" name="text" style="resize:none;font-family:bitstream;width:65.5%"><?=htmlspecialchars($text)?></textarea>
 
 &nbsp;
