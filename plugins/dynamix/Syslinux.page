@@ -44,11 +44,11 @@ case 'azure':
   break;
 case 'white':
   echo "span.array,span.system{margin-left:33.33%;width:65.66%;padding:1px 8px;font-weight:bold;border:solid 1px #E0E0E0;border-bottom:none}\n";
-  echo "textarea.menu{margin-left:33.33%;width:65.66%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
   break;
 case 'black':
   echo "span.array,span.system{margin-left:33.33%;width:65.66%;padding:1px 8px;font-weight:bold;border:solid 1px #404040;border-bottom:none}\n";
-  echo "textarea.menu{margin-left:33.33%;width:65.66%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
   break;
 }
 ?>
