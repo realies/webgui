@@ -25,9 +25,8 @@ $text = preg_replace(["/\r\n/","/\r/"],"\n",$text);
 ?>
 <script>
 $(function(){
-  $('form').find('textarea').on('input change',function(event){
+  $('form').find('textarea').on('input change',function(){
     $(this).prop('rows',($(this).val().match(/\n/g)||[]).length+1);
-    if (event.type == 'input') return;
   });
 });
 </script>
