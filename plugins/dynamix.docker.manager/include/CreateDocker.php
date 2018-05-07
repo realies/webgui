@@ -31,10 +31,8 @@ $DockerTemplates = new DockerTemplates();
 
 $custom = DockerUtil::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
-$driver = [];
 
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
-foreach (DockerUtil::docker("network ls --format='{{.Name}}|{{.Driver}}'",true) as $network) {list($name,$type) = explode('|',$network); $driver[$name] = $type;}
 
 function stopContainer($name) {
   global $DockerClient;
@@ -564,9 +562,7 @@ if (isset($_POST['contName'])) {
     // remove old template
     @unlink("$userTmplDir/my-$existing.xml");
   }
-  if ($startContainer) {
-    $cmd = str_replace('/plugins/dynamix.docker.manager/scripts/docker create ', '/plugins/dynamix.docker.manager/scripts/docker run -d ', $cmd);
-  }
+  if ($startContainer) $cmd = str_replace('/docker create ', '/docker run -d ', $cmd);
   execCommand($cmd);
   echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;

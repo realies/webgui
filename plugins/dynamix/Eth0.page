@@ -556,6 +556,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.192.0", "18");?>
@@ -730,6 +731,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.192.0", "18");?>
@@ -837,6 +839,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-INDEX" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$eth0["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:INDEX"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.192.0", "18");?>
