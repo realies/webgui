@@ -165,9 +165,10 @@ $(function(){
       var text = $(this).val().split('\n');
       for (var i=0; i < text.length; i++) {
         if (text[i].indexOf(mark) >= 0) {
-          $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
+          $('#text-'+(n++)).val(area.join('\n')).prop('rows',area.length);
+          var label = $('#label-'+n);
+          label.html(label.html().replace(/^.*(<span.*)/,text[i].replace(mark,'')+'$1'));
           area = [];
-          n++;
         } else {
           if (text[i].indexOf(menu) >= 0) id = 'input-'+n; else if (text[i].length) area.push(text[i].replace(/^  /,''));
         }
