@@ -43,9 +43,8 @@ if (strstr('gray,azure',$display['theme'])) {
   foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
 $notes = '/tmp/plugins/unRAIDServer.txt';
-$notes = file_exists($notes)
-       ? "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
-       : "";
+if (!file_exists($notes)) file_put_contents($notes,shell_exec("/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin changes /usr/local/emhttp/plugins/unRAIDServer/unRAIDServer.plg"));
+$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
 ?>
 </style>
 
