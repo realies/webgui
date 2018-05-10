@@ -44,7 +44,7 @@ if (strstr('gray,azure',$display['theme'])) {
 }
 $notes = '/var/tmp/unRAIDServer.txt';
 if (!file_exists($notes)) file_put_contents($notes,shell_exec("/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin changes /usr/local/emhttp/plugins/unRAIDServer/unRAIDServer.plg"));
-$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=/var/tmp&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
+$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=1&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
 ?>
 </style>
 

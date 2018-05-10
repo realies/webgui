@@ -23,9 +23,9 @@ require_once "$docroot/webGui/include/Markdown.php";
 <body style="margin:14px 10px">
 <?
 $file = $_GET['file'];
-$tmp = $_GET['tmp'] ?? '/tmp/plugins/';
+$tmp = $_GET['tmp'] ? '/var/tmp' : '/tmp/plugins/';
 
-if (file_exists($file) && strpos(realpath($file),$tmp) === 0 && substr($file, -4) == '.txt') echo Markdown(file_get_contents($file)); else echo Markdown("*No release notes available!*");
+if (file_exists($file) && strpos(realpath($file),$tmp)===0 && substr($file, -4)=='.txt') echo Markdown(file_get_contents($file)); else echo Markdown("*No release notes available!*");
 ?>
 <br><div style="text-align:center"><input type="button" value="Done" onclick="top.Shadowbox.close()"></div>
 </body>
