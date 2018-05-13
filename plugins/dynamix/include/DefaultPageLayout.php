@@ -42,6 +42,9 @@ if (strstr('gray,azure',$display['theme'])) {
   foreach ($tasks as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
   foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
+$notes = '/var/tmp/unRAIDServer.txt';
+if (!file_exists($notes)) file_put_contents($notes,shell_exec("$docroot/plugins/dynamix.plugin.manager/scripts/plugin changes $docroot/plugins/unRAIDServer/unRAIDServer.plg"));
+$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=1&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
 ?>
 </style>
 
@@ -297,7 +300,7 @@ $.ajaxPrefilter(function(s, orig, xhr){
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
-    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
+    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version'].$notes?><br/><span id="uptime"></span></span>
    </div>
   </div>
   <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>

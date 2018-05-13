@@ -35,7 +35,8 @@ $host = $eth0['IPADDR:0'] ?? '0.0.0.0';
 $driver = DockerUtil::driver();
 
 // Docker configuration file - guaranteed to exist
-$dockercfg = parse_ini_file('/boot/config/docker.cfg');
+$docker_cfgfile = '/boot/config/docker.cfg';
+$dockercfg = parse_ini_file($docker_cfgfile);
 
 #######################################
 ##       DOCKERTEMPLATES CLASS       ##
