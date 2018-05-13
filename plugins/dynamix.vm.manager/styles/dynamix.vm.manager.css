@@ -666,9 +666,6 @@ table.tablesorter.domsnap td:last-child{width:96px;padding:0;}
   font-size: 1.3em;
   text-shadow: 0 0 2px #FFF;
 }
-.iconstatus.started {
-  font-size: 1.3em;
-}
 img.started{opacity: 1.0;}
 img.stopped{opacity: 0.3;}
 img.paused{opacity: 0.6;}
