@@ -17,7 +17,7 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
 $user_prefs = $dockerManPaths['user-prefs'];
 $action     = $_POST['action'];
-$status     = $action=='start' ? 'exited' : 'running';
+$status     = $action=='start' ? 'exited' : ($action=='unpause' ? 'paused' : 'running');
 $containers = DockerUtil::docker("ps -a --filter status='$status' --format='{{.Names}}'",true);
 
 if (file_exists($user_prefs)) {

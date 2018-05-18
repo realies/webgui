@@ -288,6 +288,7 @@ function checkDNSSettings6(form) {
     form.DNS6_SERVER1.disabled = disabled;
     form.DNS6_SERVER2.disabled = disabled;
     form.DNS6_SERVER3.disabled = disabled;
+    if (!form.DNS6_SERVER1.value && disabled) $('#dns6server1').hide(); else $('#dns6server1').show();
     if (!form.DNS6_SERVER2.value && disabled) $('#dns6server2').hide(); else $('#dns6server2').show();
     if (!form.DNS6_SERVER3.value && disabled) $('#dns6server3').hide(); else $('#dns6server3').show();
   }
@@ -365,7 +366,7 @@ function portcheck_eth0() {
 function portToggle(port,cmd) {
   $.post('/webGui/include/PortToggle.php',{port:port,cmd:cmd},function(){refresh();});
 }
-var watchDHCP = new NchanSubscriber('/sub/dhcp');
+var watchDHCP = new NchanSubscriber('/sub/dhcp', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchDHCP.on('message', function(data) {
   data = data.split(' ');
   for (var i=0,row; row=data[i]; i++) {
@@ -399,6 +400,9 @@ $(function() {
   $('#bridge-eth0').dropdownchecklist('disable');
   if (form.DNS_SERVER2.value) $('#dnsserver2').show(); else $('#dnsserver2').hide();
   if (form.DNS_SERVER3.value) $('#dnsserver3').show(); else $('#dnsserver3').hide();
+  if (form.DNS6_SERVER1.value) $('#dns6server1').show(); else $('#dns6server1').hide();
+  if (form.DNS6_SERVER2.value) $('#dns6server2').show(); else $('#dns6server2').hide();
+  if (form.DNS6_SERVER3.value) $('#dns6server3').show(); else $('#dns6server3').hide();
 <?else:?>
   checkDNSSettings(form);
   checkDNSSettings6(form);
@@ -552,6 +556,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.192.0", "18");?>
@@ -645,6 +650,7 @@ IPv6 privacy extensions:
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
 </div>
+<div id="dns6server1" style="display:none" markdown="1">
 IPv6 DNS server assignment:
 : <select name="DHCP6_KEEPRESOLV" size="1" onchange="checkDNSSettings6(this.form)">
   <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "no", "Automatic");?>
@@ -659,6 +665,7 @@ IPv6 DNS server:
 
 > This is the primary IPv6 DNS server to use. Enter a IPv6 address.
 
+</div>
 <div id="dns6server2" style="display:none" markdown="1">
 IPv6 DNS server 2:
 : <input type="text" name="DNS6_SERVER2" maxlength="39" value="<?=$eth0['DNS6_SERVER2'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
@@ -675,7 +682,7 @@ IPv6 DNS server 3:
 </div>
 </div>
 Desired MTU:
-: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow">
+: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow" placeholder="<?=exec("ip link show dev eth0|grep -Pom1 'mtu \K\d+'")?>">
 
 > This is the MTU size to use on the physical Ethernet interface.
 > If left blank, the MTU will automatically be determined (by default 1500 bytes).
@@ -724,6 +731,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.192.0", "18");?>
@@ -831,6 +839,7 @@ IPv4 address assignment:
 <div class="more-ipv4-eth0-INDEX" style="display:none" markdown="1">
 IPv4 address:
 : <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$eth0["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:INDEX"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.128.0", "17");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.192.0", "18");?>

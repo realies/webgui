@@ -55,6 +55,8 @@ function icon($name) {
   if (file_exists($icon)) return $icon;
   $icon = "plugins/{$plugin}/{$name}.png";
   if (file_exists($icon)) return $icon;
+  $icon = "plugins/{$name}.png";
+  if (file_exists($icon)) return $icon;
 // last resort - plugin manager icon
   return "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
 }

@@ -81,21 +81,21 @@ foreach ($vms as $vm) {
   unset($dom);
   $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');", addslashes($vm),addslashes($uuid),addslashes($template),$state,addslashes($vnc),addslashes($log));
   $kvm[] = "kvm.push({id:'$uuid',state:'$state'});";
+
   /* VM information */
-  echo "<tr style='background-color:".bcolor($i)."'>";
+  echo "<tr parent-id='$i' class='sortable'>";
   echo "<td style='width:48px;padding:4px'>".renderVMContentIcon($uuid, $vm, $vmicon, $state)."</td>";
-  echo "<td class='vm-name'><a href='#' onclick='return toggle_id(\"name{$i}\")' title='click for more VM info'>$vm</a></td>";
+  echo "<td class='vm-name'><a href='#' onclick='return toggle_id(\"name-$i\")' title='click for more VM info'>$vm</a></td>";
   echo "<td>$desc</td>";
   echo "<td><a class='vcpu-$uuid' style='cursor:pointer'>$vcpu</a></td>";
   echo "<td>$mem</td>";
   echo "<td title='$diskdesc'>$disks</td>";
   echo "<td>$graphics</td>";
-  echo "<td><input class='autostart' type='checkbox' name='auto_{$vm}' title='Toggle VM auostart' uuid='$uuid' $auto></td>";
-  echo "<td style='text-align:right;padding-right:12px'><a href='#' title='Move row up'><i class='fa fa-arrow-up up'></i></a>&nbsp;<a href='#' title='Move row down'><i class='fa fa-arrow-down down'></i></a></td></tr>";
+  echo "<td><input class='autostart' type='checkbox' name='auto_{$vm}' title='Toggle VM auostart' uuid='$uuid' $auto></td></tr>";
 
   /* Disk device information */
-  echo "<tr id='name{$i}".(in_array('name'.$i++,$show) ? "'>" : "' style='display:none'>");
-  echo "<td colspan='7' style='overflow:hidden'>";
+  echo "<tr child-id='$i' id='name-$i".(in_array('name-'.$i++,$show) ? "'>" : "' style='display:none'>");
+  echo "<td colspan='8' style='overflow:hidden'>";
   echo "<table class='tablesorter domdisk' id='domdisk_table'>";
   echo "<thead><tr><th><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th></tr></thead>";
   echo "<tbody id='domdisk_list'>";
@@ -124,7 +124,6 @@ foreach ($vms as $vm) {
     }
     echo "<td>$allocation</td></tr>";
   }
-  /* end Display VM disks */
 
   /* Display VM cdroms */
   foreach ($lv->get_cdrom_stats($res) as $arrCD) {
@@ -136,7 +135,6 @@ foreach ($vms as $vm) {
     echo "<tr><td>$disk</td><td>$bus</td><td>$capacity</td><td>$allocation</td></tr>";
   }
 
-  /* end Display VM cdroms */
   echo "</tbody></table>";
   echo "</td></tr>";
 }

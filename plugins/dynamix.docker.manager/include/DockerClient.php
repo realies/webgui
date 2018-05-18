@@ -28,8 +28,11 @@ $dockerManPaths = [
 ];
 
 // load network variables if needed.
-if (!isset($eth0) && is_file("$docroot/state/network.ini")) extract(parse_ini_file("$docroot/state/network.ini",true));
+if (!isset($eth0)) extract(parse_ini_file("$docroot/state/network.ini",true));
 $host = $eth0['IPADDR:0'] ?? '0.0.0.0';
+
+// get network drivers
+$driver = DockerUtil::driver();
 
 // Docker configuration file - guaranteed to exist
 $docker_cfgfile = '/boot/config/docker.cfg';
@@ -72,6 +75,7 @@ class DockerTemplates {
 		foreach ($iter as $path => $fileinfo) {
 			$fext = $fileinfo->getExtension();
 			if ($ext && $ext != $fext) continue;
+			if (substr(basename($path),0,1) == ".")  continue;
 			if ($fileinfo->isFile()) $paths[] = ['path' => $path, 'prefix' => basename(dirname($path)), 'name' => $fileinfo->getBasename(".$fext")];
 		}
 		return $paths;
@@ -259,6 +263,7 @@ class DockerTemplates {
 			$image = $ct['Image'];
 			$tmp = &$info[$name] ?? [];
 			$tmp['running'] = $ct['Running'];
+			$tmp['paused'] = $ct['Paused'];
 			$tmp['autostart'] = in_array($name, $autoStart);
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
 			if ($ct['Running']) {
@@ -627,8 +632,20 @@ class DockerClient {
 		return $code;
 	}
 
+	public function pauseContainer($id) {
+		$this->getDockerJSON("/containers/$id/pause", 'POST', $code);
+		$this->flushCache($this::$containersCache);
+		return $code;
+	}
+
 	public function stopContainer($id) {
 		$this->getDockerJSON("/containers/$id/stop", 'POST', $code);
+		$this->flushCache($this::$containersCache);
+		return $code;
+	}
+
+	public function resumeContainer($id) {
+		$this->getDockerJSON("/containers/$id/unpause", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
@@ -684,6 +701,7 @@ class DockerClient {
 	}
 
 	public function getDockerContainers() {
+		global $driver;
 		// Return cached values
 		if (is_array($this::$containersCache)) return $this::$containersCache;
 		$this::$containersCache = [];
@@ -695,6 +713,7 @@ class DockerClient {
 			$c['Name']        = substr($info['Name'], 1);
 			$c['Status']      = $ct['Status'] ?: 'None';
 			$c['Running']     = $info['State']['Running'];
+			$c['Paused']      = $info['State']['Paused'];
 			$c['Cmd']         = $ct['Command'];
 			$c['Id']          = $this->extractID($ct['Id']);
 			$c['Volumes']     = $info['HostConfig']['Binds'];
@@ -702,7 +721,7 @@ class DockerClient {
 			$c['NetworkMode'] = $ct['HostConfig']['NetworkMode'];
 			$c['BaseImage']   = $ct['Labels']['BASEIMAGE'] ?? false;
 			$c['Ports']       = [];
-			if (!empty($info['HostConfig']['PortBindings'])) {
+			if ($driver[$c['NetworkMode']]=='bridge') {
 				$ports = &$info['HostConfig']['PortBindings'];
 				$nat = true;
 			} else {
@@ -710,6 +729,7 @@ class DockerClient {
 				$nat = false;
 			}
 			$ip = $ct['NetworkSettings']['Networks'][$c['NetworkMode']]['IPAddress'];
+			$ports = is_array($ports) ? $ports : array();
 			foreach ($ports as $port => $value) {
 				list($PrivatePort, $Type) = explode('/', $port);
 				$c['Ports'][] = ['IP' => $ip, 'PrivatePort' => $PrivatePort, 'PublicPort' => $nat ? $value[0]['HostPort']:$PrivatePort, 'NAT' => $nat, 'Type' => $Type ];
@@ -802,6 +822,11 @@ class DockerUtil {
 	public static function myIP($name, $version=4) {
 		$ipaddr = $version==4 ? 'IPAddress' : 'GlobalIPv6Address';
 		return static::docker("inspect --format='{{range .NetworkSettings.Networks}}{{.$ipaddr}}{{end}}' $name");
+	}
+	public static function driver() {
+		$list = [];
+		foreach (static::docker("network ls --format='{{.Name}}={{.Driver}}'",true) as $network) {list($name,$driver) = explode('=',$network); $list[$name] = $driver;}
+		return $list;
 	}
 }
 ?>

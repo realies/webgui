@@ -16,6 +16,7 @@
 <title><?=$var['NAME']?>/<?=$myPage['name']?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex">
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
@@ -41,6 +42,9 @@ if (strstr('gray,azure',$display['theme'])) {
   foreach ($tasks as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
   foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
+$notes = '/var/tmp/unRAIDServer.txt';
+if (!file_exists($notes)) file_put_contents($notes,shell_exec("$docroot/plugins/dynamix.plugin.manager/scripts/plugin changes $docroot/plugins/unRAIDServer/unRAIDServer.plg"));
+$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=1&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
 ?>
 </style>
 
@@ -169,17 +173,12 @@ function showFooter(data, id) {
   if (id !== undefined) $('#'+id).remove();
   $('#copyright').prepend(data);
 }
-function showNotice(data,plugin) {
-  if (plugin)
-    var href = "href=\"#\" onclick=\"openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2="+plugin+".plg','Update Plugin',600,900,true)\"";
-  else
-    var href = "href=\"/Plugins\"";
-  $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a "+href+">$1</a>"));
+function showNotice(data) {
+  $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='/Plugins'>$1</a>"));
 }
-function showUpgrade(data,plugin) {
-  var href = "href=\"#\" onclick=\"hideUpgrade();openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2="+plugin+".plg','Update Plugin',600,900,true)\"";
+function showUpgrade(data) {
   if ($.cookie('os_upgrade')==null)
-    $('.upgrade_notice').html(data.replace(/<a(.*)>(.*)<\/a>/,"<a "+href+"$1>$2</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
+    $('.upgrade_notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='#' onclick='hideUpgrade();openUpgrade()'>$1</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
 }
 function hideUpgrade(set) {
   $('.upgrade_notice').hide();
@@ -187,6 +186,11 @@ function hideUpgrade(set) {
     $.cookie('os_upgrade','true',{path:'/'});
   else
     $.removeCookie('os_upgrade',{path:'/'});
+}
+function openUpgrade() {
+  swal({title:'Update unRAID OS',text:'Do you want to update to the new version?',type:'warning',showCancelButton:true},function(){
+    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2=unRAIDServer.plg','Update unRAID OS',600,900,true);
+  });
 }
 function notifier() {
   var tub1 = 0, tub2 = 0, tub3 = 0;
@@ -296,7 +300,7 @@ $.ajaxPrefilter(function(s, orig, xhr){
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
-    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
+    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version'].$notes?><br/><span id="uptime"></span></span>
    </div>
   </div>
   <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>
@@ -435,7 +439,7 @@ function parseINI(data){
   });
   return value;
 }
-var watchdog = new NchanSubscriber('/sub/var');
+var watchdog = new NchanSubscriber('/sub/var', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchdog.on('message', function(data) {
   var ini = parseINI(data);
   var state = ini['fsState'];
@@ -510,7 +514,7 @@ $(function() {
 <?elseif (strpos($readme,'DOWNGRADE')!==false):?>
   showUpgrade('<b>Reboot required</b> to downgrade unRAID OS');
 <?elseif ($version = plugin_update_available('unRAIDServer',true)):?>
-  showUpgrade('unRAID OS v<?=$version?> is available. <a>Download Now</a>','unRAIDServer');
+  showUpgrade('unRAID OS v<?=$version?> is available. <a>Update Now</a>');
 <?elseif (!$notify['system']):?>
   $('.upgrade_notice').html('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.').show();
 <?endif;?>

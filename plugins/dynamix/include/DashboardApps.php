@@ -25,7 +25,7 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   $DockerClient = new DockerClient();
   $DockerTemplates = new DockerTemplates();
   $containers = $DockerClient->getDockerContainers();
-  $all_info = $DockerTemplates->getAllInfo();
+  $allInfo = $DockerTemplates->getAllInfo();
 
   if (file_exists($user_prefs)) {
     $prefs = parse_ini_file($user_prefs); $sort = [];
@@ -36,17 +36,18 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
   foreach ($containers as $ct) {
     $name = $ct['Name'];
     $id = $ct['Id'];
-    $running = $ct['Running'] ? 1:0;
-    $info = &$all_info[$name];
+    $info = &$allInfo[$name];
+    $running = $info['running'] ? 1:0;
+    $paused = $info['paused'] ? 1:0;
     $is_autostart = $info['autostart'] ? 'true':'false';
     $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
     $template = $info['template'];
     $webGui = html_entity_decode($info['url']);
     $support = html_entity_decode($info['Support']);
     $project = html_entity_decode($info['Project']);
-    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
-    $shape = $running ? 'play':'square';
-    $status = $running ? 'started':'stopped';
+    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+    $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
+    $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
     $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
     echo "<div class='Panel $status'>";
     echo "<div id='$id' style='display:block; cursor:pointer'>";

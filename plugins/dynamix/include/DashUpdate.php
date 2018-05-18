@@ -123,24 +123,24 @@ function stage($i) {
     }
   } else {
     $d = $i ? ($now ? $D : today($i)) : today(last_day()-6);
-    $i = $i ?: last_day()-6;
-    $D = mkdate($d, $i);
+    $s = $i ?: last_day()-6;
+    $D = mkdate($d, $s);
     $t = mktime($h,$m,0,$M,$D,$Y)-$time; // first day
     if ($t < 0) {
-      $D = mkdate(next_day($d), $i);
+      $D = mkdate(next_day($d), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next day
     }
     if ($t < 0) {
       $M = find_month($M+1);
-      $i = $i ?: last_day()-6;
-      $D = mkdate(today($i), $i);
+      $s = $i ?: last_day()-6;
+      $D = mkdate(today($s), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next month
     }
     if ($t < 0) {
       $Y++;
       $M = find_month(1);
-      $i = $i ?: last_day()-6;
-      $D = mkdate(today($i), $i);
+      $s = $i ?: last_day()-6;
+      $D = mkdate(today($s), $s);
       $t = mktime($h,$m,0,$M,$D,$Y)-$time; // next year
     }
   }
@@ -297,7 +297,7 @@ case 'port':
 break;
 case 'parity':
   $var  = parse_ini_file("state/var.ini");
-  if ($var['mdNumInvalid']==0 && $var['mdResync']>0) {
+  if ($var['mdResync']>0) {
     $mode = '';
     if (strstr($var['mdResyncAction'],"recon")) {
       $mode = 'Parity-Sync / Data-Rebuild';
@@ -309,8 +309,8 @@ case 'parity':
       $mode = 'Parity-Check';
     }
     echo "<span class='orange p0'><strong>".$mode." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>";
-    echo "<br><em>Elapsed time: ".my_clock(floor((time()-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
-  } elseif ($var['mdNumInvalid']==0) {
+    echo "<br><i class='fa fa-clock-o'></i> <em>Elapsed time: ".my_clock(floor((time()-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
+  } else {
     extract(parse_plugin_cfg('dynamix', true));
     list($m,$h) = explode(' ', $parity['hour']);
     $time = time();
@@ -378,8 +378,6 @@ case 'parity':
     echo "</strong><br><i class='fa fa-clock-o'></i> <em>Due in: ";
     echo my_clock(floor($t/60));
     echo "</em>";
-  } else {
-    echo "<i class='fa fa-warning'></i> Array contains {$var['mdNumInvalid']} invalid disk(s)";
   }
 break;
 case 'shares':

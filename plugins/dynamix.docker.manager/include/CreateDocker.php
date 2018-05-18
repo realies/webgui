@@ -29,8 +29,9 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = DockerUtil::docker("network ls --filter driver='macvlan' --format='{{.Name}}'",true);
+$custom = DockerUtil::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
 $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
+
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
 function stopContainer($name) {
@@ -189,6 +190,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->Networking->addChild("Publish");
   $xml->addChild("Data");
   $xml->addChild("Environment");
+  $xml->addChild("Labels");
 
   $size = is_array($post['confName']) ? count($post['confName']) : 0;
   for ($i = 0; $i < $size; $i++) {
@@ -219,6 +221,11 @@ function postToXML($post, $setOwnership=false) {
       $variable->Value     = $post['confValue'][$i];
       $variable->Name      = $post['confTarget'][$i];
       $variable->Mode      = $post['confMode'][$i];
+    } elseif ($Type == 'Label') {
+      $label               = $xml->Labels->addChild("Label");
+      $label->Value        = $post['confValue'][$i];
+      $label->Name         = $post['confTarget'][$i];
+      $label->Mode         = $post['confMode'][$i];
     }
   }
   $dom = new DOMDocument('1.0');
@@ -343,6 +350,25 @@ function xmlToVar($xml) {
         ];
       }
     }
+    if (isset($xml->Labels->Variable)) {
+      $varNum = 0;
+      foreach ($xml->Labels->Variable as $varitem) {
+        if (empty(xml_decode($varitem->Name))) continue;
+        $varNum += 1;
+        $out['Config'][] = [
+          'Name'        => "Label ${varNum}",
+          'Target'      => xml_decode($varitem->Name),
+          'Default'     => xml_decode($varitem->Value),
+          'Value'       => xml_decode($varitem->Value),
+          'Mode'        => '',
+          'Description' => 'Container Label: '.xml_decode($varitem->Name),
+          'Type'        => 'Label',
+          'Display'     => 'always',
+          'Required'    => 'false',
+          'Mask'        => 'false'
+        ];
+      }
+    }
   }
   xmlSecurity($out);
   return $out;
@@ -366,8 +392,7 @@ function xmlSecurity(&$template) {
 }
 
 function xmlToCommand($xml, $create_paths=false) {
-  global $var;
-  global $docroot;
+  global $docroot, $var, $driver;
   $xml           = xmlToVar($xml);
   $cmdName       = strlen($xml['Name']) ? '--name='.escapeshellarg($xml['Name']) : '';
   $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
@@ -376,6 +401,7 @@ function xmlToCommand($xml, $create_paths=false) {
   $Volumes       = [''];
   $Ports         = [''];
   $Variables     = [''];
+  $Labels        = [''];
   $Devices       = [''];
   // Bind Time
   $Variables[]   = 'TZ="' . $var['timeZone'] . '"';
@@ -396,14 +422,21 @@ function xmlToCommand($xml, $create_paths=false) {
         @chgrp($hostConfig, 100);
       }
     } elseif ($confType == 'port') {
-      // Export ports as variable if Network is set to host
-      if (preg_match('/^(host|eth[0-9]|br[0-9]|bond[0-9])/',strtolower($xml['Network']))) {
+      switch ($driver[$xml['Network']]) {
+      case 'host':
+      case 'macvlan':
+        // Export ports as variable if network is set to host or macvlan
         $Variables[] = strtoupper(escapeshellarg($Mode.'_PORT_'.$containerConfig).'='.escapeshellarg($hostConfig));
-      // Export ports as port if Network is set to bridge
-      } elseif (strtolower($xml['Network'])== 'bridge') {
+        break;
+      case 'bridge':
+        // Export ports as port if network is set to (custom) bridge
         $Ports[] = escapeshellarg($hostConfig.':'.$containerConfig.'/'.$Mode);
-      // No export of ports if Network is set to none
+        break;
+      case 'none':
+        // No export of ports if network is set to none
       }
+    } elseif ($confType == "label") {
+      $Labels[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);
     } elseif ($confType == "variable") {
       $Variables[] = escapeshellarg($containerConfig).'='.escapeshellarg($hostConfig);
     } elseif ($confType == "device") {
@@ -411,8 +444,8 @@ function xmlToCommand($xml, $create_paths=false) {
     }
   }
   $postArgs = explode(";",$xml['PostArgs']);
-  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s',
-         $cmdName, $cmdNetwork, $cmdMyIP, $cmdPrivileged, implode(' -e ', $Variables), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $postArgs[0]);
+  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s',
+         $cmdName, $cmdNetwork, $cmdMyIP, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $postArgs[0]);
   return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
 
@@ -557,9 +590,7 @@ if (isset($_POST['contName'])) {
     // remove old template
     @unlink("$userTmplDir/my-$existing.xml");
   }
-  if ($startContainer) {
-    $cmd = str_replace('/plugins/dynamix.docker.manager/scripts/docker create ', '/plugins/dynamix.docker.manager/scripts/docker run -d ', $cmd);
-  }
+  if ($startContainer) $cmd = str_replace('/docker create ', '/docker run -d ', $cmd);
   execCommand($cmd);
   echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;
@@ -1026,7 +1057,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       targetDiv.find('#dt1').text('Key:');
       valueDiv.find('#dt2').text('Value:');
       break;
-    case 3: // Device
+    case 3: // Label
+      targetDiv.find('#dt1').text('Key:');
+      valueDiv.find('#dt2').text('Value:');
+      break;
+    case 4: // Device
       targetDiv.hide();
       defaultDiv.hide();
       valueDiv.find('#dt2').text('Value:');
@@ -1443,7 +1478,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
     <table class="settings wide">
       <tr>
         <td></td>
-        <td><a href="javascript:addConfigPopup()"><i class="fa fa-plus"></i> Add another Path, Port, Variable or Device</a></td>
+        <td><a href="javascript:addConfigPopup()"><i class="fa fa-plus"></i> Add another Path, Port, Variable, Label or Device</a></td>
       </tr>
     </table>
     <br>
@@ -1476,6 +1511,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <option value="Path">Path</option>
         <option value="Port">Port</option>
         <option value="Variable">Variable</option>
+        <option value="Label">Label</option>
         <option value="Device">Device</option>
       </select>
     </dd>

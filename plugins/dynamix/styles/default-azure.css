@@ -77,7 +77,6 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 #title span.right{font-size:20px;padding-right:10px;float:right}
 #title span img,#title p{display:none}
 #title:first-child{margin-top:0}
-#apps_icons{width:90%}
 #clear{clear:both}
 #footer{position:fixed;bottom:0;left:0;color:#808080;background:#121510;padding:5px 0;width:100%;height:16px;line-height:16px;text-align:center;z-index:100}
 #statusraid{float:left;padding-left:10px}
@@ -219,11 +218,11 @@ label+.content{margin-top:64px}
 div.tabs{position:relative;margin:110px 30px 30px 100px;background-color:#E4E2E4}
 div.tab{float:left;margin-top:23px}
 div.tab input[id^='tab']{display:none}
-div.tab [type=radio]+label:hover{background:#606E7F;color:#B0B0B0;cursor:pointer;border-color:#0072C6}
-div.tab [type=radio]:checked+label{cursor:default;background:#606E7F;color:#B0B0B0}
+div.tab [type=radio]+label:hover{cursor:pointer;border-color:#004E86;opacity:1}
+div.tab [type=radio]:checked+label{cursor:default;background:transparent;color:#606E7F;border-color:#004E86;opacity:1}
 div.tab [type=radio]+label~.content{display:none}
 div.tab [type=radio]:checked+label~.content{display:inline}
-div.tab [type=radio]+label{position:relative;padding:10px 10px;margin-right:2px;border-top-left-radius:12px;border-top-right-radius:12px;border:#004E86 1px solid;border-bottom:none}
+div.tab [type=radio]+label{position:relative;padding:10px 10px;margin-right:2px;border-top-left-radius:12px;border-top-right-radius:12px;background:#606E7F;color:#B0B0B0;border:#8B98A7 1px solid;border-bottom:none;opacity:0.5}
 div.tab [type=radio]+label img{display:none}
 div.Panel{width:25%;height:auto;float:left;margin:0;padding:5px;border-right:#F3F0F4 1px solid;border-bottom:#F3F0F4 1px solid;box-sizing:border-box}
 div.Panel:hover{background-color:#EDEAEF}

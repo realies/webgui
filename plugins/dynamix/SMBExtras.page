@@ -20,14 +20,21 @@ Tag="share-alt-square"
 
 <?
 $file = "/boot/config/smb-extra.conf";
-$text = @file_get_contents($file);
+$text = @file_get_contents($file) ?: '';
+$text = preg_replace(["/\r\n/","/\r/"],"\n",$text);
 ?>
+<script>
+$(function(){
+  $('form').find('textarea').on('input change',function(){
+    $(this).prop('rows',($(this).val().match(/\n/g)||[]).length+1);
+  });
+});
+</script>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
 Samba extra configuration:
-
-: <textarea spellcheck="false" cols="80" rows="22" maxlength="2048" name="text" style="font-family:bitstream;width:66%"><?=htmlspecialchars($text)?></textarea>
+: <textarea spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" name="text" style="resize:none;font-family:bitstream;width:65.5%"><?=htmlspecialchars($text)?></textarea>
 
 &nbsp;
 : <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">

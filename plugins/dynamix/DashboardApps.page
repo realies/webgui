@@ -11,14 +11,13 @@ body{-webkit-overflow-scrolling:touch}
 label{display:inline}
 iframe{overflow:scroll;-webkit-overflow-scrolling:touch}
 h2{color:#625D5D;letter-spacing:0;font-family:arimo;font-size:32px;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
-.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF}
-.iconstatus.started{font-size:1.3em}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.3em;text-shadow:0 0 2px #FFF}
 img.started{opacity:1.0}
 img.stopped{opacity:0.3}
-img.paused{opacity:1.0}
+img.paused{opacity:0.6}
 .started{color:#009900}
-.paused{color:#F0DD33}
 .stopped{color:#EF3D47}
+.paused{color:#F0DD33}
 .update{color:#3300FF}
 .show{display:block}
 div.Panel{float:none;display:inline-block;margin:0 18px 15px 0;height:90px;overflow:hidden;vertical-align:top;width:94px;word-wrap:break-word;border:none}
@@ -38,7 +37,7 @@ div.Panel:hover{overflow:visible;z-index:10;background-color:unset}
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top:-44px; margin-right:<?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
+<span class="status" style="margin-top:-44px; margin-right:0"><input type="checkbox" class="appview"></span>
 <div id="apps_icons" style="display:none"></div><div id="noapps">No apps available to show</div>
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
@@ -51,8 +50,8 @@ function loadlist() {
     $('#apps_icons').html(data[0]);
     $('head').append('<script>'+data[1]+'<\/script>');
     if ($.cookie('dashapps_view_mode')=='startedonly') {
-      $('.Panel').not('.started').hide();
-      if ($('.Panel.started').length===0) $('#noapps').show();
+      $('.Panel.stopped').hide();
+      if ($('.Panel.started').length===0 && $('.Panel.paused').length===0) $('#noapps').show();
     }
     if ($('.Panel').length===0) $('#noapps').show();
     $('#apps_icons').slideDown('fast');
@@ -62,8 +61,8 @@ function loadlist() {
 $(function() {
   $('.appview').switchButton({labels_placement:"left", on_label:'Started Only', off_label:'All Apps', checked:$.cookie('dashapps_view_mode') == 'startedonly'});
   $('.appview').change(function() {
-    $('.Panel').not('.started').finish().toggle('fast');
-    if ($('.Panel').length===0 || ($('.appview').is(':checked') && $('.Panel.started').length===0)) {
+    $('.Panel.stopped').finish().toggle('fast');
+    if ($('.Panel').length===0 || ($('.appview').is(':checked') && $('.Panel.started').length===0 && $('.Panel.paused').length===0)) {
       $('#noapps').slideDown('fast');
     } else {
       $('#noapps').slideUp('fast');

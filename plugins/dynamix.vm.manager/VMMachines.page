@@ -95,6 +95,7 @@ if (empty($vms)) {
 }
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style type="text/css">
@@ -109,11 +110,12 @@ div.Panel{float:unset;margin:4px;height:inherit;border:none;}
 div.Panel:hover{background-color:unset;}
 div.PanelText{display:none;}
 th.five{width:5%}
+tbody > tr.sortable:hover{cursor:move}
 </style>
 <div class="spinner fixed"></div>
-<table id="kvm_table" class="tablesorter shift">
-<thead><tr><th><i class="fa fa-th-list"></i></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th><th class="five" style="text-align:right;padding-right:24px"><a href="#" style="cursor:hand" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-sort"></i></a></th></tr></thead>
-<tbody id="kvm_list"><tr><td colspan='9'><div class="spinner"></div></td></tr></tbody>
+<table id="kvm_table" class="tablesorter four shift">
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="five">Autostart</th></tr></thead>
+<tbody id="kvm_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" style="display:none">
 <input type="button" onclick="startAll()" value="Start all VMs" style="display:none">
@@ -141,11 +143,27 @@ function resetSorting() {
   $('input[type=button]').prop('disabled',true);
   $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
 }
+var sortableHelper = function(e,i){
+  i.children().each(function(){
+    $(this).width($(this).width());
+  });
+  return i;
+};
 function loadlist() {
   $.get('/plugins/dynamix.vm.manager/include/VMMachines.php',{show:$.cookie('vmshow')},function(d) {
     var data = d.split(/\0/);
     $('div.spinner').hide('slow');
-    $('#kvm_list').html(data[0]);
+    $('#kvm_list').html(data[0]).sortable({helper:sortableHelper,items:'tr.sortable',opacity:0.4,update:function(e,i){
+      $('#kvm_list').find('tr.sortable').each(function(){
+        var parent = $(this).attr('parent-id');
+        var child = $('tr[child-id="'+parent+'"]');
+        child.detach().insertAfter($(this));
+      });
+      var row = $('#kvm_list').find('tr:first');
+      var names = ''; var index = '';
+      row.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
+      $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
+    }});
     $('head').append('<script>'+data[1]+'<\/script>');
 <?if ($display['resize']):?>
     resize();
@@ -175,27 +193,6 @@ function loadlist() {
     $('input[type=button]').prop('disabled',false).show('slow');
     $('.text').click(showInput);
     $('.input').blur(hideInput);
-    $('i.up,i.down').click(function() {
-      var row1 = $(this).parents('tr:first');
-      var row2 = row1.next();
-      var color1 = row1.css('background-color');
-      if ($(this).is('.up')) {
-        var color2 = row1.prev().prev().css('background-color');
-        row1.prev().prev().css('background-color',color1);
-        row1.css('background-color',color2);
-        row1.insertBefore(row1.prev().prev());
-        row2.insertBefore(row2.prev().prev());
-      } else {
-        var color2 = row1.next().next().css('background-color');
-        row1.next().next().css('background-color',color1);
-        row1.css('background-color',color2);
-        row2.insertAfter(row2.next().next());
-        row1.insertAfter(row1.next().next());
-      }
-      var names = ''; var index = '';
-      row1.parent().children().find('td.vm-name').each(function(){names+=$(this).text()+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
-      $.post('/plugins/dynamix.vm.manager/include/UserPrefs.php',{names:names,index:index});
-    });
   });
 }
 $(function() {
