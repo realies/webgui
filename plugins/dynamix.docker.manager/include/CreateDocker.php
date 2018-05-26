@@ -584,7 +584,9 @@ if (isset($_POST['contName'])) {
     // force kill container if still running after 10 seconds
     removeContainer($existing,1);
     // remove old template
-    @unlink("$userTmplDir/my-$existing.xml");
+    if (strtolower($filename) != strtolower("$userTmplDir/my-$existing.xml")) {
+      @unlink("$userTmplDir/my-$existing.xml");
+    }
   }
   if ($startContainer) $cmd = str_replace('/docker create ', '/docker run -d ', $cmd);
   execCommand($cmd);
