@@ -43,8 +43,8 @@ tbody > tr.sortable:hover{cursor:move}
 <span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
 <div class="spinner fixed"></div>
 <table id="docker_containers" class="tablesorter shift">
-<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load">CPU load</th><th class="load">Memory load</th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
-<tbody id="docker_list"><tr><td colspan='10'><div class="spinner"></div></td></tr></tbody>
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
+<tbody id="docker_list"><tr><td class="advanced"></td><td colspan='8'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start all Containers" style="display:none">
