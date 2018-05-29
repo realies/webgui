@@ -17,9 +17,6 @@ Markdown="false"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?
-if (!exec("pgrep docker_load")) exec("$docroot/plugins/dynamix.docker.manager/scripts/docker_load >/dev/null 2>&1 &");
-?>
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
