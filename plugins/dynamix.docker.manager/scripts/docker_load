@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while :; do
+  curl --data "$(docker stats --no-stream --format='{{.Container}} {{.CPUPerc}} {{.MemPerc}}')" --unix-socket /var/run/nginx.socket http://localhost/pub/dockerload?buffer_length=0 >/dev/null 2>&1
+  sleep 1
+done &
