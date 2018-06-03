@@ -102,6 +102,9 @@ function loadlist(update) {
     resize();
     $(window).bind('resize',function(){resize(true);});
 <?endif;?>
+    $('.iconstatus').each(function(){
+      if ($(this).hasClass('stopped')) $('div.'+$(this).prop('id')).hide();
+    });
     $('.autostart').switchButton({labels_placement:"right"});
     $('.autostart').change(function() {
       $.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php",{action:'autostart',container:$(this).attr('container'),response:'json'},function(data){$(this).prop('checked',data.autostart);},'json');
