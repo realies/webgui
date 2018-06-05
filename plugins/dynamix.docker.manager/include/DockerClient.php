@@ -532,7 +532,7 @@ class DockerClient {
 		'304' => 'Container already started',
 		'400' => 'Bad parameter',
 		'404' => 'No such container',
-		'409' => 'Image can not be deleted<br><i>In use by other container(s)</i>',
+		'409' => 'Image can not be deleted, in use by other container(s)',
 		'500' => 'Server error'
 	];
 
