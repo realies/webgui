@@ -291,7 +291,7 @@ class DockerTemplates {
 	public function getIcon($Repository) {
 		global $docroot, $dockerManPaths;
 		$imgUrl = $this->getTemplateValue($Repository, 'Icon');
-		preg_match_all("/(.*?):([\w]*$)/i", $Repository, $matches);
+		preg_match_all("/(.*?):([\S]*$)/i", $Repository, $matches);
 		$name = preg_replace("%\/|\\\%", '-', $matches[1][0]);
 		$version = $matches[2][0];
 		$iconRAM = sprintf('%s/%s-%s-%s.png', $dockerManPaths['images-ram'], $name, $version, 'icon');
