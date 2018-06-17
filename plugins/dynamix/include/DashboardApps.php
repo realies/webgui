@@ -42,10 +42,11 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
     $is_autostart = $info['autostart'] ? 'true':'false';
     $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
     $template = $info['template'];
+    $shell = $info['shell'];
     $webGui = html_entity_decode($info['url']);
     $support = html_entity_decode($info['Support']);
     $project = html_entity_decode($info['Project']);
-    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+    $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $shell, $id, addslashes($support), addslashes($project));
     $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
     $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
     $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';

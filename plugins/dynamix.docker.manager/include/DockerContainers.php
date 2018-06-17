@@ -39,7 +39,6 @@ $docker = ['var docker=[];'];
 $null = '0.0.0.0';
 $menu = [];
 
-$n = 0;
 foreach ($containers as $ct) {
   $name = $ct['Name'];
   $id = $ct['Id'];
@@ -49,10 +48,11 @@ foreach ($containers as $ct) {
   $is_autostart = $info['autostart'] ? 'true':'false';
   $updateStatus = $info['updated']=='true'||$info['updated']=='undef' ? 'true':'false';
   $template = $info['template'];
+  $shell = $info['shell'];
   $webGui = html_entity_decode($info['url']);
   $support = html_entity_decode($info['Support']);
   $project = html_entity_decode($info['Project']);
-  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $id, addslashes($support), addslashes($project));
+  $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $shell, $id, addslashes($support), addslashes($project));
   $docker[] = "docker.push({name:'$name',id:'$id',state:$running,pause:$paused,update:'$updateStatus'});";
   $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
   $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
@@ -71,7 +71,7 @@ foreach ($containers as $ct) {
   echo "<tr class='sortable'><td style='width:48px;padding:4px'>";
   echo "<div id='$id' style='display:block; cursor:pointer'><div style='position:relative;width:48px;height:48px;margin:0px auto'>";
   echo "<img src='".htmlspecialchars($icon)."' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
-  echo "<i class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
+  echo "<i id='load-$id' class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
   echo "</td><td class='ct-name'>";
   if ($template) {
     echo "<a class='exec' onclick=\"editContainer('".addslashes(htmlspecialchars($name))."','".addslashes(htmlspecialchars($template))."')\">".htmlspecialchars($name)."</a>";
@@ -79,7 +79,7 @@ foreach ($containers as $ct) {
     echo htmlspecialchars($name);
   }
   echo "<div class='advanced' style='width:160px'>Container ID: $id</div>";
-  if ($ct['BaseImage']) echo "<div class='advanced' style='width:160px;'><i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."</div>"; 
+  if ($ct['BaseImage']) echo "<div class='advanced' style='width:160px;'><i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."</div>";
   echo "<div class='advanced' style='width:160px'>By:";
   $registry = $info['registry'];
   if ($registry) {
@@ -100,6 +100,8 @@ foreach ($containers as $ct) {
   echo "</td><td>{$ct['NetworkMode']}</td>";
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
+  echo "<td class='advanced'><div class='usage-disk sys load-$id'><span id='cpu-$id' style='width:0'></span></div></td>";
+  echo "<td class='advanced'><div class='usage-disk sys load-$id'><span id='mem-$id' style='width:0'></span></div></td>";
   echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
   echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td></tr>";
@@ -115,7 +117,7 @@ foreach ($images as $image) {
   echo "</div></div></td>";
   echo "<td><i>(orphan image)</i><div style='width:160px;'>Image ID: $id</div>";
   echo "<div style='width:160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div></td>";
-  echo "<td colspan='5'></td>";
+  echo "<td colspan='5'></td><td class='advanced' colspan='2'></td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
 echo "\0".implode($menu).implode($docker);

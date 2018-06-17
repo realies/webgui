@@ -139,10 +139,9 @@ function chkDelete(form, button) {
 }
 function openBox(cmd,title,height,width,load,func,id) {
   // open shadowbox window (run in foreground)
-  if (id === undefined) id = '';
   var run = cmd.split('?')[0].substr(-4)=='.php' ? cmd : '/logging.htm?cmd='+cmd+'&csrf_token=<?=$var['csrf_token']?>';
-  var options = load ? (func ? {modal:true,onClose:function(){setTimeout(func+'('+'"'+id+'")',0);}} : {modal:true,onClose:function(){location=location;}}) : {modal:true};
-  Shadowbox.open({content:run, player:'iframe', title:title, height:height, width:width, options:options});
+  var options = load ? (func ? {modal:true,onClose:function(){setTimeout(func+'('+'"'+(id||'')+'")',0);}} : {modal:true,onClose:function(){location=location;}}) : {modal:true};
+  Shadowbox.open({content:run, player:'iframe', title:title, height:Math.min(height,screen.availHeight), width:Math.min(width,screen.availWidth), options:options});
 }
 function openWindow(cmd,title,height,width) {
   // open regular window (run in background)
@@ -160,8 +159,10 @@ function openWindow(cmd,title,height,width) {
   form_html += '</form>';
   var form = $(form_html);
   $('body').append(form);
-  var top = (screen.height-height)/2;
-  var left = (screen.width-width)/2;
+  var top = (screen.availHeight-height)/2;
+  if (top < 0) {top = 0; height = screen.availHeight;}
+  var left = (screen.availWidth-width)/2;
+  if (left < 0) {left = 0; width = screen.availWidth;}
   var options = 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left;
   window.open('', window_name, options);
   form.submit();

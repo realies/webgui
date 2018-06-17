@@ -1,10 +1,10 @@
 var eventURL = '/plugins/dynamix.docker.manager/include/Events.php';
 
-function addDockerContainerContext(container, image, template, started, paused, update, autostart, webui, id, Support, Project) {
+function addDockerContainerContext(container, image, template, started, paused, update, autostart, webui, shell, id, Support, Project) {
   var opts = [{header:container, image:'/plugins/dynamix.docker.manager/images/dynamix.docker.manager.png'}];
   if (started && !paused) {
     if (webui !== '' && webui != '#') opts.push({text:'WebUI', icon:'fa-globe', href:webui, target:'_blank'});
-    opts.push({text:'Console', icon:'fa-terminal', action:function(e){e.preventDefault(); dockerTerminal(container);}});
+    opts.push({text:'Console', icon:'fa-terminal', action:function(e){e.preventDefault(); dockerTerminal(container,shell);}});
     opts.push({divider:true});
   }
   if (!update) {
@@ -45,12 +45,12 @@ function addDockerImageContext(image, imageTag) {
   opts.push({text:'Remove', icon:'fa-trash', action:function(e){e.preventDefault(); rmImage(image, imageTag);}});
   context.attach('#'+image, opts);
 }
-function dockerTerminal(container) {
+function dockerTerminal(container,shell) {
   var height = 600;
   var width = 900;
   var top = (screen.height-height)/2;
   var left = (screen.width-width)/2;
-  $.get(eventURL,{action:'terminal',name:container});
+  $.get(eventURL,{action:'terminal',name:container,shell:shell});
   setTimeout(function(){window.open('/dockerterminal/'+container+'/', container, 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();},180);
 }
 function execUpContainer(container) {

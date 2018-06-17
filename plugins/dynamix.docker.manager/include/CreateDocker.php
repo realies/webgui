@@ -168,6 +168,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->Registry           = xml_encode(trim($post['contRegistry']));
   $xml->Network            = xml_encode($post['contNetwork']);
   $xml->MyIP               = xml_encode($post['contMyIP']);
+  $xml->Shell              = xml_encode($post['contShell']);
   $xml->Privileged         = strtolower($post['contPrivileged'])=='on' ? 'true' : 'false';
   $xml->Support            = xml_encode($post['contSupport']);
   $xml->Project            = xml_encode($post['contProject']);
@@ -242,6 +243,7 @@ function xmlToVar($xml) {
   $out['Registry']    = xml_decode($xml->Registry);
   $out['Network']     = xml_decode($xml->Network);
   $out['MyIP']        = xml_decode($xml->MyIP ?? '');
+  $out['Shell']       = xml_decode($xml->Shell ?? 'sh');
   $out['Privileged']  = xml_decode($xml->Privileged);
   $out['Support']     = xml_decode($xml->Support);
   $out['Project']     = xml_decode($xml->Project);
@@ -1421,6 +1423,14 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
             Generally speaking, it is recommended to leave this setting to its default value as specified per application template.</p>
             <p>IMPORTANT NOTE:  If adjusting port mappings, do not modify the settings for the Container port as only the Host port can be adjusted.</p>
           </blockquote>
+        </td>
+      </tr>
+      <tr <?=$showAdditionalInfo?>>
+        <td>Console shell command:</td>
+        <td><select name="contShell" class="narrow">
+            <?=mk_option(1,'sh','Shell')?>
+            <?=mk_option(1,'bash','Bash')?>
+            </select>
         </td>
       </tr>
       <tr <?=$showAdditionalInfo?>>
