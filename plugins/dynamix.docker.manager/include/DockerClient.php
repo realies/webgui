@@ -270,6 +270,7 @@ class DockerTemplates {
 				$port = &$ct['Ports'][0];
 				$ip = ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : $port['IP']);
 				$tmp['url'] = strpos($tmp['url'],$ip)!==false ? $tmp['url'] : $this->getControlURL($ct, $ip);
+				$tmp['shell'] = $tmp['shell'] ?? $this->getTemplateValue($image, 'Shell');
 			}
 			$tmp['registry'] = $tmp['registry'] ?? $this->getTemplateValue($image, 'Registry');
 			$tmp['Support'] = $tmp['Support'] ?? $this->getTemplateValue($image, 'Support');
@@ -291,7 +292,7 @@ class DockerTemplates {
 	public function getIcon($Repository) {
 		global $docroot, $dockerManPaths;
 		$imgUrl = $this->getTemplateValue($Repository, 'Icon');
-		preg_match_all("/(.*?):([\w]*$)/i", $Repository, $matches);
+		preg_match_all("/(.*?):([\S]*$)/i", $Repository, $matches);
 		$name = preg_replace("%\/|\\\%", '-', $matches[1][0]);
 		$version = $matches[2][0];
 		$iconRAM = sprintf('%s/%s-%s-%s.png', $dockerManPaths['images-ram'], $name, $version, 'icon');
@@ -531,7 +532,7 @@ class DockerClient {
 		'304' => 'Container already started',
 		'400' => 'Bad parameter',
 		'404' => 'No such container',
-		'409' => 'Image can not be deleted<br><i>In use by other container(s)</i>',
+		'409' => 'Image can not be deleted, in use by other container(s)',
 		'500' => 'Server error'
 	];
 

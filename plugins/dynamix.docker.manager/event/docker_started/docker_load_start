@@ -1,6 +1,6 @@
 #!/bin/bash
-# daemonize the 'diskload' script
-DAEMON="/usr/local/emhttp/webGui/scripts/diskload"
+# daemonize the 'docker_load' script
+DAEMON="/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker_load"
 if [[ "$(pgrep -f $DAEMON)" == "" ]]; then
   logger "Starting $(basename $DAEMON)"
   $DAEMON &>/dev/null &
