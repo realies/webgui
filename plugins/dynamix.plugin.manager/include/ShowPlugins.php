@@ -78,6 +78,9 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //version
   $version = plugin('version',$plugin_file) ?: "unknown";
   $date = str_replace('.','',$version);
+//support
+  $support = plugin('support',$plugin_file) ?: "";
+  $support = $support ? "<a href='$support' target='_blank'>Support Thread</a>" : "";
 //category
   $category = plugin('category',$plugin_file) ?: (strpos($version,'-')!==false ? 'next' : 'stable');
 //status
@@ -118,7 +121,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   $empty = false;
   echo "<tr id=\"".str_replace(['.',' ','_'],'',basename($plugin_file,'.plg'))."\">";
   echo "<td style='vertical-align:top;width:64px'><p style='text-align:center'>$link</p></td>";
-  echo "<td><span class='desc_readmore' style='display:block'>$desc</span></td>";
+  echo "<td><span class='desc_readmore' style='display:block'>$desc</span> $support</td>";
   echo "<td>$author</td>";
   echo "<td data='$date'>$version</td>";
   echo "<td data='$rank'>$status</td>";
