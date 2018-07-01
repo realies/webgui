@@ -444,6 +444,7 @@ function execCommand($command) {
 
 function dockerRunSecurity($command) {
   $testCommand = htmlspecialchars_decode($command);
+	$testCommand = str_replace("\'","",$testCommand);
   $cmdSplit = explode("'",$testCommand);
   for ($i=0; $i<count($cmdSplit); $i=$i+2) {
     $tstCommand .= $cmdSplit[$i];
