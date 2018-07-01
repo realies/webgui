@@ -413,9 +413,9 @@ function pullImage($name, $image) {
 }
 
 function execCommand($command) {
-	if ( dockerRunSecurity($command) ) {
-		$command = "logger 'docker command execution halted due to security violation (Bash command execution or redirection)'";
-	}
+  if ( dockerRunSecurity($command) ) {
+    $command = "logger 'docker command execution halted due to security violation (Bash command execution or redirection)'";
+  }
   // $command should have all its args already properly run through 'escapeshellarg'
   $descriptorspec = [
     0 => ['pipe', 'r'],   // stdin is a pipe that the child will read from
@@ -443,17 +443,17 @@ function execCommand($command) {
 }
 
 function dockerRunSecurity($command) {
-	$testCommand = htmlspecialchars_decode($command);
-	$cmdSplit = explode("'",$testCommand);
-	for ($i=0; $i<count($cmdSplit); $i=$i+2) {
-		$tstCommand .= $cmdSplit[$i];
-	}
-	foreach ( [";","|",">","&&"] as $invalidChars ) {
-		if ( strpos($tstCommand,$invalidChars) ) {
-			return true;
-		}
-	}
-	return false;
+  $testCommand = htmlspecialchars_decode($command);
+  $cmdSplit = explode("'",$testCommand);
+  for ($i=0; $i<count($cmdSplit); $i=$i+2) {
+    $tstCommand .= $cmdSplit[$i];
+  }
+  foreach ( [";","|",">","&&"] as $invalidChars ) {
+    if ( strpos($tstCommand,$invalidChars) ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function getXmlVal($xml, $element, $attr=null, $pos=0) {
