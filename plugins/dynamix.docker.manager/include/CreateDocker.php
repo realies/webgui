@@ -1441,7 +1441,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <td colspan="2">
           <blockquote class="inline_help">
             <p>For containers that require the use of host-device access directly or need full exposure to host capabilities, this option will need to be selected.
-            <br>For more information, see this link: <a href="https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration" target="_blank">https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration</a></p>
+            <br>For more information, see this link: <a href="https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities" target="_blank">https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities</a></p>
           </blockquote>
         </td>
       </tr>
