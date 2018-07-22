@@ -16,7 +16,7 @@ $text = $_POST['text'] ?? '';
 file_put_contents('/boot/config/ssl/certs/certificate_bundle.pem.new', $text);
 
 //validate certificate_bundle.pem.new is for *.unraid.net before moving it over to certificate_bundle.pem
-if (preg_match('/CN=[0-9a-f]{40}\.unraid\.net$/', exec('openssl x509 -in /boot/config/ssl/certs/certificate_bundle.pem.new -subject -noout 2>&1'))) {
+if (preg_match('/[0-9a-f]{40}\.unraid\.net$/', exec('openssl x509 -in /boot/config/ssl/certs/certificate_bundle.pem.new -subject -noout 2>&1'))) {
   rename('/boot/config/ssl/certs/certificate_bundle.pem.new', '/boot/config/ssl/certs/certificate_bundle.pem');
 } else {
   unlink('/boot/config/ssl/certs/certificate_bundle.pem.new');

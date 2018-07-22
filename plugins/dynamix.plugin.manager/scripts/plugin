@@ -439,6 +439,7 @@ if ($argc < 3) {
 //
 $unraid = parse_ini_file('/etc/unraid-version');
 if ($method == "install") {
+  $argv[2] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $argv[2]);
   echo "plugin: installing: $argv[2]\n";
   // check for URL
   if ((strpos($argv[2], "http://") === 0) || (strpos($argv[2], "https://") === 0)) {
