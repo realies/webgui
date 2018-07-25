@@ -70,6 +70,7 @@ function doDispatch(form) {
   if (form.<?=addslashes(htmlspecialchars($name))?>_maxTemp.value>0) form.<?=addslashes(htmlspecialchars($name))?>_maxTemp.value = Math.round((form.<?=addslashes(htmlspecialchars($name))?>_maxTemp.value-32)*5/9);
 <?endif;?>
   fields['#cfg'] = "/boot/config/smart-one.cfg";
+  fields['#cleanup'] = true;
   $(form).find('input[name^="<?=addslashes(htmlspecialchars($name))?>_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
   $.post('/webGui/include/Dispatcher.php',fields);
 }
