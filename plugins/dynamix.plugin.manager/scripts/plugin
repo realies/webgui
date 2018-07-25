@@ -345,8 +345,8 @@ function plugin($method, $plugin_file, &$error) {
         passthru("echo $inline | $command", $retval);
       }
       if ($retval) {
-	      $error = "run failed: $command retval: $retval";
-	      return false;
+        $error = "run failed: $command retval: $retval";
+        return false;
       }
     }
   }
@@ -603,6 +603,8 @@ if ($method == "update") {
     echo "plugin: not installed\n";
     exit(1);
   }
+  // get old support link
+  $previousSupportLink = plugin('support',"/var/log/plugins/$plugin",$error);
   // verify previous check has been done
   $plugin_file = "/tmp/plugins/$plugin";
   if (!file_exists($plugin_file)) {
@@ -629,7 +631,18 @@ if ($method == "update") {
   }
   // install was successful, save the updated plugin so it installs again next boot
   unlink("/var/log/plugins/$plugin");
-  copy($plugin_file, "/boot/config/plugins/$plugin");
+  // re-inject the old support link if the updated plugin doesn't have one
+  if ( (! plugin("support",$plugin_file,$error)) && $previousSupportLink ) {
+    echo "\n\nUpdating Support Link\n";
+    $pluginXML = simplexml_load_file($plugin_file);
+    $pluginXML->addAttribute("support",$previousSupportLink);
+    $dom = new DOMDocument('1.0');
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = true;
+    $dom->loadXML($pluginXML->asXML());
+    file_put_contents($plugin_file,$dom->saveXML());
+  }
+  copy($plugin_file,"/boot/config/plugins/$plugin");
   symlink("/boot/config/plugins/$plugin", "/var/log/plugins/$plugin");
   echo "plugin: updated\n";
   exit(0);
