@@ -50,8 +50,8 @@ function dockerTerminal(container,shell) {
   var width = 900;
   var top = (screen.height-height)/2;
   var left = (screen.width-width)/2;
-  $.get(eventURL,{action:'terminal',name:container,shell:shell});
-  setTimeout(function(){window.open('/dockerterminal/'+container+'/', container, 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left).focus();},180);
+  var win = window.open('', container, 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left);
+  $.get(eventURL,{action:'terminal',name:container,shell:shell},function(){win.location='/dockerterminal/'+container+'/'; win.focus();});
 }
 function execUpContainer(container) {
   var title = 'Updating the container: '+container;
