@@ -575,13 +575,14 @@ class DockerClient {
 	}
 
 	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false) {
+		$api = '/v1.37'; // used to force an API version. See https://docs.docker.com/develop/sdk/#api-version-matrix
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 		if ($fp === false) {
 			echo "Couldn't create socket: [$errno] $errstr";
 			return null;
 		}
 		$protocol = $unchunk ? 'HTTP/1.0' : 'HTTP/1.1';
-		$out = "$method $url $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
+		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
