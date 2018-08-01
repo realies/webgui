@@ -492,7 +492,7 @@ function getAllocations() {
     }
     sort($port);
     $ip = $ct['NetworkMode']=='host'||$nat ? $host : ($ip ?: DockerUtil::myIP($ct['Name']) ?: '0.0.0.0');
-    $list['Port'] = "$ip : ".(implode(' ',array_unique($port)) ?: '???')." -- {$ct['NetworkMode']}";
+    $list['Port'] = "<span style='display:inline-block;width:90px'>{$ct['NetworkMode']}</span><span style='display:inline-block;width:140px'>$ip</span>".(implode(', ',array_unique($port)) ?: '???');
     $ports[] = $list;
   }
   return $ports;
