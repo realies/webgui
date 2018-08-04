@@ -23,6 +23,7 @@ $empty   = true;
 $updates = 0;
 $builtin = ['unRAIDServer'];
 $plugins = "/var/log/plugins/*.plg";
+$ncsi    = null; // network connection status indicator
 
 if ($audit) {
   list($plg,$action) = explode(':',$audit);
@@ -44,7 +45,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //switch between system and custom plugins
   if (($system && !$custom) || (!$system && $custom)) continue;
 //forced plugin check?
-  $checked = (!$audit && !$check) ? check_plugin(basename($plugin_file)) : true;
+  $checked = (!$audit && !$check) ? check_plugin(basename($plugin_file),$ncsi) : true;
 //OS update?
   $os = $system && $name==$builtin[0];
   $toggle = false;
@@ -56,7 +57,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
     copy($plugin_file,$tmp_file);
     exec("sed -ri 's|^(<!ENTITY category).*|\\1 \"{$branch}\">|' $tmp_file");
     symlink($tmp_file,"/var/log/plugins/$tmp_plg");
-    if (check_plugin($tmp_plg)) {
+    if (check_plugin($tmp_plg,$ncsi)) {
       copy("/tmp/plugins/$tmp_plg",$tmp_file);
       $plugin_file = $tmp_file;
     }

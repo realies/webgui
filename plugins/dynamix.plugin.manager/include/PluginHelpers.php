@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,9 +20,10 @@ function plugin($method, $arg = '') {
   return $retval==0 ? implode("\n", $output) : false;
 }
 
-function check_plugin($arg, $dns='8.8.8.8') {
-// ping DNS server first to ensure internet is present
-  return exec("ping -qnl2 -c2 -W3 $dns 2>/dev/null|awk '/received/{print $4}'") ? plugin('check',$arg) : false;
+function check_plugin($arg, &$ncsi) {
+// Get network connection status indicator (NCSI)
+  if ($ncsi===null) passthru("wget --quiet --spider --timeout=10 --tries=1 http://www.msftncsi.com/ncsi.txt",$ncsi);
+  return $ncsi===0 ? plugin('check',$arg) : false;
 }
 
 function make_link($method, $arg, $extra='') {
