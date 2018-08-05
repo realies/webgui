@@ -37,6 +37,7 @@ th.five{width:5%}
 th.eight{width:8%}
 th.load{width:100px}
 tbody > tr.sortable:hover{cursor:move}
+input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
 </style>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
@@ -75,11 +76,17 @@ function resetSorting() {
   $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
 }
 function listview() {
-  if ($.cookie('docker_listview_mode')=='advanced') {
+  var more = $.cookie('docker_listview_mode')=='advanced';
+  if (more) {
     $('.docker_readmore').readmore('destroy');
   } else {
     $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
   }
+  $('input.autostart').each(function(){
+    var wait = $('#'+$(this).prop('id').replace('auto','wait'));
+    var auto = $(this).prop('checked');
+    if (auto && more) wait.show(); else wait.hide();
+  });
 }
 var sortableHelper = function(e,i){
   i.children().each(function(){
@@ -105,21 +112,28 @@ function loadlist() {
     $('.iconstatus').each(function(){
       if ($(this).hasClass('stopped')) $('div.'+$(this).prop('id')).hide();
     });
-    $('.autostart').switchButton({labels_placement:"right"});
-    $('.autostart').change(function() {
-      $.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php",{action:'autostart',container:$(this).attr('container'),response:'json'},function(data){$(this).prop('checked',data.autostart);},'json');
+    $('.autostart').switchButton({labels_placement:'right'});
+    $('.autostart').change(function(){
+      var more = $.cookie('docker_listview_mode')=='advanced';
+      var wait = $('#'+$(this).prop('id').replace('auto','wait'));
+      var auto = $(this).prop('checked');
+      if (auto && more) wait.show(); else wait.hide();
+      $.post('/plugins/dynamix.docker.manager/include/UpdateConfig.php',{action:'autostart',container:$(this).attr('container'),auto:auto,wait:wait.find('input.wait').val()});
+    });
+    $('input.wait').change(function(){
+      $.post('/plugins/dynamix.docker.manager/include/UpdateConfig.php',{action:'wait',container:$(this).attr('container'),wait:$(this).val()});
     });
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
-    listview();
     context.init({preventDoubleContext:false});
     $('input[type=button]').prop('disabled',false).show('slow');
     var update = false;
     for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') {update = true; break;};
     if (!update) $('input#updateAll').hide();
+    listview();
   });
 }
 var watchDocker = new NchanSubscriber('/sub/dockerload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
-watchDocker.on('message', function(data) {
+watchDocker.on('message', function(data){
   data = data.split('\n');
   for (var i=0,row; row=data[i]; i++) {
     var id = row.split(' ');
@@ -129,7 +143,7 @@ watchDocker.on('message', function(data) {
 });
 $(function() {
   $('.advancedview').switchButton({labels_placement:'left', on_label:'Advanced View', off_label:'Basic View', checked:$.cookie('docker_listview_mode')=='advanced'});
-  $('.advancedview').change(function() {
+  $('.advancedview').change(function(){
     $('.advanced').toggle('slow');
     $('.basic').toggle('slow');
     $.cookie('docker_listview_mode',$('.advancedview').is(':checked')?'advanced':'basic',{expires:3650});

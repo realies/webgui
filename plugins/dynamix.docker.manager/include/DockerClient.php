@@ -38,6 +38,10 @@ $driver = DockerUtil::driver();
 $docker_cfgfile = '/boot/config/docker.cfg';
 $dockercfg = parse_ini_file($docker_cfgfile);
 
+function var_split($item, $i=0) {
+	return explode(' ',$item)[$i];
+}
+
 #######################################
 ##       DOCKERTEMPLATES CLASS       ##
 #######################################
@@ -257,7 +261,7 @@ class DockerTemplates {
 		$DockerUpdate = new DockerUpdate();
 		//$DockerUpdate->verbose = $this->verbose;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
-		$autoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
+		$autoStart = array_map('var_split', @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: []);
 		foreach ($DockerClient->getDockerContainers() as $ct) {
 			$name = $ct['Name'];
 			$image = $ct['Image'];
