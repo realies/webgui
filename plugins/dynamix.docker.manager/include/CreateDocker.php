@@ -39,26 +39,23 @@ exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cp
 
 function cpu_pinning() {
   global $xml,$cpus;
-  $row1 = $row2 = [];
   $vcpu = explode(',',$xml['CPUset'] ?? '');
   $total = count($cpus);
   $loop = floor(($total-1)/22)+1;
   for ($c = 0; $c < $loop; $c++) {
-    $row1[$c] = $row1[$c] = [];
+    $row1 = $row2 = [];
     $max = ($c == $loop-1 ? ($total%22?:22) : 22);
     for ($n = 0; $n < $max; $n++) {
       unset($cpu1,$cpu2);
       list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*22+$n]);
       $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
       $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
-      $row1[$c][] .="<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
-      if ($cpu2) $row2[$c][] .= "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
+      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
+      if ($cpu2) $row2[] = "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
     }
-  }
-  for ($c = 0; $c < $loop; $c++) {
-    if ($c) echo '<br>';
-    echo "<span class='cpu'>CPU:</span>".implode($row1[$c]);
-    if ($row2[$c]) echo "<br><span class='cpu'>HT:</span>".implode($row2[$c]);
+    if ($c) echo '<hr>';
+    echo "<span class='cpu'>CPU:</span>".implode($row1);
+    if ($row2) echo "<br><span class='cpu'>HT:</span>".implode($row2);
   }
 }
 
