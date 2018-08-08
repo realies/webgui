@@ -29,6 +29,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->Icon               = xml_encode(trim($post['contIcon']));
   $xml->ExtraParams        = xml_encode($post['contExtraParams']);
   $xml->PostArgs           = xml_encode($post['contPostArgs']);
+  $xml->CPUset             = xml_encode($post['contCPUset']);
   $xml->DateInstalled      = xml_encode(time());
   $xml->DonateText         = xml_encode($post['contDonateText']);
   $xml->DonateLink         = xml_encode($post['contDonateLink']);
@@ -104,6 +105,7 @@ function xmlToVar($xml) {
   $out['Icon']        = xml_decode($xml->Icon);
   $out['ExtraParams'] = xml_decode($xml->ExtraParams);
   $out['PostArgs']    = xml_decode($xml->PostArgs);
+  $out['CPUset']      = xml_decode($xml->CPUset);
   $out['DonateText']  = xml_decode($xml->DonateText);
   $out['DonateLink']  = xml_decode($xml->DonateLink);
   $out['Config']      = [];
@@ -246,6 +248,7 @@ function xmlToCommand($xml, $create_paths=false) {
   $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
   $cmdNetwork    = '--net='.escapeshellarg(strtolower($xml['Network']));
   $cmdMyIP       = $xml['MyIP'] ? '--ip='.escapeshellarg($xml['MyIP']) : '';
+  $cmdCPUset     = strlen($xml['CPUset']) ? '--cpuset-cpus='.escapeshellarg($xml['CPUset']) : '';
   $Volumes       = [''];
   $Ports         = [''];
   $Variables     = [''];
@@ -292,8 +295,8 @@ function xmlToCommand($xml, $create_paths=false) {
     }
   }
 
-  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s',
-         $cmdName, $cmdNetwork, $cmdMyIP, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
+  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s %s',
+         $cmdName, $cmdNetwork, $cmdMyIP, $cmdCPUset, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
   return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
 function stopContainer($name) {

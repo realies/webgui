@@ -35,7 +35,47 @@ $subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
 
 foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
 
+exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
 
+function cpu_pinning() {
+  global $xml,$cpus;
+  $row1 = $row2 = [];
+  $vcpu = explode(',',$xml['CPUset'] ?? '');
+  $total = count($cpus);
+  $loop = floor(($total-1)/22)+1;
+  for ($c = 0; $c < $loop; $c++) {
+    $row1[$c] = $row1[$c] = [];
+    $max = ($c == $loop-1 ? ($total%22?:22) : 22);
+    for ($n = 0; $n < $max; $n++) {
+      unset($cpu1,$cpu2);
+      list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*22+$n]);
+      $row1[$c][] .="<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
+      if ($cpu2) $row2[$c][] .= "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
+    }
+  }
+  //$title = implode('<br>',array_fill(0,$loop,'CPU:'.($cpu2 ? '<br>HT:':'')));
+  for ($c = 0; $c < $loop; $c++) {
+    if ($c) echo '<br>';
+    echo "<span class='cpu'>CPU:</span>".implode($row1[$c]);
+    if ($row2[$c]) echo "<br><span class='cpu'>HT:</span>".implode($row2[$c]);
+  }
+/*
+  foreach ($cpus as $pair) {
+    unset($cpu1,$cpu2);
+    list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
+    $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
+    $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
+    if ($cpu2) {
+      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
+      $row2[] = "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
+    } else {
+      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
+    }
+  }
+  echo "<span class='cpu'>CPU:</span>".implode($row1);
+  if ($row2) echo "<br><span class='cpu'>HT:</span>".implode($row2);
+*/
+}
 
 #    ██████╗ ██████╗ ██████╗ ███████╗
 #   ██╔════╝██╔═══██╗██╔══██╗██╔════╝
@@ -251,6 +291,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 .switch-button-label.off{color:inherit;}
 .selectVariable{width:320px}
 .fa.button{color:maroon;font-size:24px;position:relative;top:4px;cursor:pointer}
+span.cpu{display:inline-block;width:50px}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
@@ -524,6 +565,9 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
       $(form).find('input[name="confTarget[]"]').each(function(){targets.push($(this));});
       for (var i=0; i < types.length; i++) if (types[i]=='Port') $(targets[i]).val($(values[i]).val());
     }
+    var vcpu = [];
+    $(form).find('input[id^="box"]').each(function(){if ($(this).prop('checked')) vcpu.push($('#'+$(this).prop('id').replace('box','cpu')).text());});
+    form.contCPUset.value = vcpu.join(',');
   }
 
   function makeName(type) {
@@ -664,6 +708,7 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 <div id="canvas">
   <form method="POST" autocomplete="off" onsubmit="prepareConfig(this)">
     <input type="hidden" name="csrf_token" value="<?=$var['csrf_token']?>">
+    <input type="hidden" name="contCPUset" value="">
     <table class="settings">
       <? if ($xmlType == 'edit'):
       if ($DockerClient->doesContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
@@ -902,8 +947,6 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
         <td colspan="2">
           <blockquote class="inline_help">
             <p>If you wish to append additional commands to your Docker container at run-time, you can specify them here.<br>
-            For example, if you wish to pin an application to live on a specific CPU core, you can enter "--cpuset=0" in this field.
-            Change 0 to the core # on your system (starting with 0).  You can pin multiple cores by separation with a comma or a range of cores by separation with a dash.
             For all possible Docker run-time commands, see here: <a href="https://docs.docker.com/reference/run/" target="_blank">https://docs.docker.com/reference/run/</a></p>
           </blockquote>
         </td>
@@ -920,6 +963,20 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
           </blockquote>
         </td>
       </tr>
+
+      <tr class="advanced">
+        <td>CPU Pinning:</td>
+        <td><?cpu_pinning()?></td>
+      </tr>
+      <tr class="advanced">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Help text for CPU pinning.</p>
+          </blockquote>
+        </td>
+      </tr>
+
+
       <tr <?=$showAdditionalInfo?>>
         <td>Network Type:</td>
         <td>

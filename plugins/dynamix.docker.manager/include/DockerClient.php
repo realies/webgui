@@ -269,6 +269,7 @@ class DockerTemplates {
 			$tmp['running'] = $ct['Running'];
 			$tmp['paused'] = $ct['Paused'];
 			$tmp['autostart'] = in_array($name, $autoStart);
+			$tmp['cpuset'] = $ct['CPUset'];
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
 			if ($ct['Running']) {
 				$port = &$ct['Ports'][0];
@@ -725,6 +726,7 @@ class DockerClient {
 			$c['Volumes']     = $info['HostConfig']['Binds'];
 			$c['Created']     = $this->humanTiming($ct['Created']);
 			$c['NetworkMode'] = $ct['HostConfig']['NetworkMode'];
+			$c['CPUset']      = $info['HostConfig']['CpusetCpus'];
 			$c['BaseImage']   = $ct['Labels']['BASEIMAGE'] ?? false;
 			$c['Ports']       = [];
 			if ($driver[$c['NetworkMode']]=='bridge') {
