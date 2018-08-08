@@ -59,22 +59,6 @@ function cpu_pinning() {
     echo "<span class='cpu'>CPU:</span>".implode($row1[$c]);
     if ($row2[$c]) echo "<br><span class='cpu'>HT:</span>".implode($row2[$c]);
   }
-/*
-  foreach ($cpus as $pair) {
-    unset($cpu1,$cpu2);
-    list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
-    $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
-    $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
-    if ($cpu2) {
-      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
-      $row2[] = "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
-    } else {
-      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
-    }
-  }
-  echo "<span class='cpu'>CPU:</span>".implode($row1);
-  if ($row2) echo "<br><span class='cpu'>HT:</span>".implode($row2);
-*/
 }
 
 #    ██████╗ ██████╗ ██████╗ ███████╗
