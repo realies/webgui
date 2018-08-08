@@ -49,11 +49,12 @@ function cpu_pinning() {
     for ($n = 0; $n < $max; $n++) {
       unset($cpu1,$cpu2);
       list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*22+$n]);
+      $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
+      $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
       $row1[$c][] .="<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
       if ($cpu2) $row2[$c][] .= "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
     }
   }
-  //$title = implode('<br>',array_fill(0,$loop,'CPU:'.($cpu2 ? '<br>HT:':'')));
   for ($c = 0; $c < $loop; $c++) {
     if ($c) echo '<br>';
     echo "<span class='cpu'>CPU:</span>".implode($row1[$c]);
