@@ -262,4 +262,8 @@ function my_parse_ini_string($text, $sections=false, $scanner=INI_SCANNER_NORMAL
 function my_parse_ini_file($file, $sections=false, $scanner=INI_SCANNER_NORMAL) {
   return my_parse_ini_string(file_get_contents($file),$sections,$scanner);
 }
+function cpu_list() {
+  exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
+  return $cpus;
+}
 ?>

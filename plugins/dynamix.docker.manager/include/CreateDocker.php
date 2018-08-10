@@ -19,8 +19,7 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
 $var = parse_ini_file('state/var.ini');
 ignore_user_abort(true);
 
-$DockerClient    = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
+$DockerClient = new DockerClient();
 $DockerTemplates = new DockerTemplates();
 
 #   ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
@@ -30,12 +29,9 @@ $DockerTemplates = new DockerTemplates();
 #   ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 #   ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 
-$custom = DockerUtil::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
-$subnet = ['bridge'=>'', 'host'=>'', 'none'=>''];
-
-foreach ($custom as $network) $subnet[$network] = substr(DockerUtil::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $network"),0,-1);
-
-exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
+$custom = DockerUtil::custom();
+$subnet = DockerUtil::network($custom);
+$cpus   = cpu_list();
 
 function cpu_pinning() {
   global $xml,$cpus;

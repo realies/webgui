@@ -645,8 +645,8 @@ class DockerClient {
 		return $code;
 	}
 
-	public function stopContainer($id) {
-		$this->getDockerJSON("/containers/$id/stop", 'POST', $code);
+	public function stopContainer($id, $t=10) {
+		$this->getDockerJSON("/containers/$id/stop?t=$t", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
@@ -663,7 +663,7 @@ class DockerClient {
 		return $code;
 	}
 
-	public function removeContainer($name, $id, $cache=false) {
+	public function removeContainer($name, $id=false, $cache=false) {
 		global $docroot, $dockerManPaths;
 		$id = $id ?: $name;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
@@ -834,6 +834,14 @@ class DockerUtil {
 	public static function driver() {
 		$list = [];
 		foreach (static::docker("network ls --format='{{.Name}}={{.Driver}}'",true) as $network) {list($name,$driver) = explode('=',$network); $list[$name] = $driver;}
+		return $list;
+	}
+	public static function custom() {
+		return static::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
+	}
+	public static function network($more) {
+		$list = ['bridge'=>'', 'host'=>'', 'none'=>''];
+		foreach ($more as $net) $list[$net] = substr(static::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $net"),0,-1);
 		return $list;
 	}
 }
