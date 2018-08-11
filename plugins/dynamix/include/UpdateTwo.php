@@ -18,7 +18,6 @@ switch ($_POST['id']) {
 case 'vm':
   // update vm
   require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
-  require_once "$docroot/webGui/include/Helpers.php";
   $file = "/var/tmp/$name.tmp";
   if (!file_exists($file)) {
     $reply = ['error' => "File: '$file' not found"];
