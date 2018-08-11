@@ -38,6 +38,10 @@ $driver = DockerUtil::driver();
 $docker_cfgfile = '/boot/config/docker.cfg';
 $dockercfg = parse_ini_file($docker_cfgfile);
 
+function var_split($item, $i=0) {
+	return explode(' ',$item)[$i];
+}
+
 #######################################
 ##       DOCKERTEMPLATES CLASS       ##
 #######################################
@@ -257,7 +261,7 @@ class DockerTemplates {
 		$DockerUpdate = new DockerUpdate();
 		//$DockerUpdate->verbose = $this->verbose;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
-		$autoStart = @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: [];
+		$autoStart = array_map('var_split', @file($dockerManPaths['autostart-file'], FILE_IGNORE_NEW_LINES) ?: []);
 		foreach ($DockerClient->getDockerContainers() as $ct) {
 			$name = $ct['Name'];
 			$image = $ct['Image'];
@@ -265,6 +269,7 @@ class DockerTemplates {
 			$tmp['running'] = $ct['Running'];
 			$tmp['paused'] = $ct['Paused'];
 			$tmp['autostart'] = in_array($name, $autoStart);
+			$tmp['cpuset'] = $ct['CPUset'];
 			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
 			if ($ct['Running']) {
 				$port = &$ct['Ports'][0];
@@ -575,13 +580,14 @@ class DockerClient {
 	}
 
 	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false) {
+		$api = '/v1.37'; // used to force an API version. See https://docs.docker.com/develop/sdk/#api-version-matrix
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 		if ($fp === false) {
 			echo "Couldn't create socket: [$errno] $errstr";
 			return null;
 		}
 		$protocol = $unchunk ? 'HTTP/1.0' : 'HTTP/1.1';
-		$out = "$method $url $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
+		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
@@ -639,8 +645,8 @@ class DockerClient {
 		return $code;
 	}
 
-	public function stopContainer($id) {
-		$this->getDockerJSON("/containers/$id/stop", 'POST', $code);
+	public function stopContainer($id, $t=10) {
+		$this->getDockerJSON("/containers/$id/stop?t=$t", 'POST', $code);
 		$this->flushCache($this::$containersCache);
 		return $code;
 	}
@@ -657,7 +663,7 @@ class DockerClient {
 		return $code;
 	}
 
-	public function removeContainer($name, $id, $cache=false) {
+	public function removeContainer($name, $id=false, $cache=false) {
 		global $docroot, $dockerManPaths;
 		$id = $id ?: $name;
 		$info = DockerUtil::loadJSON($dockerManPaths['webui-info']);
@@ -720,6 +726,7 @@ class DockerClient {
 			$c['Volumes']     = $info['HostConfig']['Binds'];
 			$c['Created']     = $this->humanTiming($ct['Created']);
 			$c['NetworkMode'] = $ct['HostConfig']['NetworkMode'];
+			$c['CPUset']      = $info['HostConfig']['CpusetCpus'];
 			$c['BaseImage']   = $ct['Labels']['BASEIMAGE'] ?? false;
 			$c['Ports']       = [];
 			if ($driver[$c['NetworkMode']]=='bridge') {
@@ -827,6 +834,14 @@ class DockerUtil {
 	public static function driver() {
 		$list = [];
 		foreach (static::docker("network ls --format='{{.Name}}={{.Driver}}'",true) as $network) {list($name,$driver) = explode('=',$network); $list[$name] = $driver;}
+		return $list;
+	}
+	public static function custom() {
+		return static::docker("network ls --filter driver='bridge' --filter driver='macvlan' --format='{{.Name}}'|grep -v '^bridge$'",true);
+	}
+	public static function network($more) {
+		$list = ['bridge'=>'', 'host'=>'', 'none'=>''];
+		foreach ($more as $net) $list[$net] = substr(static::docker("network inspect --format='{{range .IPAM.Config}}{{.Subnet}}, {{end}}' $net"),0,-1);
 		return $list;
 	}
 }

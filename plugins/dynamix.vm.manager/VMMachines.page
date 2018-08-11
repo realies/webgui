@@ -19,8 +19,7 @@ Markdown="false"
 ?>
 <?
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
-
-exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
+$cpus = cpu_list();
 
 function showCPUs($uuid) {
   global $cpus;

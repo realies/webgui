@@ -632,7 +632,7 @@
 				<td>
 				<div class="textarea four">
 				<?
-				exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
+				$cpus = cpu_list();
 				foreach ($cpus as $pair) {
 					unset($cpu1,$cpu2);
 					list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);

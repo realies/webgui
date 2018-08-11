@@ -17,46 +17,53 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
 $autostart_file = $dockerManPaths['autostart-file'];
 $template_repos = $dockerManPaths['template-repos'];
-$user_prefs = $dockerManPaths['user-prefs'];
+$user_prefs     = $dockerManPaths['user-prefs'];
 
-// Update the start/stop configuration
-if ($_POST['action'] == 'autostart' ){
-  $json = ($_POST['response'] == 'json') ? true : false;
-
-  if (!$json) readfile("$docroot/update.htm");
-
+switch ($_POST['action']) {
+case 'autostart':
+  // update container autostart setting
   $container = urldecode(($_POST['container']));
-  unset($_POST['container']);
-
-  $allAutoStart = @file($autostart_file, FILE_IGNORE_NEW_LINES) ?: [];
-  $key = array_search($container, $allAutoStart);
-  if ($key===false) {
-    array_push($allAutoStart, $container);
-    if ($json) echo json_encode(['autostart' => true]);
+  $wait = $_POST['wait'];
+  $item = rtrim("$container $wait");
+  $autostart = @file($autostart_file, FILE_IGNORE_NEW_LINES) ?: [];
+  $key = array_search($item, $autostart);
+  if ($_POST['auto']=='true') {
+    if ($key===false) $autostart[] = $item;
   } else {
-    unset($allAutoStart[$key]);
-    if ($json) echo json_encode(['autostart' => false]);
+    unset($autostart[$key]);
   }
-  // sort containers for start-up
-  if (file_exists($user_prefs)) {
-    $prefs = parse_ini_file($user_prefs); $sort = [];
-    foreach ($allAutoStart as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
-    array_multisort($sort,SORT_NUMERIC,$allAutoStart);
-  } else {
-    natcasesort($allAutoStart);
-  }
-  $allAutoStart ? file_put_contents($autostart_file, implode(PHP_EOL, $allAutoStart).PHP_EOL) : @unlink($autostart_file);
-}
-
-if ($_POST['#action'] == 'templates' ){
+  if ($autostart) {
+    if (file_exists($user_prefs)) {
+      $prefs = parse_ini_file($user_prefs); $sort = [];
+      foreach ($autostart as $ct) $sort[] = array_search(var_split($ct),$prefs) ?? 999;
+      array_multisort($sort,$autostart);
+    } else {
+      natcasesort($autostart);
+    }
+    file_put_contents($autostart_file, implode("\n", $autostart)."\n");
+  } else @unlink($autostart_file);
+  break;
+case 'wait':
+  // update wait period used after container autostart
+  $container = urldecode(($_POST['container']));
+  $wait = $_POST['wait'];
+  $item = rtrim("$container $wait");
+  $autostart = file($autostart_file, FILE_IGNORE_NEW_LINES) ?: [];
+  $names = array_map('var_split', $autostart);
+  $autostart[array_search($container,$names)] = $item;
+  file_put_contents($autostart_file, implode("\n", $autostart)."\n");
+  break;
+case 'templates':
+  // update template
   readfile("$docroot/update.htm");
   $repos = $_POST['template_repos'];
   file_put_contents($template_repos, $repos);
   $DockerTemplates = new DockerTemplates();
   $DockerTemplates->downloadTemplates();
+  break;
 }
 
-if ( isset($_GET['is_dir'] )) {
+if (isset($_GET['is_dir'])) {
   echo json_encode(['is_dir' => is_dir($_GET['is_dir'])]);
 }
 ?>

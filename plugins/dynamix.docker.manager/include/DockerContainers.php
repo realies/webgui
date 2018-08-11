@@ -20,6 +20,7 @@ $DockerTemplates = new DockerTemplates();
 $containers      = $DockerClient->getDockerContainers();
 $images          = $DockerClient->getDockerImages();
 $user_prefs      = $dockerManPaths['user-prefs'];
+$autostart_file  = $dockerManPaths['autostart-file'];
 
 if (!$containers && !$images) {
   echo "<tr><td colspan='8' style='text-align:center;padding-top:12px'>No Docker containers installed</td></tr>";
@@ -39,6 +40,9 @@ $docker = ['var docker=[];'];
 $null = '0.0.0.0';
 $menu = [];
 
+$autostart = @file($autostart_file, FILE_IGNORE_NEW_LINES) ?: [];
+$names = array_map('var_split', $autostart);
+
 foreach ($containers as $ct) {
   $name = $ct['Name'];
   $id = $ct['Id'];
@@ -57,6 +61,7 @@ foreach ($containers as $ct) {
   $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
   $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
   $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
+  $wait = var_split($autostart[array_search($name,$names)],1);
   $ports = [];
   foreach ($ct['Ports'] as $port) {
     $intern = $running ? ($ct['NetworkMode']=='host' ? $host : $port['IP']) : $null;
@@ -102,7 +107,8 @@ foreach ($containers as $ct) {
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
   echo "<td class='advanced'><div class='usage-disk sys load-$id'><span id='cpu-$id' style='width:0'></span></div></td>";
   echo "<td class='advanced'><div class='usage-disk sys load-$id'><span id='mem-$id' style='width:0'></span></div></td>";
-  echo "<td><input type='checkbox' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'')."></td>";
+  echo "<td><input type='checkbox' id='$id-auto' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'').">";
+  echo "<span id='$id-wait' style='float:right;display:none'>wait<input class='wait' container='".htmlspecialchars($name)."' type='number' value='$wait' placeholder='0' title='seconds'></span></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
   echo htmlspecialchars(str_replace('Up','Uptime',$ct['Status']))."</div><div class='advanced' style='margin-top:4px'>Created ".htmlspecialchars($ct['Created'])."</div></a></td></tr>";
 }

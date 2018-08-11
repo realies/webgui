@@ -186,7 +186,7 @@ function resumeAll() {
 function checkAll() {
   $('input[type=button]').prop('disabled',true);
   $('.updatecolumn').html('<span style="color:#267CA8"><i class="fa fa-refresh fa-spin"></i> checking...</span>');
-  $.post('/plugins/dynamix.docker.manager/include/DockerUpdate.php',{check:true},function(u){loadlist(u);});
+  loadlist();
 }
 function updateAll() {
   $('input[type=button]').prop('disabled',true);

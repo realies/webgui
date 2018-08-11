@@ -499,8 +499,8 @@ $(function() {
   $('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').attr('disabled','disabled');
   $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],input[type=file],textarea').each(function(){$(this).on('input change',function() {
     var form = $(this).parentsUntil('form').parent();
-    form.find('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').not('input.lock').removeAttr('disabled');
-    form.find('input[value="Done"]').not('input.lock').val('Reset').prop('onclick',null).click(function(){refresh(form.offset().top)});
+    form.find('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').not('input.lock').prop('disabled',false);
+    form.find('input[value="Done"]').not('input.lock').val('Reset').prop('onclick',null).off('click').click(function(){refresh(form.offset().top)});
   });});
 
   var top = ($.cookie('top')||0) - $('.tabs').offset().top - 75;

@@ -29,6 +29,7 @@ function postToXML($post, $setOwnership=false) {
   $xml->Icon               = xml_encode(trim($post['contIcon']));
   $xml->ExtraParams        = xml_encode($post['contExtraParams']);
   $xml->PostArgs           = xml_encode($post['contPostArgs']);
+  $xml->CPUset             = xml_encode($post['contCPUset']);
   $xml->DateInstalled      = xml_encode(time());
   $xml->DonateText         = xml_encode($post['contDonateText']);
   $xml->DonateLink         = xml_encode($post['contDonateLink']);
@@ -104,6 +105,7 @@ function xmlToVar($xml) {
   $out['Icon']        = xml_decode($xml->Icon);
   $out['ExtraParams'] = xml_decode($xml->ExtraParams);
   $out['PostArgs']    = xml_decode($xml->PostArgs);
+  $out['CPUset']      = xml_decode($xml->CPUset);
   $out['DonateText']  = xml_decode($xml->DonateText);
   $out['DonateLink']  = xml_decode($xml->DonateLink);
   $out['Config']      = [];
@@ -246,6 +248,7 @@ function xmlToCommand($xml, $create_paths=false) {
   $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
   $cmdNetwork    = '--net='.escapeshellarg(strtolower($xml['Network']));
   $cmdMyIP       = $xml['MyIP'] ? '--ip='.escapeshellarg($xml['MyIP']) : '';
+  $cmdCPUset     = strlen($xml['CPUset']) ? '--cpuset-cpus='.escapeshellarg($xml['CPUset']) : '';
   $Volumes       = [''];
   $Ports         = [''];
   $Variables     = [''];
@@ -292,57 +295,71 @@ function xmlToCommand($xml, $create_paths=false) {
     }
   }
 
-  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s',
-         $cmdName, $cmdNetwork, $cmdMyIP, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
+  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s %s',
+         $cmdName, $cmdNetwork, $cmdMyIP, $cmdCPUset, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
   return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
-function stopContainer($name) {
+function stopContainer($name, $t=10, $echo=true) {
   global $DockerClient;
   $waitID = mt_rand();
-  echo "<p class=\"logLine\" id=\"logBody\"></p>";
-  echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Stopping container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
-  @flush();
-  $retval = $DockerClient->stopContainer($name);
+  if ($echo) {
+    echo "<p class=\"logLine\" id=\"logBody\"></p>";
+    echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Stopping container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
+    @flush();
+  }
+  $retval = $DockerClient->stopContainer($name, $t);
   $out = ($retval === true) ? "Successfully stopped container '$name'" : "Error: ".$retval;
-  echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
+    @flush();
+  }
 }
 
-function removeContainer($name, $cache=false) {
+function removeContainer($name, $cache=false, $echo=true) {
   global $DockerClient;
   $waitID = mt_rand();
-  echo "<p class=\"logLine\" id=\"logBody\"></p>";
-  echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<p class=\"logLine\" id=\"logBody\"></p>";
+    echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing container: ".addslashes(htmlspecialchars($name))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
+    @flush();
+  }
   $retval = $DockerClient->removeContainer($name, false, $cache);
   $out = ($retval === true) ? "Successfully removed container '$name'" : "Error: ".$retval;
-  echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
+    @flush();
+  }
 }
 
-function removeImage($image) {
+function removeImage($image, $echo=true) {
   global $DockerClient;
   $waitID = mt_rand();
-  echo "<p class=\"logLine\" id=\"logBody\"></p>";
-  echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing orphan image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<p class=\"logLine\" id=\"logBody\"></p>";
+    echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Removing orphan image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
+    @flush();
+  }
   $retval = $DockerClient->removeImage($image);
   $out = ($retval === true) ? "Successfully removed image '$image'" : "Error: ".$retval;
-  echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<script>stop_Wait($waitID);addLog('<b>".addslashes(htmlspecialchars($out))."</b>');</script>\n";
+    @flush();
+  }
 }
 
-function pullImage($name, $image) {
+function pullImage($name, $image, $echo=true) {
   global $DockerClient, $DockerTemplates, $DockerUpdate;
   $waitID = mt_rand();
   if (!preg_match("/:\S+$/", $image)) $image .= ":latest";
-  echo "<p class=\"logLine\" id=\"logBody\"></p>";
-  echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
-  @flush();
+  if ($echo) {
+    echo "<p class=\"logLine\" id=\"logBody\"></p>";
+    echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: ".addslashes(htmlspecialchars($image))."</legend><p class=\"logLine\" id=\"logBody\"></p><span id=\"wait{$waitID}\">Please wait </span></fieldset>');show_Wait($waitID);</script>\n";
+    @flush();
+  }
   $alltotals = [];
   $laststatus = [];
   $strError = '';
-  $DockerClient->pullImage($image, function ($line) use (&$alltotals, &$laststatus, &$waitID, &$strError, $image, $DockerClient, $DockerUpdate) {
+  $DockerClient->pullImage($image, function ($line) use (&$alltotals, &$laststatus, &$waitID, &$strError, $image, $DockerClient, $DockerUpdate, $echo) {
     $cnt = json_decode($line, true);
     $id = (isset($cnt['id'])) ? trim($cnt['id']) : '';
     $status = (isset($cnt['status'])) ? trim($cnt['status']) : '';
@@ -350,8 +367,10 @@ function pullImage($name, $image) {
       $strError = $cnt['error'];
     }
     if ($waitID !== false) {
-      echo "<script>stop_Wait($waitID);</script>\n";
-      @flush();
+      if ($echo) {
+        echo "<script>stop_Wait($waitID);</script>\n";
+        @flush();
+      }
       $waitID = false;
     }
     if (empty($status)) return;
@@ -368,51 +387,55 @@ function pullImage($name, $image) {
           break;
         case 'Downloading':
           if ($laststatus[$id] != $status) {
-            echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
+            if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
           }
           $total = $cnt['progressDetail']['total'];
           $current = $cnt['progressDetail']['current'];
           if ($total > 0) {
             $percentage = round(($current / $total) * 100);
-            echo "<script>progress('${id}',' ".$percentage."% of ".$DockerClient->formatBytes($total)."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' ".$percentage."% of ".$DockerClient->formatBytes($total)."');</script>\n";
           } else {
             // Docker must not know the total download size (http-chunked or something?)
             // just show the current download progress without the percentage
             $alltotals[$id] = $current;
-            echo "<script>progress('${id}',' ".$DockerClient->formatBytes($current)."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' ".$DockerClient->formatBytes($current)."');</script>\n";
           }
           break;
         default:
           if ($laststatus[$id] == "Downloading") {
-            echo "<script>progress('${id}',' 100% of ".$DockerClient->formatBytes($alltotals[$id])."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' 100% of ".$DockerClient->formatBytes($alltotals[$id])."');</script>\n";
           }
           if ($laststatus[$id] != $status) {
-            echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
+            if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
           }
           break;
       }
       $laststatus[$id] = $status;
     } else {
       if (strpos($status, 'Status: ') === 0) {
-        echo "<script>addLog('".addslashes(htmlspecialchars($status))."');</script>\n";
+        if ($echo) echo "<script>addLog('".addslashes(htmlspecialchars($status))."');</script>\n";
       }
       if (strpos($status, 'Digest: ') === 0) {
         $DockerUpdate->setUpdateStatus($image, substr($status, 8));
       }
     }
-    @flush();
+    if ($echo) @flush();
   });
-  echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . $DockerClient->formatBytes(array_sum($alltotals)) . "');</script>\n";
-  @flush();
-  if (!empty($strError)) {
-    echo "<script>addLog('<br><span class=\"error\"><b>Error:</b> ".addslashes(htmlspecialchars($strError))."</span>');</script>\n";
+  if ($echo) {
+    echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . $DockerClient->formatBytes(array_sum($alltotals)) . "');</script>\n";
     @flush();
+  }
+  if (!empty($strError)) {
+    if ($echo) {
+      echo "<script>addLog('<br><span class=\"error\"><b>Error:</b> ".addslashes(htmlspecialchars($strError))."</span>');</script>\n";
+      @flush();
+    }
     return false;
   }
   return true;
 }
 
-function execCommand($command) {
+function execCommand($command, $echo=true) {
   if ( dockerRunSecurity($command) ) {
     $command = "logger 'docker command execution halted due to security violation (Bash command execution or redirection)'";
   }
@@ -423,22 +446,26 @@ function execCommand($command) {
     2 => ['pipe', 'w']    // stderr is a pipe that the child will write to
   ];
   $id = mt_rand();
-  echo '<p class="logLine" id="logBody"></p>';
-  echo '<script>addLog(\'<fieldset style="margin-top:1px;" class="CMD"><legend>Command:</legend>';
-  echo 'root@localhost:# '.addslashes(htmlspecialchars($command)).'<br>';
-  echo '<span id="wait'.$id.'">Please wait </span>';
-  echo '<p class="logLine" id="logBody"></p></fieldset>\');show_Wait('.$id.');</script>';
-  @flush();
+  if ($echo) {
+    echo '<p class="logLine" id="logBody"></p>';
+    echo '<script>addLog(\'<fieldset style="margin-top:1px;" class="CMD"><legend>Command:</legend>';
+    echo 'root@localhost:# '.addslashes(htmlspecialchars($command)).'<br>';
+    echo '<span id="wait'.$id.'">Please wait </span>';
+    echo '<p class="logLine" id="logBody"></p></fieldset>\');show_Wait('.$id.');</script>';
+    @flush();
+  }
   $proc = proc_open($command." 2>&1", $descriptorspec, $pipes, '/', []);
   while ($out = fgets( $pipes[1] )) {
     $out = preg_replace("%[\t\n\x0B\f\r]+%", '', $out);
-    echo '<script>addLog("'.htmlspecialchars($out).'");</script>';
-    @flush();
+    if ($echo) {
+      echo '<script>addLog("'.htmlspecialchars($out).'");</script>';
+      @flush();
+    }
   }
   $retval = proc_close($proc);
-  echo '<script>stop_Wait('.$id.');</script>';
+  if ($echo) echo '<script>stop_Wait('.$id.');</script>';
   $out = $retval ?  'The command failed.' : 'The command finished successfully!';
-  echo '<script>addLog(\'<br><b>'.$out.'</b>\');</script>';
+  if ($echo) echo '<script>addLog(\'<br><b>'.$out.'</b>\');</script>';
   return $retval===0;
 }
 
@@ -492,7 +519,7 @@ function getAllocations() {
     }
     sort($port);
     $ip = $ct['NetworkMode']=='host'||$nat ? $host : ($ip ?: DockerUtil::myIP($ct['Name']) ?: '0.0.0.0');
-    $list['Port'] = "$ip : ".(implode(' ',array_unique($port)) ?: '???')." -- {$ct['NetworkMode']}";
+    $list['Port'] = "<span style='display:inline-block;width:90px'>{$ct['NetworkMode']}</span><span style='display:inline-block;width:140px'>$ip</span>".(implode(', ',array_unique($port)) ?: '???');
     $ports[] = $list;
   }
   return $ports;
