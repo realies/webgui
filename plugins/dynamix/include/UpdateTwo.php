@@ -42,7 +42,7 @@ case 'vm':
   }
   $uuid = $lv->domain_get_uuid($lv->get_domain_by_name($name));
   $dom = $lv->domain_get_domain_by_uuid($uuid);
-  $auto = $lv->domain_get_autostart($dom);
+  $auto = $lv->domain_get_autostart($dom)==1;
   $xml = simplexml_load_string($lv->domain_get_xml($dom));
   // update topology and vpcus
   $xml->cpu->topology['cores'] = $cores;
@@ -71,10 +71,11 @@ case 'vm':
   $lv->nvram_backup($uuid);
   $lv->domain_undefine($dom);
   $lv->nvram_restore($uuid);
-  if (!$lv->domain_define($xml->saveXML(),$auto)) {
+  if (!$lv->domain_define($xml->saveXML())) {
     $reply = ['error' => $lv->get_last_error()];
     break;
   }
+  $lv->domain_set_autostart($dom, $auto);
   if ($running && !$lv->domain_start($dom)) {
     $reply = ['error' => $lv->get_last_error()];
   } else {
