@@ -27,8 +27,20 @@ case 'vm':
   // read new cpu assignments
   $cpuset = explode(',',file_get_contents($file)); unlink($file);
   $vcpus = count($cpuset);
-  $cores = $vcpus%2 ? $vcpus : ($vcpus>2 ? $vcpus/2 : $vcpus);
-  $threads = $vcpus%2 ? 1 : ($vcpus>2 ? 2: 1);
+  // initial cores/threads assignment
+  $cores = $vcpus;
+  $threads = 1;
+  $vendor = exec("grep -Pom1 '^vendor_id\\s+: \\K\\S+' /proc/cpuinfo");
+  if ($vendor == 'AuthenticAMD') {
+    $ht = 1; // force single threaded for AMD
+  } else {
+    $ht = exec("lscpu|grep -Po '^Thread\\(s\\) per core:\\s+\\K\\d+'") ?: 1; // fetch hyperthreading
+  }
+  // adjust for hyperthreading
+  if ($vcpus > $ht && !$vcpus%$ht) {
+    $cores /= $ht;
+    $threads = $ht;
+  }
   $uuid = $lv->domain_get_uuid($lv->get_domain_by_name($name));
   $dom = $lv->domain_get_domain_by_uuid($uuid);
   $auto = $lv->domain_get_autostart($dom);
