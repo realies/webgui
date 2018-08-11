@@ -72,9 +72,14 @@ function apply(form) {
   // show the instant wait message
   $('#wait-'+id).show();
   // step 1: prepare the update and report back the changes
-  $.post('/webGui/include/UpdateOne.php',args,function(d){
-    if (d.success) {
-      var data = d.success.split(';');
+  $.post('/webGui/include/UpdateOne.php',args,function(reply){
+    if (reply.error) {
+      swal({type:'error', title:'Assignment error', text:reply.error},function(){
+        $('#wait-'+id).hide();
+        $(form).find('input[value="Done"]').val('Reset').prop('disabled',false).prop('onclick',null).off('click').click(function(){reset($('form[name="'+id+'"]'));});
+      });
+    } else if (reply.success) {
+      var data = reply.success.split(';');
       wait = data.length;
       for (var i=0; i < data.length; i++) {
         var name = data[i];

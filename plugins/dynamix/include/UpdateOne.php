@@ -22,12 +22,16 @@ foreach($_POST as $key => $val) {
 }
 // map holds the list of each vm or container and its newly proposed cpu assignments
 $map = array_map(function($d){return substr($d,0,-1);},$map);
-
+file_put_contents('/tmp/map',print_r($map,true));
 switch ($_POST['id']) {
 case 'vm':
   // report changed vms in temporary file
   require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
   foreach ($map as $name => $cpuset) {
+    if (!strlen($cpuset)) {
+      $reply = ['error' => "Not allowed to assign ZERO cores"];
+      break 2;
+    }
     $uuid = $lv->domain_get_uuid($lv->get_domain_by_name($name));
     $cfg = domain_to_config($uuid);
     $cpus = implode(',',$cfg['domain']['vcpu']);
@@ -38,6 +42,7 @@ case 'vm':
       file_put_contents("/var/tmp/$name.tmp",$cpuset);
     }
   }
+  $reply = ['success' => (count($changes) ? implode(';',$changes) : '')];
   break;
 case 'ct':
   // update the XML file of the container
@@ -65,10 +70,10 @@ case 'ct':
       exec("sed -ri 's/^(<CPUset)/  \\1/;s/><(\\/Container)/>\\n  <\\1/' \"$file\""); // aftercare
     }
   }
+  $reply = ['success' => (count($changes) ? implode(';',$changes) : '')];
   break;
 }
 // signal changes
-$reply = ['success' => (count($changes) ? implode(';',$changes) : '')];
 header('Content-Type: application/json');
 die(json_encode($reply));
 ?>
