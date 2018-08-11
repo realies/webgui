@@ -65,7 +65,6 @@ case 'ct':
   // create the current container assignments
   require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
   $DockerClient = new DockerClient();
-  $DockerTemplates = new DockerTemplates();
   $containers = $DockerClient->getDockerContainers();
   $user_prefs = $dockerManPaths['user-prefs'];
   $cts = []; foreach ($containers as $ct) $cts[] = $ct['Name'];

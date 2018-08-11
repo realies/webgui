@@ -157,8 +157,6 @@ $(function(){
 >
 > When ***Apply*** is pressed a scan is performed to find the changes, subsequently only VMs or containers which have changes are modified in parallel.
 >
-> **ANY CUSTOM MODIFICATIONS TO THE XML FILE OF THE VM WILL BE LOST**
->
 > *Please wait until all updates are finished*.
 
 <?if ($libvirtd):?>

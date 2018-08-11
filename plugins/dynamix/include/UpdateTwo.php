@@ -20,66 +20,54 @@ case 'vm':
   require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
   require_once "$docroot/webGui/include/Helpers.php";
   $file = "/var/tmp/$name.tmp";
-  if (file_exists($file)) {
-    // read new cpu assignments
-    $cpuset = explode(',',file_get_contents($file));
-    unlink($file);
-    // get vm reference
-    $uuid = $lv->domain_get_uuid($lv->get_domain_by_name($name));
-    $cfg = domain_to_config($uuid);
-    // update cpu assignments
-    $cfg['domain']['type'] = 'kvm';
-    $cfg['domain']['vcpus'] = count($cpuset);
-    $cfg['domain']['vcpu'] = $cpuset;
-    // we need to do something with USB
-    $build = [];
-    foreach ($cfg['usb'] as $index => $usb) $build[] = $usb['id'];
-    unset($cfg['usb']);
-    foreach ($build as $usb) $cfg['usb'][] = $usb;
-    // we need to do something with PCI
-    $build = [];
-    foreach ($cfg['pci'] as $index => $pci) $build[] = $pci['id'];
-    unset($cfg['pci']);
-    foreach ($build as $pci) $cfg['pci'][] = $pci;
-    $dom = $lv->domain_get_domain_by_uuid($uuid);
-    // autostart?
-    $auto = $lv->domain_get_autostart($dom);
-    // restore old in case of failure
-    $old = $lv->domain_get_xml($dom);
-    // stop running vm first?
-    $running = $lv->domain_get_state($dom)=='running';
-    if ($running) {
-      $lv->domain_shutdown($dom);
-      for ($n =0; $n < 30; $n++) { // allow up to 30s for VM to shutdown
-        sleep(1);
-        if ($stopped = $lv->domain_get_state($dom)=='shutoff') break;
-      }
-    } else $stopped = true;
-    if ($stopped) {
-      $lv->nvram_backup($uuid);
-      $lv->domain_undefine($dom);
-      $lv->nvram_restore($uuid);
-      $new = $lv->domain_new($cfg);
-      if ($new) {
-        if ($running) {
-          if (!$lv->domain_start($dom)) {
-            $reply = ['error' => $lv->get_last_error()];
-            break;
-          }
-        }
-        $lv->domain_set_autostart($new, $auto==1);
-        $reply = ['success' => $name];
-      } else {
-        $error = $lv->get_last_error();
-        $new = $lv->domain_define($old);
-        if ($new) $lv->domain_set_autostart($new, $auto==1);
-        $reply = ['error' => $error];
-      }
-    } else {
-      $reply = ['error' => "Failed to stop '$name'"];
-    }
-  } else {
+  if (!file_exists($file)) {
     $reply = ['error' => "File: '$file' not found"];
+    break;
+  }
+  // read new cpu assignments
+  $cpuset = explode(',',file_get_contents($file)); unlink($file);
+  $vcpus = count($cpuset);
+  $cores = $vcpus%2 ? $vcpus : ($vcpus>2 ? $vcpus/2 : $vcpus);
+  $threads = $vcpus%2 ? 1 : ($vcpus>2 ? 2: 1);
+  $uuid = $lv->domain_get_uuid($lv->get_domain_by_name($name));
+  $dom = $lv->domain_get_domain_by_uuid($uuid);
+  $auto = $lv->domain_get_autostart($dom);
+  $xml = simplexml_load_string($lv->domain_get_xml($dom));
+  // update topology and vpcus
+  $xml->cpu->topology['cores'] = $cores;
+  $xml->cpu->topology['threads'] = $threads;
+  $xml->vcpu = $vcpus;
+  unset($xml->cputune);
+  $xml->addChild('cputune');
+  for ($i = 0; $i < $vcpus; $i++) {
+    $vcpu = $xml->cputune->addChild('vcpupin');
+    $vcpu['vcpu'] = $i;
+    $vcpu['cpuset'] = $cpuset[$i];
+  }
+  // stop running vm first?
+  $running = $lv->domain_get_state($dom)=='running';
+  if ($running) {
+    $lv->domain_shutdown($dom);
+    for ($n =0; $n < 30; $n++) { // allow up to 30s for VM to shutdown
+      sleep(1);
+      if ($stopped = $lv->domain_get_state($dom)=='shutoff') break;
+    }
+  } else $stopped = true;
+  if (!$stopped) {
+    $reply = ['error' => "Failed to stop '$name'"];
+    break;
+  }
+  $lv->nvram_backup($uuid);
+  $lv->domain_undefine($dom);
+  $lv->nvram_restore($uuid);
+  if (!$lv->domain_define($xml->saveXML(),$auto)) {
+    $reply = ['error' => $lv->get_last_error()];
+    break;
+  }
+  if ($running && !$lv->domain_start($dom)) {
+    $reply = ['error' => $lv->get_last_error()];
+  } else {
+    $reply = ['success' => $name];
   }
   break;
 case 'ct':
