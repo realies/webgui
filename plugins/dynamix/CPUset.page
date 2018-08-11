@@ -136,11 +136,11 @@ function reset(form) {
     case 'ct': $('#table-ct').html("<?=$spinner?>"); ct(); break;
   }
 }
-function buttons(doc) {
+function buttons(form) {
   // we need the Apply and Done buttons react on checkbox changes
-  $(doc).find('input[type=checkbox]').each(function(){$(this).on('input change',function(){
-    $(doc).find('input[value="Apply"]').prop('disabled',false);
-    $(doc).find('input[value="Done"]').val('Reset').prop('onclick',null).off('click').click(function(){reset(doc);});
+  $(form).find('input[type=checkbox]').each(function(){$(this).on('input change',function(){
+    $(form).find('input[value="Apply"]').prop('disabled',false);
+    $(form).find('input[value="Done"]').val('Reset').prop('onclick',null).off('click').click(function(){reset(form);});
   });});
 }
 $(function(){
