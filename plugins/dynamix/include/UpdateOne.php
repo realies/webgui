@@ -22,7 +22,7 @@ foreach($_POST as $key => $val) {
 }
 // map holds the list of each vm or container and its newly proposed cpu assignments
 $map = array_map(function($d){return substr($d,0,-1);},$map);
-file_put_contents('/tmp/map',print_r($map,true));
+
 switch ($_POST['id']) {
 case 'vm':
   // report changed vms in temporary file
