@@ -37,7 +37,7 @@ case 'vm':
     $ht = exec("lscpu|grep -Po '^Thread\\(s\\) per core:\\s+\\K\\d+'") ?: 1; // fetch hyperthreading
   }
   // adjust for hyperthreading
-  if ($vcpus > $ht && !$vcpus%$ht) {
+  if ($vcpus > $ht && $vcpus%$ht===0) {
     $cores /= $ht;
     $threads = $ht;
   }
