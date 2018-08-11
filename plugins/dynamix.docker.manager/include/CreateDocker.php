@@ -15,11 +15,13 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
+require_once "$docroot/webGui/include/Helpers.php";
 
 $var = parse_ini_file('state/var.ini');
 ignore_user_abort(true);
 
 $DockerClient = new DockerClient();
+$DockerUpdate = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
 
 #   ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗

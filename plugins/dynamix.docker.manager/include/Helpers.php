@@ -359,7 +359,7 @@ function pullImage($name, $image, $echo=true) {
   $alltotals = [];
   $laststatus = [];
   $strError = '';
-  $DockerClient->pullImage($image, function ($line) use (&$alltotals, &$laststatus, &$waitID, &$strError, $image, $DockerClient, $DockerUpdate) {
+  $DockerClient->pullImage($image, function ($line) use (&$alltotals, &$laststatus, &$waitID, &$strError, $image, $DockerClient, $DockerUpdate, $echo) {
     $cnt = json_decode($line, true);
     $id = (isset($cnt['id'])) ? trim($cnt['id']) : '';
     $status = (isset($cnt['status'])) ? trim($cnt['status']) : '';
@@ -387,39 +387,39 @@ function pullImage($name, $image, $echo=true) {
           break;
         case 'Downloading':
           if ($laststatus[$id] != $status) {
-              if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
+            if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
           }
           $total = $cnt['progressDetail']['total'];
           $current = $cnt['progressDetail']['current'];
           if ($total > 0) {
             $percentage = round(($current / $total) * 100);
-              if ($echo) echo "<script>progress('${id}',' ".$percentage."% of ".$DockerClient->formatBytes($total)."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' ".$percentage."% of ".$DockerClient->formatBytes($total)."');</script>\n";
           } else {
             // Docker must not know the total download size (http-chunked or something?)
             // just show the current download progress without the percentage
             $alltotals[$id] = $current;
-              if ($echo) echo "<script>progress('${id}',' ".$DockerClient->formatBytes($current)."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' ".$DockerClient->formatBytes($current)."');</script>\n";
           }
           break;
         default:
           if ($laststatus[$id] == "Downloading") {
-              if ($echo) echo "<script>progress('${id}',' 100% of ".$DockerClient->formatBytes($alltotals[$id])."');</script>\n";
+            if ($echo) echo "<script>progress('${id}',' 100% of ".$DockerClient->formatBytes($alltotals[$id])."');</script>\n";
           }
           if ($laststatus[$id] != $status) {
-              if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
+            if ($echo) echo "<script>addToID('${id}','".addslashes(htmlspecialchars($status))."');</script>\n";
           }
           break;
       }
       $laststatus[$id] = $status;
     } else {
       if (strpos($status, 'Status: ') === 0) {
-          if ($echo) echo "<script>addLog('".addslashes(htmlspecialchars($status))."');</script>\n";
+        if ($echo) echo "<script>addLog('".addslashes(htmlspecialchars($status))."');</script>\n";
       }
       if (strpos($status, 'Digest: ') === 0) {
         $DockerUpdate->setUpdateStatus($image, substr($status, 8));
       }
     }
-      if ($echo) @flush();
+    if ($echo) @flush();
   });
   if ($echo) {
     echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . $DockerClient->formatBytes(array_sum($alltotals)) . "');</script>\n";
