@@ -162,6 +162,9 @@ $(function(){
 > When ***Apply*** is pressed a scan is performed to find the changes, subsequently only VMs or containers which have changes are modified in parallel.
 >
 > *Please wait until all updates are finished*.
+>
+> By default NO cores are selected for a Docker container, which means it uses all available cores.<br>
+> **Do not select ALL cores, just select NONE**
 
 <?if ($libvirtd):?>
 <form name="vm">
