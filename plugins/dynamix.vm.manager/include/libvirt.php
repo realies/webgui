@@ -747,8 +747,8 @@
 						<name>$name</name>
 						<description>" . htmlspecialchars($domain['desc'], ENT_QUOTES | ENT_XML1) . "</description>
 						$metadata
-						<currentMemory>$mem</currentMemory>
-						<memory>$maxmem</memory>
+						<currentMemory unit='KiB'>$mem</currentMemory>
+						<memory unit='KiB'>$maxmem</memory>
 						<memoryBacking>
 							<nosharepages/>
 						</memoryBacking>
