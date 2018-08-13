@@ -104,18 +104,31 @@
 
 	// create new VM
 	if ($_POST['createvm']) {
-		if ($lv->domain_new($_POST)){
-			// Fire off the vnc popup if available
-			$dom = $lv->get_domain_by_name($_POST['domain']['name']);
-			$vncport = $lv->domain_get_vnc_port($dom);
-			$wsport = $lv->domain_get_ws_port($dom);
-			if ($vncport > 0) {
-				$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$_SERVER['HTTP_HOST'].'&port='.$wsport.'&path=';
-				$reply['vncurl'] = $vnc;
+		if ($_POST['xmldesc']) {
+			file_put_contents('/tmp/post2',print_r($_POST,true));
+			// XML view
+			$new = $lv->domain_define($_POST['xmldesc']);
+			if ($new){
+				$lv->domain_set_autostart($new, $_POST['domain']['autostart']==1);
+				$reply = ['success' => true];
+			} else {
+				$reply = ['error' => $lv->get_last_error()];
 			}
-			$reply = ['success' => true];
 		} else {
-			$reply = ['error' => $lv->get_last_error()];
+			// form view
+			if ($lv->domain_new($_POST)){
+				// Fire off the vnc popup if available
+				$dom = $lv->get_domain_by_name($_POST['domain']['name']);
+				$vncport = $lv->domain_get_vnc_port($dom);
+				$wsport = $lv->domain_get_ws_port($dom);
+				if ($vncport > 0) {
+					$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$_SERVER['HTTP_HOST'].'&port='.$wsport.'&path=';
+					$reply['vncurl'] = $vnc;
+				}
+				$reply = ['success' => true];
+				} else {
+					$reply = ['error' => $lv->get_last_error()];
+			}
 		}
 		echo json_encode($reply);
 		exit;
@@ -166,28 +179,35 @@
 		if ($dom) {
 			$oldName = $lv->domain_get_name($dom);
 			$newName = $_POST['domain']['name'];
-			$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
-			$newDir = $domain_cfg['DOMAINDIR'].$newdName;
-			if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
-				// mv domain/vmname folder
-				if (rename($oldDir, $newDir)) {
-					// replace all disk paths in xml
-					foreach ($_POST['disk'] as &$arrDisk) {
-						if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
-						if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
+			if (!$_POST['xmldesc']) {
+				$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
+				$newDir = $domain_cfg['DOMAINDIR'].$newdName;
+				if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
+					// mv domain/vmname folder
+					if (rename($oldDir, $newDir)) {
+						// replace all disk paths in xml
+						foreach ($_POST['disk'] as &$arrDisk) {
+							if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
+							if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
+						}
 					}
 				}
 			}
 		}
 
 		// construct updated config
-		$arrExistingConfig = custom::createArray('domain',$strXML);
-		$arrExistingConfig['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
-		$arrExistingConfig['cputune']['vcpupin'] = [];
-		$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
-		$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
-		$xml = custom::createXML('domain',$arrConfig)->saveXML();
-
+		if ($_POST['xmldesc']) {
+			// XML view
+			$xml = $_POST['xmldesc'];
+		} else {
+			// form view
+			$arrExistingConfig = custom::createArray('domain',$strXML);
+			$arrExistingConfig['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
+			$arrExistingConfig['cputune']['vcpupin'] = [];
+			$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
+			$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
+			$xml = custom::createXML('domain',$arrConfig)->saveXML();
+		}
 		// delete and create the VM
 		$lv->nvram_backup($uuid);
 		$lv->domain_undefine($dom);
@@ -1120,7 +1140,6 @@
 					<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
 				<? } ?>
 				<input type="button" value="Cancel" id="btnCancel" />
-				<span><i class="fa fa-warning icon warning"></i> Manual XML edits may be lost if you later edit with the Form editor.</span>
 			<? } else { ?>
 				<input type="button" value="Back" id="btnCancel" />
 			<? } ?>
