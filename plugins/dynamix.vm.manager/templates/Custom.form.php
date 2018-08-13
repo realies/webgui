@@ -96,6 +96,7 @@
 			]
 		]
 ];
+$hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaration
 
 	// Merge in any default values from the VM template
 	if ($arrAllTemplates[$strSelectedTemplate] && $arrAllTemplates[$strSelectedTemplate]['overrides']) {
@@ -1122,7 +1123,7 @@
 </div>
 
 <div class="xmlview">
-	<textarea id="addcode" name="xmldesc" placeholder="Copy &amp; Paste Domain XML Configuration Here." autofocus><?= htmlspecialchars($strXML); ?></textarea>
+	<textarea id="addcode" name="xmldesc" placeholder="Copy &amp; Paste Domain XML Configuration Here." autofocus><?=htmlspecialchars($hdrXML).htmlspecialchars($strXML)?></textarea>
 
 	<table>
 		<tr>
