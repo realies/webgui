@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,6 +14,7 @@
 <?
 	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
+	require_once "$docroot/webGui/include/Custom.php";
 	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 	$arrValidMachineTypes = getValidMachineTypes();
@@ -93,98 +95,54 @@
 				'target' => ''
 			]
 		]
-	];
+];
 
 	// Merge in any default values from the VM template
-	if (!empty($arrAllTemplates[$strSelectedTemplate]) && !empty($arrAllTemplates[$strSelectedTemplate]['overrides'])) {
+	if ($arrAllTemplates[$strSelectedTemplate] && $arrAllTemplates[$strSelectedTemplate]['overrides']) {
 		$arrConfigDefaults = array_replace_recursive($arrConfigDefaults, $arrAllTemplates[$strSelectedTemplate]['overrides']);
 	}
 
-	if (array_key_exists('updatevm', $_POST) && !empty($_POST['domain']['uuid'])) {
-		$_GET['uuid'] = $_POST['domain']['uuid'];
-	}
-
-	// If we are editing a existing VM load it's existing configuration details
-	$boolNew = true;
-	$boolRunning = false;
-	$arrExistingConfig = [];
-	$strUUID = '';
-	$strXML = '';
-	if (!empty($_GET['uuid'])) {
-		$strUUID = $_GET['uuid'];
-		$res = $lv->domain_get_name_by_uuid($strUUID);
-		$dom = $lv->domain_get_info($res);
-
-		$boolNew = false;
-		$boolRunning = ($lv->domain_state_translate($dom['state']) != 'shutoff');
-		$arrExistingConfig = domain_to_config($strUUID);
-		$strXML = $lv->domain_get_xml($res);
-	}
-
-	// Active config for this page
-	$arrConfig = array_replace_recursive($arrConfigDefaults, $arrExistingConfig);
-
-	// Add any custom metadata field defaults (e.g. os)
-	if (empty($arrConfig['template']['os'])) {
-		$arrConfig['template']['os'] = ($arrConfig['domain']['clock'] == 'localtime' ? 'windows' : 'linux');
-	}
-
-	if (array_key_exists('createvm', $_POST)) {
-		$arrResponse = ['success' => true];
-
-		if (array_key_exists('xmldesc', $_POST)) {
-			$tmp = $lv->domain_define($_POST['xmldesc'], !empty($config['domain']['xmlstartnow']));
-			if (!$tmp){
-				$arrResponse = ['error' => $lv->get_last_error()];
-			} else {
-				$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
+	// create new VM
+	if ($_POST['createvm']) {
+		if ($lv->domain_new($_POST)){
+			// Fire off the vnc popup if available
+			$dom = $lv->get_domain_by_name($_POST['domain']['name']);
+			$vncport = $lv->domain_get_vnc_port($dom);
+			$wsport = $lv->domain_get_ws_port($dom);
+			if ($vncport > 0) {
+				$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$_SERVER['HTTP_HOST'].'&port='.$wsport.'&path=';
+				$reply['vncurl'] = $vnc;
 			}
+			$reply = ['success' => true];
 		} else {
-			$tmp = $lv->domain_new($_POST);
-			if (!$tmp){
-				$arrResponse = ['error' => $lv->get_last_error()];
-			} else {
-				// Fire off the vnc popup if available
-				$dom = $lv->get_domain_by_name($_POST['domain']['name']);
-				$vncport = $lv->domain_get_vnc_port($dom);
-				$wsport = $lv->domain_get_ws_port($dom);
-
-				if ($vncport > 0) {
-					$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host=' . $_SERVER['HTTP_HOST'] . '&port=' . $wsport . '&path=';
-					$arrResponse['vncurl'] = $vnc;
-				}
-			}
+			$reply = ['error' => $lv->get_last_error()];
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
-	if (array_key_exists('updatevm', $_POST)) {
-		$dom = $lv->domain_get_domain_by_uuid($_POST['domain']['uuid']);
+	// update existing VM
+	if ($_POST['updatevm']) {
+		$uuid = $_POST['domain']['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
+		$oldAutoStart = $lv->domain_get_autostart($dom)==1;
+		$newAutoStart = $_POST['domain']['autostart']==1;
+		$strXML = $lv->domain_get_xml($dom);
 
-		if ($boolRunning) {
+		if ($lv->domain_get_state($dom)=='running') {
 			$arrErrors = [];
-
-			$arrExistingConfig = domain_to_config($_POST['domain']['uuid']);
+			$arrExistingConfig = domain_to_config($uuid);
 			$arrNewUSBIDs = $_POST['usb'];
 
 			// hot-attach any new usb devices
 			foreach ($arrNewUSBIDs as $strNewUSBID) {
 				foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
-					if ($strNewUSBID == $arrExistingUSB['id']) {
-						continue 2;
-					}
+					if ($strNewUSBID == $arrExistingUSB['id']) continue 2;
 				}
-				list($strVendor, $strProduct) = explode(':', $strNewUSBID);
+				list($strVendor,$strProduct) = explode(':', $strNewUSBID);
 				// hot-attach usb
-				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'>
-					<source startupPolicy='optional'>
-						<vendor id='0x".$strVendor."'/>
-						<product id='0x".$strProduct."'/>
-					</source>
-				</hostdev>");
-				exec("virsh attach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
+				exec("virsh attach-device ".escapeshellarg($uuid)." /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
 				if ($intReturnCode != 0) {
 					$arrErrors[] = implode(' ', $arrOutput);
 				}
@@ -194,88 +152,77 @@
 			foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
 				if (!in_array($arrExistingUSB['id'], $arrNewUSBIDs)) {
 					list($strVendor, $strProduct) = explode(':', $arrExistingUSB['id']);
-
-					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'>
-						<source startupPolicy='optional'>
-							<vendor id='0x".$strVendor."'/>
-							<product id='0x".$strProduct."'/>
-						</source>
-					</hostdev>");
-					exec("virsh detach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
-					if ($intReturnCode != 0) {
-						$arrErrors[] = implode(' ', $arrOutput);
-					}
+					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
+					exec("virsh detach-device ".escapeshellarg($uuid)." /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+					if ($intReturnCode != 0) $arrErrors[] = implode(' ',$arrOutput);
 				}
 			}
-
-
-			if (empty($arrErrors)) {
-				$arrResponse = ['success' => true];
-			} else {
-				$arrResponse = ['error' => implode(', ', $arrErrors)];
-			}
-			echo json_encode($arrResponse);
+			$reply = !$arrErrors ? ['success' => true] : ['error' => implode(', ',$arrErrors)];
+			echo json_encode($reply);
 			exit;
 		}
 
-		// Backup xml for existing domain in ram
-		$strOldXML = '';
-		$boolOldAutoStart = false;
+		// backup xml for existing domain in ram
 		if ($dom) {
-			$strOldXML = $lv->domain_get_xml($dom);
-			$boolOldAutoStart = $lv->domain_get_autostart($dom);
-			if (!array_key_exists('xmldesc', $_POST)) {
-				$strOldName = $lv->domain_get_name($dom);
-				$strNewName = $_POST['domain']['name'];
-
-				if (!empty($strOldName) &&
-					 !empty($strNewName) &&
-					 is_dir($domain_cfg['DOMAINDIR'].$strOldName.'/') &&
-					 !is_dir($domain_cfg['DOMAINDIR'].$strNewName.'/')) {
-
-					// mv domain/vmname folder
-					if (rename($domain_cfg['DOMAINDIR'].$strOldName, $domain_cfg['DOMAINDIR'].$strNewName)) {
-						// replace all disk paths in xml
-						foreach ($_POST['disk'] as &$arrDisk) {
-							if (!empty($arrDisk['new'])) {
-								$arrDisk['new'] = str_replace($domain_cfg['DOMAINDIR'].$strOldName.'/', $domain_cfg['DOMAINDIR'].$strNewName.'/', $arrDisk['new']);
-							}
-							if (!empty($arrDisk['image'])) {
-								$arrDisk['image'] = str_replace($domain_cfg['DOMAINDIR'].$strOldName.'/', $domain_cfg['DOMAINDIR'].$strNewName.'/', $arrDisk['image']);
-							}
-						}
+			$oldName = $lv->domain_get_name($dom);
+			$newName = $_POST['domain']['name'];
+			$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
+			$newDir = $domain_cfg['DOMAINDIR'].$newdName;
+			if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
+				// mv domain/vmname folder
+				if (rename($oldDir, $newDir)) {
+					// replace all disk paths in xml
+					foreach ($_POST['disk'] as &$arrDisk) {
+						if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
+						if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
 					}
 				}
 			}
 		}
 
-		// Remove existing domain
-		$lv->nvram_backup($_POST['domain']['uuid']);
+		// construct updated config
+		$arrExistingConfig = custom::createArray('domain',$strXML);
+		$arrExistingConfig['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
+		$arrExistingConfig['cputune']['vcpupin'] = [];
+		$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
+		$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
+		$xml = custom::createXML('domain',$arrConfig)->saveXML();
+
+		// delete and create the VM
+		$lv->nvram_backup($uuid);
 		$lv->domain_undefine($dom);
-		$lv->nvram_restore($_POST['domain']['uuid']);
-
-		// Save new domain
-		if (array_key_exists('xmldesc', $_POST)) {
-			$tmp = $lv->domain_define($_POST['xmldesc']);
+		$lv->nvram_restore($uuid);
+		$new = $lv->domain_define($xml);
+		if ($new) {
+			$lv->domain_set_autostart($new, $newAutoStart);
+			$reply = ['success' => true];
 		} else {
-			$tmp = $lv->domain_new($_POST);
-		}
-		if (!$tmp){
-			$strLastError = $lv->get_last_error();
-
 			// Failure -- try to restore existing domain
-			$tmp = $lv->domain_define($strOldXML);
-			if ($tmp) $lv->domain_set_autostart($tmp, $boolOldAutoStart);
-
-			$arrResponse = ['error' => $strLastError];
-		} else {
-			$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
-
-			$arrResponse = ['success' => true];
+			$old = $lv->domain_define($strXML);
+			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);
+			$reply = ['error' => $lv->get_last_error()];
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
+	}
+
+	if ($_GET['uuid']) {
+		// edit an existing VM
+		$dom = $lv->domain_get_domain_by_uuid($_GET['uuid']);
+		$boolRunning = $lv->domain_get_state($dom)=='running';
+		$strXML = $lv->domain_get_xml($dom);
+		$boolNew = false;
+		$arrConfig = domain_to_config($_GET['uuid']);
+	} else {
+		// edit new VM
+		$boolRunning = false;
+		$strXML = '';
+		$boolNew = true;
+		$arrConfig = $arrConfigDefaults;
+	}
+	// Add any custom metadata field defaults (e.g. os)
+	if (!$arrConfig['template']['os']) {
+		$arrConfig['template']['os'] = ($arrConfig['domain']['clock']=='localtime' ? 'windows' : 'linux');
 	}
 ?>
 

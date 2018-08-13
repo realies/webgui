@@ -39,7 +39,6 @@ if (!empty($_GET['uuid'])) {
 	}
 
 	$strIconURL = $lv->domain_get_icon_url($res);
-
 	$arrLoad = [
 		'name' => $lv->domain_get_name($res),
 		'icon' => basename($strIconURL),
@@ -49,14 +48,12 @@ if (!empty($_GET['uuid'])) {
 	];
 
 	if (empty($_GET['template'])) {
+		// read vm-template attribute
 		$strTemplateOS = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@os');
-		if (empty($strTemplateOS)) {
-			$strTemplate = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@name');
-			if (!empty($strTemplate)) {
-				$strSelectedTemplate = $strTemplate;
-			}
+		if ($strTemplateOS) {
+			$strSelectedTemplate = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@name');
 		} else {
-			// Legacy VM support for <6.2 but need it going forward too
+			// legacy VM support for <6.2 but need it going forward too
 			foreach ($arrAllTemplates as $strName => $arrTemplate) {
 				if (!empty($arrTemplate) && !empty($arrTemplate['os']) && $arrTemplate['os'] == $strTemplateOS) {
 					$strSelectedTemplate = $strName;
@@ -65,12 +62,11 @@ if (!empty($_GET['uuid'])) {
 			}
 		}
 		if (empty($strSelectedTemplate) || empty($arrAllTemplates[$strSelectedTemplate])) {
-			$strSelectedTemplate = 'Custom';
+			$strSelectedTemplate = 'Windows 10'; //default to Windows 10
 		}
 	}
 	$arrLoad['form'] = $arrAllTemplates[$strSelectedTemplate]['form'];
 }
-
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
