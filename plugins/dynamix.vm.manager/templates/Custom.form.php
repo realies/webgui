@@ -105,7 +105,6 @@
 	// create new VM
 	if ($_POST['createvm']) {
 		if ($_POST['xmldesc']) {
-			file_put_contents('/tmp/post2',print_r($_POST,true));
 			// XML view
 			$new = $lv->domain_define($_POST['xmldesc']);
 			if ($new){
