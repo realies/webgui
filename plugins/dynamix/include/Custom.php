@@ -16,8 +16,8 @@ class custom {
   private static $xml = null;
   private static $encoding = 'UTF-8';
 
-  /*
-  * custom::init - initialize the root XML node [optional]
+ /*
+  * custom::init > initialize the root XML node [optional]
   * @param $version
   * @param $encoding
   * @param $format_output
@@ -28,8 +28,8 @@ class custom {
     self::$encoding = $encoding;
   }
 
-  /*
-  * custom::createXML - convert Array to XML
+ /*
+  * custom::createXML > convert Array to XML
   * @param string $root - name of the root node
   * @param array $arr   - array object to be converterd
   * @return XML object
@@ -41,8 +41,8 @@ class custom {
     return $xml;
   }
 
-  /*
-  * custom::createArray - convert XML to Array
+ /*
+  * custom::createArray > convert XML to Array
   * @param string $root     - name of the root node
   * @param array $xmlstring - xml string to be converterd
   * @return Array object
@@ -52,7 +52,7 @@ class custom {
     return self::XML2Array($xml)[$root];
   }
 
-  /*
+ /*
   * Recursive conversion Array to XML
   */
   private static function &Array2XML($node_name, $arr=array()) {
@@ -112,7 +112,7 @@ class custom {
     return $node;
   }
 
-  /*
+ /*
   * Recursive conversion XML to Array
   */
   private static function &XML2Array($xml) {
@@ -125,7 +125,7 @@ class custom {
     // walk thru child nodes recursively
     foreach ($xml->children() as $child) {
       $arr = self::XML2Array($child);
-      $node =key($arr);
+      $node = key($arr);
       $data = current($arr);
       // store as single or multi array
       if (!isset($tags[$node])) {
@@ -144,7 +144,7 @@ class custom {
     return array($xml->getName() => $data);
   }
 
-  /*
+ /*
   * Get the root XML node, if there isn't one, create it
   */
   private static function getXMLRoot() {
@@ -152,7 +152,7 @@ class custom {
     return self::$xml;
   }
 
-  /*
+ /*
   * Get string representation of boolean value
   */
   private static function bool2str($v) {
@@ -162,7 +162,7 @@ class custom {
     return $v;
   }
 
-  /*
+ /*
   * Check if the tag name or attribute name contains illegal characters
   * Ref: http://www.w3.org/TR/xml/#sec-common-syn
   */
