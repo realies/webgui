@@ -363,6 +363,9 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 			$arrExistingConfig['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 			$arrExistingConfig['cputune']['vcpupin'] = [];
 			$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
+			// controller USB removed from updated config
+			unset($arrUpdatedConfig['devices']['controller']);
+			// it already exists and causes wrong array merge below. PHP bug?
 			$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
 			$xml = custom::createXML('domain',$arrConfig)->saveXML();
 		}
