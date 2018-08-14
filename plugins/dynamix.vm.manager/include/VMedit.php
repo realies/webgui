@@ -50,7 +50,11 @@ if (!empty($_GET['uuid'])) {
 	if (empty($_GET['template'])) {
 		// read vm-template attribute
 		$strTemplateOS = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@os');
-		if ($strTemplateOS) {
+		$strLibreELEC = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@libreelec');
+		$strOpenELEC = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@openelec');
+		if ($strLibreELEC) $strSelectedTemplate = 'LibreELEC';
+		elseif ($strOpenELEC) $strSelectedTemplate = 'OpenELEC';
+		elseif ($strTemplateOS) {
 			$strSelectedTemplate = $lv->_get_single_xpath_result($res, '//domain/metadata/*[local-name()=\'vmtemplate\']/@name');
 		} else {
 			// legacy VM support for <6.2 but need it going forward too
