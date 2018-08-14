@@ -217,7 +217,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 			$lv->domain_set_autostart($new, $newAutoStart);
 			$reply = ['success' => true];
 		} else {
-			// Failure -- try to restore existing domain
+			// Failure -- try to restore existing VM
 			$reply = ['error' => $lv->get_last_error()];
 			$old = $lv->domain_define($strXML);
 			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);

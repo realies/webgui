@@ -31,6 +31,7 @@
 		exit;
 	}
 
+	// update existing VM
 	if ($_POST['updatevm']) {
 		$uuid = $_POST['domain']['uuid'];
 		$dom = $lv->domain_get_domain_by_uuid($uuid);
@@ -47,7 +48,7 @@
 			$lv->domain_set_autostart($new, $newAutoStart);
 			$reply = ['success' => true];
 		} else {
-			// Failure -- try to restore existing domain
+			// Failure -- try to restore existing VM
 			$reply = ['error' => $lv->get_last_error()];
 			$old = $lv->domain_define($strXML);
 			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);
