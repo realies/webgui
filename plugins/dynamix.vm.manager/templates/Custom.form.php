@@ -107,7 +107,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 	if ($_POST['createvm']) {
 		if ($_POST['xmldesc']) {
 			// XML view
-			$new = $lv->domain_define($_POST['xmldesc']);
+			$new = $lv->domain_define($_POST['xmldesc'], $_POST['domain']['xmlstartnow']==1);
 			if ($new){
 				$lv->domain_set_autostart($new, $_POST['domain']['autostart']==1);
 				$reply = ['success' => true];
