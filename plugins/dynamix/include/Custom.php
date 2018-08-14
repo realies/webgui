@@ -129,7 +129,8 @@ class custom {
       $data = current($arr);
       // store as single or multi array
       if (!isset($tags[$node])) {
-        $tags[$node] = $data;
+        // specific for unRAID
+        if (in_array($node,['hostdev','controller'])) $tags[$node][] = $data; else $tags[$node] = $data;
       } elseif (is_array($tags[$node]) && array_keys($tags[$node])===range(0, count($tags[$node])-1)) {
         $tags[$node][] = $data;
       } else {
