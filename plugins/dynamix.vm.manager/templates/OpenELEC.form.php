@@ -335,20 +335,18 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 		}
 
 		// backup xml for existing domain in ram
-		if ($dom) {
+		if ($dom && !$_POST['xmldesc']) {
 			$oldName = $lv->domain_get_name($dom);
 			$newName = $_POST['domain']['name'];
-			if (!$_POST['xmldesc']) {
-				$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
-				$newDir = $domain_cfg['DOMAINDIR'].$newdName;
-				if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
-					// mv domain/vmname folder
-					if (rename($oldDir, $newDir)) {
-						// replace all disk paths in xml
-						foreach ($_POST['disk'] as &$arrDisk) {
-							if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
-							if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
-						}
+			$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
+			$newDir = $domain_cfg['DOMAINDIR'].$newdName;
+			if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
+				// mv domain/vmname folder
+				if (rename($oldDir, $newDir)) {
+					// replace all disk paths in xml
+					foreach ($_POST['disk'] as &$arrDisk) {
+						if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
+						if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
 					}
 				}
 			}
