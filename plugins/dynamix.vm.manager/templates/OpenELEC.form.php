@@ -380,9 +380,9 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 			$reply = ['success' => true];
 		} else {
 			// Failure -- try to restore existing domain
+			$reply = ['error' => $lv->get_last_error()];
 			$old = $lv->domain_define($strXML);
 			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);
-			$reply = ['error' => $lv->get_last_error()];
 		}
 		echo json_encode($reply);
 		exit;
@@ -975,7 +975,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 			<td></td>
 			<td>
 			<? if (!$boolRunning) { ?>
-				<? if (!empty($strXML)) { ?>
+				<? if ($strXML) { ?>
 					<input type="hidden" name="updatevm" value="1" />
 					<input type="button" value="Update" busyvalue="Updating..." readyvalue="Update" id="btnSubmit" />
 				<? } else { ?>
@@ -985,7 +985,6 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 					<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
 				<? } ?>
 				<input type="button" value="Cancel" id="btnCancel" />
-				<span><i class="fa fa-warning icon warning"></i> Manual XML edits may be lost if you later edit with the Form editor.</span>
 			<? } else { ?>
 				<input type="button" value="Back" id="btnCancel" />
 			<? } ?>
