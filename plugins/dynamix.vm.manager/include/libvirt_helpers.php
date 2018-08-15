@@ -1097,6 +1097,10 @@
 				if ($p2['bus'] && $p2['slot'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot']) $hostdev[$key] = $d;
 			}
 		}
+		// settings not in the GUI, but maybe customized
+		$new['memoryBacking'] = $old['memoryBacking'];
+		$new['clock'] = $old['clock'];
+		$new['features'] = $old['features'];
 		// update parent arrays
 		if ($hostdev) $new['devices']['hostdev'] = $hostdev;
 		unset($old['cputune']['vcpupin'], $old['devices']['hostdev']);
