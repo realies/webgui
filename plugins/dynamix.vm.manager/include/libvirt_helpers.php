@@ -1099,9 +1099,7 @@
 			}
 		}
 		// settings not in the GUI, but maybe customized
-		$new['memoryBacking'] = $old['memoryBacking'];
-		$new['clock'] = $old['clock'];
-		$new['features'] = $old['features'];
+		unset($new['memoryBacking'], $new['clock'], $new['features']);
 		// update parent arrays
 		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
 		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
