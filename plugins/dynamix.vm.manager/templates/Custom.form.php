@@ -225,11 +225,12 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 
 	if ($_GET['uuid']) {
 		// edit an existing VM
-		$dom = $lv->domain_get_domain_by_uuid($_GET['uuid']);
+		$uuid = $_GET['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
 		$boolRunning = $lv->domain_get_state($dom)=='running';
 		$strXML = $lv->domain_get_xml($dom);
 		$boolNew = false;
-		$arrConfig = domain_to_config($_GET['uuid']);
+		$arrConfig = domain_to_config($uuid);
 	} else {
 		// edit new VM
 		$boolRunning = false;
@@ -250,6 +251,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 	.CodeMirror pre.CodeMirror-placeholder { color: #999; }
 </style>
 
+<div class="formview">
 <input type="hidden" name="template[os]" id="template_os" value="<?=htmlspecialchars($arrConfig['template']['os'])?>">
 <input type="hidden" name="domain[persistent]" value="<?=htmlspecialchars($arrConfig['domain']['persistent'])?>">
 <input type="hidden" name="domain[uuid]" value="<?=htmlspecialchars($arrConfig['domain']['uuid'])?>">
@@ -257,7 +259,6 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 <input type="hidden" name="domain[arch]" value="<?=htmlspecialchars($arrConfig['domain']['arch'])?>">
 <input type="hidden" name="domain[oldname]" id="domain_oldname" value="<?=htmlspecialchars($arrConfig['domain']['name'])?>">
 
-<div class="formview">
 	<table>
 		<tr>
 			<td>Name:</td>
@@ -1423,15 +1424,19 @@ $(function() {
 
 		$panel.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
 
+		<?if (!$boolRunning):?>
 		// signal devices to be added or removed
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
 		});
+		<?endif?>
 		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
+		<?if (!$boolRunning):?>
 		// keep checkbox visually unchecked
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if ($(this).val().indexOf('#remove')>0) $(this).prop('checked',false);
 		});
+		<?endif?>
 
 		$panel.find('input').prop('disabled', true);
 		$button.val($button.attr('busyvalue'));
