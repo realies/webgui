@@ -362,11 +362,8 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 				@mkdir($_POST['shares'][0]['source'], 0777, true);
 			}
 			$arrExistingConfig = custom::createArray('domain',$strXML);
-			// set the 'unraid' namespace
-			$arrExistingConfig['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
-			// redo vcpupin and hostdev
-			unset($arrExistingConfig['cputune']['vcpupin'], $arrExistingConfig['devices']['hostdev']);
 			$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
+			array_update_recursive($arrExistingConfig, $arrUpdatedConfig);
 			$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
 			$xml = custom::createXML('domain',$arrConfig)->saveXML();
 		}

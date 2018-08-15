@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -26,7 +27,6 @@
 
 	// Check if program is running and
 	$libvirt_running = trim(shell_exec( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ));
-
 
 	$arrAllTemplates = [
 		' Windows ' => '', /* Windows Header */
@@ -168,7 +168,6 @@
 			]
 		],
 
-
 		' Pre-packaged ' => '', /* Pre-built Header */
 
 		'LibreELEC' => [
@@ -180,7 +179,6 @@
 			'form' => 'OpenELEC.form.php',
 			'icon' => 'openelec.png'
 		],
-
 
 		' Linux ' => '', /* Linux Header */
 
@@ -260,7 +258,6 @@
 			'os' => 'vyos'
 		],
 
-
 		' ' => '', /* Custom / XML Expert Header */
 
 		'Custom' => [
@@ -268,7 +265,6 @@
 			'icon' => 'default.png'
 		]
 	];
-
 
 	$arrOpenELECVersions = [
 		'6.0.3_1' => [
@@ -305,7 +301,6 @@
 		]
 	];
 
-
 	$arrLibreELECVersions = [
 		'7.0.1_1' => [
 			'name' => '7.0.1',
@@ -316,7 +311,6 @@
 			'valid' => '0'
 		]
 	];
-
 
 	$virtio_isos = [
 		'virtio-win-0.1.141-1' => [
@@ -571,7 +565,6 @@
 		return $arrJSON;
 	}
 
-
 	$cacheValidPCIDevices = null;
 	function getValidPCIDevices() {
 		global $cacheValidPCIDevices;
@@ -668,7 +661,6 @@
 		return $arrValidPCIDevices;
 	}
 
-
 	function getValidGPUDevices() {
 		$arrValidPCIDevices = getValidPCIDevices();
 
@@ -678,7 +670,6 @@
 
 		return $arrValidGPUDevices;
 	}
-
 
 	function getValidAudioDevices() {
 		$arrValidPCIDevices = getValidPCIDevices();
@@ -690,7 +681,6 @@
 		return $arrValidAudioDevices;
 	}
 
-
 	function getValidOtherDevices() {
 		$arrValidPCIDevices = getValidPCIDevices();
 
@@ -701,7 +691,6 @@
 		return $arrValidOtherDevices;
 	}
 
-
 	function getValidOtherStubbedDevices() {
 		$arrValidPCIDevices = getValidPCIDevices();
 
@@ -711,7 +700,6 @@
 
 		return $arrValidOtherStubbedDevices;
 	}
-
 
 	$cacheValidUSBDevices = null;
 	function getValidUSBDevices() {
@@ -772,7 +760,6 @@
 		return $arrValidUSBDevices;
 	}
 
-
 	function getValidMachineTypes() {
 		global $lv;
 
@@ -808,7 +795,6 @@
 		return $arrValidMachineTypes;
 	}
 
-
 	function getLatestMachineType($strType = 'i440fx') {
 		$arrMachineTypes = getValidMachineTypes();
 
@@ -821,7 +807,6 @@
 		return array_shift(array_keys($arrMachineTypes));
 	}
 
-
 	function getValidDiskDrivers() {
 		$arrValidDiskDrivers = [
 			'raw' => 'raw',
@@ -830,7 +815,6 @@
 
 		return $arrValidDiskDrivers;
 	}
-
 
 	function getValidDiskBuses() {
 		$arrValidDiskBuses = [
@@ -844,7 +828,6 @@
 		return $arrValidDiskBuses;
 	}
 
-
 	function getValidCdromBuses() {
 		$arrValidCdromBuses = [
 			'scsi' => 'SCSI',
@@ -856,7 +839,6 @@
 		return $arrValidCdromBuses;
 	}
 
-
 	function getValidVNCModels() {
 		$arrValidVNCModels = [
 			'cirrus' => 'Cirrus',
@@ -866,7 +848,6 @@
 
 		return $arrValidVNCModels;
 	}
-
 
 	function getValidKeyMaps() {
 		$arrValidKeyMaps = [
@@ -909,13 +890,11 @@
 		return $arrValidKeyMaps;
 	}
 
-
 	function getHostCPUModel() {
 		$cpu = explode('#', exec("dmidecode -q -t 4|awk -F: '{if(/Version:/) v=$2; else if(/Current Speed:/) s=$2} END{print v\"#\"s}'"));
 		list($strCPUModel) = explode('@', str_replace(["Processor","CPU","(C)","(R)","(TM)"], ["","","&#169;","&#174;","&#8482;"], $cpu[0]) . '@');
 		return trim($strCPUModel);
 	}
-
 
 	function getNetworkBridges() {
 		exec("brctl show|grep -Po '^(vir)?br\d\S*'", $arrValidBridges);
@@ -933,7 +912,6 @@
 
 		return array_values($arrValidBridges);
 	}
-
 
 	function domain_to_config($uuid) {
 		global $lv;
@@ -953,7 +931,6 @@
 		$arrHostDevs = $lv->domain_get_host_devices_pci($res);
 		$arrUSBDevs = $lv->domain_get_host_devices_usb($res);
 
-
 		// Metadata Parsing
 		// libvirt xpath parser sucks, use php's xpath parser instead
 		$strDOMXML = $lv->domain_get_xml($res);
@@ -972,7 +949,6 @@
 		if (empty($arrTemplateValues['name'])) {
 			$arrTemplateValues['name'] = 'Custom';
 		}
-
 
 		$arrGPUDevices = [];
 		$arrAudioDevices = [];
@@ -1103,4 +1079,25 @@
 		];
 	}
 
+	function array_update_recursive(&$old, &$new) {
+		$hostdev = [];
+		// update USB & PCI host devices
+		foreach ($new['devices']['hostdev'] as $key => $device) {
+			$vendor = $device['source']['vendor']['@attributes']['id'];
+			$product = $device['source']['product']['@attributes']['id'];
+			$pci = $device['source']['address']['@attributes'];
+			foreach ($old['devices']['hostdev'] as $k => $d) {
+				$v = $d['source']['vendor']['@attributes']['id'];
+				$p = $d['source']['product']['@attributes']['id'];
+				$p2 = $d['source']['address']['@attributes'];
+				if ($vendor && $product && $vendor==$v && $product==$p) $hostdev[] = $d;
+				if ($pci['bus'] && $pci['slot'] && $pci['bus']==$p2['bus'] && $pci['slot']==$p2['slot']) $hostdev[] = $d;
+			}
+		}
+		// update parent arrays
+		if ($hostdev) $new['devices']['hostdev'] = $hostdev;
+		unset($old['cputune']['vcpupin'], $old['devices']['hostdev']);
+		// set namespace
+		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
+	}
 ?>
