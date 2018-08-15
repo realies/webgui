@@ -1080,21 +1080,22 @@
 	}
 
 	function array_update_recursive(&$old, &$new) {
-		$hostdev = $new['devices']['hostdev'];
-		$hostold = $old['devices']['hostdev'];
+		$hostold = $old['devices']['hostdev']; // existing devices including custom settings
+		$hostnew = $new['devices']['hostdev']; // GUI generated devices
 		// update USB & PCI host devices
-		foreach ($hostdev as $key => $device) {
+		foreach ($hostnew as $key => $device) {
+			$auto = $device['tag'];
 			$vendor = $device['source']['vendor']['@attributes']['id'];
-			$product = $device['source']['product']['@attributes']['id'];
+			$remove = false;
+			list($product,$remove) = explode('#',$device['source']['product']['@attributes']['id']);
 			$pci = $device['source']['address']['@attributes'];
-			// check if device already exists
+			if ($remove) unset($new['devices']['hostdev'][$key]);
 			foreach ($hostold as $k => $d) {
 				$v = $d['source']['vendor']['@attributes']['id'];
 				$p = $d['source']['product']['@attributes']['id'];
 				$p2 = $d['source']['address']['@attributes'];
-				// merge old and new settings
-				if ($v && $p && $v==$vendor && $p==$product) $hostdev[$key] = $d;
-				if ($p2['bus'] && $p2['slot'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot']) $hostdev[$key] = $d;
+				if ($v && $p && $v==$vendor && $p==$product && $remove) unset($old['devices']['hostdev'][$k]);
+				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$pci['function'] && $remove) unset($old['devices']['hostdev'][$k]);
 			}
 		}
 		// settings not in the GUI, but maybe customized
@@ -1102,8 +1103,9 @@
 		$new['clock'] = $old['clock'];
 		$new['features'] = $old['features'];
 		// update parent arrays
-		if ($hostdev) $new['devices']['hostdev'] = $hostdev;
-		unset($old['cputune']['vcpupin'], $old['devices']['hostdev']);
+		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
+		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
+		unset($old['cputune']['vcpupin']);
 		// set namespace
 		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 	}
