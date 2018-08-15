@@ -1080,18 +1080,21 @@
 	}
 
 	function array_update_recursive(&$old, &$new) {
-		$hostdev = [];
+		$hostdev = $new['devices']['hostdev'];
+		$hostold = $old['devices']['hostdev'];
 		// update USB & PCI host devices
-		foreach ($new['devices']['hostdev'] as $key => $device) {
+		foreach ($hostdev as $key => $device) {
 			$vendor = $device['source']['vendor']['@attributes']['id'];
 			$product = $device['source']['product']['@attributes']['id'];
 			$pci = $device['source']['address']['@attributes'];
-			foreach ($old['devices']['hostdev'] as $k => $d) {
+			// check if device already exists
+			foreach ($hostold as $k => $d) {
 				$v = $d['source']['vendor']['@attributes']['id'];
 				$p = $d['source']['product']['@attributes']['id'];
 				$p2 = $d['source']['address']['@attributes'];
-				if ($vendor && $product && $vendor==$v && $product==$p) $hostdev[] = $d;
-				if ($pci['bus'] && $pci['slot'] && $pci['bus']==$p2['bus'] && $pci['slot']==$p2['slot']) $hostdev[] = $d;
+				// merge old and new settings
+				if ($v && $p && $v==$vendor && $p==$product) $hostdev[$key] = $d;
+				if ($p2['bus'] && $p2['slot'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot']) $hostdev[$key] = $d;
 			}
 		}
 		// update parent arrays
