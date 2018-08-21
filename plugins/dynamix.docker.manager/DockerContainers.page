@@ -17,6 +17,9 @@ Markdown="false"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$width = strstr('white,black',$display['theme']) ? -58: -44;
+?>
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
@@ -41,19 +44,19 @@ input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;bac
 </style>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top:-44px"><span><input type="checkbox" class="advancedview"></span></span>
+<span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
 <div class="spinner fixed"></div>
 <table id="docker_containers" class="tablesorter shift">
 <thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td class="advanced"></td><td colspan='8'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
-<input type="button" onclick="startAll()" value="Start all Containers" style="display:none">
-<input type="button" onclick="stopAll()" value="Stop all Containers" style="display:none">
-<input type="button" onclick="pauseAll()" value="Pause all Containers" style="display:none">
-<input type="button" onclick="resumeAll()" value="Resume all Containers" style="display:none">
+<input type="button" onclick="startAll()" value="Start All" style="display:none">
+<input type="button" onclick="stopAll()" value="Stop All" style="display:none">
+<input type="button" onclick="pauseAll()" value="Pause All" style="display:none">
+<input type="button" onclick="resumeAll()" value="Resume All" style="display:none">
 <input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll" style="display:none">
-<input type="button" onclick="updateAll()" value="Update all Containers" id="updateAll" style="display:none">
+<input type="button" onclick="updateAll()" value="Update All" id="updateAll" style="display:none">
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>

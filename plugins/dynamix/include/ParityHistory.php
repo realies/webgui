@@ -11,6 +11,9 @@
  */
 ?>
 <?
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Helpers.php";
+
 $month = [' Jan '=>'-01-',' Feb '=>'-02-',' Mar '=>'-03-',' Apr '=>'-04-',' May '=>'-05-',' Jun '=>'-06-',' Jul '=>'-07-',' Aug '=>'-08-',' Sep '=>'-09-',' Oct '=>'-10-',' Nov '=>'-11-',' Dec '=>'-12-'];
 
 function plus($val, $word, $last) {
@@ -29,8 +32,8 @@ function my_duration($time) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-popup.css">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 </head>
 <body>
 <table class='share_status'><thead><tr><td>Date</td><td>Duration</td><td>Speed</td><td>Status</td><td>Errors</td></tr></thead><tbody>

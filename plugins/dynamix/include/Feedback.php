@@ -11,6 +11,8 @@
 ?>
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Helpers.php";
+
 $var = parse_ini_file('state/var.ini');
 $unraid = parse_ini_file('/etc/unraid-version');
 $keyfile = trim(base64_encode(@file_get_contents($var['regFILE'])));
@@ -24,8 +26,8 @@ if (array_key_exists('getdiagnostics', $_GET)) {
     exit;
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-popup.css">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 <style>
 #spinner_image{position:fixed;left:46%;top:46%;width:16px;height:16px;display:none}
 #control_panel{position:fixed;left:5px;right:5px;top:0;padding-top:8px;line-height:24px;white-space:nowrap}

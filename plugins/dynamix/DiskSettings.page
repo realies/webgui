@@ -25,11 +25,7 @@ function displayTemp($temp) {
 }
 ?>
 <style>
-<?if (strstr('azure,gray',$display['theme'])):?>
 span.code{display:inline-block;width:186px}
-<?else:?>
-span.code{display:inline-block;width:138px}
-<?endif;?>
 </style>
 <script>
 function doDispatch(form) {

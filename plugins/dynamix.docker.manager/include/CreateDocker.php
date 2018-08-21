@@ -39,17 +39,17 @@ function cpu_pinning() {
   global $xml,$cpus;
   $vcpu = explode(',',$xml['CPUset'] ?? '');
   $total = count($cpus);
-  $loop = floor(($total-1)/22)+1;
+  $loop = floor(($total-1)/20)+1;
   for ($c = 0; $c < $loop; $c++) {
     $row1 = $row2 = [];
-    $max = ($c == $loop-1 ? ($total%22?:22) : 22);
+    $max = ($c == $loop-1 ? ($total%20?:20) : 20);
     for ($n = 0; $n < $max; $n++) {
       unset($cpu1,$cpu2);
-      list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*22+$n]);
+      list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*20+$n]);
       $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
       $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
-      $row1[] = "<span id='cpu$cpu1' class='cpu'><input type='checkbox' id='box$cpu1'$check1>$cpu1</span>";
-      if ($cpu2) $row2[] = "<span id='cpu$cpu2' class='cpu'><input type='checkbox' id='box$cpu2'$check2>$cpu2</span>";
+      $row1[] = "<label id='cpu$cpu1' class='checkbox'>$cpu1<input type='checkbox' id='box$cpu1'$check1><span class='checkmark'></span></label>";
+      if ($cpu2) $row2[] = "<label id='cpu$cpu2' class='checkbox'>$cpu2<input type='checkbox' id='box$cpu2'$check2><span class='checkmark'></span></label>";
     }
     if ($c) echo '<hr>';
     echo "<span class='cpu'>CPU:</span>".implode($row1);
@@ -134,7 +134,7 @@ if (isset($_POST['contName'])) {
   }
   if ($startContainer) $cmd = str_replace('/docker create ', '/docker run -d ', $cmd);
   execCommand($cmd);
-  echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
+ echo '<div style="text-align:center"><button type="button" onclick="done()">Done</button></div><br>';
   goto END;
 }
 
@@ -176,7 +176,7 @@ if ($_GET['updateContainer']){
       removeImage($oldImageID);
     }
   }
-  echo '<div style="text-align:center"><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');">Done</button></div><br>';
+  echo '<div style="text-align:center"><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\')">Done</button></div><br>';
   goto END;
 }
 
@@ -249,16 +249,15 @@ $authoring     = $authoringMode ? 'advanced' : 'noshow';
 $disableEdit   = $authoringMode ? 'false' : 'true';
 $showAdditionalInfo = '';
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link rel="stylesheet" type="text/css" href="/plugins/dynamix.docker.manager/styles/style-<?=$display['theme'];?>.css">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.ui.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.switchbutton.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
+<link rel="stylesheet" type="text/css" href="<?autov("/plugins/dynamix.docker.manager/styles/style-{$display['theme']}.css")?>">
 <style>
-table {border-collapse:separate;}
-table.settings tr>td+td{white-space:normal;text-align:justify;padding-right:12px}
+table{border-collapse:separate}
 option.list{padding:0 0 0 7px}
 optgroup.bold{font-weight:bold;margin-top:5px}
-optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-top:10px}
+optgroup.title{background-color:#625D5D;color:#f2f2f2;text-align:center;margin-top:10px}
 .textTemplate{width:60%}
 .fileTree{width:240px;max-height:200px;overflow-y:scroll;position:absolute;z-index:100;display:none}
 .show{display:block}
@@ -267,11 +266,11 @@ optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-t
 .noshow{display:none}
 .required:after{content:" *";color:#E80000}
 .inline_help{font-weight:normal}
-.switch-wrapper{display:inline-block;position:relative;top:3px;vertical-align:middle;}
+.switch-wrapper{display:inline-block;position:relative;top:3px;vertical-align:middle;margin-top:-30px}
 .switch-button-label.off{color:inherit;}
 .selectVariable{width:320px}
 .fa.button{color:maroon;font-size:24px;position:relative;top:4px;cursor:pointer}
-span.cpu{display:inline-block;width:50px}
+span.cpu,label.checkbox{display:inline-block;width:32px}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
@@ -403,7 +402,7 @@ span.cpu{display:inline-block;width:50px}
     popup.dialog({
       title: title,
       resizable: false,
-      width: 600,
+      width: 900,
       modal: true,
       show : {effect: 'fade' , duration: 250},
       hide : {effect: 'fade' , duration: 250},
@@ -423,11 +422,11 @@ span.cpu{display:inline-block;width:50px}
             Opts.Description = "Container "+Opts.Type+": "+Opts.Target;
           }
           if (Opts.Required == "true") {
-            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",false)'> Edit</button> ";
-            Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
+            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",false)'>Edit</button>";
+            Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+")'>Remove</button></span>";
           } else {
-            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",false)'> Edit</button> ";
-            Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button>";
+            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",false)'>Edit</button>";
+            Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+")'>Remove</button>";
           }
           Opts.Number = confNum;
           newConf = makeConfig(Opts);
@@ -479,7 +478,7 @@ span.cpu{display:inline-block;width:50px}
     popup.dialog({
       title: title,
       resizable: false,
-      width: 600,
+      width: 900,
       modal: true,
       show : {effect: 'fade' , duration: 250},
       hide : {effect: 'fade' , duration: 250},
@@ -492,11 +491,11 @@ span.cpu{display:inline-block;width:50px}
             Opts[e] = getVal(Element, e);
           });
           if (Opts.Display == "always-hide" || Opts.Display == "advanced-hide") {
-            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'> Edit</button> ";
-            Opts.Buttons += "<button type='button' onclick='removeConfig("+num+");'> Remove</button></span>";
+            Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'>Edit</button>";
+            Opts.Buttons += "<button type='button' onclick='removeConfig("+num+")'>Remove</button></span>";
           } else {
-            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'> Edit</button> ";
-            Opts.Buttons += "<button type='button' onclick='removeConfig("+num+");'> Remove</button>";
+            Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+num+",<?=$disableEdit?>)'>Edit</button>";
+            Opts.Buttons += "<button type='button' onclick='removeConfig("+num+")'>Remove</button>";
           }
           if (! Opts.Name ){
             Opts.Name = makeName(Opts.Type);
@@ -951,7 +950,7 @@ span.cpu{display:inline-block;width:50px}
       <tr class="advanced">
         <td colspan="2">
           <blockquote class="inline_help">
-            <p>Help text for CPU pinning.</p>
+            <p>Checking a CPU core(s) will limit the container to run on the selected cores only. Selecting no cores lets the container run on all available cores (default)</p>
           </blockquote>
         </td>
       </tr>
@@ -1006,28 +1005,28 @@ span.cpu{display:inline-block;width:50px}
       </tr>
     </table>
     <div id="configLocation" style="margin-top:12px"></div>
-    <table class="settings wide" style="margin-top:12px">
+    <table class="settings" style="margin-top:12px">
       <tr>
         <td></td>
         <td id="readmore_toggle" class="readmore_collapsed"><a onclick="toggleReadmore()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show more settings ...</a></td>
       </tr>
     </table>
     <div id="configLocationAdvanced" style="display:none"></div><br>
-    <table class="settings wide">
+    <table class="settings">
       <tr>
         <td></td>
         <td id="allocations_toggle" class="readmore_collapsed"><a onclick="toggleAllocations()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show docker allocations ...</a></td>
       </tr>
     </table>
     <div id="dockerAllocations" style="display:none"></div><br>
-    <table class="settings wide">
+    <table class="settings">
       <tr>
         <td></td>
         <td><a href="javascript:addConfigPopup()"><i class="fa fa-plus"></i> Add another Path, Port, Variable, Label or Device</a></td>
       </tr>
     </table>
     <br>
-    <table class="settings wide">
+    <table class="settings">
       <tr>
         <td></td>
         <td>
@@ -1119,7 +1118,7 @@ span.cpu{display:inline-block;width:50px}
   <input type="hidden" name="confDisplay[]" value="{6}">
   <input type="hidden" name="confRequired[]" value="{7}">
   <input type="hidden" name="confMask[]" value="{8}">
-  <table class="settings wide">
+  <table class="settings">
     <tr>
       <td class="{11}" style="vertical-align:top;">{0}:</td>
       <td>
@@ -1131,12 +1130,12 @@ span.cpu{display:inline-block;width:50px}
 </div>
 
 <div id="templateAllocations" style="display:none">
-<table class='settings wide'>
+<table class='settings'>
   <tr><td></td><td style="{0}"><span style="width:160px;display:inline-block;padding-left:20px">{1}</span>{2}</td></tr>
 </table>
 </div>
 
-<script type="text/javascript">
+<script>
   var subnet = {};
 <?foreach ($subnet as $network => $value):?>
   subnet['<?=$network?>'] = '<?=$value?>';
@@ -1219,11 +1218,11 @@ span.cpu{display:inline-block;width:50px}
         confNum += 1;
         Opts = Settings.Config[i];
         if (Opts.Display == "always-hide" || Opts.Display == "advanced-hide") {
-          Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'> Edit</button> ";
-          Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
+          Opts.Buttons  = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'>Edit</button>";
+          Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+")'>Remove</button></span>";
         } else {
-          Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'> Edit</button> ";
-          Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button>";
+          Opts.Buttons  = "<button type='button' onclick='editConfigPopup("+confNum+",<?=$disableEdit?>)'>Edit</button>";
+          Opts.Buttons += "<button type='button' onclick='removeConfig("+confNum+")'>Remove</button>";
         }
         Opts.Number = confNum;
         newConf = makeConfig(Opts);

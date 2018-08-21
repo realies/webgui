@@ -30,7 +30,7 @@
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:15px;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
-.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:green;font-size:25px}
+.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:25px}
 <?
 $tasks = find_pages('Tasks');
 $buttons = find_pages('Buttons');
@@ -44,7 +44,7 @@ if (strstr('gray,azure',$display['theme'])) {
 }
 $notes = '/var/tmp/unRAIDServer.txt';
 if (!file_exists($notes)) file_put_contents($notes,shell_exec("$docroot/plugins/dynamix.plugin.manager/scripts/plugin changes $docroot/plugins/unRAIDServer/unRAIDServer.plg"));
-$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=1&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw blue-text'></span></a>"
+$notes = "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?tmp=1&file=$notes','Release Notes',600,900);return false\"><span class='fa fa-info-circle fa-fw'></span></a>"
 ?>
 </style>
 
@@ -296,12 +296,13 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div class="upgrade_notice" style="display:none"></div>
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',450,450,false);return false;"><img src="/webGui/images/limetech-logo-<?=$display['theme']?>.png" title="Feedback" border="0"/></a><br/>
-   <a href="/Tools/Registration"><span id="licensetype"><strong>unRAID Server <em><?=$var['regTy']?></em><span id="licenseexpire"></span></strong></span></a>
+   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><img src="/webGui/images/UN-logotype-gradient.png" title="Feedback" border="0"/></a>
+   <a href="/Tools/Registration"><span></span></a>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
-    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version'].$notes?><br/><span id="uptime"></span></span>
+    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?>
+    <a href="/Tools/Registration" class="header" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a><?=$notes?><br/><span id="uptime"></span></span>
    </div>
   </div>
   <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>

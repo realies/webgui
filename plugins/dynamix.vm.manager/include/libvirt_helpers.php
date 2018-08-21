@@ -490,9 +490,9 @@
 		elseif ($display['theme']=='azure')
 			return "transparent";
 		elseif ($display['theme']=='black')
-			return ($row % 2 == 0) ? "transparent":"#0C0C0C";
+			return ($row % 2 == 0) ? "transparent":"#212121";
 		else
-			return ($row % 2 == 0) ? "transparent":"#F8F8F8";
+			return ($row % 2 == 0) ? "transparent":"#ededed";
 	}
 
 	function mk_dropdown_options($arrOptions, $strSelected) {

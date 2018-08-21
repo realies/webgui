@@ -15,7 +15,7 @@ Tag="share-alt-square"
  */
 ?>
 <?
-$width = strstr('gray,azure',$display['theme']) ? [123,305]:[123,300];
+$width = [123,305];
 
 if ($name == "") {
   /* default values when adding new share */

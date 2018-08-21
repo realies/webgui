@@ -106,8 +106,8 @@ function base_net($route) {
   return substr(explode('/',$route)[0],0,-2);
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 .errortext{color:#EF3D47;display:none}
 .fileTree{width:305px;max-height:150px;overflow:scroll;position:absolute;z-index:100;display:none}

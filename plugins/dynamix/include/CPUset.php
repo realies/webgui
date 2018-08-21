@@ -30,8 +30,8 @@ function create($id, $name, $vcpu) {
       list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*32+$n]);
       $check1 = in_array($cpu1, $vcpu) ? 'checked':'';
       $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? 'checked':''):'';
-      $text[$n] .="<input type='checkbox' name='$name:$cpu1' $check1><br>";
-      if ($cpu2) $text[$n] .= "<input type='checkbox' name='$name:$cpu2' $check2><br>";
+      $text[$n] .="<label class='checkbox'><input type='checkbox' name='$name:$cpu1' $check1><span class='checkmark'></span></label><br>";
+      if ($cpu2) $text[$n] .= "<label class='checkbox'><input type='checkbox' name='$name:$cpu2' $check2><span class='checkmark'></span></label><br>";
     }
   }
   echo implode(array_map(function($t){return "<td>$t</td>";},$text));

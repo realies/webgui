@@ -100,11 +100,11 @@ if (empty($vms)) {
 <style type="text/css">
 body{-webkit-overflow-scrolling:touch;}
 .fileTree{width:305px;max-height:150px;overflow-y:scroll;position:absolute;z-index:100;display:none;}
-div.four{font-family:arimo;font-size:12px;color:#A0A0A0;width:300px}
+div.four{font-size:12px;width:300px}
 div.four label{float:left;display:table-cell;width:25%}
 div.four label:nth-child(4n+4){float:none;clear:both}
-div.four label.cpu1{width:27%}
-div.four label.cpu2{width:33%}
+div.four label.cpu1{width:32%}
+div.four label.cpu2{width:26%}
 div.Panel{float:unset;margin:4px;height:inherit;border:none;}
 div.Panel:hover{background-color:unset;}
 div.PanelText{display:none;}
@@ -117,8 +117,8 @@ tbody > tr.sortable:hover{cursor:move}
 <tbody id="kvm_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" style="display:none">
-<input type="button" onclick="startAll()" value="Start all VMs" style="display:none">
-<input type="button" onclick="stopAll()" value="Stop all VMs" style="display:none">
+<input type="button" onclick="startAll()" value="Start All" style="display:none">
+<input type="button" onclick="stopAll()" value="Stop All" style="display:none">
 
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>

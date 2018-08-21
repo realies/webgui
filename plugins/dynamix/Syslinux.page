@@ -18,6 +18,8 @@ Tag="edit"
 > You will need to reboot your server for these changes to take effect.
 
 <?
+$top = strstr('white,black',$display['theme']) ? -58 : -44;
+
 function strip($area) {
   return preg_replace(["/^|(\n)  /","/\n$/"],["$1",""],$area);
 }
@@ -43,12 +45,12 @@ case 'azure':
   echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none}\n";
   break;
 case 'white':
-  echo "span.array,span.system{margin-left:33.33%;width:65.5%;padding:1px 8px;font-weight:bold;border:solid 1px #E0E0E0;border-bottom:none}\n";
-  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  echo "span.array,span.system{margin-left:33.33%;width:65.5%;padding:2px 10px;font-weight:bold;border:solid 1px #1c1c1c;border-bottom:none}\n";
+  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none}\n";
   break;
 case 'black':
-  echo "span.array,span.system{margin-left:33.33%;width:65.5%;padding:1px 8px;font-weight:bold;border:solid 1px #404040;border-bottom:none}\n";
-  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none;border-radius:0}\n";
+  echo "span.array,span.system{margin-left:33.33%;width:65.5%;padding:2px 10px;font-weight:bold;border:solid 1px #f2f2f2;border-bottom:none}\n";
+  echo "textarea.menu{margin-left:33.33%;width:65.5%;margin-bottom:12px;font-family:bitstream;resize:none;border-top:none}\n";
   break;
 }
 ?>
@@ -194,7 +196,7 @@ $(function(){
   });
 });
 </script>
-<span class="status" style="margin-top:-44px"><input type="checkbox" class="advancedview"></span>
+<span class="status" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareMenu(this)">
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">

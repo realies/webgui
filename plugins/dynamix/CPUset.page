@@ -1,7 +1,7 @@
 Menu="OtherSettings"
 Title="CPU Pinning"
 Icon="grid.png"
-Tag="table"
+Tag="map-marker"
 Cond="pgrep('libvirtd')!==false || pgrep('dockerd')!==false"
 ---
 <?PHP
@@ -48,7 +48,6 @@ table.tablesorter tr>th+th{text-align:right;vertical-align:top}
 table.tablesorter tr>td+td+td{vertical-align:top}
 table.tablesorter tr>th+th+th,table.tablesorter tr>td+td{text-align:center}
 table.tablesorter th:first-child,table.tablesorter td:first-child{width:180px;text-align:left}
-input[type=checkbox]{margin:0;padding:0}
 input.flat{margin:0}
 input.lock{margin:0}
 </style>
@@ -169,7 +168,7 @@ $(function(){
 <?if ($libvirtd):?>
 <form name="vm">
 <input type="hidden" name="names" id="names-vm" value="">
-<table class='tablesorter' style='width:auto'>
+<table class='tablesorter shift' style='width:auto'>
 <thead><tr><th><i class="fa fa-list"></i> VM</th><?create()?></tr></thead>
 <tbody id="table-vm"><?=$spinner?></tbody>
 </table>

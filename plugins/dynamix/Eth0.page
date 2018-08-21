@@ -22,7 +22,7 @@ $template = "$docroot/webGui/EthX.page";
 $ini = '/var/local/emhttp/network.ini';
 $validIP4 = '((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
 $validIP6 = '((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}';
-$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
+$width    = [166,305];
 
 // get available ethernet ports (excluding eth0)
 exec("ls --indicator-style=none /sys/class/net|grep -P '^eth[1-9][0-9]*$'",$ports);
@@ -75,9 +75,9 @@ span.red{color:#E68A00}
 span.blue{color:#00529B}
 span.green{color:#4F8A10}
 input.gap{margin-right:6px}
-div.shade-white{background-color:#F8F8F8}
-div.shade-black{background-color:#0C0C0C}
-div.shade-azure{background-color:#EDEAEF}
+div.shade-white{background-color:#ededed}
+div.shade-black{background-color:#212121}
+div.shade-azure{background-color:#edeaef}
 div.shade-gray{background-color:#121510}
 select.slim{min-width:45px}
 input.slim{width:32px}

@@ -15,6 +15,8 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
+$top = strstr('white,black',$display['theme']) ? -58 : -44;
+
 $strSelectedTemplate = array_keys($arrAllTemplates)[1];
 if (!empty($_GET['template']) && !(empty($arrAllTemplates[$_GET['template']]))) {
 	$strSelectedTemplate = $_GET['template'];
@@ -72,9 +74,9 @@ if (!empty($_GET['uuid'])) {
 	$arrLoad['form'] = $arrAllTemplates[$strSelectedTemplate]['form'];
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style type="text/css">
 	body { -webkit-overflow-scrolling: touch;}
 	.fileTree {
@@ -89,11 +91,11 @@ if (!empty($_GET['uuid'])) {
 		margin-top: 0;
 	}
 	#vmform div#title + table {
-		margin-top:<?=strstr('gray,azure',$display['theme'])?0:-21?>px;
+		margin-top:0;
 	}
 	#vmform table tr {
 		vertical-align: top;
-		line-height:<?=strstr('gray,azure',$display['theme'])?40:24?>px;
+		line-height:40px;
 	}
 	#vmform table tr td:nth-child(odd) {
 		width: 220px;
@@ -155,9 +157,9 @@ if (!empty($_GET['uuid'])) {
 		<?elseif ($display['theme']=='azure'):?>
 		background:#EDEAEF;
 		<?elseif ($display['theme']=='black'):?>
-		background:linear-gradient(90deg, #0A0A0A, #000000);
+		background:#212121;
 		<?else:?>
-		background:linear-gradient(90deg, #F5F5F5, #FFFFFF);
+		background:#ededed;
 		<?endif;?>
 		background-size: 800px 100%;
 		background-position: -800px;
@@ -231,13 +233,11 @@ if (!empty($_GET['uuid'])) {
 		border:1px solid #606E7F;
 		background:#EDEAEF;
 		<?elseif ($display['theme']=='black'):?>
-		border:1px solid #202020;
-		background:-webkit-radial-gradient(#303030,#101010);
-		background:linear-gradient(#303030,#101010);
+		border:1px solid #2b2b2b;
+		background:#212121;
 		<?else:?>
-		border:1px solid #D0D0D0;
-		background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);
-		background:linear-gradient(#B0B0B0,#F0F0F0);
+		border:1px solid #e3e3e3;
+		background:#ededed;
 		<?endif;?>
 		z-index: 10;
 	}
@@ -250,17 +250,15 @@ if (!empty($_GET['uuid'])) {
 	#vmform .four label {
 		float: left;
 		display: table-cell;
-		width: 25%;
+		width: 15%;
 	}
 	#vmform .four label:nth-child(4n+4) {
-		float: none;
-		clear: both;
 	}
 	#vmform .four label.cpu1 {
-		width: 30%;
+		width: 28%;height:16px;line-height:16px;
 	}
 	#vmform .four label.cpu2 {
-		width: 31%;
+		width: 3%;height:16px;line-height:16px;
 	}
 	#vmform .mac_generate {
 		cursor: pointer;
@@ -282,13 +280,13 @@ if (!empty($_GET['uuid'])) {
 	<?elseif ($display['theme']=='azure'):?>
 	span#dropbox{border:1px solid #606E7F;border-radius:5px;background:#EDEAEF;padding:28px 12px;line-height:72px;margin-right:16px;}
 	<?elseif ($display['theme']=='black'):?>
-	span#dropbox{border:1px solid #202020;border-radius:5px;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);padding:28px 12px;line-height:72px;margin-right:16px;}
+	span#dropbox{border:1px solid #2b2b2b;border-radius:5px;background:#212121;padding:28px 12px;line-height:72px;margin-right:16px;}
 	<?else:?>
-	span#dropbox{border:1px solid #D0D0D0;border-radius:5px;background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);background:linear-gradient(#B0B0B0,#F0F0F0);padding:28px 12px;line-height:72px;margin-right:16px;}
+	span#dropbox{border:1px solid #e3e3e3;border-radius:5px;background:#ededed;padding:28px 12px;line-height:72px;margin-right:16px;}
 	<?endif;?>
 </style>
-<span class="status advancedview_panel" style="margin-top:-44px"><input type="checkbox" class="advancedview"></span>
-<div id="content" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-21?>px;margin-left:0px">
+<span class="status advancedview_panel" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
+<div id="content" style="margin-top:0;margin-left:0px">
 	<form id="vmform" method="POST">
 	<input type="hidden" name="domain[type]" value="kvm" />
 	<input type="hidden" name="template[name]" value="<?=htmlspecialchars($strSelectedTemplate)?>" />
@@ -321,7 +319,7 @@ if (!empty($_GET['uuid'])) {
 	<table>
 		<tr style="line-height: 16px; vertical-align: middle;">
 			<td>Autostart:</td>
-			<td><div style="margin-left: -10px<?=strstr('gray,azure',$display['theme'])?';padding-top:6px':''?>"><input type="checkbox" id="domain_autostart" name="domain[autostart]" style="display: none" class="autostart" value="1" <? if ($arrLoad['autostart']) echo 'checked'; ?>></div></td>
+			<td><div style="margin-left:-10px;padding-top:6px"><input type="checkbox" id="domain_autostart" name="domain[autostart]" style="display:none" class="autostart" value="1" <? if ($arrLoad['autostart']) echo 'checked'; ?>></div></td>
 		</tr>
 	</table>
 	<blockquote class="inline_help">

@@ -19,7 +19,6 @@ Markdown="false"
 <?
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-
 // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
 // If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
 $strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
@@ -28,9 +27,7 @@ if (empty($strLoadedModules)) {
 	exit;
 }
 
-
 $arrValidBridges = getNetworkBridges();
-
 
 // Check for PCIE ACS capabilities
 $boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
@@ -55,9 +52,9 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	}
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 	body { -webkit-overflow-scrolling: touch;}
 	.errortext{color:#EF3D47;display:none;}
@@ -91,7 +88,6 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	}
 	#download_button span {
 		font-size: 12px;
-		font-family: arimo;
 		vertical-align: top;
 	}
 	#download_button.fa-spin span {
@@ -107,11 +103,10 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	}
 	#remove_button span {
 		font-size: 12px;
-		font-family: arimo;
 		vertical-align: top;
 	}
 </style>
-<span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
+<span class="status" style="margin-top:0"><input type="checkbox" class="advancedview"></span>
 <?if ($boolACSEnabled != $boolACSInSyslinux):?>
 	<br><p class="notice">You must reboot for changes to take effect</p>
 <?endif;?>

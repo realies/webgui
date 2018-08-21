@@ -18,9 +18,9 @@ Tag="calendar"
 if ($disks['parity']['status']=='DISK_NP_DSBL' && $disks['parity2']['status']=='DISK_NP_DSBL') {
   echo "<p class='notice'>No Parity disk present!</p>";
 }
-$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
-$mode = ['Disabled','Daily','Weekly','Monthly','Yearly','Custom'];
-$days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+$width  = [166,305];
+$mode   = ['Disabled','Daily','Weekly','Monthly','Yearly','Custom'];
+$days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 $months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 $memory = '/tmp/memory.tmp';
 if (file_exists($memory)) {

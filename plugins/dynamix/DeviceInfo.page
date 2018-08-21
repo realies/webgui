@@ -56,11 +56,7 @@ $next = $i<$end ? $sheets[$i+1] : $sheets[0];
 input.option{display:none;width:40px}
 span.devtext{display:none;font-weight:bold}
 span.helptext{display:none;font-style:italic}
-<?if (strstr('azure,gray',$display['theme'])):?>
 span.code{display:inline-block;width:186px}
-<?else:?>
-span.code{display:inline-block;width:138px}
-<?endif;?>
 </style>
 <script>
 function doDispatch(form) {
@@ -153,7 +149,7 @@ function setGlue(form,reset) {
 }
 $(function() {
 <?if (count($sheets)>1):?>
-  var ctrl  = "<span class='status vhshift'><span class='waitmsg fa fa-circle-o-notch fa-span fa-fw' style='display:none;margin-right:8px'></span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
+  var ctrl  = "<span class='status <?=$tabbed?'vhshift':'vshift'?>'><span class='waitmsg fa fa-circle-o-notch fa-span fa-fw' style='display:none;margin-right:8px'></span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
       ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-left fa-fw'></i></button></a>";
       ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-right fa-fw'></i></button></a></span>";
 <?if ($tabbed):?>
