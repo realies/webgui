@@ -96,7 +96,7 @@ input.trim{width:50px}
 .usage-disk.sys>span{color:#f2f2f2;font-size:14px}
 .usage-disk.all{margin-right:2px}
 .usage-disk.all>span{color:#f2f2f2;font-size:12px}
-.notice{background:#FFF6BF url(../images/notice.png) no-repeat;background-position:15px 50%;text-align:left;padding:15px 15px 15px 100px;display:table-cell;height:30px;width:100%;vertical-align:middle;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324}
+.notice{background:#FFF6BF url(../images/notice.png) no-repeat;background-position:60px 50%;font-size:16px;text-align:left;margin-top:180px;padding:15px 0 15px 130px;display:block;height:70px;line-height:70px;width:100%;vertical-align:middle;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324}
 .whitebar{background:-webkit-gradient(linear,left top,right top,from(#C7C7C7),to(#EEEEEE));background:linear-gradient(90deg,#C7C7C7 0,#EEEEEE)}
 .greenbar{background:-webkit-gradient(linear,left top,right top,from(#127A05),to(#17BF0B));background:linear-gradient(90deg,#127A05 0,#17BF0B)}
 .orangebar{background:-webkit-gradient(linear,left top,right top,from(#CE7C10),to(#CE7C10));background:linear-gradient(90deg,#CE7C10 0,#CE7C10)}

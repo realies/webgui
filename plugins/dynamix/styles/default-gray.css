@@ -102,7 +102,7 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 .usage-disk.sys>span{font-size:13px}
 .usage-disk.all{background-color:transparent}
 .usage-disk.all>span{font-size:12px}
-.notice{background:#FFF6BF url(../images/notice.png) no-repeat;background-position:20px 50%;text-align:left;padding:0 0 0 100px;display:block;height:70px;width:100%;vertical-align:middle;border-top:1px solid #FFD324;border-bottom:1px solid #FFD324;box-sizing:border-box;line-height:65px;border-left:1px solid #FFD324;border-right:1px solid #FFD324}
+.notice{background:#FFF6BF url(../images/notice.png) no-repeat;background-position:60px 50%;font-size:16px;text-align:left;padding:15px 0 15px 130px;display:block;height:70px;line-height:70px;width:100%;vertical-align:middle;border-top:1px solid #FFD324;border-bottom:1px solid #FFD324}
 .whitebar{background:-webkit-radial-gradient(#C7C7C7,#EEEEEE);background:linear-gradient(#C7C7C7,#EEEEEE)}
 .greenbar{background:-webkit-radial-gradient(#127A05,#17BF0B);background:linear-gradient(#127A05,#17BF0B)}
 .orangebar{background:-webkit-radial-gradient(#CE7C10,#F0B400);background:linear-gradient(#CE7C10,#F0B400)}
