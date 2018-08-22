@@ -59,6 +59,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	body { -webkit-overflow-scrolling: touch;}
 	.errortext{color:#EF3D47;display:none;}
 	.fileTree {
+		background:transparent;
 		width: 305px;
 		max-height: 150px;
 		overflow-y: scroll;
