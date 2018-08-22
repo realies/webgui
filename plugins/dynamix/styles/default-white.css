@@ -43,12 +43,12 @@ select.auto{min-width:auto}
 select.slot{min-width:440px;max-width:440px}
 input.narrow{width:166px}
 input.trim{width:50px}
-#header{position:fixed;top:0;left:0;width:100%;height:140px;z-index:100;margin:0;background:#1c1c1c}
+#header{position:fixed;top:0;left:0;width:100%;height:140px;z-index:100;margin:0;background:#1c1b1b}
 #header.image{background-size:100% 90px;background-repeat:no-repeat;color:#f2f2f2}
 #header .logo{float:left;margin-top:20px;margin-left:20px}
 #header .logo img{margin:4px 50px 0 20px}
 #header .logo a{color:#ff8c2f;font-size:24px}
-#header .block{margin:2px 5px 0 0;float:right;text-align:right;background-color:rgba(26,26,26,0.4);border-radius:10px;padding:5px 20px}
+#header .block{margin:2px 5px 0 0;float:right;text-align:right;background-color:rgba(28,27,27,0.4);border-radius:10px;padding:5px 20px}
 #header .text-left{float:left;text-align:right;color:#f2f2f2;padding-right:5px;border-right:solid medium #f15a2c}
 #header .text-right{float:right;color:#f2f2f2;text-align:left;padding-left:5px;min-width:165px}
 #header #licensetype{font-weight:bold;color:#ff8c2f;text-transform:uppercase;letter-spacing:1px}
