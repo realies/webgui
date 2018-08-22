@@ -1119,14 +1119,14 @@ $(function() {
 
 		$panel.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
 
-		<?if (!$boolRunning):?>
+		<?if (!$boolRunning && !$boolNew):?>
 		// signal devices to be added or removed
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
 		});
 		<?endif?>
 		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
-		<?if (!$boolRunning):?>
+		<?if (!$boolRunning && !$boolNew):?>
 		// keep checkbox visually unchecked
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if ($(this).val().indexOf('#remove')>0) $(this).prop('checked',false);
