@@ -131,8 +131,8 @@ function reset(form) {
   $(form).find('input[value="Apply"]').prop('disabled',true);
   $(form).find('input[value="Reset"]').val('Done').prop('onclick',null).off('click').click(function(){done();});
   switch ($(form).prop('name')) {
-    case 'vm': $('#table-vm').html("<?=$spinner?>"); vm(); break;
-    case 'ct': $('#table-ct').html("<?=$spinner?>"); ct(); break;
+    case 'vm': $('#table-vm').html("<?=$spinner?>"); $('div.spinner').html(unraid_logo); vm(); break;
+    case 'ct': $('#table-ct').html("<?=$spinner?>"); $('div.spinner').html(unraid_logo); ct(); break;
   }
 }
 function buttons(form) {
