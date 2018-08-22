@@ -42,7 +42,7 @@ function diagnostics() {
 }
 </script>
 <div class="spinner" style="display:none"></div>
-<div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center;margin:24px 0">Please wait, collecting diagnostic information...</div>
+<div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center;margin:0">Please wait, collecting diagnostic information...</div>
 This utility is used for troubleshooting purposes. It will collect all of the system information and configuration files, and package these files in a single ZIP file which can be saved locally.
 Subsequently, this file can be included in your correspondence with Limetech or the unRAID forum.
 
