@@ -80,6 +80,7 @@ if (!empty($_GET['uuid'])) {
 <style type="text/css">
 	body { -webkit-overflow-scrolling: touch;}
 	.fileTree {
+		background:#808080;
 		width: 305px;
 		max-height: 150px;
 		overflow-y: scroll;
