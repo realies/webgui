@@ -254,7 +254,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 	<dl>
 		<dt>VM shutdown time-out:</dt>
 		<dd>
-			<input type="number" name="TIMEOUT" value="<?=htmlspecialchars($domain_cfg['TIMEOUT'])?>" class="narrow">
+			<input type="number" id="vm_shutdown_timeout" name="TIMEOUT" value="<?=htmlspecialchars($domain_cfg['TIMEOUT'])?>" class="narrow">
 			<?if (!empty($var['shutdownTimeout']) && !empty($domain_cfg['TIMEOUT']) && (int)$domain_cfg['TIMEOUT'] > (int)$var['shutdownTimeout']):?>
 			<span id="arraystopped"><i class="fa fa-warning icon warning"></i> exceeds Disk Shutdown <?=htmlspecialchars($var['shutdownTimeout'])?>s time-out (<a href="/Settings/DiskSettings">edit</a>)</span>
 			<?endif;?>
@@ -524,6 +524,7 @@ $(function(){
 			$("#bridge").prop("disabled", checked);
 			$("#hostshutdown").prop("disabled", checked);
 			$("#pcie_acs_override").prop("disabled", checked);
+			$("#vm_shutdown_timeout").prop("disabled", checked);
 			$("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
 		});
 	}
