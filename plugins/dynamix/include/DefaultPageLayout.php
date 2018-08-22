@@ -575,7 +575,7 @@ $(function() {
     });
   }
   $('form').append($('<input>').attr({type:'hidden', name:'csrf_token', value:'<?=$var['csrf_token']?>'}));
-  $('div.spinner').each(function(){$(this).html(unraid_logo);});
+  setTimeout(function(){$('div.spinner').each(function(){$(this).html(unraid_logo);});},100); // display animation if longer than 100ms
   watchdog.start();
 });
 </script>
