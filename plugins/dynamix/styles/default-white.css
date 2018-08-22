@@ -1,5 +1,5 @@
 html{font-family:clear-sans;height:100%}
-body{font-size:14px;color:#1a1a1a;background:#f2f2f2;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-size:14px;color:#1c1c1c;background:#f2f2f2;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 @media (max-width:1280px){#template{min-width:1280px;margin:0}}
 @media (min-width:1281px){#template{min-width:1280px;margin:0 10px}}
 @media (min-width:1921px){#template{min-width:1280px;max-width:1920px;margin:0 auto}}
