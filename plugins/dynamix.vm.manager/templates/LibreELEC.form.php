@@ -313,6 +313,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 				// hot-attach usb
 				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
 				exec("virsh attach-device ".escapeshellarg($uuid)." /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+				unlink('/tmp/hotattach.tmp');
 				if ($intReturnCode != 0) {
 					$arrErrors[] = implode(' ', $arrOutput);
 				}
@@ -324,6 +325,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 					list($strVendor, $strProduct) = explode(':', $arrExistingUSB['id']);
 					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
 					exec("virsh detach-device ".escapeshellarg($uuid)." /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+					unlink('/tmp/hotdetach.tmp');
 					if ($intReturnCode != 0) $arrErrors[] = implode(' ',$arrOutput);
 				}
 			}
@@ -1117,14 +1119,14 @@ $(function() {
 
 		$panel.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
 
-		<?if (!$boolRunning && !$boolNew):?>
+		<?if (!$boolNew):?>
 		// signal devices to be added or removed
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
 		});
 		<?endif?>
 		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
-		<?if (!$boolRunning && !$boolNew):?>
+		<?if (!$boolNew):?>
 		// keep checkbox visually unchecked
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if ($(this).val().indexOf('#remove')>0) $(this).prop('checked',false);
