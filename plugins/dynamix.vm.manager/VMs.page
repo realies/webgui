@@ -1,7 +1,7 @@
 Menu="Tasks:70"
 Type="xmenu"
 Code="f108"
-Cond="pgrep('libvirtd')!==false"
+Cond="exec(\"grep -o '^SERVICE=.enable' /boot/config/domain.cfg 2>/dev/null\")"
 ---
 <?PHP
 /* Copyright 2005-2017, Lime Technology
