@@ -241,7 +241,7 @@ div.vmtemplate{height:120px;width:120px;border:1px solid #F3F0F4}
 div.vmtemplate img{margin-top:20px}
 div.up{margin-top:-20px;border:1px solid #F3F0F4;padding:4px 6px;overflow:auto}
 div.spinner{margin:48px auto;text-align:center}
-div.spinner.fixed{display:none;position:absolute;left:46%;top:96px;margin:0}
+div.spinner.fixed{display:none;position:fixed;top:50%;left:50%;margin-left:-64px}
 div.spinner .unraid_mark{height:64px}
 div.spinner .unraid_mark_2,div .unraid_mark_4{animation:mark_2 1.5s ease infinite}
 div.spinner .unraid_mark_3{animation:mark_3 1.5s ease infinite}
@@ -266,6 +266,7 @@ label.checkbox input{position:absolute;opacity:0;cursor:pointer}
 span.checkmark{position:absolute;top:0;left:6px;height:14px;width:14px;background-color:#D4D2D4}
 label.checkbox:hover input ~ .checkmark{background-color:#A4A2A4}
 label.checkbox input:checked ~ .checkmark {background-color:#ff8c2f}
+label.checkbox input:disabled ~ .checkmark {opacity:0.5}
 span.checkmark:after{content:'';position:absolute;display:none}
 label.checkbox input:checked ~ .checkmark:after{display:block}
 label.checkbox .checkmark:after{left:4px;top:0;width:3px;height:8px;border:solid white;border-width:0 3px 3px 0;-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg)}
