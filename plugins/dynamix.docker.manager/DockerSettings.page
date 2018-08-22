@@ -133,7 +133,7 @@ span.disabled{color:#404040}
 <?endif;?>
 </style>
 <span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
-
+<div class="spinner fixed"></div>
 <form markdown="1" id="settingsForm" name="settingsForm" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDocker(this)">
 <input type="hidden" name="#file" value="<?=$docker_cfgfile?>">
 <input type="hidden" name="#include" value="/plugins/dynamix.docker.manager/include/PruneConfig.php">
@@ -560,6 +560,7 @@ btrfs scrub status:
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script>
 function prepareDocker(form) {
+  setTimeout(function(){$('div.spinner').show('slow');},100);
   $(form).find('input:hidden[name^="DOCKER_DHCP_"]').each(function(){
     var id = '#'+$(this).attr('name')+'_';
     if ($(id+'dhcp').prop('checked') && $(id+'edit').prop('checked')) {
