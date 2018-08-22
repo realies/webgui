@@ -136,8 +136,12 @@ function reset(form) {
   }
 }
 function buttons(form) {
-  // we need the Apply and Done buttons react on checkbox changes
-  $(form).find('input[type=checkbox]').each(function(){$(this).on('input change',function(){
+  $(form).find('input[type=checkbox]').each(function(){$(this).on('change',function(){
+    var checked = 'input[name^="'+$(this).prop('name').split(':')[0]+':'+'"]:checked';
+    var cores = $(form).find(checked).length;
+    // vms must have at least one core selected
+    if ($(form).prop('name')=='vm') $(form).find(checked).prop('disabled',cores<2);
+    // we need the Apply and Done buttons react on checkbox changes
     $(form).find('input[value="Apply"]').prop('disabled',false);
     $(form).find('input[value="Done"]').val('Reset').prop('onclick',null).off('click').click(function(){reset(form);});
   });});
