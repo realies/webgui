@@ -43,8 +43,7 @@ function backup() {
 }
 </script>
 <div class="spinner" style="display:none"></div>
-<div id="pleaseWait" style="display:none;text-align:center;margin:0"><span class="red-text strong">Please wait... creating Flash backup zip file (this may take several minutes)</span>
-<br><br><span class="small">Do not leave this page until backup operation is finished</span></div>
+<div id="pleaseWait" style="display:none;text-align:center;margin-bottom:24px"><span class="red-text strong">Please wait... creating Flash backup zip file (this may take several minutes)</span></div>
 
 Flash Vendor:
 : <?=$var['flashVendor'];?>
