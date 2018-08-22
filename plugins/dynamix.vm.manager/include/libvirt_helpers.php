@@ -1094,8 +1094,8 @@
 				$v = $d['source']['vendor']['@attributes']['id'];
 				$p = $d['source']['product']['@attributes']['id'];
 				$p2 = $d['source']['address']['@attributes'];
-				if ($v && $p && $v==$vendor && $p==$product || $remove) unset($old['devices']['hostdev'][$k]);
-				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$pci['function'] || $remove) unset($old['devices']['hostdev'][$k]);
+				if ($v && $p && $v==$vendor && $p==$product) unset($old['devices']['hostdev'][$k]);
+				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$pci['function']) unset($old['devices']['hostdev'][$k]);
 			}
 		}
 		// settings not in the GUI, but maybe customized
