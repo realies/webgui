@@ -108,7 +108,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 		vertical-align: top;
 	}
 </style>
-<span class="status" style="margin-top:0"><input type="checkbox" class="advancedview"></span>
+<span class="status vhshift"><input type="checkbox" class="advancedview"></span>
 <?if ($boolACSEnabled != $boolACSInSyslinux):?>
 	<br><p class="notice">You must reboot for changes to take effect</p>
 <?endif;?>

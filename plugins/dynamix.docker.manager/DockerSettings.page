@@ -20,10 +20,8 @@ Tag="docker"
 // Add the Docker JSON client
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-$docker          = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
-$DockerTemplates = new DockerTemplates();
-$DockerStopped   = pgrep('dockerd')===false;
+$DockerClient  = new DockerClient();
+$DockerStopped = pgrep('dockerd')===false;
 
 // Check for nodatacow flag on Docker file; display warning
 $realfile = $dockercfg['DOCKER_IMAGE_FILE'];
@@ -132,7 +130,7 @@ span.disabled{color:#B0B0B0}
 span.disabled{color:#404040}
 <?endif;?>
 </style>
-<span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
+<span class="status vhshift"><input type="checkbox" class="advancedview"></span>
 
 <form markdown="1" id="settingsForm" name="settingsForm" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDocker(this)">
 <input type="hidden" name="#file" value="<?=$docker_cfgfile?>">
@@ -412,7 +410,7 @@ IPv6 custom network on interface <?=$network?> (optional):
 <?else: /* DOCKER STARTED */?>
 
 Docker version:
-: <?$arrInfo = $docker->getInfo(); echo $arrInfo['Version']?>
+: <?$arrInfo = $DockerClient->getInfo(); echo $arrInfo['Version']?>
 
 > This is the Docker version.
 
