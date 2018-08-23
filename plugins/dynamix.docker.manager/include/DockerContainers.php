@@ -14,6 +14,7 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
+require_once "$docroot/webGui/include/Helpers.php";
 
 $DockerClient    = new DockerClient();
 $DockerTemplates = new DockerTemplates();
@@ -126,5 +127,5 @@ foreach ($images as $image) {
   echo "<td colspan='5'></td><td class='advanced' colspan='2'></td>";
   echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
 }
-echo "\0".implode($menu).implode($docker);
+echo "\0".implode($menu).implode($docker)."\0".(pgrep('rc.docker')!==false ? 1:0);
 ?>
