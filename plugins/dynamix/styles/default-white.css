@@ -60,14 +60,14 @@ input.trim{width:50px}
 #nav-block{overflow:hidden;height:38px;letter-spacing:2px}
 #nav-left{float:left}
 #nav-right{border-right:none;float:right}
-#nav-block #nav-item{display:block;float:left;text-align:center;margin:0 8px;transition:0.3s background-color ease}
+#nav-block #nav-item{display:block;float:left;text-align:center;margin:0 2px;transition:0.3s background-color ease}
 #nav-block #nav-user{display:block;float:left;text-align:center;border:none}
 #nav-right #nav-item{border-right:none}
 #nav-block #nav-item .system{vertical-align:middle;padding-bottom:2px;padding-right:4px}
 #nav-block #nav-user .probe{font-size:13px;margin-left:3px;margin-right:8px}
 #nav-block #nav-item:hover{border-bottom:5px solid #ff8c2f;-webkit-transition:all 0.3s ease-in-out;transition:all 0.3s ease-in-out}
 #nav-block #nav-item.active{color:#f2f2f2;border-bottom:5px solid #ff8c2f}
-#nav-block #nav-item a{color:#f2f2f2;text-transform:uppercase;font-weight:bold;display:block;padding:0;min-width:32px}
+#nav-block #nav-item a{color:#f2f2f2;text-transform:uppercase;font-weight:bold;display:block;padding:0 8px;min-width:32px}
 #nav-block #nav-item a:hover{color:#f2f2f2;text-decoration:none}
 #nav-block #nav-item.active a{color:#f2f2f2}
 #nav-block #nav-item.active:hover a{color:#f2f2f2;text-decoration:none}
