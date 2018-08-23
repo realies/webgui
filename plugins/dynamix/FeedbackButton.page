@@ -18,6 +18,6 @@ Code="f075"
 ?>
 <script>
 function FeedbackButton() {
-	openBox('/webGui/include/Feedback.php','Feedback',450,450,false);
+	openBox('/webGui/include/Feedback.php','Feedback',600,600,false);
 }
 </script>

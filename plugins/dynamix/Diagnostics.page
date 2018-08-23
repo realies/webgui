@@ -23,6 +23,7 @@ $zip = str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-H
 function cleanUp() {
   if (document.hasFocus()) {
     $('input[value="Downloading..."]').val('Download').prop('disabled',false);
+    $('div.spinner').hide('slow');
     $('#pleaseWait').hide('slow');
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=addslashes(htmlspecialchars($zip))?>'});
   } else {
@@ -31,6 +32,7 @@ function cleanUp() {
 }
 function diagnostics() {
   $('input[value="Download"]').val('Downloading...').prop('disabled',true);
+  $('div.spinner').show('slow');
   $('#pleaseWait').show('slow');
   var anonymize = $('#anonymize').is(':checked') ? '' : '-a';
   $.post('/webGui/include/Download.php',{cmd:'diag',file:'<?=addslashes(htmlspecialchars($zip))?>',anonymize:anonymize},function(zip) {
@@ -39,6 +41,8 @@ function diagnostics() {
   });
 }
 </script>
+<div class="spinner" style="display:none"></div>
+<div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center;margin:0">Please wait, collecting diagnostic information...</div>
 This utility is used for troubleshooting purposes. It will collect all of the system information and configuration files, and package these files in a single ZIP file which can be saved locally.
 Subsequently, this file can be included in your correspondence with Limetech or the unRAID forum.
 
@@ -75,5 +79,3 @@ to the system log.*
 *Use* **Anonymize diagnostics** *when publishing the diagnostics file in the public forum. In private communication with Limetech it is recommended to uncheck this setting and capture all information unaltered.*
 
 <input type="button" value="Download" onclick="diagnostics()"><input type="button" value="Done" onclick="done()"><input type="checkbox" id="anonymize" checked>Anonymize diagnostics
-
-<br><div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center">Please wait, collecting diagnostic information...</div>

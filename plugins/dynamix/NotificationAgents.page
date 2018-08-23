@@ -20,7 +20,7 @@ var enabledAgents = new Object();
 var disabledAgents = new Object();
 var openPage = true;
 
-<?$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];?>
+<?$width = [166,305]?>
 <?if ($tabbed):?>
 $('#tab3').bind({click:function(){initDropdown();}});
 $(function(){if ($('#tab3').is(':checked')) initDropdown();});

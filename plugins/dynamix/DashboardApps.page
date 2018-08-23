@@ -4,13 +4,16 @@ Tag="map"
 Cond="(((pgrep('dockerd')!==false) || (pgrep('libvirtd')!==false)) && ($display['dashapps']!='none'))"
 Markdown="false"
 ---
+<?
+$width = strstr('white,black',$display['theme']) ? -58: -44;
+?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
 body{-webkit-overflow-scrolling:touch}
 label{display:inline}
 iframe{overflow:scroll;-webkit-overflow-scrolling:touch}
-h2{color:#625D5D;letter-spacing:0;font-family:arimo;font-size:32px;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
+h2{color:#625D5D;letter-spacing:0;font-size:32px;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
 .iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.3em;text-shadow:0 0 2px #FFF}
 img.started{opacity:1.0}
 img.stopped{opacity:0.3}
@@ -37,7 +40,7 @@ div.Panel:hover{overflow:visible;z-index:10;background-color:unset}
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top:-44px; margin-right:0"><input type="checkbox" class="appview"></span>
+<span class="status" style="margin-top:<?=$width?>px;margin-right:0"><input type="checkbox" class="appview"></span>
 <div id="apps_icons" style="display:none"></div><div id="noapps">No apps available to show</div>
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>

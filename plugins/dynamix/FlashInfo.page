@@ -18,6 +18,7 @@ Tag="usb"
 function cleanUp(zip) {
   if (document.hasFocus()) {
     $('input[value="Creating Flash backup..."]').val('Flash backup').prop('disabled',false);
+    $('div.spinner').hide('slow');
     $('#pleaseWait').hide('slow');
     $.post('/webGui/include/Download.php',{cmd:'unlink',file:zip});
   } else {
@@ -26,6 +27,7 @@ function cleanUp(zip) {
 }
 function backup() {
   $('input[value="Flash backup"]').val('Creating Flash backup...').prop('disabled',true);
+  $('div.spinner').show('slow');
   $('#pleaseWait').show('slow');
   $.post('/webGui/include/Download.php',{cmd:'backup'},function(zip) {
     if (zip) {
@@ -33,12 +35,15 @@ function backup() {
       setTimeout(function(){cleanUp(zip);},6000);
     } else {
       $('input[value="Creating Flash backup..."]').val('Flash backup');
+      $('div.spinner').hide('slow');
       $('#pleaseWait').hide('slow');
       swal('Creation error','Insufficient free disk space available','error');
     }
   });
 }
 </script>
+<div class="spinner" style="display:none"></div>
+<div id="pleaseWait" style="display:none;text-align:center;margin-bottom:24px"><span class="red-text strong">Please wait... creating Flash backup zip file (this may take several minutes)</span></div>
 
 Flash Vendor:
 : <?=$var['flashVendor'];?>
@@ -65,6 +70,3 @@ Flash GUID:
 
 &nbsp;
 : <input type="button" value="Flash backup" onclick="backup()"><input type="button" value="Done" onclick="done()">
-
-<br><div id="pleaseWait" style="display:none;text-align:center"><span class="red-text strong">Please wait... creating Flash backup zip file (this may take several minutes)</span>
-<br><br><span class="small">Do not leave this page until backup operation is finished</span></div>

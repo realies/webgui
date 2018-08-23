@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,6 +14,7 @@
 <?
 	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
+	require_once "$docroot/webGui/include/Custom.php";
 	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 	$arrValidMachineTypes = getValidMachineTypes();
@@ -34,7 +36,6 @@
 		@mkdir(dirname($strOpenELECConfig), 0777, true);
 	}
 
-
 	// Compare openelec.cfg and populate 'localpath' in $arrOEVersion
 	foreach ($arrOpenELECConfig as $strID => $strLocalpath) {
 		if (array_key_exists($strID, $arrOpenELECVersions)) {
@@ -45,17 +46,15 @@
 		}
 	}
 
-	if (array_key_exists('delete_version', $_POST)) {
-
+	if ($_POST['delete_version']) {
 		$arrDeleteOpenELEC = [];
 		if (array_key_exists($_POST['delete_version'], $arrOpenELECVersions)) {
 			$arrDeleteOpenELEC = $arrOpenELECVersions[$_POST['delete_version']];
 		}
 
-		$arrResponse = [];
-
+		$reply = [];
 		if (empty($arrDeleteOpenELEC)) {
-			$arrResponse = ['error' => 'Unknown version: ' . $_POST['delete_version']];
+			$reply = ['error' => 'Unknown version: ' . $_POST['delete_version']];
 		} else {
 			// delete img file
 			@unlink($arrDeleteOpenELEC['localpath']);
@@ -65,40 +64,36 @@
 			$text = '';
 			foreach ($arrOpenELECConfig as $key => $value) $text .= "$key=\"$value\"\n";
 			file_put_contents($strOpenELECConfig, $text);
-
-			$arrResponse = ['status' => 'ok'];
+			$reply = ['status' => 'ok'];
 		}
 
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
-	if (array_key_exists('download_path', $_POST)) {
-
+	if ($_POST['download_path']) {
 		$arrDownloadOpenELEC = [];
 		if (array_key_exists($_POST['download_version'], $arrOpenELECVersions)) {
 			$arrDownloadOpenELEC = $arrOpenELECVersions[$_POST['download_version']];
 		}
-
 		if (empty($arrDownloadOpenELEC)) {
-			$arrResponse = ['error' => 'Unknown version: ' . $_POST['download_version']];
+			$reply = ['error' => 'Unknown version: ' . $_POST['download_version']];
 		} elseif (empty($_POST['download_path'])) {
-			$arrResponse = ['error' => 'Please choose a folder the OpenELEC image will download to'];
+			$reply = ['error' => 'Please choose a folder the OpenELEC image will download to'];
 		} else {
 			@mkdir($_POST['download_path'], 0777, true);
 			$_POST['download_path'] = realpath($_POST['download_path']) . '/';
 
 			// Check free space
 			if (disk_free_space($_POST['download_path']) < $arrDownloadOpenELEC['size']+10000) {
-				$arrResponse = [
+				$reply = [
 					'error' => 'Not enough free space, need at least ' . ceil($arrDownloadOpenELEC['size']/1000000).'MB'
 				];
-				echo json_encode($arrResponse);
+				echo json_encode($reply);
 				exit;
 			}
 
 			$boolCheckOnly = !empty($_POST['checkonly']);
-
 			$strInstallScript = '/tmp/OpenELEC_' . $_POST['download_version'] . '_install.sh';
 			$strInstallScriptPgrep = '-f "OpenELEC_' . $_POST['download_version'] . '_install.sh"';
 			$strTempFile = $_POST['download_path'] . basename($arrDownloadOpenELEC['url']);
@@ -107,26 +102,20 @@
 			$strMD5StatusFile = $strTempFile . '.md5status';
 			$strExtractedFile = $_POST['download_path'] . basename($arrDownloadOpenELEC['url'], 'tar.xz') . 'img';
 
-
 			// Save to strOpenELECConfig
 			$arrOpenELECConfig[$_POST['download_version']] = $strExtractedFile;
 			$text = '';
 			foreach ($arrOpenELECConfig as $key => $value) $text .= "$key=\"$value\"\n";
 			file_put_contents($strOpenELECConfig, $text);
 
-
 			$strDownloadCmd = 'wget -nv -c -O ' . escapeshellarg($strTempFile) . ' ' . escapeshellarg($arrDownloadOpenELEC['url']);
 			$strDownloadPgrep = '-f "wget.*' . $strTempFile . '.*' . $arrDownloadOpenELEC['url'] . '"';
-
 			$strVerifyCmd = 'md5sum -c ' . escapeshellarg($strMD5File);
 			$strVerifyPgrep = '-f "md5sum.*' . $strMD5File . '"';
-
 			$strExtractCmd = 'tar Jxf ' . escapeshellarg($strTempFile) . ' -C ' . escapeshellarg(dirname($strTempFile));
 			$strExtractPgrep = '-f "tar.*' . $strTempFile . '.*' . dirname($strTempFile) . '"';
-
 			$strCleanCmd = '(chmod 777 ' . escapeshellarg($_POST['download_path']) . ' ' . escapeshellarg($strExtractedFile) . '; chown nobody:users ' . escapeshellarg($_POST['download_path']) . ' ' . escapeshellarg($strExtractedFile) . '; rm ' . escapeshellarg($strTempFile) . ' ' . escapeshellarg($strMD5File) . ' ' . escapeshellarg($strMD5StatusFile) . ')';
 			$strCleanPgrep = '-f "chmod.*chown.*rm.*' . $strMD5StatusFile . '"';
-
 			$strAllCmd = "#!/bin/bash\n\n";
 			$strAllCmd .= $strDownloadCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
 			$strAllCmd .= 'echo "' . $arrDownloadOpenELEC['md5'] . '  ' . $strTempFile . '" > ' . escapeshellarg($strMD5File) . ' && ';
@@ -136,103 +125,69 @@
 			$strAllCmd .= 'rm ' . escapeshellarg($strLogFile) . ' && ';
 			$strAllCmd .= 'rm ' . escapeshellarg($strInstallScript);
 
-			$arrResponse = [];
+			$reply = [];
 
 			if (file_exists($strExtractedFile)) {
-
 				if (!file_exists($strTempFile)) {
-
 					// Status = done
-					$arrResponse['status'] = 'Done';
-					$arrResponse['localpath'] = $strExtractedFile;
-					$arrResponse['localfolder'] = dirname($strExtractedFile);
-
+					$reply['status'] = 'Done';
+					$reply['localpath'] = $strExtractedFile;
+					$reply['localfolder'] = dirname($strExtractedFile);
 				} else {
 					if (pgrep($strExtractPgrep, false)) {
-
 						// Status = running extract
-						$arrResponse['status'] = 'Extracting ... ';
-
+						$reply['status'] = 'Extracting ... ';
 					} else {
-
 						// Status = cleanup
-						$arrResponse['status'] = 'Cleanup ... ';
-
+						$reply['status'] = 'Cleanup ... ';
 					}
 				}
-
 			} elseif (file_exists($strTempFile)) {
-
 				if (pgrep($strDownloadPgrep, false)) {
-
 					// Get Download percent completed
 					$intSize = filesize($strTempFile);
 					$strPercent = 0;
 					if ($intSize > 0) {
 						$strPercent = round(($intSize / $arrDownloadOpenELEC['size']) * 100);
 					}
-
-					$arrResponse['status'] = 'Downloading ... ' . $strPercent . '%';
-
+					$reply['status'] = 'Downloading ... ' . $strPercent . '%';
 				} elseif (pgrep($strVerifyPgrep, false)) {
-
 					// Status = running md5 check
-					$arrResponse['status'] = 'Verifying ... ';
-
+					$reply['status'] = 'Verifying ... ';
 				} elseif (file_exists($strMD5StatusFile)) {
-
 					// Status = running extract
-					$arrResponse['status'] = 'Extracting ... ';
-
+					$reply['status'] = 'Extracting ... ';
 					if (!pgrep($strExtractPgrep, false)) {
 						// Examine md5 status
 						$strMD5StatusContents = file_get_contents($strMD5StatusFile);
-
 						if (strpos($strMD5StatusContents, ': FAILED') !== false) {
-
 							// ERROR: MD5 check failed
-							unset($arrResponse['status']);
-							$arrResponse['error'] = 'MD5 verification failed, your download is incomplete or corrupted.';
-
+							unset($reply['status']);
+							$reply['error'] = 'MD5 verification failed, your download is incomplete or corrupted.';
 						}
 					}
-
 				} elseif (!file_exists($strMD5File)) {
-
 					// Status = running md5 check
-					$arrResponse['status'] = 'Downloading ... 100%';
-
+					$reply['status'] = 'Downloading ... 100%';
 					if (!pgrep($strInstallScriptPgrep, false) && !$boolCheckOnly) {
-
 						// Run all commands
 						file_put_contents($strInstallScript, $strAllCmd);
 						chmod($strInstallScript, 0777);
 						exec($strInstallScript . ' >/dev/null 2>&1 &');
-
 					}
-
 				}
-
 			} elseif (!$boolCheckOnly) {
-
 				if (!pgrep($strInstallScriptPgrep, false)) {
-
 					// Run all commands
 					file_put_contents($strInstallScript, $strAllCmd);
 					chmod($strInstallScript, 0777);
 					exec($strInstallScript . ' >/dev/null 2>&1 &');
-
 				}
-
-				$arrResponse['status'] = 'Downloading ... ';
-
+				$reply['status'] = 'Downloading ... ';
 			}
-
-			$arrResponse['pid'] = pgrep($strInstallScriptPgrep, false);
-
+			$reply['pid'] = pgrep($strInstallScriptPgrep, false);
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
@@ -305,89 +260,62 @@
 		]
 	];
 
+$hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaration
+
 	// Merge in any default values from the VM template
-	if (!empty($arrAllTemplates[$strSelectedTemplate]) && !empty($arrAllTemplates[$strSelectedTemplate]['overrides'])) {
+	if ($arrAllTemplates[$strSelectedTemplate] && $arrAllTemplates[$strSelectedTemplate]['overrides']) {
 		$arrConfigDefaults = array_replace_recursive($arrConfigDefaults, $arrAllTemplates[$strSelectedTemplate]['overrides']);
 	}
 
-	if (array_key_exists('updatevm', $_POST) && !empty($_POST['domain']['uuid'])) {
-		$_GET['uuid'] = $_POST['domain']['uuid'];
-	}
-
-	// If we are editing a existing VM load it's existing configuration details
-	$boolNew = true;
-	$boolRunning = false;
-	$arrExistingConfig = [];
-	$strUUID = '';
-	$strXML = '';
-	if (!empty($_GET['uuid'])) {
-		$strUUID = $_GET['uuid'];
-		$res = $lv->domain_get_name_by_uuid($strUUID);
-		$dom = $lv->domain_get_info($res);
-
-		$boolNew = false;
-		$boolRunning = ($lv->domain_state_translate($dom['state']) != 'shutoff');
-		$arrExistingConfig = domain_to_config($strUUID);
-		$strXML = $lv->domain_get_xml($res);
-	}
-
-	// Active config for this page
-	$arrConfig = array_replace_recursive($arrConfigDefaults, $arrExistingConfig);
-
-	if (array_key_exists($arrConfig['template']['openelec'], $arrOpenELECVersions)) {
-		$arrConfigDefaults['disk'][0]['image'] = $arrOpenELECVersions[$arrConfig['template']['openelec']]['localpath'];
-	}
-
-	if (array_key_exists('createvm', $_POST)) {
-		$arrResponse = ['success' => true];
-
-		if (array_key_exists('xmldesc', $_POST)) {
-			$tmp = $lv->domain_define($_POST['xmldesc'], !empty($config['domain']['xmlstartnow']));
-			if (!$tmp){
-				$arrResponse = ['error' => $lv->get_last_error()];
+	// create new VM
+	if ($_POST['createvm']) {
+		if ($_POST['xmldesc']) {
+			// XML view
+			$new = $lv->domain_define($_POST['xmldesc'], $_POST['domain']['xmlstartnow']==1);
+			if ($new){
+				$lv->domain_set_autostart($new, $_POST['domain']['autostart']==1);
+				$reply = ['success' => true];
 			} else {
-				$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
+				$reply = ['error' => $lv->get_last_error()];
 			}
 		} else {
-			if (!empty($_POST['shares'][0]['source'])) {
+			// form view
+			if ($_POST['shares'][0]['source']) {
 				@mkdir($_POST['shares'][0]['source'], 0777, true);
 			}
-
-			$tmp = $lv->domain_new($_POST);
-			if (!$tmp){
-				$arrResponse = ['error' => $lv->get_last_error()];
+			if ($lv->domain_new($_POST)){
+				$reply = ['success' => true];
+			} else {
+				$reply = ['error' => $lv->get_last_error()];
 			}
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
-	if (array_key_exists('updatevm', $_POST)) {
-		$dom = $lv->domain_get_domain_by_uuid($_POST['domain']['uuid']);
+	// update existing VM
+	if ($_POST['updatevm']) {
+		$uuid = $_POST['domain']['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
+		$oldAutoStart = $lv->domain_get_autostart($dom)==1;
+		$newAutoStart = $_POST['domain']['autostart']==1;
+		$strXML = $lv->domain_get_xml($dom);
 
-		if ($boolRunning) {
+		if ($lv->domain_get_state($dom)=='running') {
 			$arrErrors = [];
-
-			$arrExistingConfig = domain_to_config($_POST['domain']['uuid']);
+			$arrExistingConfig = domain_to_config($uuid);
 			$arrNewUSBIDs = $_POST['usb'];
 
 			// hot-attach any new usb devices
 			foreach ($arrNewUSBIDs as $strNewUSBID) {
 				foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
-					if ($strNewUSBID == $arrExistingUSB['id']) {
-						continue 2;
-					}
+					if ($strNewUSBID == $arrExistingUSB['id']) continue 2;
 				}
-				list($strVendor, $strProduct) = explode(':', $strNewUSBID);
+				list($strVendor,$strProduct) = explode(':', $strNewUSBID);
 				// hot-attach usb
-				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'>
-					<source startupPolicy='optional'>
-						<vendor id='0x".$strVendor."'/>
-						<product id='0x".$strProduct."'/>
-					</source>
-				</hostdev>");
-				exec("virsh attach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+				file_put_contents('/tmp/hotattach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
+				exec("virsh attach-device ".escapeshellarg($uuid)." /tmp/hotattach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+				unlink('/tmp/hotattach.tmp');
 				if ($intReturnCode != 0) {
 					$arrErrors[] = implode(' ', $arrOutput);
 				}
@@ -397,91 +325,86 @@
 			foreach ($arrExistingConfig['usb'] as $arrExistingUSB) {
 				if (!in_array($arrExistingUSB['id'], $arrNewUSBIDs)) {
 					list($strVendor, $strProduct) = explode(':', $arrExistingUSB['id']);
-
-					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'>
-						<source startupPolicy='optional'>
-							<vendor id='0x".$strVendor."'/>
-							<product id='0x".$strProduct."'/>
-						</source>
-					</hostdev>");
-					exec("virsh detach-device " . escapeshellarg($_POST['domain']['uuid']) . " /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
-					if ($intReturnCode != 0) {
-						$arrErrors[] = implode(' ', $arrOutput);
-					}
+					file_put_contents('/tmp/hotdetach.tmp', "<hostdev mode='subsystem' type='usb'><source startupPolicy='optional'><vendor id='0x".$strVendor."'/><product id='0x".$strProduct."'/></source></hostdev>");
+					exec("virsh detach-device ".escapeshellarg($uuid)." /tmp/hotdetach.tmp --live 2>&1", $arrOutput, $intReturnCode);
+					unlink('/tmp/hotdetach.tmp');
+					if ($intReturnCode != 0) $arrErrors[] = implode(' ',$arrOutput);
 				}
 			}
-
-
-			if (empty($arrErrors)) {
-				$arrResponse = ['success' => true];
-			} else {
-				$arrResponse = ['error' => implode(', ', $arrErrors)];
-			}
-			echo json_encode($arrResponse);
+			$reply = !$arrErrors ? ['success' => true] : ['error' => implode(', ',$arrErrors)];
+			echo json_encode($reply);
 			exit;
 		}
 
-		// Backup xml for existing domain in ram
-		$strOldXML = '';
-		$boolOldAutoStart = false;
-		if ($dom) {
-			$strOldXML = $lv->domain_get_xml($dom);
-			$boolOldAutoStart = $lv->domain_get_autostart($dom);
-			if (!array_key_exists('xmldesc', $_POST)) {
-				$strOldName = $lv->domain_get_name($dom);
-				$strNewName = $_POST['domain']['name'];
-
-				if (!empty($strOldName) &&
-					 !empty($strNewName) &&
-					 is_dir($domain_cfg['DOMAINDIR'].$strOldName.'/') &&
-					 !is_dir($domain_cfg['DOMAINDIR'].$strNewName.'/')) {
-
-					// mv domain/vmname folder
-					if (rename($domain_cfg['DOMAINDIR'].$strOldName, $domain_cfg['DOMAINDIR'].$strNewName)) {
-						// replace all disk paths in xml
-						foreach ($_POST['disk'] as &$arrDisk) {
-							if (!empty($arrDisk['new'])) {
-								$arrDisk['new'] = str_replace($domain_cfg['DOMAINDIR'].$strOldName.'/', $domain_cfg['DOMAINDIR'].$strNewName.'/', $arrDisk['new']);
-							}
-							if (!empty($arrDisk['image'])) {
-								$arrDisk['image'] = str_replace($domain_cfg['DOMAINDIR'].$strOldName.'/', $domain_cfg['DOMAINDIR'].$strNewName.'/', $arrDisk['image']);
-							}
-						}
+		// backup xml for existing domain in ram
+		if ($dom && !$_POST['xmldesc']) {
+			$oldName = $lv->domain_get_name($dom);
+			$newName = $_POST['domain']['name'];
+			$oldDir = $domain_cfg['DOMAINDIR'].$oldName;
+			$newDir = $domain_cfg['DOMAINDIR'].$newdName;
+			if ($oldName && $newName && is_dir($oldDir) && !is_dir($newDir)) {
+				// mv domain/vmname folder
+				if (rename($oldDir, $newDir)) {
+					// replace all disk paths in xml
+					foreach ($_POST['disk'] as &$arrDisk) {
+						if ($arrDisk['new']) $arrDisk['new'] = str_replace($oldDir, $newDir, $arrDisk['new']);
+						if ($arrDisk['image']) $arrDisk['image'] = str_replace($oldDir, $newDir, $arrDisk['image']);
 					}
 				}
 			}
 		}
 
-		// Remove existing domain
-		$lv->nvram_backup($_POST['domain']['uuid']);
-		$lv->domain_undefine($dom);
-		$lv->nvram_restore($_POST['domain']['uuid']);
-
-		// Save new domain
-		if (array_key_exists('xmldesc', $_POST)) {
-			$tmp = $lv->domain_define($_POST['xmldesc']);
+		// construct updated config
+		if ($_POST['xmldesc']) {
+			// XML view
+			$xml = $_POST['xmldesc'];
 		} else {
-			if (!empty($_POST['shares'][0]['source'])) {
+			// form view
+			if ($_POST['shares'][0]['source']) {
 				@mkdir($_POST['shares'][0]['source'], 0777, true);
 			}
-			$tmp = $lv->domain_new($_POST);
+			$arrExistingConfig = custom::createArray('domain',$strXML);
+			$arrUpdatedConfig = custom::createArray('domain',$lv->config_to_xml($_POST));
+			array_update_recursive($arrExistingConfig, $arrUpdatedConfig);
+			$arrConfig = array_replace_recursive($arrExistingConfig, $arrUpdatedConfig);
+			$xml = custom::createXML('domain',$arrConfig)->saveXML();
 		}
-		if (!$tmp){
-			$strLastError = $lv->get_last_error();
-
-			// Failure -- try to restore existing domain
-			$tmp = $lv->domain_define($strOldXML);
-			if ($tmp) $lv->domain_set_autostart($tmp, $boolOldAutoStart);
-
-			$arrResponse = ['error' => $strLastError];
+		// delete and create the VM
+		$lv->nvram_backup($uuid);
+		$lv->domain_undefine($dom);
+		$lv->nvram_restore($uuid);
+		$new = $lv->domain_define($xml);
+		if ($new) {
+			$lv->domain_set_autostart($new, $newAutoStart);
+			$reply = ['success' => true];
 		} else {
-			$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
-
-			$arrResponse = ['success' => true];
+			// Failure -- try to restore existing VM
+			$reply = ['error' => $lv->get_last_error()];
+			$old = $lv->domain_define($strXML);
+			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
+	}
+
+	if ($_GET['uuid']) {
+		// edit an existing VM
+		$uuid = $_GET['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
+		$boolRunning = $lv->domain_get_state($dom)=='running';
+		$strXML = $lv->domain_get_xml($dom);
+		$boolNew = false;
+		$arrConfig = domain_to_config($uuid);
+	} else {
+		// edit new VM
+		$boolRunning = false;
+		$strXML = '';
+		$boolNew = true;
+		$arrConfig = $arrConfigDefaults;
+	}
+
+	if (array_key_exists($arrConfig['template']['openelec'], $arrLibreELECVersions)) {
+		$arrConfigDefaults['disk'][0]['image'] = $arrLibreELECVersions[$arrConfig['template']['openelec']]['localpath'];
 	}
 ?>
 
@@ -505,6 +428,7 @@
 	}
 </style>
 
+<div class="formview">
 <input type="hidden" name="domain[persistent]" value="<?=htmlspecialchars($arrConfig['domain']['persistent'])?>">
 <input type="hidden" name="domain[uuid]" value="<?=htmlspecialchars($arrConfig['domain']['uuid'])?>">
 <input type="hidden" name="domain[clock]" id="domain_clock" value="<?=htmlspecialchars($arrConfig['domain']['clock'])?>">
@@ -515,7 +439,6 @@
 <input type="hidden" name="disk[0][dev]" value="<?=htmlspecialchars($arrConfig['disk'][0]['dev'])?>">
 <input type="hidden" name="disk[0][readonly]" value="1">
 
-<div class="formview">
 	<div class="installed">
 		<table>
 			<tr>
@@ -638,11 +561,11 @@
 					list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
 					$extra = in_array($cpu1, $arrConfig['domain']['vcpu']) ? ($arrConfig['domain']['vcpus'] > 1 ? 'checked' : 'checked disabled') : '';
 					if (!$cpu2) {
-						echo "<label for='vcpu$cpu1'><input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu1' value='$cpu1' $extra> cpu $cpu1</label>";
+						echo "<label for='vcpu$cpu1' class='checkbox'>cpu $cpu1<input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu1' value='$cpu1' $extra><span class='checkmark'></span></label>";
 					} else {
-						echo "<label for='vcpu$cpu1' class='cpu1'><input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu1' value='$cpu1' $extra> cpu $cpu1 / $cpu2</label>";
+						echo "<label for='vcpu$cpu1' class='cpu1 checkbox'>cpu $cpu1 / $cpu2<input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu1' value='$cpu1' $extra><span class='checkmark'></span></label>";
 						$extra = in_array($cpu2, $arrConfig['domain']['vcpu']) ? ($arrConfig['domain']['vcpus'] > 1 ? 'checked' : 'checked disabled') : '';
-						echo "<label for='vcpu$cpu2' class='cpu2'><input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu2' value='$cpu2' $extra></label>";
+						echo "<label for='vcpu$cpu2' class='cpu2 checkbox'><input type='checkbox' name='domain[vcpu][]' class='domain_vcpu' id='vcpu$cpu2' value='$cpu2' $extra><span class='checkmark'></span></label>";
 					}
 				}
 				?>
@@ -1052,7 +975,7 @@
 			<td></td>
 			<td>
 			<? if (!$boolRunning) { ?>
-				<? if (!empty($strXML)) { ?>
+				<? if ($strXML) { ?>
 					<input type="hidden" name="updatevm" value="1" />
 					<input type="button" value="Update" busyvalue="Updating..." readyvalue="Update" id="btnSubmit" />
 				<? } else { ?>
@@ -1062,7 +985,6 @@
 					<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
 				<? } ?>
 				<input type="button" value="Cancel" id="btnCancel" />
-				<span><i class="fa fa-warning icon warning"></i> Manual XML edits may be lost if you later edit with the Form editor.</span>
 			<? } else { ?>
 				<input type="button" value="Back" id="btnCancel" />
 			<? } ?>
@@ -1199,7 +1121,19 @@ $(function() {
 
 		$panel.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
 
+		<?if (!$boolNew):?>
+		// signal devices to be added or removed
+		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
+			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
+		});
+		<?endif?>
 		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
+		<?if (!$boolNew):?>
+		// keep checkbox visually unchecked
+		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
+			if ($(this).val().indexOf('#remove')>0) $(this).prop('checked',false);
+		});
+		<?endif?>
 
 		$panel.find('input').prop('disabled', true);
 		$button.val($button.attr('busyvalue'));

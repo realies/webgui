@@ -16,7 +16,7 @@ Cond="(($var['shareSMBEnabled']!='no') && (isset($name)?array_key_exists($name,$
  */
 ?>
 <?
-$width = strstr('gray,azure',$display['theme']) ? [123,305]:[123,300];
+$width = [123,305];
 ?>
 > *Read settings from* is used to preset the SMB security settings of the current selected share with the settings of an existing share.
 >

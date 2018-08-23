@@ -17,7 +17,7 @@ Tag="hand-paper-o"
 <?
 $newarray = $var['mdState']=='NEW_ARRAY';
 $disabled = $var['fsState']=="Started";
-$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
+$width    = [166,305];
 if ($newarray) {
   @unlink('/boot/config/smart-one.cfg');
   @unlink('/boot/config/smart-all.cfg');
@@ -25,7 +25,7 @@ if ($newarray) {
 }
 ?>
 <style>
-span.indent{display:inline-block;width:200px;margin-top:11px;}
+span.indent{display:inline-block;width:240px;margin-top:11px;}
 </style>
 
 <script>

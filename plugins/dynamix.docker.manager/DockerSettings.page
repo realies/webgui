@@ -20,10 +20,8 @@ Tag="docker"
 // Add the Docker JSON client
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
-$docker          = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
-$DockerTemplates = new DockerTemplates();
-$DockerStopped   = pgrep('dockerd')===false;
+$DockerClient  = new DockerClient();
+$DockerStopped = pgrep('dockerd')===false;
 
 // Check for nodatacow flag on Docker file; display warning
 $realfile = $dockercfg['DOCKER_IMAGE_FILE'];
@@ -105,12 +103,13 @@ function base_max($route) {
 function base_net($route) {
   return substr(explode('/',$route)[0],0,-2);
 }
+$bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 .errortext{color:#EF3D47;display:none}
-.fileTree{width:305px;max-height:150px;overflow:scroll;position:absolute;z-index:100;display:none}
+.fileTree{background:<?=$bgcolor?>;width:305px;max-height:150px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
 select.mask{min-width:0;margin:0 10px 0 4px}
@@ -132,7 +131,7 @@ span.disabled{color:#B0B0B0}
 span.disabled{color:#404040}
 <?endif;?>
 </style>
-<span class="status" style="margin-top:<?=strstr('gray,azure',$display['theme'])?0:-10?>px;"><input type="checkbox" class="advancedview"></span>
+<span class="status vhshift"><input type="checkbox" class="advancedview"></span>
 
 <form markdown="1" id="settingsForm" name="settingsForm" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDocker(this)">
 <input type="hidden" name="#file" value="<?=$docker_cfgfile?>">
@@ -412,7 +411,7 @@ IPv6 custom network on interface <?=$network?> (optional):
 <?else: /* DOCKER STARTED */?>
 
 Docker version:
-: <?$arrInfo = $docker->getInfo(); echo $arrInfo['Version']?>
+: <?$arrInfo = $DockerClient->getInfo(); echo $arrInfo['Version']?>
 
 > This is the Docker version.
 

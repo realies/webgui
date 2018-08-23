@@ -17,6 +17,6 @@ Code="f05a"
 ?>
 <script>
 function InfoButton() {
-  openBox('/webGui/include/SystemInformation.php?more=<?=isset($display['sysinfo'])?$display['sysinfo']:''?>','System Information',600,460);
+  openBox('/webGui/include/SystemInformation.php?more=<?=isset($display['sysinfo'])?$display['sysinfo']:''?>','System Information',600,600);
 }
 </script>

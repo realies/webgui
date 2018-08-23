@@ -1,7 +1,7 @@
 Menu="OtherSettings"
 Title="CPU Pinning"
 Icon="grid.png"
-Tag="table"
+Tag="map-marker"
 Cond="pgrep('libvirtd')!==false || pgrep('dockerd')!==false"
 ---
 <?PHP
@@ -48,7 +48,6 @@ table.tablesorter tr>th+th{text-align:right;vertical-align:top}
 table.tablesorter tr>td+td+td{vertical-align:top}
 table.tablesorter tr>th+th+th,table.tablesorter tr>td+td{text-align:center}
 table.tablesorter th:first-child,table.tablesorter td:first-child{width:180px;text-align:left}
-input[type=checkbox]{margin:0;padding:0}
 input.flat{margin:0}
 input.lock{margin:0}
 </style>
@@ -132,13 +131,17 @@ function reset(form) {
   $(form).find('input[value="Apply"]').prop('disabled',true);
   $(form).find('input[value="Reset"]').val('Done').prop('onclick',null).off('click').click(function(){done();});
   switch ($(form).prop('name')) {
-    case 'vm': $('#table-vm').html("<?=$spinner?>"); vm(); break;
-    case 'ct': $('#table-ct').html("<?=$spinner?>"); ct(); break;
+    case 'vm': $('#table-vm').html("<?=$spinner?>"); $('div.spinner').html(unraid_logo); vm(); break;
+    case 'ct': $('#table-ct').html("<?=$spinner?>"); $('div.spinner').html(unraid_logo); ct(); break;
   }
 }
 function buttons(form) {
-  // we need the Apply and Done buttons react on checkbox changes
-  $(form).find('input[type=checkbox]').each(function(){$(this).on('input change',function(){
+  $(form).find('input[type=checkbox]').each(function(){$(this).on('change',function(){
+    var checked = 'input[name^="'+$(this).prop('name').split(':')[0]+':'+'"]:checked';
+    var cores = $(form).find(checked).length;
+    // vms must have at least one core selected
+    if ($(form).prop('name')=='vm') $(form).find(checked).prop('disabled',cores<2);
+    // we need the Apply and Done buttons react on checkbox changes
     $(form).find('input[value="Apply"]').prop('disabled',false);
     $(form).find('input[value="Done"]').val('Reset').prop('onclick',null).off('click').click(function(){reset(form);});
   });});
@@ -162,11 +165,14 @@ $(function(){
 > When ***Apply*** is pressed a scan is performed to find the changes, subsequently only VMs or containers which have changes are modified in parallel.
 >
 > *Please wait until all updates are finished*.
+>
+> By default NO cores are selected for a Docker container, which means it uses all available cores.<br>
+> **Do not select ALL cores, just select NONE**
 
 <?if ($libvirtd):?>
 <form name="vm">
 <input type="hidden" name="names" id="names-vm" value="">
-<table class='tablesorter' style='width:auto'>
+<table class='tablesorter shift' style='width:auto'>
 <thead><tr><th><i class="fa fa-list"></i> VM</th><?create()?></tr></thead>
 <tbody id="table-vm"><?=$spinner?></tbody>
 </table>

@@ -72,7 +72,7 @@ td.gap{padding-left:26px!important}
 span#pass{display:none;margin-left:20px}
 </style>
 <script>
-var ctrl = "<span class='status'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
+var ctrl = "<span class='status <?=$tabbed?'':'vhshift'?>'><a style='cursor:pointer' class='tooltip_diskio' title='Toggle reads/writes display' onclick='toggle_diskio();return false'><i class='toggle fa'></i></a></span>";
 
 function selectInput(form) {
   if (form.input.value == 'text') {

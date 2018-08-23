@@ -15,7 +15,7 @@ Tag="hand-paper-o"
  */
 ?>
 <?
-$width = strstr('gray,azure',$display['theme']) ? [166,305]:[131,300];
+$width = [166,305];
 
 function data_disks($disk) {
   return ($disk['type']=='Data' && $disk['status']=='DISK_OK');

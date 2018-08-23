@@ -46,9 +46,7 @@ $disabled_updatedns = $keyfile!==false && $isLEcert ? '' : 'disabled';
 $internalip = $eth0['IPADDR:0'];
 $tasks = find_tasks();
 ?>
-<?if (strstr('azure,gray',$display['theme'])):?>
 <style>input.trim{width:65px}</style>
-<?endif;?>
 <script>
 function provisionSSL(button) {
   var oldlabel = $.trim($(button).text());
