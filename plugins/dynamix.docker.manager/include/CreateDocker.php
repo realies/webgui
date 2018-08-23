@@ -259,7 +259,7 @@ option.list{padding:0 0 0 7px}
 optgroup.bold{font-weight:bold;margin-top:5px}
 optgroup.title{background-color:#625D5D;color:#f2f2f2;text-align:center;margin-top:10px}
 .textTemplate{width:60%}
-.fileTree{width:240px;max-height:200px;overflow-y:scroll;position:absolute;z-index:100;display:none}
+.fileTree{width:240px;max-height:200px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none;background:<?=strstr('white,azure',$display['theme'])?'#f2f2f2':'#1c1c1c'?>}
 .show{display:block}
 .basic{display:table-row}
 .advanced{display:none}
