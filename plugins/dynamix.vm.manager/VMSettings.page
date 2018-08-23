@@ -88,7 +88,7 @@ Enable VMs:
   <span class="basic" style="display:inline"><i class="fa fa-warning icon warning"></i> One or more paths do not exist (<a href="#" onclick="$('.advancedview').switchButton('option','checked',true); return false">view</a>)</span>
   <?endif;?>
 
-> Stopping the VM Manager will first attempt to shutdown all running VMs.  After 60 seconds, any remaining VM instances will be terminated.
+> Stopping the VM Manager will first attempt to shutdown all running VMs. After 60 seconds, any remaining VM instances will be terminated.
 
 <div class="advanced" markdown="1">
 <?if ($libvirt_running == 'yes'):?>
@@ -110,7 +110,7 @@ Libvirt vdisk size:
 : <input id="IMAGE_SIZE" type="number" min="1" name="IMAGE_SIZE" value="<?=htmlspecialchars($domain_cfg['IMAGE_SIZE']);?>" style="width:50px;" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span>
 
 > If the system needs to create a new libvirt image file, this is the default size to use specified in GB.
-> To resize an existing image file, specify the new size here.  Next time the Libvirt service is started the file (and file system) will increased to the new size (but never decreased).
+> To resize an existing image file, specify the new size here. Next time the Libvirt service is started the file (and file system) will increased to the new size (but never decreased).
 
 Libvirt storage location:
 : <input id="IMAGE_FILE" type="text" name="IMAGE_FILE" value="<?=htmlspecialchars($domain_cfg['IMAGE_FILE']);?>" placeholder="e.g. /mnt/user/system/libvirt/libvirt.img" data-pickcloseonfile="true" data-pickfilter="img" data-pickroot="/mnt/" data-pickfolders="true" required="required" /> <?php if (file_exists($domain_cfg['IMAGE_FILE'])) { ?><span id="deletePanel"><label><input type="checkbox" id="deleteCheckbox" /> Delete Image File</label></span><?php } ?> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir(dirname($domain_cfg['IMAGE_FILE']))):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?> <span id="IMAGE_ERROR" class="errortext"></span>
@@ -152,12 +152,12 @@ Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</
   </select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-trash" id="remove_button" title="Remove Windows VirtIO driver ISO"> <span>Remove</span></i><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
 
 > Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.
-> Download the latest ISO from here: <a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download</a>
+> Download the latest ISO from here: <a href="https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html" target="_blank">fedoraproject.org</a>
 >
 > When installing Windows, you will reach a step where no disk devices will be found. There is an option to browse for drivers on that screen.
 > Click browse and locate the additional CD-ROM in the menu. Inside there will be various folders for the different versions of Windows.
 > Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).
-> Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.
+> Three drivers will be found. Select them all, click next, and the vDisks you have assigned will appear.
 
 <div class="advanced" markdown="1">
 Default network bridge:
@@ -179,7 +179,7 @@ Upon host shutdown:
   ?>
   </select>
 
-> When shutting down the server, this defines the action to take upon running VMs. If <em>Hibernate VMs</em> is chosen,
+> When shutting down the server, this defines the action to take upon running VMs. If *Hibernate VMs* is chosen,
 > the VM will be instructed to hibernate (if supported) otherwise it will attempt a VM shutdown.
 
 VM shutdown time-out:
@@ -188,7 +188,7 @@ VM shutdown time-out:
   <span id="arraystopped"><i class="fa fa-warning icon warning"></i> exceeds Disk Shutdown <?=htmlspecialchars($var['shutdownTimeout'])?>s time-out (<a href="/Settings/DiskSettings">edit</a>)</span>
   <?endif;?>
 
->When shutting down the server, this defines how long to wait in seconds for <em>graceful</em> VM shutdown before forcing shutdown to continue.
+>When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
 Enable PCIe ACS Override:
@@ -197,7 +197,7 @@ Enable PCIe ACS Override:
   <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
   </select>
 
-> Warning:  Use of this setting could cause possible data corruption with certain hardware configurations.  Please visit the Lime Technology forums for more information.
+> Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
 
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
