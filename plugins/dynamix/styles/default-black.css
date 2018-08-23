@@ -230,7 +230,7 @@ div.user-list{float:left;padding:10px;margin-right:10px;margin-bottom:24px;borde
 div.user-list img{width:auto;max-width:48px;height:48px;margin-bottom:16px}
 div.up{margin-top:-20px;border:1px solid #2b2b2b;padding:4px 6px;overflow:auto}
 div.spinner{margin:48px auto;text-align:center}
-div.spinner.fixed{display:none;position:fixed;top:50%;left:50%;margin-left:-64px}
+div.spinner.fixed{display:none;position:fixed;top:50%;left:50%;margin-top:-16px;margin-left:-64px}
 div.spinner .unraid_mark{height:64px}
 div.spinner .unraid_mark_2,div .unraid_mark_4{animation:mark_2 1.5s ease infinite}
 div.spinner .unraid_mark_3{animation:mark_3 1.5s ease infinite}
