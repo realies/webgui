@@ -188,7 +188,7 @@ VM shutdown time-out:
   <span id="arraystopped"><i class="fa fa-warning icon warning"></i> exceeds Disk Shutdown <?=htmlspecialchars($var['shutdownTimeout'])?>s time-out (<a href="/Settings/DiskSettings">edit</a>)</span>
   <?endif;?>
 
->When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
+> When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
 Enable PCIe ACS Override:
