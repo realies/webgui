@@ -19,13 +19,16 @@ require_once "$docroot/webGui/include/ColorCoding.php";
 
 $ata = exec("ls -n  ".escapeshellarg("/sys/block/{$argv[1]}")."|grep -Po 'ata\d+'");
 $dev = $ata ? "${argv[1]}|${ata}[.:]" : $argv[1];
+$logs = array_merge(glob("/var/log/syslog.*"),["/var/log/syslog"]);
 
-exec("grep -P ".escapeshellarg($dev)." /var/log/syslog", $lines);
-
-foreach ($lines as $line) {
-  if (strpos($line,'disk_log')!==false) continue;
-  $span = "span";
-  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
-  echo "<$span>".htmlspecialchars($line)."\n</span>";
+foreach ($logs as $syslog) {
+  exec("grep -P ".escapeshellarg($dev)." ".escapeshellarg($syslog), $lines);
+  foreach ($lines as $line) {
+    if (strpos($line,'disk_log')!==false) continue;
+    $span = "span";
+    foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
+    echo "<$span>".htmlspecialchars($line)."\n</span>";
+  }
+  unset($lines);
 }
 ?>
