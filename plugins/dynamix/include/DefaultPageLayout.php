@@ -86,13 +86,12 @@ function updateTime() {
   if (expiretime > 0) {
     var remainingtime = expiretime - now.getTime()/1000;
     if (remainingtime <= 0) {
-      $('#licenseexpire').html('<em> (click here for details)</em>');
-      $('#licensetype').addClass('warning')
+      $('#licenseexpire').html('Trial period: expired (click here for details)');
     } else {
       days = parseInt(remainingtime/86400);
       hour = parseInt(remainingtime/3600%24);
       mins = parseInt(remainingtime/60%60);
-      $('#licenseexpire').html(' - '+((days|hour|mins)?(days?plus(days,'day',true):(hour?plus(hour,'hour',true):plus(mins,'minute',true))):'less than a minute')+' remaining (click here for details)');
+      $('#licenseexpire').html('Trial period: '+((days|hour|mins)?(days?plus(days,'day',true):(hour?plus(hour,'hour',true):plus(mins,'minute',true))):'less than a minute')+' remaining (click here for details)');
     }
   }
   setTimeout(updateTime,1000);
@@ -296,13 +295,14 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div class="upgrade_notice" style="display:none"></div>
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><img src="/webGui/images/UN-logotype-gradient.png" title="Feedback" border="0"/></a>
-   <a href="/Tools/Registration"><span></span></a>
+   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
+   <a href="/Tools/Registration"><span id="licenseexpire"></span></a>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
-    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/><?=$var['version']?>
-    <a href="/Tools/Registration" class="header" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a><?=$notes?><br/><span id="uptime"></span></span>
+    <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
+    <a href="/Tools/Registration" class="header" title="Go to Registration page"><?=$var['version']?>-<span id="licensetype"><?=$var['regTy']?></span></a><?=$notes?><br/>
+    <span id="uptime"></span></span>
    </div>
   </div>
   <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>
@@ -442,7 +442,7 @@ function parseINI(data){
   return value;
 }
 // unraid animated logo
-var unraid_logo = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 133.52 76.97" class="unraid_mark"><defs><linearGradient id="unraid_logo" x1="23.76" y1="81.49" x2="109.76" y2="-4.51" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#e32929"/><stop offset="1" stop-color="#ff8d30"/></linearGradient></defs><path d="m70,19.24zm57,0l6.54,0l0,38.49l-6.54,0l0,-38.49z" fill="url(#unraid_logo)" class="unraid_mark_9"/><path d="m70,19.24zm47.65,11.9l-6.55,0l0,-23.79l6.55,0l0,23.79z" fill="url(#unraid_logo)" class="unraid_mark_8"/><path d="m70,19.24zm31.77,-4.54l-6.54,0l0,-14.7l6.54,0l0,14.7z" fill="url(#unraid_logo)" class="unraid_mark_7"/><path d="m70,19.24zm15.9,11.9l-6.54,0l0,-23.79l6.54,0l0,23.79z" fill="url(#unraid_logo)" class="unraid_mark_6"/><path d="m63.49,19.24l6.51,0l0,38.49l-6.51,0l0,-38.49z" fill="url(#unraid_logo)" class="unraid_mark_5"/><path d="m70,19.24zm-22.38,26.6l6.54,0l0,23.78l-6.54,0l0,-23.78z" fill="url(#unraid_logo)" class="unraid_mark_4"/><path d="m70,19.24zm-38.26,43.03l6.55,0l0,14.73l-6.55,0l0,-14.73z" fill="url(#unraid_logo)" class="unraid_mark_3"/><path d="m70,19.24zm-54.13,26.6l6.54,0l0,23.78l-6.54,0l0,-23.78z" fill="url(#unraid_logo)" class="unraid_mark_2"/><path d="m70,19.24zm-63.46,38.49l-6.54,0l0,-38.49l6.54,0l0,38.49z" fill="url(#unraid_logo)" class="unraid_mark_1"/></svg>';
+var unraid_logo = '<?=file_get_contents("$docroot/webGui/images/animated-logo.svg")?>';
 
 var watchdog = new NchanSubscriber('/sub/var', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchdog.on('message', function(data) {
@@ -575,7 +575,7 @@ $(function() {
     });
   }
   $('form').append($('<input>').attr({type:'hidden', name:'csrf_token', value:'<?=$var['csrf_token']?>'}));
-  setTimeout(function(){$('div.spinner').each(function(){$(this).html(unraid_logo);});},100); // display animation if longer than 100ms
+  setTimeout(function(){$('div.spinner').each(function(){$(this).html(unraid_logo);});},150); // display animation if page loading takes longer than 150ms
   watchdog.start();
 });
 </script>

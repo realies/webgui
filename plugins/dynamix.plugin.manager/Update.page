@@ -32,7 +32,12 @@ if (file_exists('/boot/previous/changes.txt')) {
   $branch = strpos($version,'rc')===false ? 'Stable' : 'Next';
 }
 ?>
-<style>input[value='Install'],input[value='Update'],input[value='Restore']{margin:0}</style>
+<style>
+input[value='Install'],input[value='Update'],input[value='Restore']{margin:0}
+<?if (strstr('white,black',$display['theme'])):?>
+span.vhshift{margin-top:30px!important;margin-right:-20px!important}
+<?endif;?>
+</style>
 <script>
 var original = null;
 
@@ -79,7 +84,7 @@ function loadlist(id) {
 $(function() {
   loadlist();
 <?if ($check):?>
-  $('.tabs').append("<span class='status vhshift'><input type='button' id='checkos' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"System Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
+  $('.tabs').append("<span class='status vhshift'><input type='button' id='checkos' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkos\",\"System Update Check\",600,600,true,\"loadlist\",\":return\")' disabled></span>");
 <?endif;?>
 });
 </script>

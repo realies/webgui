@@ -57,6 +57,9 @@ input.option{display:none;width:40px}
 span.devtext{display:none;font-weight:bold}
 span.helptext{display:none;font-style:italic}
 span.code{display:inline-block;width:186px}
+<?if (strstr('white,black',$display['theme'])):?>
+span.vhshift{margin-top:30px!important;margin-right:-20px!important}
+<?endif;?>
 </style>
 <script>
 function doDispatch(form) {
