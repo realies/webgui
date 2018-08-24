@@ -50,7 +50,7 @@ function loadlist(id) {
       var cmd = id.split(':');
       var tr = 'tr#'+cmd[0].replace(/[\. _]/g,'');
       switch (cmd[1]) {
-        case 'return' : $('div.spinner').hide('slow');list.html(data[0]); $('#plugin_table').trigger('destroy'); break;
+        case 'return' : $('div.spinner').hide('slow').remove();list.html(data[0]); $('#plugin_table').trigger('destroy'); break;
         case 'remove' : list.find(tr).remove(); break;
         case 'update' : list.find(tr).remove();
         case 'install': if (!list.find(tr).length) list.append(data[0]).trigger('update'); break;
@@ -70,12 +70,16 @@ function loadlist(id) {
 <?endif;?>
   });
 }
+function spinner() {
+  $('#plugin_list').append("<div class='spinner fixed'></div>");
+  $('div.spinner').html(unraid_logo).show('slow');
+}
 $(function() {
   loadlist();
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none;margin-left:12px'><input type='button' value='Update All Plugins' onclick='$(\"div.spinner\").addClass('fixed').show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",490,430,true,\"loadlist\",\":return\")'></span>");
+  $('.tabs').append("<span id='updateall' class='status vhshift' style='display:none;margin-left:12px'><input type='button' value='Update All Plugins' onclick='spinner();openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=updateall\",\"Update All Plugins\",600,600,true,\"loadlist\",\":return\")'></span>");
 <?if ($check):?>
-  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check For Updates' onclick='$(\"div.spinner\").addClass('fixed').show(\"slow\");openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",490,430,true,\"loadlist\",\":return\")' disabled></span>");
+  $('.tabs').append("<span id='checkall' class='status vhshift'><input type='button' value='Check For Updates' onclick='spinner();openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin&arg1=checkall\",\"Plugin Update Check\",600,600,true,\"loadlist\",\":return\")' disabled></span>");
 <?endif;?>
 });
 </script>
