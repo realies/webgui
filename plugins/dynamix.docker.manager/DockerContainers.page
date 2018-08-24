@@ -105,7 +105,7 @@ var sortableHelper = function(e,i){
 function loadlist() {
   $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
     var data = d.split(/\0/);
-    $('div.spinner').hide('slow');
+    $('div.spinner').hide('slow').remove();
     $('#docker_list').html(data[0]).sortable({helper:sortableHelper,items:'tr.sortable',opacity:0.4,update:function(e,i){
       var row = $('#docker_list').find('tr:first');
       var names = ''; var index = '';

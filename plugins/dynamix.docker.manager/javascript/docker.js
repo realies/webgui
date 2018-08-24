@@ -190,7 +190,8 @@ function checkAll() {
 }
 function updateAll() {
   $('input[type=button]').prop('disabled',true);
-  $('div.spinner').addClass('fixed').show('slow');
+  $('#docker_list').append("<div class='spinner fixed'></div>");
+  $('div.spinner').html(unraid_logo).show('slow');
   var list = '';
   for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') list += '&ct[]='+encodeURI(ct.name);
   var address = '/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true'+list;
