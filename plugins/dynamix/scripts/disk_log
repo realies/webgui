@@ -29,5 +29,6 @@ foreach ($logs as $syslog) {
     foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
     echo "<$span>".htmlspecialchars($line)."\n</span>";
   }
+  unset($lines);
 }
 ?>
