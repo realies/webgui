@@ -20,6 +20,7 @@ function displayDisks(all) {
   if (all == 'yes') {
     $.cookie('ssz','ssz',{path:'/'});
     $('#disk_list').html("<tr><td colspan='8'><div class='spinner'></div></td></tr>");
+    $('div.spinner').html(unraid_logo);
   }
   $.get('/webGui/include/DiskList.php',{compute:all,path:'<?=$path?>',scale:'<?=$display['scale']?>',number:'<?=$display['number']?>',fill:$.cookie('ssz')},function(data){
     $.removeCookie('ssz',{path:'/'})
