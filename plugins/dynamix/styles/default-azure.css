@@ -264,10 +264,7 @@ blockquote{width:90%;margin:10px auto;text-align:left;padding:4px 20px;border:1p
 blockquote.ontop{margin-top:0;margin-bottom:46px}
 label.checkbox{display:block;position:relative;padding-left:28px;margin:3px 0;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
 label.checkbox input{position:absolute;opacity:0;cursor:pointer}
-span.checkmark{position:absolute;top:0;left:6px;height:14px;width:14px;background-color:#D4D2D4}
+span.checkmark{position:absolute;top:0;left:6px;height:14px;width:14px;background-color:#D4D2D4;border-radius:100%}
 label.checkbox:hover input ~ .checkmark{background-color:#A4A2A4}
 label.checkbox input:checked ~ .checkmark {background-color:#ff8c2f}
 label.checkbox input:disabled ~ .checkmark {opacity:0.5}
-span.checkmark:after{content:'';position:absolute;display:none}
-label.checkbox input:checked ~ .checkmark:after{display:block}
-label.checkbox .checkmark:after{left:4px;top:0;width:3px;height:8px;border:solid white;border-width:0 3px 3px 0;-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg)}

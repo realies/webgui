@@ -183,7 +183,7 @@ $(function(){
 <?if ($dockerd):?>
 <form name="ct">
 <input type="hidden" name="names" id="names-ct" value="">
-<table class='tablesorter' style='width:auto'>
+<table class='tablesorter <?=$libvirtd?'':'shift'?>' style='width:auto'>
 <thead><tr><th><i class="fa fa-list"></i> Container</th><?create()?></tr></thead>
 <tbody id="table-ct"><?=$spinner?></tbody>
 </table>
