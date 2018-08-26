@@ -296,12 +296,13 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
    <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
-   <a href="/Tools/Registration"><span id="licenseexpire"></span></a>
+   SERVER OS <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a>
+   <a href="/Tools/Registration" title="Go to Registration page"><span id="licenseexpire"></span></a>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
-    <a href="/Tools/Registration" class="header" title="Go to Registration page"><?=$var['version']?>-<span id="licensetype"><?=$var['regTy']?></span></a><?=$notes?><br/>
+    <?=$var['version']?><?=$notes?><br/>
     <span id="uptime"></span></span>
    </div>
   </div>
