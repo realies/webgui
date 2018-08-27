@@ -43,15 +43,14 @@ select.slot{min-width:440px;max-width:440px}
 input.narrow{width:166px}
 input.trim{width:50px}
 form+p{display:none}
-#header{position:fixed;top:0;left:0;width:100%;height:90px;z-index:100;margin:0;background-color:#edeaef;background-size:100% 90px;border-bottom:#9794a0 1px solid}
-#header .logo{float:left;margin-left:75px;color:#e22828;font-size:24px;font-weight:bold;letter-spacing:2px}
-#header .logo svg{height:28px;display:block;margin:17px 50px 4px 0}
-#header .logo #licensetype{font-style:italic}
-#header .logo a{color:#e22828}
-#header .logo #licenseexpire{margin-left:40px;letter-spacing:0}
+#header{position:fixed;top:0;left:0;width:100%;height:90px;z-index:100;margin:0;background-color:#edeaef;background-size:100% 90px;background-repeat:no-repeat;border-bottom:#9794a0 1px solid}
+#header .logo{float:left;margin-left:75px;color:#e22828;width:160px;text-align:center}
+#header .logo svg{width:160px;display:block;margin:25px 50px 8px 0}
 #header .block{margin:0;float:right;text-align:right;background-color:rgba(237,234,239,0.7);padding:7px 12px}
 #header .text-left{float:left;text-align:right;padding-right:5px;border-right:solid medium #f15a2c}
 #header .text-right{float:right;text-align:left;padding-left:5px}
+#header .text-right a{color:#606e7f}
+#header .text-right #licensetype{font-weight:bold;font-style:italic;margin-right:4px}
 #menu{position:fixed;top:0;left:0;bottom:12px;width:65px;padding:0;margin:0;background:#383A34;z-index:100;box-shadow:inset -1px 0 2px #edeaef}
 #nav-block{position:absolute;top:0;bottom:12px;color:#5D6833;white-space:nowrap;float:left;overflow-y:scroll;direction:rtl;letter-spacing:2px}
 #nav-block::-webkit-scrollbar{display:none}

@@ -85,13 +85,21 @@ function updateTime() {
   before = now;
   if (expiretime > 0) {
     var remainingtime = expiretime - now.getTime()/1000;
-    if (remainingtime <= 0) {
-      $('#licenseexpire').html('Trial period: expired (click here for details)');
-    } else {
+    if (remainingtime > 0) {
       days = parseInt(remainingtime/86400);
       hour = parseInt(remainingtime/3600%24);
       mins = parseInt(remainingtime/60%60);
-      $('#licenseexpire').html('Trial period: '+((days|hour|mins)?(days?plus(days,'day',true):(hour?plus(hour,'hour',true):plus(mins,'minute',true))):'less than a minute')+' remaining (click here for details)');
+      if (days) {
+        $('#licenseexpire').html(plus(days,'day',true)+' remaining');
+      } else if (hour) {
+        $('#licenseexpire').html(plus(hour,'hour',true)+' remaining').addClass('orange-text');
+      } else if (mins) {
+        $('#licenseexpire').html(plus(mins,'minute',true)+' remaining').addClass('red-text');
+      } else {
+        $('#licenseexpire').html('less than a minute remaining').addClass('red-text');
+      }
+    } else {
+      $('#licenseexpire').html('expired').addClass('red-text');
     }
   }
   setTimeout(updateTime,1000);
@@ -296,13 +304,12 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
    <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
-   SERVER OS <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a>
-   <a href="/Tools/Registration" title="Go to Registration page"><span id="licenseexpire"></span></a>
+   <?=$var['version']?><?=$notes?>
    </div>
    <div class="block">
-    <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
+    <span class="text-left">Server<br/>Description<br/>Registration<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
-    <?=$var['version']?><?=$notes?><br/>
+    <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a><a href="/Tools/Registration" title="Go to Registration page"><span id="licenseexpire"></span></a><br/>
     <span id="uptime"></span></span>
    </div>
   </div>
@@ -487,6 +494,12 @@ $('.back_to_top').click(function(event) {
   return false;
 });
 $(function() {
+<?$regTy = strtolower($var['regTy']);?>
+<?if ($regTy=='unregistered'):?>
+  $('#licensetype').addClass('orange-text');
+<?elseif (!in_array($regTy,['trial','basic','plus','pro'])):?>
+  $('#licensetype').addClass('red-text');
+<?endif;?>
   if ($("div#nav-right").css('float').toLowerCase() == 'right') {
     var origNavRightWidth = $('div#nav-right').width();
     var adjustMenuSize = function() {
