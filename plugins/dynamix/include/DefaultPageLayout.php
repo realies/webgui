@@ -309,7 +309,7 @@ $.ajaxPrefilter(function(s, orig, xhr){
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Registration<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
-    <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span></a><a href="/Tools/Registration" title="Go to Registration page"><span id="licenseexpire"></span></a><br/>
+    <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span><span id="licenseexpire"></span></a><br/>
     <span id="uptime"></span></span>
    </div>
   </div>
