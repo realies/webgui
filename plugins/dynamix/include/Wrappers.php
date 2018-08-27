@@ -14,12 +14,12 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 // Wrapper functions
-function parse_plugin_cfg($plugin, $sections=false) {
+function parse_plugin_cfg($plugin, $sections=false, $scanner=INI_SCANNER_NORMAL) {
   global $docroot;
   $ram = "$docroot/plugins/$plugin/default.cfg";
   $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : [];
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
+  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections, $scanner) : [];
+  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections, $scanner)) : $cfg;
 }
 function parse_cron_cfg($plugin, $job, $text = "") {
   $cron = "/boot/config/plugins/$plugin/$job.cron";
