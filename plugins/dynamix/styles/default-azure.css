@@ -69,9 +69,9 @@ form+p{display:none}
 #nav-item a i{display:none}
 #nav-user{display:block;float:left;text-align:center;border:none}
 #nav-user.probe{font-size:11px;margin-left:3px;margin-right:8px}
-#nav-tub1{position:fixed;top:56px;right:350px}
-#nav-tub2{position:fixed;top:56px;right:320px}
-#nav-tub3{position:fixed;top:56px;right:290px}
+#nav-tub1{position:fixed;top:56px;right:400px}
+#nav-tub2{position:fixed;top:56px;right:370px}
+#nav-tub3{position:fixed;top:56px;right:340px}
 span.tub span[id^='txt-tub']{margin-top:7px}
 #title{color:#39587f;margin:20px 0 10px 0;padding:10px 0;clear:both;background:#e4e2e4;border-bottom:#606e7f 1px solid;letter-spacing:2px}
 #title span.left{font-size:20px;text-transform:uppercase}
@@ -92,7 +92,7 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 .orange-text,.warning{color:#E68A00}
 .blue-text{color:#3B5998}
 .grey-text{color:#606060}
-.usage-bar{position:fixed;top:60px;right:400px;height:22px;line-height:22px;width:140px;background-color:rgba(228,226,228,0.4)}
+.usage-bar{position:fixed;top:60px;right:450px;height:22px;line-height:22px;width:140px;background-color:rgba(228,226,228,0.4)}
 .usage-bar>span{display:block;height:3px;background-color:#606e7f;text-align:left}
 .usage-bar>span>span{padding-left:4px;color:#606e7f}
 .usage-disk{height:25px;line-height:25px;background-color:rgba(237,234,239,0.4)}
