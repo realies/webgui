@@ -120,7 +120,8 @@ table.disk_status tr td:last-child{width:4%;padding-right:10px}
 table.disk_status select{background:transparent}
 table.disk_status tbody tr:nth-child(even){background-color:#212121}
 table.disk_status.stats tr>td+td{text-align:left;padding-left:0;padding-right:12px}
-table.array_status td{padding:12px 0}
+table.array_status{margin-top:0}
+table.array_status td{padding:4px 0}
 table.array_status tr>td{text-align:left;white-space:nowrap;padding-left:12px;width:30%}
 table.array_status tr>td+td{padding-left:2px;width:20%}
 table.array_status tr>td+td+td{width:auto}
