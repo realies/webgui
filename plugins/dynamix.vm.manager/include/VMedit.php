@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,7 +15,12 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-$top = strstr('white,black',$display['theme']) ? -58 : -44;
+switch ($display['theme']) {
+	case 'gray' : $bgcolor = '#121510'; $border = '#606e7f'; $top = -44; break;
+	case 'azure': $bgcolor = '#edeaef'; $border = '#606e7f'; $top = -44; break;
+	case 'black': $bgcolor = '#212121'; $border = '#2b2b2b'; $top = -58; break;
+	default     : $bgcolor = '#ededed'; $border = '#e3e3e3'; $top = -58; break;
+}
 
 $strSelectedTemplate = array_keys($arrAllTemplates)[1];
 if (!empty($_GET['template']) && !(empty($arrAllTemplates[$_GET['template']]))) {
@@ -77,216 +82,53 @@ if (!empty($_GET['uuid'])) {
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
-<style type="text/css">
-	body { -webkit-overflow-scrolling: touch;}
-	.fileTree {
-		background:<?=strstr('white,azure',$display['theme'])?'#f2f2f2':'#1c1c1c'?>;
-		width: 305px;
-		max-height: 150px;
-		overflow-y: scroll;
-		overflow-x: hidden;
-		position: absolute;
-		z-index: 100;
-		display: none;
-	}
-	#vmform table {
-		margin-top: 0;
-	}
-	#vmform div#title + table {
-		margin-top:0;
-	}
-	#vmform table tr {
-		vertical-align: top;
-		line-height:40px;
-	}
-	#vmform table tr td:nth-child(odd) {
-		width: 220px;
-		text-align: right;
-		padding-right: 10px;
-	}
-	#vmform table tr td:nth-child(even) {
-		width: 100px;
-	}
-	#vmform table tr td:last-child {
-		width: inherit;
-	}
-	#vmform .multiple {
-		position: relative;
-	}
-	#vmform .sectionbutton {
-		position: absolute;
-		left: 2px;
-		cursor: pointer;
-		opacity: 0.4;
-		font-size: 15px;
-		line-height: 17px;
-		z-index: 10;
-		transition-property: opacity, left;
-		transition-duration: 0.1s;
-		transition-timing-function: linear;
-	}
-	#vmform .sectionbutton.remove { top: 0; opacity: 0.3; }
-	#vmform .sectionbutton.add { bottom: 0; }
-	#vmform .sectionbutton:hover { opacity: 1.0; }
-	#vmform .sectiontab {
-		position: absolute;
-		top: 2px;
-		bottom: 2px;
-		left: 0;
-		width: 6px;
-		border-radius: 3px;
-		background-color: #DDDDDD;
-		transition-property: background, width;
-		transition-duration: 0.1s;
-		transition-timing-function: linear;
-	}
-	#vmform .multiple:hover .sectionbutton {
-		opacity: 0.7;
-		left: 4px;
-	}
-	#vmform .multiple:hover .sectionbutton.remove {
-		opacity: 0.6;
-	}
-	#vmform .multiple:hover .sectiontab {
-		background-color: #CCCCCC;
-		width: 8px;
-	}
 
-	#vmform table.multiple {
-		margin: 10px 0;
-		<?if ($display['theme']=='gray'):?>
-		background:#121510;
-		<?elseif ($display['theme']=='azure'):?>
-		background:#EDEAEF;
-		<?elseif ($display['theme']=='black'):?>
-		background:#212121;
-		<?else:?>
-		background:#ededed;
-		<?endif;?>
-		background-size: 800px 100%;
-		background-position: -800px;
-		background-repeat: no-repeat;
-		background-clip: content-box;
-		transition: background 0.3s linear;
-	}
-	#vmform table.multiple:hover {
-		background-position: 0 0;
-	}
-	#vmform table.multiple td {
-		padding: 5px 0;
-	}
-
-	span.advancedview_panel {
-		display: none;
-		line-height: 16px;
-		margin-top: 1px;
-	}
-	.basic {
-		display: none;
-	}
-	.advanced {
-		/*Empty placeholder*/
-	}
-	.switch-button-label.off {
-		color: inherit;
-	}
-	#template_img {
-		cursor: pointer;
-	}
-	#template_img:hover {
-		opacity: 0.5;
-	}
-	#template_img:hover i {
-		opacity: 1.0;
-	}
-	.template_img_chooser_inner {
-		display: inline-block;
-		width: 80px;
-		margin-bottom: 15px;
-		margin-right: 10px;
-		text-align: center;
-	}
-	.template_img_chooser_inner img {
-		width: 48px;
-		height: 48px;
-	}
-	.template_img_chooser_inner p {
-		text-align: center;
-		line-height: 8px;
-	}
-	#template_img_chooser {
-		width: 560px;
-		height: 300px;
-		overflow-y: scroll;
-		position: relative;
-	}
-	#template_img_chooser div:hover {
-		background-color: #eee;
-		cursor: pointer;
-	}
-	#template_img_chooser_outer {
-		position: absolute;
-		display: none;
-		border-radius:5px;
-		<?if ($display['theme']=='gray'):?>
-		border:1px solid #606E7F;
-		background:#121510;
-		<?elseif ($display['theme']=='azure'):?>
-		border:1px solid #606E7F;
-		background:#EDEAEF;
-		<?elseif ($display['theme']=='black'):?>
-		border:1px solid #2b2b2b;
-		background:#212121;
-		<?else:?>
-		border:1px solid #e3e3e3;
-		background:#ededed;
-		<?endif;?>
-		z-index: 10;
-	}
-	#form_content {
-		display: none;
-	}
-	#vmform .four {
-		overflow: auto;
-	}
-	#vmform .four label {
-		float: left;
-		display: table-cell;
-		width: 15%;
-	}
-	#vmform .four label:nth-child(4n+4) {
-	}
-	#vmform .four label.cpu1 {
-		width: 28%;height:16px;line-height:16px;
-	}
-	#vmform .four label.cpu2 {
-		width: 3%;height:16px;line-height:16px;
-	}
-	#vmform .mac_generate {
-		cursor: pointer;
-		margin-left: -5px;
-		color: #08C;
-		font-size: 1.3em;
-		transform: translate(0px, 2px);
-	}
-	#vmform .disk {
-		display: none;
-	}
-	#vmform .disk_preview {
-		display: inline-block;
-		color: #BBB;
-		transform: translate(0px, 1px);
-	}
-	<?if ($display['theme']=='gray'):?>
-	span#dropbox{border:1px solid #606E7F;border-radius:5px;background:#121510;padding:28px 12px;line-height:72px;margin-right:16px;}
-	<?elseif ($display['theme']=='azure'):?>
-	span#dropbox{border:1px solid #606E7F;border-radius:5px;background:#EDEAEF;padding:28px 12px;line-height:72px;margin-right:16px;}
-	<?elseif ($display['theme']=='black'):?>
-	span#dropbox{border:1px solid #2b2b2b;border-radius:5px;background:#212121;padding:28px 12px;line-height:72px;margin-right:16px;}
-	<?else:?>
-	span#dropbox{border:1px solid #e3e3e3;border-radius:5px;background:#ededed;padding:28px 12px;line-height:72px;margin-right:16px;}
-	<?endif;?>
+<style>
+body{-webkit-overflow-scrolling:touch}
+.fileTree{background:<?=$bgcolor?>;width:305px;max-height:150px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
+#vmform table{margin-top:0}
+#vmform div#title + table{margin-top:0}
+#vmform table tr{vertical-align:top;line-height:40px}
+#vmform table tr td:nth-child(odd){width:220px;text-align:right;padding-right:10px}
+#vmform table tr td:nth-child(even){width:100px}
+#vmform table tr td:last-child{width:inherit}
+#vmform .multiple{position:relative}
+#vmform .sectionbutton{position:absolute;left:2px;cursor:pointer;opacity:0.4;font-size:15px;line-height:17px;z-index:10;transition-property:opacity,left;transition-duration:0.1s;transition-timing-function:linear}
+#vmform .sectionbutton.remove{top:0;opacity:0.3}
+#vmform .sectionbutton.add{bottom:0}
+#vmform .sectionbutton:hover{opacity:1.0}
+#vmform .sectiontab{position:absolute;top:2px;bottom:2px;left:0;width:6px;border-radius:3px;background-color:#DDDDDD;transition-property:background,width;transition-duration:0.1s;transition-timing-function:linear}
+#vmform .multiple:hover .sectionbutton{opacity:0.7;left:4px}
+#vmform .multiple:hover .sectionbutton.remove{opacity:0.6}
+#vmform .multiple:hover .sectiontab{background-color:#CCCCCC;width:8px}
+#vmform table.multiple{margin:10px 0;background:<?=$bgcolor?>;background-size:800px 100%;background-position:-800px;background-repeat:no-repeat;background-clip:content-box;transition:background 0.3s linear}
+#vmform table.multiple:hover{background-position:0 0;}
+#vmform table.multiple td{padding:5px 0}
+span.advancedview_panel{display:none;line-height:16px;margin-top:1px}
+.basic{display:none}
+.advanced{/*Empty placeholder*/}
+.switch-button-label.off{color:inherit}
+#template_img{cursor:pointer}
+#template_img:hover{opacity:0.5}
+#template_img:hover i{opacity:1.0}
+.template_img_chooser_inner{display:inline-block;width:80px;margin-bottom:15px;margin-right:10px;text-align:center;}
+.template_img_chooser_inner img{width:48px;height:48px}
+.template_img_chooser_inner p{text-align:center;line-height:8px;}
+#template_img_chooser{width:560px;height:300px;overflow-y:scroll;position:relative}
+#template_img_chooser div:hover{background-color:#eee;cursor:pointer;}
+#template_img_chooser_outer{position:absolute;display:none;border-radius:5px;border:1px solid <?=$border?>;background:<?=$bgcolor?>;z-index:10}
+#form_content{display:none}
+#vmform .four{overflow:auto}
+#vmform .four label{float:left;display:table-cell;width:15%;}
+#vmform .four label:nth-child(4n+4){}
+#vmform .four label.cpu1{width:28%;height:16px;line-height:16px}
+#vmform .four label.cpu2{width:3%;height:16px;line-height:16px}
+#vmform .mac_generate{cursor:pointer;margin-left:-5px;color:#08C;font-size:1.3em;transform:translate(0px, 2px)}
+#vmform .disk{display:none}
+#vmform .disk_preview{display:inline-block;color:#BBB;transform:translate(0px, 1px)}
+span#dropbox{border:1px solid <?=$border?>;background:<?=$bgcolor?>;padding:28px 12px;line-height:72px;margin-right:16px;}
 </style>
+
 <span class="status advancedview_panel" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
 <div id="content" style="margin-top:0;margin-left:0px">
 	<form id="vmform" method="POST">
