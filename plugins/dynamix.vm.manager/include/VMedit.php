@@ -36,7 +36,7 @@ if (!empty($_GET['uuid'])) {
 	$res = $lv->domain_get_domain_by_uuid($_GET['uuid']);
 
 	if ($res === false) {
-		echo "<p class='notice'>Invalid VM to edit.</p>";
+		echo "<p class='notice'>Invalid VM to edit.</p><input type='button' value='Done' onclick='done()'>";
 		return;
 	}
 
