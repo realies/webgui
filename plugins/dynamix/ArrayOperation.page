@@ -223,7 +223,7 @@ $(function(){
 <form name="arrayOps" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
-<table class="array_status">
+<table class="array_status shift">
 <?$parity = $var['mdResync']>0 ? '<br><small>Disabled -- Parity operation is running</small>' : '';
   $mover = file_exists('/var/run/mover.pid') ? '<br><small>Disabled -- Mover is running</small>' : '';
   $btrfs = exec('pgrep -cf /sbin/btrfs') ? '<br><small>Disabled -- BTRFS operation is running</small>' : '';
