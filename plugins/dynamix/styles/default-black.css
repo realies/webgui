@@ -120,13 +120,12 @@ table.disk_status tr td:last-child{width:4%;padding-right:10px}
 table.disk_status select{background:transparent}
 table.disk_status tbody tr:nth-child(even){background-color:#212121}
 table.disk_status.stats tr>td+td{text-align:left;padding-left:0;padding-right:12px}
-table.array_status{margin-top:0}
 table.array_status td{padding:4px 0}
 table.array_status tr>td{text-align:left;white-space:nowrap;padding-left:12px;width:30%}
 table.array_status tr>td+td{padding-left:2px;width:20%}
 table.array_status tr>td+td+td{width:auto}
 table.array_status td.line{border-top:1px solid #2b2b2b}
-table.array_status.shift{margin-top:-30px}
+table.array_status.noshift{margin-top:0}
 table.settings{margin:0;padding:0px}
 table.settings td:first-child{width:35%;padding-left:12px}
 table.settings.shifted{padding:0;margin-left:0;margin-top:0}
