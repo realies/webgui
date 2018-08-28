@@ -130,7 +130,7 @@ span#dropbox{border:1px solid <?=$border?>;background:<?=$bgcolor?>;padding:28px
 </style>
 
 <span class="status advancedview_panel" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
-<div id="content" style="margin-top:0;margin-left:0px">
+<div class="domain">
 	<form id="vmform" method="POST">
 	<input type="hidden" name="domain[type]" value="kvm" />
 	<input type="hidden" name="template[name]" value="<?=htmlspecialchars($strSelectedTemplate)?>" />
