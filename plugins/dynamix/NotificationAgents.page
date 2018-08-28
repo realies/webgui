@@ -115,7 +115,7 @@ foreach ($xml->Agent as $agent) {
     }
   }
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) if (trim($line)) $script .= trim($line)."{1}";
-  echo '<div id="title" style="position:relative;margin:0px;top:-30px;"><span class="left"><img src="/plugins/dynamix/icons/'.strtolower(str_replace('_','',$name)).'.png" class="icon" style="height:16px;width:16px;">'.str_replace('_',' ',$name).'</span><span class="status vhshift">'.(is_file($enabledAgent) ? '<span class="green">Enabled</span>' : '<span class="red">Disabled</span>').'</span></div>';
+  echo '<div id="title" class="shift"><span class="left"><img src="/plugins/dynamix/icons/'.strtolower(str_replace('_','',$name)).'.png" class="icon" style="height:16px;width:16px;">'.str_replace('_',' ',$name).'</span><span class="status vhshift">'.(is_file($enabledAgent) ? '<span class="green">Enabled</span>' : '<span class="red">Disabled</span>').'</span></div>';
   echo '<form method="POST" name="'.$name.'" action="/update.php" target="progressFrame">';
   echo '<input type="hidden" name="#include" value="/webGui/include/update.file.php">';
   echo '<input type="hidden" name="#file" value="'.$file.'">';
