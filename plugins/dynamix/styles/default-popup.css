@@ -13,5 +13,6 @@ table tbody td{padding:5px 0}
 table.share_status{white-space:nowrap}
 table.share_status thead tr:first-child td{font-size:15px;background:#e8e8e8}
 table.share_status thead tr:last-child{border-bottom:1px solid #e3e3e3}
+table.share_status tbody tr:nth-child(even){background-color:#ededed}
 table.share_status tr>td{text-align:left;padding-left:12px}
 table.share_status tr>td+td{padding-left:0}
