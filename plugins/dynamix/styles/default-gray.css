@@ -6,6 +6,7 @@ body{font-size:14px;color:#606e7f;background-color:#1b1d1b;padding:0;margin:0;-w
 img{border:0;text-decoration:none;vertical-align:middle}
 p{text-align:left}
 p.centered{text-align:left}
+p:empty{display:none}
 a:hover{text-decoration:underline}
 a{color:#486dba;text-decoration:none}
 a.none{color:#606e7f}
