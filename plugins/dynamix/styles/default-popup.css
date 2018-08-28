@@ -8,8 +8,8 @@ input:hover[type=button][disabled],input:hover[type=reset][disabled],input:hover
 input:active[type=button][disabled],input:active[type=reset][disabled],input:active[type=submit][disabled],button:active[disabled],button:active[type=button][disabled],a.button:active[disabled]
 {cursor:default;color:#808080;background:-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 0 no-repeat,-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#404040),to(#404040)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#808080),to(#808080)) 100% 100% no-repeat;background:linear-gradient(90deg,#404040 0,#808080) 0 0 no-repeat,linear-gradient(90deg,#404040 0,#808080) 0 100% no-repeat,linear-gradient(0deg,#404040 0,#404040) 0 100% no-repeat,linear-gradient(0deg,#808080 0,#808080) 100% 100% no-repeat;background-size:100% 2px,100% 2px,2px 100%,2px 100%}
 table{border-collapse:collapse;border-spacing:0;margin:0;width:100%}
-table thead td{padding:7px 0}
-table tbody td{padding:5px 0}
+table thead td{padding:6px 0}
+table tbody td{padding:4px 0}
 table.share_status{white-space:nowrap}
 table.share_status thead tr:first-child td{font-size:15px;background:#e8e8e8}
 table.share_status thead tr:last-child{border-bottom:1px solid #e3e3e3}
