@@ -254,7 +254,7 @@ $(function(){
           <tr><td>Parity is valid.</td><td><input type="submit" name="cmdCheck" value="Check"></td><td><strong>Check</strong> will start <strong>Parity-Check</strong>.&nbsp;&nbsp;<a href="/Main/Scheduler"<?if ($tabbed):?> onclick="$.cookie('one','tab1',{path:'/'})"<?endif;?>>(Schedule)</a>
           <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?      endif;?>
-        <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td>
+        <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,900,false)"></td>
 <?      if ($var['sbSyncExit']!=0):?>
           <td>Last check incomplete on <strong><?=my_time($var['sbSynced2']).day_count($var['sbSynced2'])?></strong><?if ($var['sbSynced2']):?>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.<?endif;?>
           <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=my_error($var['sbSyncExit'])?></small></td></tr>
@@ -298,7 +298,7 @@ $(function(){
         <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
-      <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,600,false)"></td><td>Current operation started on <strong><?=my_time($var['sbUpdated'])?></strong></td></tr>
+      <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,900,false)"></td><td>Current operation started on <strong><?=my_time($var['sbUpdated'])?></strong></td></tr>
       <tr><td>Total size:</td><td id="line0"></td><td></td></tr>
       <tr><td>Elapsed time:</td><td id="line1"></td><td></td></tr>
       <tr><td>Current position:</td><td id="line2"></td><td></td></tr>
@@ -428,7 +428,7 @@ $(function(){
 </table>
 </form>
 <?if ($var['fsState']=="Started"):?>
-<table class="array_status">
+<table class="array_status noshift">
  <tr><td></td><td><input type="button" id="button-down" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('down')" value="Spin Down"<?=$parity?' disabled':''?>><input type="button" id="button-up" onclick="$('[id^=button-]').prop('disabled',true);toggle_state('up')" value="Spin Up"<?=$parity?' disabled':''?>></td>
  <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td></tr>
  <tr><td></td><td><input type="button" value="Clear Statistics" onclick="toggle_state('Clear')"></td><td><strong>Clear Statistics</strong> will immediately clear all disk statistics.</td></tr>
@@ -436,7 +436,7 @@ $(function(){
 </table>
 <?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
-<table class="array_status">
+<table class="array_status noshift">
  <tr><td></td>
 <?if ($mover):?>
  <td><input type="submit" name="cmdStartMover" value="Move now" disabled></td><td>Disabled - Mover is running.</td>
@@ -449,7 +449,7 @@ $(function(){
 <?endif;?>
 <?endif;?>
 <form name="shutdownOps" method="POST" action="/webGui/include/Boot.php">
-<table class="array_status">
+<table class="array_status noshift">
  <tr><td></td><td><input type="button" name="reboot" value="Reboot" onclick="shutdown_now(this.form,'reboot')"><input type="button" name="shutdown" value="Power down" onclick="shutdown_now(this.form,'shutdown')"></td>
  <td><strong>Reboot</strong> will activate a <em>clean</em> system reset.<br><strong>Power down</strong> will activate a <em>clean</em> power down.</td></tr>
  <tr><td></td><td class="line" colspan="2"></td></tr>
@@ -459,7 +459,7 @@ $(function(){
 <form name="delete_keyfile" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="unused">
 <input type="hidden" name="#include" value="webGui/include/KeyUpload.php">
-<table class="array_status">
+<table class="array_status noshift">
  <tr><td></td><td><input type="submit" name="#apply" value="Delete" disabled></td><td><strong>Delete</strong> will delete the encryption keyfile.
  <br><input type="checkbox" onchange="toggleApply(this.checked)"><small>Yes I want to do this</small></td></tr>
 </table>

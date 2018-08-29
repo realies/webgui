@@ -35,7 +35,7 @@ if (file_exists('/boot/previous/changes.txt')) {
 <style>
 input[value='Install'],input[value='Update'],input[value='Restore']{margin:0}
 <?if (strstr('white,black',$display['theme'])):?>
-span.vhshift{margin-top:30px!important;margin-right:-20px!important}
+span.vhshift{margin-top:10px!important}
 <?endif;?>
 </style>
 <script>

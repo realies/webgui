@@ -17,11 +17,11 @@ Cond="exec(\"grep -o '^DOCKER_ENABLED=.yes' /boot/config/docker.cfg 2>/dev/null\
 ?>
 <?
 if ($var['fsState'] != "Started") {
-  echo "<p class='notice'>Array must be <span class='strong big'>started</span> to view Docker containers.</p>";
+  echo "<p class='notice shift'>Array must be <span class='strong big'>started</span> to view Docker containers.</p>";
   return;
 }
 if ( !is_file('/var/run/dockerd.pid') || (!is_dir('/proc/'.@file_get_contents('/var/run/dockerd.pid'))) ) {
-  echo "<p class='notice'>Docker Service failed to start.</p>";
+  echo "<p class='notice shift'>Docker Service failed to start.</p>";
   return;
 }
 ?>

@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,17 +16,17 @@ require_once "$docroot/webGui/include/Helpers.php";
 
 $month = [' Jan '=>'-01-',' Feb '=>'-02-',' Mar '=>'-03-',' Apr '=>'-04-',' May '=>'-05-',' Jun '=>'-06-',' Jul '=>'-07-',' Aug '=>'-08-',' Sep '=>'-09-',' Oct '=>'-10-',' Nov '=>'-11-',' Dec '=>'-12-'];
 
-function plus($val, $word, $last) {
+function his_plus($val, $word, $last) {
   return $val>0 ? (($val||$last)?($val.' '.$word.($last?'':', ')):'') : '';
 }
-function my_duration($time) {
+function his_duration($time) {
   if (!$time) return 'Unavailable';
   $days = floor($time/86400);
   $hmss = $time-$days*86400;
   $hour = floor($hmss/3600);
   $mins = $hmss/60%60;
   $secs = $hmss%60;
-  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hr',($mins|$secs)==0).plus($mins,'min',$secs==0).plus($secs,'sec',true);
+  return his_plus($days,'day',($hour|$mins|$secs)==0).his_plus($hour,'hr',($mins|$secs)==0).his_plus($mins,'min',$secs==0).his_plus($secs,'sec',true);
 }
 ?>
 <!DOCTYPE html>
@@ -45,7 +45,7 @@ if (file_exists($log)) {
     list($date,$duration,$speed,$status,$error) = explode('|',$line);
     if ($speed==0) $speed = 'Unavailable';
     $date = str_replace(' ',', ',strtr(str_replace('  ',' 0',$date),$month));
-    if ($duration>0||$status<>0) $list[] = "<tr><td>$date</td><td>".my_duration($duration)."</td><td>$speed</td><td>".($status==0?'OK':($status==-4?'Canceled':$status))."</td><td>$error</td></tr>";
+    if ($duration>0||$status<>0) $list[] = "<tr><td>$date</td><td>".his_duration($duration)."</td><td>$speed</td><td>".($status==0?'OK':($status==-4?'Canceled':$status))."</td><td>$error</td></tr>";
   }
   fclose($handle);
 }
@@ -55,6 +55,6 @@ else
   echo "<tr><td colspan='5' style='text-align:center;padding-top:12px'>No parity check history present!</td></tr>";
 ?>
 </tbody></table>
-<div style="text-align:center"><input type="button" value="Done" onclick="top.Shadowbox.close()"></div>
+<div style="text-align:center;margin-top:12px"><input type="button" value="Done" onclick="top.Shadowbox.close()"></div>
 </body>
 </html>
