@@ -43,8 +43,8 @@ input[type=email]{margin-top:8px;float:left}
 <body>
 <div style="margin-top:0;line-height:30px;margin-left:5px;margin-right:5px">
 <div id="control_panel" class="four">
-<label for="optOnlinePoll"><input type="radio" name="mode" id="optOnlinePoll" value="onlinepoll" checked="checked" /> Online Poll</label>
-<label for="optFeatureRequest"><input type="radio" name="mode" id="optFeatureRequest" value="featurerequest"/> Feature Request</label>
+<!-- <label for="optOnlinePoll"><input type="radio" name="mode" id="optOnlinePoll" value="onlinepoll" checked="checked"/> Online Poll</label> -->
+<label for="optFeatureRequest"><input type="radio" name="mode" id="optFeatureRequest" value="featurerequest" checked="checked"/> Product Suggestion</label>
 <label for="optBugReport"><input type="radio" name="mode" id="optBugReport" value="bugreport"/> Bug Report</label>
 <label for="optComment"><input type="radio" name="mode" id="optComment" value="comment"/> Other Comment</label>
 <hr>
@@ -52,7 +52,7 @@ input[type=email]{margin-top:8px;float:left}
 <div id="thanks_panel" class="allpanels"></div>
 <div id="onlinepoll_panel" class="allpanels"></div>
 <div id="featurerequest_panel" class="allpanels">
-<textarea id="featureDescription" placeholder="Please summarize your feature request here."></textarea>
+<textarea id="featureDescription" placeholder="Please summarize your suggestion here."></textarea>
 <br>
 <input type="email" id="featureEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="featureSubmit" value="Submit"/>
 </div>
@@ -63,7 +63,7 @@ input[type=email]{margin-top:8px;float:left}
 <input type="email" id="bugEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="bugSubmit" value="Submit"/>
 </div>
 <div id="comment_panel" class="allpanels">
-<textarea id="commentDescription" placeholder="Type your question or comment to Lime Technology here.  We will respond by to the e-mail address associated with your registration key."></textarea>
+<textarea id="commentDescription" placeholder="Type your question or comment to Lime Technology here."></textarea>
 <br>
 <input type="email" id="commentEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="commentSubmit" value="Submit"/>
 </div>
@@ -193,7 +193,8 @@ $(function() {
     featurerequest_reset();
     bugreport_reset();
     comment_reset();
-    $('#optOnlinePoll').click();
+//    $('#optOnlinePoll').click();
+    $('#optFeatureRequest').click();
 });
 </script>
 </body>

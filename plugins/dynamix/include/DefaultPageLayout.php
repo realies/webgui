@@ -303,13 +303,13 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div class="upgrade_notice" style="display:none"></div>
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',600,600,false);return false;"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
-   <?=$var['version']?><?=$notes?>
+   <a href="https://unraid.net"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
+   Version: <?=$var['version']?><?=$notes?>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Registration<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
-    <a href="/Tools/Registration" title="Go to Registration page"><span id="licensetype"><?=$var['regTy']?></span><span id="licenseexpire"></span></a><br/>
+    <a href="/Tools/Registration" title="Go to Registration page">Unraid OS <span id="licensetype"><?=$var['regTy']?></span><span id="licenseexpire"></span></a><br/>
     <span id="uptime"></span></span>
    </div>
   </div>
