@@ -158,7 +158,7 @@ System notifications:
 > By default the notifications system is disabled. Enable it here to start receiving notifications.
 > The following sections give more options about which and what type of notifications will be sent.
 
-unRAID OS update notification:
+Unraid OS update notification:
 : <select name="unraidos" size="1" onchange="prepareUnraid(this.value)">
   <?=mk_option($notify['unraidos'], "", "Never check")?>
   <?=mk_option($notify['unraidos'], "11 */6 * * *", "Check four times a day")?>
@@ -168,7 +168,7 @@ unRAID OS update notification:
   <?=mk_option($notify['unraidos'], "11 0 1 * *", "Check once a month")?>
   </select>
 
-> Start a periodic verification and notify the user when a new version of the unRAID OS system is detected.
+> Start a periodic verification and notify the user when a new version of the Unraid OS system is detected.
 > Use the checkboxes below to select how notifications need to be given; by browser, by email and/or by custom agent.
 
 Plugins update notification:
@@ -213,7 +213,7 @@ Array status notification:
 > Start a periodic array health check (preventive maintenance) and notify the user the result of this check.
 
 <span id="unraidTitle" class="unraid" style="display:none">&nbsp;</span>
-: <span class="unraid" style="display:none"><span style="display:inline-block;width:130px;font-style:italic">unRAID OS update</span>
+: <span class="unraid" style="display:none"><span style="display:inline-block;width:130px;font-style:italic">Unraid OS update</span>
   <input type="checkbox" name="unraid1"<?=($notify['unraid'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="unraid2"<?=($notify['unraid'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
   <input type="checkbox" name="unraid3"<?=($notify['unraid'] & 4)==4 ? ' checked' : ''?>>Agents &nbsp;</span>

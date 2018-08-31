@@ -172,7 +172,7 @@ Tunable (md_sync_window):
 Tunable (md_sync_thresh):
 : <input type="text" name="md_sync_thresh" maxlength="10" value="<?=$var['md_sync_thresh']?>" class="narrow"><?=$var['md_sync_thresh_status']?>
 
-> These tunables let you control certain properties of the unRAID driver.
+> These tunables let you control certain properties of the Unraid driver.
 >
 > Note: For each of these settings, if you set to blank and click Apply, the setting is restored to its default.
 

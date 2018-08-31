@@ -58,6 +58,6 @@ FTP user(s):
 
 > ### Overview
 >
-> unRAID includes the popular `vsftpd` FTP server.  The configuration of `vsftp` is currently very
+> Unraid includes the popular `vsftpd` FTP server.  The configuration of `vsftp` is currently very
 > simple: **All** user names entered above are permitted to access the server via FTP and will have
 > *full read/write/delete access* to the entire server, so use with caution.

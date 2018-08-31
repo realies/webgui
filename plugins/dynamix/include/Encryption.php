@@ -7,7 +7,7 @@
 // info@geocontext.org
 // Public domain license
 
-// Adapted by Bergware for use in unRAID
+// Adapted by Bergware for use in Unraid
 // forced use of hash key
 
 /*

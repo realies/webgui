@@ -92,6 +92,6 @@ $(function() {
 <thead><tr><th></th><th>Component</th><th>Author</th><th>Version</th><th>Status</th><th>Branch</th></tr></thead>
 <tbody id="os_list"><?=$empty?></tbody>
 <?if ($bzroot):?>
-<tbody id="previous" style="display:none"><tr><td><img src="/plugins/unRAIDServer/images/unRAIDServer.png"></td><td><b>unRAID Server OS (previous)</b></td><td>LimeTech</td><td><?=$version?></td><td><input type="button" value="Restore" onclick="downgrade()"></td><td><?=$branch?></td></tbody>
+<tbody id="previous" style="display:none"><tr><td><img src="/plugins/unRAIDServer/images/unRAIDServer.png"></td><td><b>Unraid OS (previous)</b></td><td>LimeTech</td><td><?=$version?></td><td><input type="button" value="Restore" onclick="downgrade()"></td><td><?=$branch?></td></tbody>
 <?endif;?>
 </table>

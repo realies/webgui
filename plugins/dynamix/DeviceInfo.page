@@ -301,7 +301,7 @@ btrfs balance status:
 > Without any options specified a "full balance" is performed which will basically rewrite everything in the filesystem.
 > The run time is potentially very long, depending on the filesystem size.
 >
-> unRAID uses these default options when creating a multiple-device pool:
+> Unraid uses these default options when creating a multiple-device pool:
 >
 > `-dconvert=raid1 -mconvert=raid1`
 >

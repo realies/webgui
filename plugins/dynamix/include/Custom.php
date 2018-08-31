@@ -9,8 +9,8 @@
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * Modified for unRAID of Array2XML Published February 9, 2016 by Jeetendra Singh
- * Modified for unRAID of xmlToArray Published August 23, 2012 by Tamlyn Rhodes
+ * Modified for Unraid of Array2XML Published February 9, 2016 by Jeetendra Singh
+ * Modified for Unraid of xmlToArray Published August 23, 2012 by Tamlyn Rhodes
  */
 class custom {
   private static $xml = null;
@@ -129,7 +129,7 @@ class custom {
       $data = current($arr);
       // store as single or multi array
       if (!isset($tags[$node])) {
-        // specific for unRAID
+        // specific for Unraid
         if (in_array($node,['hostdev','controller'])) $tags[$node][] = $data; else $tags[$node] = $data;
       } elseif (is_array($tags[$node]) && array_keys($tags[$node])===range(0, count($tags[$node])-1)) {
         $tags[$node][] = $data;

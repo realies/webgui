@@ -73,9 +73,9 @@ Interface <?=$eth?>:
 : <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
-> The interface assignment rules can be changed here and might be necessary to set the preferred interface for managing unRAID - *use with care, usually there is no need to change*.
+> The interface assignment rules can be changed here and might be necessary to set the preferred interface for managing Unraid - *use with care, usually there is no need to change*.
 >
-> **eth0** is the main interface used to manage the unRAID system. The other interfaces are optional and may be used as desired.
+> **eth0** is the main interface used to manage the Unraid system. The other interfaces are optional and may be used as desired.
 > Every interface must be uniquely identified by its MAC (hardware) address.
 >
 > The interface assignment is stored on the flash device under */config/network-rules.cfg*. This file can be viewed with any editor, but it is recommended to make changes via the webGUI only.<br>

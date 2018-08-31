@@ -126,7 +126,7 @@ if ($display['total']) echo "<tr class='tr_last'><td colspan='11'>&nbsp;</td></t
 >
 > The Array must be Stopped in order to change Array device assignments.
 >
-> An unRAID array consists of a single Parity disk and a number of Data disks. The Data
+> An Unraid array consists of a single Parity disk and a number of Data disks. The Data
 > disks are exclusively used to store user data, and the Parity disk provides the redundancy necessary
 > to recover from any singe disk failure.
 >

@@ -97,7 +97,7 @@ Security:
   <?=mk_option($sec_afp[$name]['security'], "private", "Private");?>
   </select>
 
-> The unRAID AFP implementation supports Guest access and fully supports the three security
+> The Unraid AFP implementation supports Guest access and fully supports the three security
 > modes: Public, Secure, and Private.
 > In general, when you click on your server's icon in Finder, you will be asked to log in as Guest or to
 > specify a set of login credentials (user name/password).  In order to use Secure or Private security on

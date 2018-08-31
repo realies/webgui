@@ -114,7 +114,7 @@ Allocation method:
   <?=mk_option($share['allocator'], "mostfree", "Most-free")?>
   </select>
 
-> This setting determines how unRAID OS will choose which disk to use when creating a new file or directory:
+> This setting determines how Unraid OS will choose which disk to use when creating a new file or directory:
 >
 > **High-water**
 > Choose the lowest numbered disk with free space still above the current *high water mark*.  The
@@ -154,9 +154,9 @@ Split level:
 > Determines whether a directory is allowed to expand onto multiple disks.
 
 > **Automatically split any directory as required**
-> When a new file or subdirectory needs to be created in a share, unRAID OS first chooses which disk
+> When a new file or subdirectory needs to be created in a share, Unraid OS first chooses which disk
 > it should be created on, according to the configured *Allocation method*.  If the parent directory containing
-> the new file or or subdirectory does not exist on this disk, then unRAID OS will first create all necessary
+> the new file or or subdirectory does not exist on this disk, then Unraid OS will first create all necessary
 > parent directories, and then create the new file or subdirectory.
 >
 > **Automatically split only the top level directory as required**
@@ -167,12 +167,12 @@ Split level:
 >
 > **Automatically split only the top "N" level directories as required**
 > Similar to previous: when a new file or subdirectory is being created, if the parent directory is at level "N",
-> and does not exist on the chosen disk, unRAID OS will first create all necessary parent directories.  If the
+> and does not exist on the chosen disk, Unraid OS will first create all necessary parent directories.  If the
 > parent directory of the new file or subdirectory is beyond level "N", then the new file or subdirectory is
 > created on the same disk where the parent directory exists.
 >
 > **Manual: do not automatically split directories**
-> When a new file or subdirectory needs to be created in a share, unRAID OS will only consider disks where the
+> When a new file or subdirectory needs to be created in a share, Unraid OS will only consider disks where the
 > parent directory already exists.
 
 Included disk(s):

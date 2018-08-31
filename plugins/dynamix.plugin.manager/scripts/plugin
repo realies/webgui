@@ -249,15 +249,15 @@ function plugin($method, $plugin_file, &$error) {
       if (!in_array($method, explode(" ", $file->attributes()->Method))) continue;
     } elseif ($method != "install") continue;
     $name = $file->attributes()->Name;
-    // bergware - check unRAID version dependency (if present)
+    // bergware - check Unraid version dependency (if present)
     $min = $file->attributes()->Min;
     if ($min && version_compare($unraid['version'],$min,'<')) {
-      echo "plugin: skipping: ".basename($name)." - unRAID version too low, requires at least version $min\n";
+      echo "plugin: skipping: ".basename($name)." - Unraid version too low, requires at least version $min\n";
       continue;
     }
     $max = $file->attributes()->Max;
     if ($max && version_compare($unraid['version'],$max,'>')) {
-      echo "plugin: skipping: ".basename($name)." - unRAID version too high, requires at most version $max\n";
+      echo "plugin: skipping: ".basename($name)." - Unraid version too high, requires at most version $max\n";
       continue;
     }
     // Name can be missing but only makes sense if Run attribute is present
@@ -453,17 +453,17 @@ if ($method == "install") {
     }
   } else
     $plugin_file = realpath($argv[2]);
-  // bergware - check unRAID version dependency (if present)
+  // bergware - check Unraid version dependency (if present)
   $min = plugin("min", $plugin_file, $error);
   if ($min && version_compare($unraid['version'],$min,'<')) {
-    echo "plugin: installed unRAID version is too low, require at least version $min\n";
+    echo "plugin: installed Unraid version is too low, require at least version $min\n";
     exit(1);
   }
   $max = plugin("max", $plugin_file, $error);
   if (empty($max))
-    $max = plugin("unRAID", $plugin_file, $error);
+    $max = plugin("Unraid", $plugin_file, $error);
   if ($max && version_compare($unraid['version'],$max,'>')) {
-    echo "plugin: installed unRAID version is too high, require at most version $max\n";
+    echo "plugin: installed Unraid version is too high, require at most version $max\n";
     exit(1);
   }
   $plugin = basename($plugin_file);
@@ -611,17 +611,17 @@ if ($method == "update") {
     echo "plugin: $plugin_file does not exist, check for updates first\n";
     exit (1);
   }
-  // bergware - check unRAID version dependency (if present)
+  // bergware - check Unraid version dependency (if present)
   $min = plugin("min", $plugin_file, $error);
   if ($min && version_compare($unraid['version'],$min,'<')) {
-    echo "plugin: installed unRAID version is too low, require at least version $min\n";
+    echo "plugin: installed Unraid version is too low, require at least version $min\n";
     exit(1);
   }
   $max = plugin("max", $plugin_file, $error);
   if (empty($max))
-    $max = plugin("unRAID", $plugin_file, $error);
+    $max = plugin("Unraid", $plugin_file, $error);
   if ($max && version_compare($unraid['version'],$max,'>')) {
-    echo "plugin: installed unRAID version is too high, require at most version $max\n";
+    echo "plugin: installed Unraid version is too high, require at most version $max\n";
     exit(1);
   }
   // install the updated plugin

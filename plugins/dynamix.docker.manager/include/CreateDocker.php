@@ -228,13 +228,13 @@ if ($_GET['xmlTemplate']) {
           if ($arrConfig['Type'] == 'Path' && strtolower($arrConfig['Target']) == '/unraid') {
             $arrConfig['Default'] = $arrConfig['Value'] = realpath($dockercfg['DOCKER_APP_UNRAID_PATH']);
             $arrConfig['Display'] = 'hidden';
-            $arrConfig['Name'] = 'unRAID Share Path';
+            $arrConfig['Name'] = 'Unraid Share Path';
             $boolFound = true;
           }
         }
         if (!$boolFound) {
           $xml['Config'][] = [
-            'Name'        => 'unRAID Share Path',
+            'Name'        => 'Unraid Share Path',
             'Target'      => '/unraid',
             'Default'     => realpath($dockercfg['DOCKER_APP_UNRAID_PATH']),
             'Value'       => realpath($dockercfg['DOCKER_APP_UNRAID_PATH']),
@@ -735,7 +735,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
       <tr>
         <td colspan="2">
           <blockquote class="inline_help">
-            <p>Templates are a quicker way to setting up Docker Containers on your unRAID server.  There are two types of templates:</p>
+            <p>Templates are a quicker way to setting up Docker Containers on your Unraid server.  There are two types of templates:</p>
 
             <p>
               <b>Default templates</b><br>

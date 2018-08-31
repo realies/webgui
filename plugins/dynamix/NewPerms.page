@@ -47,7 +47,7 @@ $(function() {
 <?endif;?>
 });
 </script>
-This is a mandatory one-time action to be taken after upgrading from a pre-5.0 unRAID server release to unRAID v5 or a later release.
+This is a mandatory one-time action to be taken after upgrading from a pre-5.0 Unraid server release to Unraid v5 or a later release.
 Select **ALL DISKS** when performing this one-time action.
 
 This utility is also useful for restoring default ownership/permissions on files and

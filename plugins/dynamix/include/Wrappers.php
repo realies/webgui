@@ -43,7 +43,7 @@ function plugin_update_available($plugin, $os=false) {
   $remote = get_plugin_attr('version', "/tmp/plugins/$plugin.plg");
   if (strcmp($remote,$local)>0) {
     if ($os) return $remote;
-    if (!$unraid = get_plugin_attr('unRAID', "/tmp/plugins/$plugin.plg")) return $remote;
+    if (!$unraid = get_plugin_attr('Unraid', "/tmp/plugins/$plugin.plg")) return $remote;
     $server = get_plugin_attr('version', "/var/log/plugins/unRAIDServer.plg");
     if (version_compare($server, $unraid, '>=')) return $remote;
   }

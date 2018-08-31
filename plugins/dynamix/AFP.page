@@ -40,7 +40,7 @@ Connected users:
 </form>
 
 > ### Overview
-> AFP for unRAID includes both `netatalk` to implement Apple Filing Protocol, and `avahi`
+> AFP for Unraid includes both `netatalk` to implement Apple Filing Protocol, and `avahi`
 > to implement Zeroconf, aka, Bonjour.
 >
 > As with SMB and NFS, you may export both disk shares and user shares via AFP.  There are some important
@@ -54,7 +54,7 @@ Connected users:
 > * The netatalk documentation includes a strong warning to not use symlinks anywhere in a file system
 > being exprted via AFP.
 >
-> AFP for unRAID supports Time Machine, and all three security modes.
+> AFP for Unraid supports Time Machine, and all three security modes.
 >
 > ### Bonjour
 > When AFP is enabled, your server name, with a `-AFP` suffix, should automatically appear in the left-hand pane of

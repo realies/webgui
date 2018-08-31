@@ -24,7 +24,7 @@ require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 $strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
 if (empty($strLoadedModules)) {
   echo "<p class='notice'>Your hardware does not have Intel VT-x or AMD-V capability. This is required to create VMs in KVM.";
-  echo "<a href='http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29' target='_blank'> Click here to see the unRAID Wiki for more information</a></p>";
+  echo "<a href='http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29' target='_blank'> Click here to see the Unraid Wiki for more information</a></p>";
   echo "<input type='button' value='Done' onclick='done()'>";
   exit;
 }

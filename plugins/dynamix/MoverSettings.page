@@ -31,7 +31,7 @@ $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 $(function() {
   presetMover(document.mover_schedule);
 });
-// Fool unRAID by simulating the original input field
+// Fool Unraid by simulating the original input field
 function prepareMover(form) {
   var mode = form.shareMoverSchedule.value;
   var min = mode!=0 ? form.min.value : 0;

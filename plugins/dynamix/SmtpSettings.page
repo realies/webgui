@@ -126,7 +126,7 @@ Priority in header:
 Email subject prefix:
 : <input type="text" name="Subject" value="<?=htmlspecialchars($ssmtp['Subject'])?>">
 
-> Set a prefix for easy recognition of unRAID messages.
+> Set a prefix for easy recognition of Unraid messages.
 
 Mail server:
 : <input type="text" name="server" value="<?=htmlspecialchars($ssmtp['server'])?>">

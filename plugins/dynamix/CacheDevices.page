@@ -52,8 +52,8 @@ endforeach;
 >
 > <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
 >
-> **Cache** is a device, or device pool, *outside* the unRAID array.  It may be exported for network access just
-> like an Array device.  Being outside the unRAID array results in significantly faster write access.
+> **Cache** is a device, or device pool, *outside* the Unraid array.  It may be exported for network access just
+> like an Array device.  Being outside the Unraid array results in significantly faster write access.
 >
 > There are two ways to configure the Cache:
 >
@@ -64,7 +64,7 @@ endforeach;
 > or xfs).  This configuration offers the highest performance, but at the cost of no data protection - if the
 > single Cache device fails all data contained on it may be lost.
 >
-> When configured as a multi-device pool, unRAID OS will automatically select *btrfs-raid1* format (for both data
+> When configured as a multi-device pool, Unraid OS will automatically select *btrfs-raid1* format (for both data
 > and meta-data).  btrfs permits any number of devices to be added to the pool and each copy of data is guaranteed
 > to be written to two different devices.  Hence the pool can withstand a single-disk failure without losing data.
 >

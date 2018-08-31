@@ -196,8 +196,8 @@ function hideUpgrade(set) {
     $.removeCookie('os_upgrade',{path:'/'});
 }
 function openUpgrade() {
-  swal({title:'Update unRAID OS',text:'Do you want to update to the new version?',type:'warning',showCancelButton:true},function(){
-    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2=unRAIDServer.plg','Update unRAID OS',600,900,true);
+  swal({title:'Update Unraid OS',text:'Do you want to update to the new version?',type:'warning',showCancelButton:true},function(){
+    openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2=unRAIDServer.plg','Update Unraid OS',600,900,true);
   });
 }
 function notifier() {
@@ -412,7 +412,7 @@ default:
   echo "<span class='green strong'><i class='fa fa-play-circle'></i> Array Started</span>$progress"; break;
 }
 echo "</span></span><span id='countdown'></span><span id='user-notice' class='red-text'></span>";
-echo "<span id='copyright'>unRAID&reg; webGui &copy;2018, Lime Technology, Inc.";
+echo "<span id='copyright'>Unraid&reg; webGui &copy;2018, Lime Technology, Inc.";
 echo " <a href='http://lime-technology.com/wiki/index.php/Official_Documentation' target='_blank' title='Online manual'><i class='fa fa-book'></i> manual</a>";
 echo "</span></div>";
 ?>
@@ -529,11 +529,11 @@ $(function() {
 <?else:?>
 <?$readme = @file_get_contents("$docroot/plugins/unRAIDServer/README.md",false,null,0,20);?>
 <?if (strpos($readme,'REBOOT REQUIRED')!==false):?>
-  showUpgrade('<b>Reboot required</b> to apply unRAID OS update');
+  showUpgrade('<b>Reboot required</b> to apply Unraid OS update');
 <?elseif (strpos($readme,'DOWNGRADE')!==false):?>
-  showUpgrade('<b>Reboot required</b> to downgrade unRAID OS');
+  showUpgrade('<b>Reboot required</b> to downgrade Unraid OS');
 <?elseif ($version = plugin_update_available('unRAIDServer',true)):?>
-  showUpgrade('unRAID OS v<?=$version?> is available. <a>Update Now</a>');
+  showUpgrade('Unraid OS v<?=$version?> is available. <a>Update Now</a>');
 <?elseif (!$notify['system']):?>
   $('.upgrade_notice').html('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.').show();
 <?endif;?>

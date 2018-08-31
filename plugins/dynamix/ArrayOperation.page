@@ -336,7 +336,7 @@ $(function(){
       <td>Cannot contact key-server.  Please check your <a href="/Settings/NetworkSettings">network settings</a>.</td></tr>
 <?  elseif ($var['configValid']=="withdrawn"):?>
       <tr><td><?status_indicator()?><span class="strong big">Stopped.</span></td><td><input type="submit" name="cmdStart" value="Start" disabled></td>
-      <td>This unRAID Server OS release has been withdrawn and may no longer be used. Please <a href="/Plugins">update</a> your server.</td></tr>
+      <td>This Unraid OS release has been withdrawn and may no longer be used. Please <a href="/Plugins">update</a> your server.</td></tr>
 <?  else:
     switch ($var['mdState']):
     case "STOPPED":
@@ -501,7 +501,7 @@ enable_stop();
 <?if ($var['fsState'] == "Stopped"):?>
 > #### Assigning Devices
 >
-> An unRAID disk array consists of a single parity disk and a number of data disks. The data
+> An Unraid disk array consists of a single parity disk and a number of data disks. The data
 > disks are exclusively used to store user data, and the parity disk provides the redundancy necessary
 > to recover from any singe disk failure.
 >
@@ -518,7 +518,7 @@ enable_stop();
 >
 > #### Requirements
 >
-> Unlike traditional RAID systems which stripe data across all the array devices, an unRAID server
+> Unlike traditional RAID systems which stripe data across all the array devices, an Unraid server
 > stores files on individual hard drives. Consequently, all file write operations will involve both the
 > data disk the file is being written to, and the parity disk. For these reasons,
 >
@@ -530,13 +530,13 @@ enable_stop();
 >
 > #### Guidelines
 >
-> Here are the steps you should follow when designing your unRAID disk array:
+> Here are the steps you should follow when designing your Unraid disk array:
 >
 > 1. Decide which hard drive you will use for parity, and which hard drives you will use for
 > data disk1, disk2, etc., and label them in some fashion. Also, find the serial number of each hard
 > drive and jot it down somewhere; you will need this information later.
 >
-> 2. Install your hard drive devices, boot unRAID Server and bring up the webGui. If this is a fresh system
+> 2. Install your hard drive devices, boot Unraid OS and bring up the webGui. If this is a fresh system
 > build, then the Main page will show no disks installed. This doesn't mean the system can't detect your
 > hard drives; it just means that none have been assigned yet.
 >

@@ -33,7 +33,7 @@ function PsEnded($pid) {
 function PsKill($pid) {
   exec("kill -9 $pid");
 }
-if (PsExecute("$docroot/webGui/scripts/notify -s 'unRAID SMTP Test' -d 'Test message received!' -i 'alert' -t")) {
+if (PsExecute("$docroot/webGui/scripts/notify -s 'Unraid SMTP Test' -d 'Test message received!' -i 'alert' -t")) {
   $result = exec("tail -3 /var/log/syslog|awk '/sSMTP/ {getline;print}'|cut -d']' -f2|cut -d'(' -f1");
   $color = strpos($result, 'Sent mail') ? 'green' : 'red';
   echo "Test result<span class='$color'>$result</span>";

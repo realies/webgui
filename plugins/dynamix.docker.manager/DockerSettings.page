@@ -29,7 +29,7 @@ if (file_exists($realfile)) {
   $realfile = transpose_user_path($realfile);
   if (exec("stat -c %T -f " . escapeshellarg($realfile)) == "btrfs") {
     if (shell_exec("lsattr " . escapeshellarg($realfile) . " | grep \"\\-C\"") == "") {
-      echo '<p class="notice">Your existing Docker image file needs to be recreated due to an issue from an earlier beta of unRAID 6.  Failure to do so may result in your docker image suffering corruption at a later time.  Please do this NOW!</p>';
+      echo '<p class="notice">Your existing Docker image file needs to be recreated due to an issue from an earlier beta of Unraid 6.  Failure to do so may result in your docker image suffering corruption at a later time.  Please do this NOW!</p>';
     }
   }
 }

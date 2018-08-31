@@ -766,14 +766,14 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 		?>
 		<table class="domain_os other" data-category="Share" data-multiple="true" data-minimum="1" data-index="<?=$i?>" data-prefix="<?=$strLabel?>">
 			<tr class="advanced">
-				<td>unRAID Share:</td>
+				<td>Unraid Share:</td>
 				<td>
-					<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="<?=htmlspecialchars($arrShare['source'])?>" name="shares[<?=$i?>][source]" placeholder="e.g. /mnt/user/..." title="path of unRAID share" />
+					<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="<?=htmlspecialchars($arrShare['source'])?>" name="shares[<?=$i?>][source]" placeholder="e.g. /mnt/user/..." title="path of Unraid share" />
 				</td>
 			</tr>
 
 			<tr class="advanced">
-				<td>unRAID Mount tag:</td>
+				<td>Unraid Mount tag:</td>
 				<td>
 					<input type="text" value="<?=htmlspecialchars($arrShare['target'])?>" name="shares[<?=$i?>][target]" placeholder="e.g. shares (name of mount tag inside vm)" title="mount tag inside vm" />
 				</td>
@@ -784,12 +784,12 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 			<div class="advanced">
 				<blockquote class="inline_help">
 					<p>
-						<b>unRAID Share</b><br>
+						<b>Unraid Share</b><br>
 						Used to create a VirtFS mapping to a Linux-based guest.  Specify the path on the host here.
 					</p>
 
 					<p>
-						<b>unRAID Mount tag</b><br>
+						<b>Unraid Mount tag</b><br>
 						Specify the mount tag that you will use for mounting the VirtFS share inside the VM.  See this page for how to do this on a Linux-based guest: <a href="http://wiki.qemu.org/Documentation/9psetup" target="_blank">http://wiki.qemu.org/Documentation/9psetup</a>
 					</p>
 
@@ -802,14 +802,14 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 	<script type="text/html" id="tmplShare">
 		<table class="domain_os other">
 			<tr class="advanced">
-				<td>unRAID Share:</td>
+				<td>Unraid Share:</td>
 				<td>
-					<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" name="shares[{{INDEX}}][source]" placeholder="e.g. /mnt/user/..." title="path of unRAID share" />
+					<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" name="shares[{{INDEX}}][source]" placeholder="e.g. /mnt/user/..." title="path of Unraid share" />
 				</td>
 			</tr>
 
 			<tr class="advanced">
-				<td>unRAID Mount tag:</td>
+				<td>Unraid Mount tag:</td>
 				<td>
 					<input type="text" value="" name="shares[{{INDEX}}][target]" placeholder="e.g. shares (name of mount tag inside vm)" title="mount tag inside vm" />
 				</td>

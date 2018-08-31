@@ -71,9 +71,9 @@ if ($cli) {
 exert("mkdir -p ".escapeshellarg("/$diag/system")." ".escapeshellarg("/$diag/config")." ".escapeshellarg("/$diag/logs")." ".escapeshellarg("/$diag/shares")." ".escapeshellarg("/$diag/smart")." ".escapeshellarg("/$diag/qemu"));
 // get utilization of running processes
 exert("top -bn1 -o%CPU 2>/dev/null|todos >".escapeshellarg("/$diag/system/top.txt"));
-// make unRAID version reference
+// make Unraid version reference
 $unraid = parse_ini_file('/etc/unraid-version');
-file_put_contents("/$diag/unRAID-".$unraid['version'].".txt",$unraid['version']);
+file_put_contents("/$diag/unraid-".$unraid['version'].".txt",$unraid['version']);
 // copy ini variables
 foreach (glob("$get/*.ini") as $file) {
   $ini = basename($file,".ini");

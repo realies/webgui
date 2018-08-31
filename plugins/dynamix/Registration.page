@@ -34,7 +34,7 @@ div.remark{padding:0 10px;text-align:justify;}
 <form markdown="1" method="GET" action="https://lime-technology.com/getkey" target="_blank">
 <input type="hidden" name="TrialGUID" value="<?=$var['flashGUID']?>">
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
-<span class="thanks">Thank you for trying unRAID Server OS!</span>
+<span class="thanks">Thank you for trying Unraid OS!</span>
 <div markdown="1" class="remark">
 Your server will not be usable until you purchase a Registration key or install a free 30-day *Trial* key. A *Trial*
 key provides all the functionality of a *Pro* Registration key.
@@ -71,7 +71,7 @@ Flash GUID:
 <form markdown="1" method="GET" action="https://lime-technology.com/getkey" target="_blank">
 <input type="hidden" name="TrialGUID" value="<?=$var['flashGUID']?>">
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
-<span class="thanks">Thank you for trying unRAID Server OS!</span>
+<span class="thanks">Thank you for trying Unraid OS!</span>
 <div markdown="1" class="remark">
 Your *Trial* key includes all the functionality and device support of a *Pro* Registration key.
 
@@ -104,7 +104,7 @@ Flash GUID:
 <form markdown="1" method="GET" action="https://lime-technology.com/getkey" target="_blank">
 <input type="hidden" name="TrialGUID" value="<?=$var['flashGUID']?>">
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
-<span class="thanks">Thank you for trying unRAID Server OS!</span>
+<span class="thanks">Thank you for trying Unraid OS!</span>
 <div markdown="1" class="remark">
 <span class='red-text'>Cannot connect to key-server!</span>
 
@@ -135,7 +135,7 @@ Flash GUID:
 <form markdown="1" method="GET" action="https://lime-technology.com/getkey" target="_blank">
 <input type="hidden" name="TrialGUID" value="<?=$var['flashGUID']?>">
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
-<span class="thanks">Thank you for trying unRAID Server OS!</span>
+<span class="thanks">Thank you for trying Unraid OS!</span>
 <div markdown="1" class="remark">
 <span class='red-text'>Release has been withdrawn!</span>
 
@@ -166,11 +166,11 @@ Flash GUID:
 <form markdown="1" method="GET" action="https://lime-technology.com/getkey" target="_blank">
 <input type="hidden" name="TrialGUID" value="<?=$var['flashGUID']?>">
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
-<span class="thanks">Thank you for trying unRAID Server OS!</span>
+<span class="thanks">Thank you for trying Unraid OS!</span>
 <div markdown="1" class="remark">
 <span class='red-text'>Your *Trial* key has expired.</span>
 
-To continue using unRAID Server OS you may purchase a Registration key. Alternately, you may request a *Trial* extension key.
+To continue using Unraid OS you may purchase a Registration key. Alternately, you may request a *Trial* extension key.
 
 Most *Trial* extension requests are processed immediately but please allow up to one business day to receive your *Trial* extension key.
 </div>
@@ -198,7 +198,7 @@ Flash GUID:
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
 <span class='thanks red'>Invalid <em>Trial</em> Installation</span>
 <div markdown="1" class="remark">
-It is not possible to use a *Trial* key with an existing unRAID OS installation.
+It is not possible to use a *Trial* key with an existing Unraid OS installation.
 
 You may purchase a Registration key corresponding to this USB Flash device to continue using this installation.
 
@@ -235,7 +235,7 @@ Expiration:
 
 
 <?if ($var['regTy']=="Basic"):?>
-<span class="thanks">Thank you for choosing unRAID Server OS!</span>
+<span class="thanks">Thank you for choosing Unraid OS!</span>
 <div markdown="1" class="remark">
 To support more storage devices as your server grows, click Upgrade Key below.
 </div>
@@ -265,7 +265,7 @@ Flash GUID:
 
 
 <?if ($var['regTy']=="Plus"):?>
-<span class="thanks">Thank you for choosing unRAID Server OS!</span>
+<span class="thanks">Thank you for choosing Unraid OS!</span>
 <div markdown="1" class="remark">
 To support more storage devices as your server grows, click Upgrade Key below.
 </div>
@@ -295,7 +295,7 @@ Flash GUID:
 
 
 <?if ($var['regTy']=="Pro"):?>
-<span class="thanks">Thank you for choosing unRAID Server OS!</span>
+<span class="thanks">Thank you for choosing Unraid OS!</span>
 
 Registered to:
 : <span class="big"><?=htmlspecialchars($var['regTo'])?></span>

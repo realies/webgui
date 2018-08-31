@@ -257,7 +257,7 @@ function xmlToCommand($xml, $create_paths=false) {
   // Bind Time
   $Variables[]   = 'TZ="' . $var['timeZone'] . '"';
   // Add HOST_OS variable
-  $Variables[]   = 'HOST_OS="unRAID"';
+  $Variables[]   = 'HOST_OS="Unraid"';
 
   foreach ($xml['Config'] as $key => $config) {
     $confType        = strtolower(strval($config['Type']));

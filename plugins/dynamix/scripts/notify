@@ -139,7 +139,7 @@ case 'cron-init':
   @mkdir($archive,0755,true);
   $text = empty($notify['status']) ? "" : "# Generated array status check schedule:\n{$notify['status']} $docroot/plugins/dynamix/scripts/statuscheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "status-check", $text);
-  $text = empty($notify['unraidos']) ? "" : "# Generated unRAID OS update check schedule:\n{$notify['unraidos']} $docroot/plugins/dynamix.plugin.manager/scripts/unraidcheck &> /dev/null\n\n";
+  $text = empty($notify['unraidos']) ? "" : "# Generated Unraid OS update check schedule:\n{$notify['unraidos']} $docroot/plugins/dynamix.plugin.manager/scripts/unraidcheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "unraid-check", $text);
   $text = empty($notify['version']) ? "" : "# Generated plugins version check schedule:\n{$notify['version']} $docroot/plugins/dynamix.plugin.manager/scripts/plugincheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "plugin-check", $text);
@@ -150,7 +150,7 @@ case 'cron-init':
   break;
 
 case 'add':
-  $event = 'unRAID Status';
+  $event = 'Unraid Status';
   $subject = 'Notification';
   $description = 'No description';
   $importance = 'normal';
