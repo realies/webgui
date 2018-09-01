@@ -155,7 +155,7 @@ Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</
   </select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-trash" id="remove_button" title="Remove Windows VirtIO driver ISO"> <span>Remove</span></i><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
 
 > Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.
-> Download the latest ISO from here: <a href="https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html" target="_blank">fedoraproject.org</a>
+> Download the latest ISO from here: <a href="https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html#virtio-win-direct-downloads" target="_blank">fedoraproject.org</a>
 >
 > When installing Windows, you will reach a step where no disk devices will be found. There is an option to browse for drivers on that screen.
 > Click browse and locate the additional CD-ROM in the menu. Inside there will be various folders for the different versions of Windows.
