@@ -25,6 +25,7 @@ $folders = ['/boot','/boot/config','/boot/config/plugins','/boot/extra','/boot/s
 function exert($cmd, &$save=null) {
 // execute command with timeout of 30s
   exec("timeout -s9 30 $cmd", $save);
+  return implode("\n",$save);
 }
 
 function anonymize($text,$select) {
