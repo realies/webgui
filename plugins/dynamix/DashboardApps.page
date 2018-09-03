@@ -7,8 +7,8 @@ Markdown="false"
 <?
 $width = strstr('white,black',$display['theme']) ? -58: -44;
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 body{-webkit-overflow-scrolling:touch}
 label{display:inline}
