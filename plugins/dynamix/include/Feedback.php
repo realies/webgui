@@ -75,7 +75,7 @@ input[type=email]{margin-top:8px;float:left}
 <a href="https://lime-technology.com/wiki" target="_blank">Wiki</a>
 </div>
 </div>
-<script type="text/javascript" src="/webGui/javascript/dynamix.js"></script>
+<script type="text/javascript" src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
 var keyfile = '<?=$keyfile?>';
 var unraid_osversion = '<?=$unraid['version']?>';

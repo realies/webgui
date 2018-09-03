@@ -33,7 +33,7 @@ span#dropbox{border:1px solid #1c1c1c;border-radius:5px;background:#e8e8e8;paddi
 i.top{position:absolute;padding-top:4px;cursor:pointer;}
 </style>
 
-<script src="/webGui/javascript/jquery.filedrop.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filedrop.js')?>"></script>
 <script>
 var path = '/boot/config/plugins/dynamix/users';
 var filename = '';

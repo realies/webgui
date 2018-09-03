@@ -28,7 +28,7 @@ $hash = trim(explode(':',$hash)[1]);
 <meta name="robots" content="noindex">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
-<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/font-awesome.css">)?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/font-awesome.css")?>">
 <script src="<?autov("/webGui/javascript/dynamix.js")?>"></script>
 <script>
 var test = 'sha1,sha256,sha512,ripemd160,whirlpool,aes-cbc:128,serpent-cbc:128,twofish-cbc:128,aes-cbc:256,serpent-cbc:256,twofish-cbc:256,aes-xts:256,serpent-xts:256,twofish-xts:256,aes-xts:512,serpent-xts:512,twofish-xts:512';
