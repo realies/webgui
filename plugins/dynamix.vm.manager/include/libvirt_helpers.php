@@ -1112,7 +1112,7 @@
 		// update parent arrays
 		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
 		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
-		unset($old['cputune']['vcpupin']);
+		unset($old['cputune']['vcpupin'],$old['devices']['graphics']);
 		// set namespace
 		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 	}
