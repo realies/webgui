@@ -19,6 +19,7 @@ $var = parse_ini_file("/var/local/emhttp/var.ini");
 <!DOCTYPE HTML>
 <html>
 <head>
+<meta name="robots" content="noindex, nofollow">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/default-fonts.css')?>">
 <style>
 div.notice{background-color:#FFF6BF;text-align:center;height:80px;line-height:80px;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324;font-family:clear-sans;font-size:18px;}
