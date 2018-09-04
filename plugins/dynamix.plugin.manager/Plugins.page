@@ -33,7 +33,7 @@ $check = $notify['version'] ? 0 : 1;
 function resize(bind) {
   var width = [];
   var h = $('#plugin_list').height();
-  var s = Math.max(window.innerHeight-300,370);
+  var s = Math.max(window.innerHeight-340,330);
   if (h>s || bind) {
     $('#plugin_list').height(s);
     $('#plugin_table tbody tr:first-child td').each(function(){width.push($(this).width());});

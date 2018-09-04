@@ -128,7 +128,7 @@ tbody > tr.sortable:hover{cursor:move}
 function resize(bind) {
   var width = [];
   var h = $('#kvm_list').height();
-  var s = Math.max(window.innerHeight-300,370);
+  var s = Math.max(window.innerHeight-340,330);
   if (h>s || bind) {
     $('#kvm_list').height(s);
     $('#kvm_table tbody tr:first-child td').each(function(){width.push($(this).width());});

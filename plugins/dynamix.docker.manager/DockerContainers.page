@@ -70,7 +70,7 @@ $('.tabs').append("<span id='busy' class='red-text strong' style='display:none;p
 function resize(bind) {
   var width = [];
   var h = $('#docker_list').height();
-  var s = Math.max(window.innerHeight-300,370);
+  var s = Math.max(window.innerHeight-340,330);
   if (h>s || bind) {
     $('#docker_list').height(s);
     $('#docker_containers tbody tr:first-child td').each(function(){width.push($(this).width());});

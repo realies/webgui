@@ -56,7 +56,7 @@ function toggle(checked) {
 }
 <?if ($display['resize']):?>
 function resize() {
-  $('pre.up').height(Math.max(window.innerHeight-280,370)).show();
+  $('pre.up').height(Math.max(window.innerHeight-320,330)).show();
 }
 $(function() {
   resize();
