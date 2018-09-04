@@ -98,12 +98,9 @@ function apply(form) {
             $('#'+id+'-'+reply.success.stripper()).hide('slow');
             // cleanup when all is done
             if (!--wait) {
-              if (id == 'is') {
-                $('#wait-is').html('<strong>Reboot system to make new settings active!</strong>');
-              } else {
-                setTimeout(function(){$('#wait-'+id).hide();},500);
-              }
+              setTimeout(function(){$('#wait-'+id).hide();},500);
               $('input[value="Done"]').prop('disabled',false);
+              if (id == 'is') swal({html:true, type:'success', title:'CPU Isolation', text:'<b>Settings are only effective after a system reboot!</b>'});
             }
           }
         });
