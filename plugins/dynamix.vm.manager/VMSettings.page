@@ -203,17 +203,13 @@ Enable PCIe ACS Override:
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
 
+</div>
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
-<input type="button" class="advanced" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
+<input type="button" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
 <?else:?>
 &nbsp;
 <?endif;?>
 : <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
-</div>
-<div class="basic" markdown="1">
-&nbsp;
-: <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
-</div>
 </form>
 
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
