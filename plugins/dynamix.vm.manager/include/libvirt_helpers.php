@@ -1104,6 +1104,9 @@
 				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$pci['function']) unset($old['devices']['hostdev'][$k]);
 			}
 		}
+		// do not overwrite existing driver settings
+		$disks = $new['devices']['disk'];
+		foreach ($disks as $key => $disk) unset($new['devices']['disk'][$key]['driver']);
 		// settings not in the GUI, but maybe customized
 		unset($new['memoryBacking'], $new['clock'], $new['features']);
 		// update parent arrays
