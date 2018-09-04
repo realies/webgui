@@ -20,7 +20,7 @@ foreach($_POST as $key => $val) {
   list($name,$cpu) = explode(':',$key);
   $map[urldecode($name)] .= "$cpu,";
 }
-// map holds the list of each vm or container and its newly proposed cpu assignments
+// map holds the list of each vm, container or isolcpus and its newly proposed cpu assignments
 $map = array_map(function($d){return substr($d,0,-1);},$map);
 
 switch ($_POST['id']) {
@@ -69,6 +69,14 @@ case 'ct':
       file_put_contents($file,$xml->saveXML());
       exec("sed -ri 's/^(<CPUset)/  \\1/;s/><(\\/Container)/>\\n  <\\1/' \"$file\""); // aftercare
     }
+  }
+  $reply = ['success' => (count($changes) ? implode(';',$changes) : '')];
+  break;
+case 'is':
+  // report changed isolcpus in temporary file
+  foreach ($map as $name => $isolcpu) {
+    file_put_contents("/var/tmp/$name.tmp",$isolcpu);
+    $changes[] = $name;
   }
   $reply = ['success' => (count($changes) ? implode(';',$changes) : '')];
   break;
