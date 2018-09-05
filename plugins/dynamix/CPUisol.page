@@ -1,4 +1,4 @@
-Menu="CPUset"
+Menu="CPUset:2"
 Title="CPU Isolation"
 Tag="leaf"
 ---
@@ -24,8 +24,7 @@ Tag="leaf"
 </form>
 <div class="notice isol" style="display:none">System must be rebooted for changes to take effect!</div>
 
-> CPU isolation allows the user to specify CPU cores that are to be explicitly reserved for assignment (to VMs or Containers).
+> CPU isolation allows the user to specify CPU cores that are to be explicitly reserved for assignment (to VMs or Docker containers).
 >
-> This is incredibly important for gaming VMs to run smoothly because even if you manually pin your docker containers to not overlap with your gaming VM,
+> This is incredibly important for gaming VMs to run smoothly because even if you manually pin your Docker containers to not overlap with your gaming VM,
 > the host OS can still utilize those same cores as the guest VM needs for things like returning responses for the webGui, running a parity check, btrfs operations, etc.
-
