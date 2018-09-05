@@ -11,17 +11,21 @@
  */
 ?>
 <?
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Helpers.php";
+
 $var = parse_ini_file("/var/local/emhttp/var.ini");
 ?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
+<meta name="robots" content="noindex, nofollow">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/default-fonts.css')?>">
 <style>
 div.notice{background-color:#FFF6BF;text-align:center;height:80px;line-height:80px;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324;font-family:clear-sans;font-size:18px;}
 span.title{font-size:28px;text-transform:uppercase;display:block;}
 </style>
-<script src="/webGui/javascript/dynamix.js"></script>
+<script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
 var start = new Date();
 

@@ -18,6 +18,7 @@ require_once "$docroot/webGui/include/Helpers.php";
 <!DOCTYPE HTML>
 <html>
 <head>
+<meta name="robots" content="noindex, nofollow">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 </head>

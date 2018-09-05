@@ -17,7 +17,7 @@ $var = parse_ini_file('state/var.ini');
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
-<script src="/webGui/javascript/dynamix.js"></script>
+<script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
 function registerTrial(email, guid) {
   if (email.length) {
