@@ -29,33 +29,38 @@ if (empty($strLoadedModules)) {
   exit;
 }
 
-$arrValidBridges = getNetworkBridges();
-
-// Check for PCIE ACS capabilities
-$boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
-
-// Check the /boot/syslinux/syslinux.cfg for the existance of pcie_acs_override=
-$arrSyslinuxCfg = file('/boot/syslinux/syslinux.cfg');
-$strCurrentLabel = '';
-$boolACSInSyslinux = false;
-
-foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
-  if (stripos(trim($strSyslinuxCfg), 'label ') === 0) $strCurrentLabel = trim(str_ireplace('label ', '', $strSyslinuxCfg));
-  if (stripos($strSyslinuxCfg, 'append ') !== false) {
-    if (stripos($strSyslinuxCfg, 'pcie_acs_override=') !== false) {
-      // pcie_acs_override= was found
-      $boolACSInSyslinux = true;
-    }
-    // We just examine the first append line
-    break;
-  }
+function scan($area, $text) {
+  return strpos($area,$text)!==false;
 }
-$bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
+function detect(&$syslinux, $key) {
+  $size = count($syslinux);
+  $menu = $i = 0;
+  $value = '';
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      // find the current requested setting
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,$key)) {$value = explode('=',$cmd)[1]; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  return $value;
+}
+$syslinux          = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES); file_put_contents('/tmp/syslinux1',print_r($syslinux,true)."\n",FILE_APPEND);
+$arrValidBridges   = getNetworkBridges();
+$pcie_acs_override = detect($syslinux, 'pcie_acs_override');
+$vfio_allow_unsafe = detect($syslinux, 'allow_unsafe_interrupts');
+$bgcolor           = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
-
 <style>
 body{-webkit-overflow-scrolling:touch}
 .errortext{color:#EF3D47;display:none}
@@ -73,10 +78,6 @@ body{-webkit-overflow-scrolling:touch}
 </style>
 
 <span class="status vhshift"><input type="checkbox" class="advancedview"></span>
-<?if ($boolACSEnabled != $boolACSInSyslinux):?>
-  <br><p class="notice">You must reboot for changes to take effect</p>
-<?endif;?>
-
 <form markdown="1" id="settingsForm" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=htmlspecialchars($domain_cfgfile)?>">
 <input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
@@ -194,14 +195,22 @@ VM shutdown time-out:
 > When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
-Enable PCIe ACS Override:
+PCIe ACS Override:
 : <select id="pcie_acs_override" class="narrow">
-  <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '0', 'No'); ?>
-  <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
+  <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
+  <?= mk_option($pcie_acs_override, 'multifunction', 'Multifunction'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream,multifunction', 'Both'); ?>
   </select>
 
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
+
+VFIO Allow Unsafe Interrupts:
+: <select id="vfio_allow_unsafe" class="narrow">
+  <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
+  <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
+  </select>
 
 </div>
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
@@ -211,6 +220,7 @@ Enable PCIe ACS Override:
 <?endif;?>
 : <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
+<div class="notice reboot" style="display:none;margin-bottom:24px">System must be rebooted for changes to take effect!</div>
 
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
 
@@ -269,23 +279,17 @@ $(function(){
 			$("#removeForm").submit();
 			return;
 		}
-		if ($('#pcie_acs_override').val() == '1') {
-			$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action: "acs-override-enable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		} else {
-			$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action: "acs-override-disable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		}
+		$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
+			$("#settingsForm").submit();
+		});
 	});
 
-	$("#mediadir").on("input change", function() {
+	$("#mediadir").on("input change", function(){
 		$("#winvirtio_select").change();
 	});
 
 	var checkDownloadTimer = null;
-	var checkOrInitDownload = function(checkonly) {
+	var checkOrInitDownload = function(checkonly){
 		clearTimeout(checkDownloadTimer);
 
 		var $button = $("#download_button");
@@ -300,7 +304,7 @@ $(function(){
 
 		$button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
 
-		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function( data ) {
+		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function(data){
 			if (postdata.download_version != $('#winvirtio_select').val())
 				return;
 			if (data.error) {
@@ -322,7 +326,7 @@ $(function(){
 		}, "json");
 	};
 
-	$("#SERVICE").change(function changeService() {
+	$("#SERVICE").change(function changeService(){
 		if ($(this).val()=='enable') {
 			$('#arraystopped').fadeIn('slow');
 		} else {
@@ -442,5 +446,9 @@ $(function(){
 			$("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
 		});
 	}
+
+	$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'reboot'}, function(data){
+		if (data.modified) $('div.notice.reboot').show(); else $('div.notice.reboot').hide();
+	});
 });
 </script>

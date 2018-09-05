@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -25,12 +26,45 @@ function requireLibvirt() {
 	}
 }
 
+function scan($area, $text) {
+	return strpos($area,$text)!==false;
+}
+
+function embed(&$syslinux, $key, $value) {
+	$size = count($syslinux);
+	$menu = $i = 0;
+	$cmd  = [];
+	$make = false;
+	// find the default section
+	while ($i < $size) {
+		if (scan($syslinux[$i],'label ')) {
+			$n = $i + 1;
+			// find the current requested setting
+			while (!scan($syslinux[$n],'label ') && $n < $size) {
+				if (scan($syslinux[$n],'menu default')) $menu = 1;
+				if (scan($syslinux[$n],'append')) {$cmd = preg_split('/\s+/',trim($syslinux[$n])); break;}
+				$n++;
+			}
+			if ($menu) break; else $i = $n - 1;
+		}
+		$i++;
+	}
+	if ($cmd) {
+		$new = strlen($value) ? "$key=$value" : "";
+		// replace the existing setting
+		for ($c = 0; $c < count($cmd); $c++) if (scan($cmd[$c],$key)) {$make = ($cmd[$c]!=$new); $cmd[$c] = $new; break;}
+		// or insert the new setting
+		if ($c==count($cmd) && $new) {array_splice($cmd,-1,0,$new); $make = true;}
+		$syslinux[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
+	}
+	return $make;
+}
+
 $arrSizePrefix = [0 => '', 1 => 'K', 2 => 'M', 3 => 'G', 4 => 'T', 5 => 'P'];
-
-$_REQUEST = array_merge($_GET, $_POST);
-
-$action = $_REQUEST['action'] ?: '';
-$uuid = $_REQUEST['uuid'] ?: '';
+$_REQUEST      = array_merge($_GET, $_POST);
+$action        = $_REQUEST['action'] ?? '';
+$uuid          = $_REQUEST['uuid'] ?? '';
+$arrResponse   = [];
 
 if ($uuid) {
 	requireLibvirt();
@@ -41,11 +75,7 @@ if ($uuid) {
 	}
 }
 
-$arrResponse = [];
-
-
 switch ($action) {
-
 	case 'domain-autostart':
 		requireLibvirt();
 		$arrResponse = $lv->domain_set_autostart($domName, ($_REQUEST['autostart'] != "false")) ?
@@ -345,7 +375,6 @@ switch ($action) {
 		$arrResponse = $arrValidUSBDevices;
 		break;
 
-
 	case 'hot-attach-usb':
 		//TODO - If usb is a block device, then attach as a <disk type="usb"> otherwise <hostdev type="usb">
 		/*
@@ -355,63 +384,39 @@ switch ($action) {
 					<product id='0xbeef'/>
 				</source>
 			</hostdev>
-
 			<disk type='block' device='disk'>
 				<driver name='qemu' type='raw'/>
 				<source dev='/dev/sda'/>
 				<target dev='hdX' bus='virtio'/>
 			</disk>
 		*/
-
 		break;
 
 	case 'hot-detach-usb':
 		//TODO
 		break;
 
-	case 'acs-override-enable':
-		// Check each boot option in /boot/syslinux/syslinux.cfg for the existance of pcie_acs_override=downstream, add it in if not found
-		$arrSyslinuxCfg = file('/boot/syslinux/syslinux.cfg');
-		$boolModded = false;
-		foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
-			if (stripos($strSyslinuxCfg, 'append ') !== false) {
-				if (stripos($strSyslinuxCfg, 'pcie_acs_override=') === false) {
-					// pcie_acs_override=downstream was not found so append it in
-					$strSyslinuxCfg = str_ireplace('append ', 'append pcie_acs_override=downstream ', $strSyslinuxCfg);
-					$boolModded = true;
-				}
-			}
-		}
-
-		if ($boolModded) {
-			// Write Changes to syslinux.cfg
-			file_put_contents('/boot/syslinux/syslinux.cfg', implode('', $arrSyslinuxCfg));
-		}
-
-		$arrResponse = ['success' => true, 'modified' => $boolModded];
+	case 'syslinux':
+		$cfg = '/boot/syslinux/syslinux.cfg';
+		$syslinux = file($cfg, FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+		$m1 = embed($syslinux, 'pcie_acs_override', $_REQUEST['pcie']);
+		$m2 = embed($syslinux, 'vfio_iommu_type1.allow_unsafe_interrupts', $_REQUEST['vfio']);
+		if ($m1||$m2) file_put_contents($cfg, implode("\n",$syslinux)."\n");
+		$arrResponse = ['success' => true, 'modified' => $m1|$m2];
 		break;
 
-	case 'acs-override-disable':
-		// Check the /boot/syslinux/syslinux.cfg for the existance of pcie_acs_override=, remove them if found
-		$arrSyslinuxCfg = file('/boot/syslinux/syslinux.cfg');
-		$boolModded = false;
-		foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
-			if (stripos($strSyslinuxCfg, 'append ') !== false) {
-				if (stripos($strSyslinuxCfg, 'pcie_acs_override=') !== false) {
-					// pcie_acs_override= was found so remove the two variations
-					$strSyslinuxCfg = str_ireplace('pcie_acs_override=downstream ', '', $strSyslinuxCfg);
-					$strSyslinuxCfg = str_ireplace('pcie_acs_override=multifunction ', '', $strSyslinuxCfg);
-					$boolModded = true;
-				}
-			}
+	case 'reboot':
+		$cfg = '/boot/syslinux/syslinux.cfg';
+		$syslinux = file($cfg, FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+		$cmdline = explode(' ',file_get_contents('/proc/cmdline'));
+		$pcie = $vfio = '';
+		foreach ($cmdline as $cmd) {
+			if (scan($cmd,'pcie_acs_override')) $pcie = explode('=',$cmd)[1];
+			if (scan($cmd,'allow_unsafe_interrupts')) $vfio = explode('=',$cmd)[1];
 		}
-
-		if ($boolModded) {
-			// Write Changes to syslinux.cfg
-			file_put_contents('/boot/syslinux/syslinux.cfg', implode('', $arrSyslinuxCfg));
-		}
-
-		$arrResponse = ['success' => true, 'modified' => $boolModded];
+		$m1 = embed($syslinux, 'pcie_acs_override', $pcie);
+		$m2 = embed($syslinux, 'vfio_iommu_type1.allow_unsafe_interrupts', $vfio);
+		$arrResponse = ['success' => true, 'modified' => $m1|$m2];
 		break;
 
 	case 'virtio-win-iso-info':
@@ -440,7 +445,6 @@ switch ($action) {
 			$arrResponse = ['exists' => true, 'pid' => $pid, 'path' => $file];
 			break;
 		}
-
 		$arrResponse = ['exists' => false, 'pid' => $pid];
 		break;
 
@@ -466,9 +470,7 @@ switch ($action) {
 				$arrResponse['error'] = 'Not enough free space, need at least ' . ceil($arrDownloadVirtIO['size']/1000000).'MB';
 				break;
 			}
-
 			$boolCheckOnly = !empty($_POST['checkonly']);
-
 			$strInstallScript = '/tmp/VirtIOWin_' . $strKeyName . '_install.sh';
 			$strInstallScriptPgrep = '-f "VirtIOWin_' . $strKeyName . '_install.sh"';
 			$strTargetFile = $_POST['download_path'] . $arrDownloadVirtIO['name'];
@@ -503,95 +505,61 @@ switch ($action) {
 			$arrResponse = [];
 
 			if (file_exists($strTargetFile)) {
-
 				if (!file_exists($strLogFile)) {
-
 					if (!pgrep($strDownloadPgrep, false)) {
-
 						// Status = done
 						$arrResponse['status'] = 'Done';
 						$arrResponse['localpath'] = $strTargetFile;
 						$arrResponse['localfolder'] = dirname($strTargetFile);
-
 					} else {
-
 						// Status = cleanup
 						$arrResponse['status'] = 'Cleanup ... ';
-
 					}
-
 				} else {
-
 					if (pgrep($strDownloadPgrep, false)) {
-
 						// Get Download percent completed
 						$intSize = filesize($strTargetFile);
 						$strPercent = 0;
 						if ($intSize > 0) {
 							$strPercent = round(($intSize / $arrDownloadVirtIO['size']) * 100);
 						}
-
 						$arrResponse['status'] = 'Downloading ... ' . $strPercent . '%';
-
 					} elseif (pgrep($strVerifyPgrep, false)) {
-
 						// Status = running md5 check
 						$arrResponse['status'] = 'Verifying ... ';
-
 					} elseif (file_exists($strMD5StatusFile)) {
-
 						// Status = running extract
 						$arrResponse['status'] = 'Cleanup ... ';
-
 						// Examine md5 status
 						$strMD5StatusContents = file_get_contents($strMD5StatusFile);
-
 						if (strpos($strMD5StatusContents, ': FAILED') !== false) {
-
 							// ERROR: MD5 check failed
 							unset($arrResponse['status']);
 							$arrResponse['error'] = 'MD5 verification failed, your download is incomplete or corrupted.';
-
 						}
-
 					} elseif (!file_exists($strMD5File)) {
-
 						// Status = running md5 check
 						$arrResponse['status'] = 'Downloading ... 100%';
-
 						if (!pgrep($strInstallScriptPgrep, false) && !$boolCheckOnly) {
-
 							// Run all commands
 							file_put_contents($strInstallScript, $strAllCmd);
 							chmod($strInstallScript, 0777);
 							exec($strInstallScript . ' >/dev/null 2>&1 &');
-
 						}
-
 					}
-
 				}
-
 			} elseif (!$boolCheckOnly) {
-
 				if (!pgrep($strInstallScriptPgrep, false)) {
-
 					// Run all commands
 					file_put_contents($strInstallScript, $strAllCmd);
 					chmod($strInstallScript, 0777);
 					exec($strInstallScript . ' >/dev/null 2>&1 &');
-
 				}
-
 				$arrResponse['status'] = 'Downloading ... ';
-
 			}
-
 			$arrResponse['pid'] = pgrep($strInstallScriptPgrep, false);
-
 		}
 		break;
-
 
 	case 'virtio-win-iso-cancel':
 		$arrDownloadVirtIO = [];
@@ -629,7 +597,6 @@ switch ($action) {
 		}
 		break;
 
-
 	case 'virtio-win-iso-remove':
 		$path = $_REQUEST['path'];
 		$file = $_REQUEST['file'];
@@ -664,13 +631,10 @@ switch ($action) {
 		$arrResponse = ['success' => false];
 		break;
 
-
 	default:
 		$arrResponse = ['error' => 'Unknown action \'' . $action . '\''];
 		break;
-
 }
 
 header('Content-Type: application/json');
 die(json_encode($arrResponse));
-
