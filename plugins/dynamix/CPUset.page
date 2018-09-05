@@ -3,7 +3,6 @@ Title="CPU Pinning VM"
 Type="xmenu"
 Icon="grid.png"
 Tag="map-marker"
-Tabs="true"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology
