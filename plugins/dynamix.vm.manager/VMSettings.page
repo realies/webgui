@@ -195,7 +195,7 @@ VM shutdown time-out:
 > When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
-PCIe ACS Override:
+PCIe ACS override:
 : <select id="pcie_acs_override" class="narrow">
   <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
   <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
@@ -206,7 +206,7 @@ PCIe ACS Override:
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
 
-VFIO Allow Unsafe Interrupts:
+VFIO allow unsafe interrupts:
 : <select id="vfio_allow_unsafe" class="narrow">
   <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
   <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
