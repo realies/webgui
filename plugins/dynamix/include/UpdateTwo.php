@@ -120,18 +120,18 @@ case 'ct':
   break;
 case 'is':
   $cfg  = '/boot/syslinux/syslinux.cfg';
-  $sys  = file($cfg, FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
-  $size = count($sys);
+  $syslinux  = file($cfg, FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $size = count($syslinux);
   $menu = $i = 0;
   $cmd = [];
   // find the default section
   while ($i < $size) {
-    if (scan($sys[$i],'label ')) {
+    if (scan($syslinux[$i],'label ')) {
       $n = $i + 1;
-      while (!scan($sys[$n],'label ') && $n < $size) {
-        if (scan($sys[$n],'menu default')) $menu = 1;
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
         // find the current command
-        if (scan($sys[$n],'append')) {$cmd = preg_split('/\s+/',trim($sys[$n])); break;}
+        if (scan($syslinux[$n],'append')) {$cmd = preg_split('/\s+/',trim($syslinux[$n])); break;}
         $n++;
       }
       if ($menu) break; else $i = $n - 1;
@@ -146,8 +146,7 @@ case 'is':
     if ($isolcpus != '') {
       $numbers = explode(',',$isolcpus);
       sort($numbers,SORT_NUMERIC);
-      $previous = array_shift($numbers);
-      $isolcpus = $previous;
+      $isolcpus = $previous = array_shift($numbers);
       $range = false;
       // convert sequential numbers to a range
       foreach ($numbers as $number) {
@@ -166,8 +165,8 @@ case 'is':
     for ($c = 0; $c < count($cmd); $c++) if (scan($cmd[$c],'isolcpus')) {$cmd[$c] = $isolcpus; break;}
     // or insert a new setting
     if ($c == count($cmd) && $isolcpus) array_splice($cmd,-1,0,$isolcpus);
-    $sys[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
-    file_put_contents($cfg, implode("\n",$sys)."\n");
+    $syslinux[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
+    file_put_contents($cfg, implode("\n",$syslinux)."\n");
   }
   $reply = ['success' => $name];
   break;

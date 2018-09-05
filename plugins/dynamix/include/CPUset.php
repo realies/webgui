@@ -88,18 +88,18 @@ case 'ct':
   echo "\0".implode(';',array_map('urlencode',$cts));
   break;
 case 'is':
-  $sys  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
-  $size = count($sys);
+  $syslinux  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $size = count($syslinux);
   $menu = $i = 0;
   $isolcpus = $isol = [];
   // find the default section
   while ($i < $size) {
-    if (scan($sys[$i],'label ')) {
+    if (scan($syslinux[$i],'label ')) {
       $n = $i + 1;
       // find the current isolcpus setting
-      while (!scan($sys[$n],'label ') && $n < $size) {
-        if (scan($sys[$n],'menu default')) $menu = 1;
-        if (scan($sys[$n],'append')) foreach (explode(' ',$sys[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isol = explode('=',$cmd)[1]; break;}
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isol = explode('=',$cmd)[1]; break;}
         $n++;
       }
       if ($menu) break; else $i = $n - 1;
@@ -123,20 +123,19 @@ case 'is':
   break;
 case 'cmd':
   $isolcpus_now = $isolcpus_new = '';
+  $syslinux = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
   $cmdline = explode(' ',file_get_contents('/proc/cmdline'));
   foreach ($cmdline as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_now = $cmd; break;}
-
-  $sys  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
-  $size = count($sys);
+  $size = count($syslinux);
   $menu = $i = 0;
   // find the default section
   while ($i < $size) {
-    if (scan($sys[$i],'label ')) {
+    if (scan($syslinux[$i],'label ')) {
       $n = $i + 1;
       // find the current isolcpus setting
-      while (!scan($sys[$n],'label ') && $n < $size) {
-        if (scan($sys[$n],'menu default')) $menu = 1;
-        if (scan($sys[$n],'append')) foreach (explode(' ',$sys[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_new = $cmd; break;}
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_new = $cmd; break;}
         $n++;
       }
       if ($menu) break; else $i = $n - 1;

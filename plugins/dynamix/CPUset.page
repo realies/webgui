@@ -32,7 +32,7 @@ function create() {
   $loop = floor(($total-1)/32)+1;
   $text = [];
   for ($c = 0; $c < $loop; $c++) {
-    $max = ($c == $loop-1 ? ($total%32?:32) : 32);
+    $max = ($c==$loop-1 ? ($total%32?:32) : 32);
     for ($n = 0; $n < $max; $n++) {
       unset($cpu1,$cpu2);
       list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*32+$n]);
@@ -100,6 +100,7 @@ function apply(form) {
             if (!--wait) {
               setTimeout(function(){$('#wait-'+id).hide();},500);
               $('input[value="Done"]').prop('disabled',false);
+              // isolated cpus, need reboot notice?
               if (id == 'is') notice();
             }
           }
@@ -108,6 +109,7 @@ function apply(form) {
     } else {
       $('#wait-'+id).hide();
       $('input[value="Done"]').prop('disabled',false);
+      if (id == 'is') notice();
     }
   });
 }
