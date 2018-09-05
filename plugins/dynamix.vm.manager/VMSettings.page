@@ -282,7 +282,7 @@ $(function(){
       $("#removeForm").submit();
       return;
     }
-    $.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
       $("#settingsForm").submit();
     });
   });
@@ -361,7 +361,7 @@ $(function(){
       path: $("#mediadir").val(),
       file: $(this).val()
     };
-    $.get("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data){
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data){
       if (!data.exists || data.pid) {
         $("#remove_button").hide('fast');
         $("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
@@ -425,7 +425,7 @@ $(function(){
       $("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
     });
   }
-  $.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'reboot'}, function(data){
+  $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'reboot'}, function(data){
     if (data.modified) $('div.notice.reboot').show(); else $('div.notice.reboot').hide();
   });
 });
