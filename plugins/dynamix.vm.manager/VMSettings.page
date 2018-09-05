@@ -212,6 +212,9 @@ VFIO allow unsafe interrupts:
   <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
   </select>
 
+> Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
+> A reboot will be required for changes to this setting to take affect.
+
 </div>
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
 <input type="button" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
