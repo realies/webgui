@@ -18,7 +18,6 @@ require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
 function requireLibvirt() {
 	global $lv;
-
 	// Make sure libvirt is connected to qemu
 	if (!isset($lv) || !$lv->enabled()) {
 		header('Content-Type: application/json');
@@ -141,7 +140,7 @@ switch ($action) {
 		$arrResponse = $lv->domain_shutdown($domName) ?
 						['success' => true, 'state' => $lv->domain_get_state($domName)] :
 						['error' => $lv->get_last_error()];
-		$n = 20; // wait for VM to die
+		$n = 30; // wait for VM to die
 		while ($arrResponse['success'] && $lv->domain_get_state($domName)=='running') {
 			sleep(1); if(!--$n) break;
 		}
@@ -260,32 +259,24 @@ switch ($action) {
 		$disk = $_REQUEST['disk'];
 		$driver = $_REQUEST['driver'];
 		$size = str_replace(["KB","MB","GB","TB","PB", " ", ","], ["K","M","G","T","P", "", ""], strtoupper($_REQUEST['size']));
-
 		$dir = dirname($disk);
-
 		if (!is_dir($dir))
 			mkdir($dir);
-
 		// determine the actual disk if user share is being used
 		$dir = transpose_user_path($dir);
-
 		@exec("chattr +C -R " . escapeshellarg($dir) . " >/dev/null");
-
 		$strLastLine = exec("qemu-img create -q -f " . escapeshellarg($driver) . " " . escapeshellarg($disk) . " " . escapeshellarg($size) . " 2>&1", $out, $status);
-
 		if (empty($status)) {
 			$arrResponse = ['success' => true];
 		} else {
 			$arrResponse = ['error' => $strLastLine];
 		}
-
 		break;
 
 	case 'disk-resize':
 		$disk = $_REQUEST['disk'];
 		$capacity = str_replace(["KB","MB","GB","TB","PB", " ", ","], ["K","M","G","T","P", "", ""], strtoupper($_REQUEST['cap']));
 		$old_capacity = str_replace(["KB","MB","GB","TB","PB", " ", ","], ["K","M","G","T","P", "", ""], strtoupper($_REQUEST['oldcap']));
-
 		if (substr($old_capacity,0,-1) < substr($capacity,0,-1)){
 			$strLastLine = exec("qemu-img resize -q " . escapeshellarg($disk) . " " . escapeshellarg($capacity) . " 2>&1", $out, $status);
 			if (empty($status)) {
@@ -300,30 +291,23 @@ switch ($action) {
 
 	case 'file-info':
 		$file = $_REQUEST['file'];
-
 		$arrResponse = [
 			'isfile' => (!empty($file) ? is_file($file) : false),
 			'isdir' => (!empty($file) ? is_dir($file) : false),
 			'isblock' => (!empty($file) ? is_block($file) : false),
 			'resizable' => false
 		];
-
 		// if file, get size and format info
 		if (is_file($file)) {
 			$json_info = getDiskImageInfo($file);
 			if (!empty($json_info)) {
 				$intDisplaySize = (int)$json_info['virtual-size'];
 				$intShifts = 0;
-				while (!empty($intDisplaySize) &&
-						(floor($intDisplaySize) == $intDisplaySize) &&
-						isset($arrSizePrefix[$intShifts])) {
-
+				while (!empty($intDisplaySize) && (floor($intDisplaySize) == $intDisplaySize) && isset($arrSizePrefix[$intShifts])) {
 					$arrResponse['display-size'] = $intDisplaySize . $arrSizePrefix[$intShifts];
-
 					$intDisplaySize /= 1024;
 					$intShifts++;
 				}
-
 				$arrResponse['virtual-size'] = $json_info['virtual-size'];
 				$arrResponse['actual-size'] = $json_info['actual-size'];
 				$arrResponse['format'] = $json_info['format'];
@@ -335,15 +319,10 @@ switch ($action) {
 			if (!empty($strDevSize) && is_numeric($strDevSize)) {
 				$arrResponse['actual-size'] = (int)$strDevSize;
 				$arrResponse['format'] = 'raw';
-
 				$intDisplaySize = (int)$strDevSize;
 				$intShifts = 0;
-				while (!empty($intDisplaySize) &&
-						($intDisplaySize >= 2) &&
-						isset($arrSizePrefix[$intShifts])) {
-
+				while (!empty($intDisplaySize) && ($intDisplaySize >= 2) && isset($arrSizePrefix[$intShifts])) {
 					$arrResponse['display-size'] = round($intDisplaySize, 0) . $arrSizePrefix[$intShifts];
-
 					$intDisplaySize /= 1000; // 1000 looks better than 1024 for block devs
 					$intShifts++;
 				}
@@ -423,24 +402,20 @@ switch ($action) {
 		$path = $_REQUEST['path'];
 		$file = $_REQUEST['file'];
 		$pid = pgrep('-f "VirtIOWin_' . basename($file, '.iso') . '_install.sh"', false);
-
 		if (empty($file)) {
 			$arrResponse = ['exists' => false, 'pid' => $pid];
 			break;
 		}
-
 		if (is_file($file)) {
 			$arrResponse = ['exists' => true, 'pid' => $pid, 'path' => $file];
 			break;
 		}
-
 		if (empty($path) || !is_dir($path)) {
 			$path = '/mnt/user/isos/';
 		} else {
 			$path = str_replace('//', '/', $path.'/');
 		}
 		$file = $path.$file;
-
 		if (is_file($file)) {
 			$arrResponse = ['exists' => true, 'pid' => $pid, 'path' => $file];
 			break;
@@ -450,50 +425,43 @@ switch ($action) {
 
 	case 'virtio-win-iso-download':
 		$arrDownloadVirtIO = [];
-		$strKeyName = basename($_POST['download_version'], '.iso');
+		$strKeyName = basename($_REQUEST['download_version'], '.iso');
 		if (array_key_exists($strKeyName, $virtio_isos)) {
 			$arrDownloadVirtIO = $virtio_isos[$strKeyName];
 		}
-
 		if (empty($arrDownloadVirtIO)) {
-			$arrResponse = ['error' => 'Unknown version: ' . $_POST['download_version']];
-		} elseif (empty($_POST['download_path'])) {
+			$arrResponse = ['error' => 'Unknown version: ' . $_REQUEST['download_version']];
+		} elseif (empty($_REQUEST['download_path'])) {
 			$arrResponse = ['error' => 'Specify a ISO storage path first'];
-		} elseif (!is_dir($_POST['download_path'])) {
+		} elseif (!is_dir($_REQUEST['download_path'])) {
 			$arrResponse = ['error' => 'ISO storage path doesn\'t exist, please create the user share (or empty folder) first'];
 		} else {
-			@mkdir($_POST['download_path'], 0777, true);
-			$_POST['download_path'] = realpath($_POST['download_path']) . '/';
-
+			@mkdir($_REQUEST['download_path'], 0777, true);
+			$_REQUEST['download_path'] = realpath($_REQUEST['download_path']) . '/';
 			// Check free space
-			if (disk_free_space($_POST['download_path']) < $arrDownloadVirtIO['size']+10000) {
+			if (disk_free_space($_REQUEST['download_path']) < $arrDownloadVirtIO['size']+10000) {
 				$arrResponse['error'] = 'Not enough free space, need at least ' . ceil($arrDownloadVirtIO['size']/1000000).'MB';
 				break;
 			}
-			$boolCheckOnly = !empty($_POST['checkonly']);
+			$boolCheckOnly = !empty($_REQUEST['checkonly']);
 			$strInstallScript = '/tmp/VirtIOWin_' . $strKeyName . '_install.sh';
 			$strInstallScriptPgrep = '-f "VirtIOWin_' . $strKeyName . '_install.sh"';
-			$strTargetFile = $_POST['download_path'] . $arrDownloadVirtIO['name'];
+			$strTargetFile = $_REQUEST['download_path'] . $arrDownloadVirtIO['name'];
 			$strLogFile = $strTargetFile . '.log';
 			$strMD5File = $strTargetFile . '.md5';
 			$strMD5StatusFile = $strTargetFile . '.md5status';
-
 			// Save to /boot/config/domain.conf
-			$domain_cfg['MEDIADIR'] = $_POST['download_path'];
+			$domain_cfg['MEDIADIR'] = $_REQUEST['download_path'];
 			$domain_cfg['VIRTIOISO'] = $strTargetFile;
 			$tmp = '';
 			foreach ($domain_cfg as $key => $value) $tmp .= "$key=\"$value\"\n";
 			file_put_contents($domain_cfgfile, $tmp);
-
 			$strDownloadCmd = 'wget -nv -c -O ' . escapeshellarg($strTargetFile) . ' ' . escapeshellarg($arrDownloadVirtIO['url']);
 			$strDownloadPgrep = '-f "wget.*' . $strTargetFile . '.*' . $arrDownloadVirtIO['url'] . '"';
-
 			$strVerifyCmd = 'md5sum -c ' . escapeshellarg($strMD5File);
 			$strVerifyPgrep = '-f "md5sum.*' . $strMD5File . '"';
-
-			$strCleanCmd = '(chmod 777 ' . escapeshellarg($_POST['download_path']) . ' ' . escapeshellarg($strTargetFile) . '; chown nobody:users ' . escapeshellarg($_POST['download_path']) . ' ' . escapeshellarg($strTargetFile) . '; rm ' . escapeshellarg($strMD5File) . ' ' . escapeshellarg($strMD5StatusFile) . ')';
+			$strCleanCmd = '(chmod 777 ' . escapeshellarg($_REQUEST['download_path']) . ' ' . escapeshellarg($strTargetFile) . '; chown nobody:users ' . escapeshellarg($_REQUEST['download_path']) . ' ' . escapeshellarg($strTargetFile) . '; rm ' . escapeshellarg($strMD5File) . ' ' . escapeshellarg($strMD5StatusFile) . ')';
 			$strCleanPgrep = '-f "chmod.*chown.*rm.*' . $strMD5StatusFile . '"';
-
 			$strAllCmd = "#!/bin/bash\n\n";
 			$strAllCmd .= $strDownloadCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
 			$strAllCmd .= 'echo "' . $arrDownloadVirtIO['md5'] . '  ' . $strTargetFile . '" > ' . escapeshellarg($strMD5File) . ' && ';
@@ -501,9 +469,7 @@ switch ($action) {
 			$strAllCmd .= $strCleanCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
 			$strAllCmd .= 'rm ' . escapeshellarg($strLogFile) . ' && ';
 			$strAllCmd .= 'rm ' . escapeshellarg($strInstallScript);
-
 			$arrResponse = [];
-
 			if (file_exists($strTargetFile)) {
 				if (!file_exists($strLogFile)) {
 					if (!pgrep($strDownloadPgrep, false)) {
@@ -563,16 +529,15 @@ switch ($action) {
 
 	case 'virtio-win-iso-cancel':
 		$arrDownloadVirtIO = [];
-		$strKeyName = basename($_POST['download_version'], '.iso');
+		$strKeyName = basename($_REQUEST['download_version'], '.iso');
 		if (array_key_exists($strKeyName, $virtio_isos)) {
 			$arrDownloadVirtIO = $virtio_isos[$strKeyName];
 		}
-
 		if (empty($arrDownloadVirtIO)) {
-			$arrResponse = ['error' => 'Unknown version: ' . $_POST['download_version']];
-		} elseif (empty($_POST['download_path'])) {
+			$arrResponse = ['error' => 'Unknown version: ' . $_REQUEST['download_version']];
+		} elseif (empty($_REQUEST['download_path'])) {
 			$arrResponse = ['error' => 'ISO storage path was empty'];
-		} elseif (!is_dir($_POST['download_path'])) {
+		} elseif (!is_dir($_REQUEST['download_path'])) {
 			$arrResponse = ['error' => 'ISO storage path doesn\'t exist'];
 		} else {
 			$strInstallScriptPgrep = '-f "VirtIOWin_' . $strKeyName . '_install.sh"';
@@ -583,7 +548,7 @@ switch ($action) {
 				if (!posix_kill($pid, SIGTERM)) {
 					$arrResponse = ['error' => 'Wasn\'t able to stop the process'];
 				} else {
-					$strTargetFile = $_POST['download_path'] . $arrDownloadVirtIO['name'];
+					$strTargetFile = $_REQUEST['download_path'] . $arrDownloadVirtIO['name'];
 					$strLogFile = $strTargetFile . '.log';
 					$strMD5File = $strTargetFile . '.md5';
 					$strMD5StatusFile = $strTargetFile . '.md5status';
@@ -601,7 +566,6 @@ switch ($action) {
 		$path = $_REQUEST['path'];
 		$file = $_REQUEST['file'];
 		$pid = pgrep('-f "VirtIOWin_' . basename($file, '.iso') . '_install.sh"', false);
-
 		if (empty($file) || substr($file, -4) !== '.iso') {
 			$arrResponse = ['success' => false];
 			break;
@@ -610,24 +574,20 @@ switch ($action) {
 			$arrResponse = ['success' => false];
 			break;
 		}
-
 		if (is_file($file)) {
 			$arrResponse = ['success' => unlink($file)];
 			break;
 		}
-
 		if (empty($path) || !is_dir($path)) {
 			$path = '/mnt/user/isos/';
 		} else {
 			$path = str_replace('//', '/', $path.'/');
 		}
 		$file = $path.$file;
-
 		if (is_file($file)) {
 			$arrResponse = ['success' => unlink($file)];
 			break;
 		}
-
 		$arrResponse = ['success' => false];
 		break;
 
