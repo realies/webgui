@@ -121,5 +121,29 @@ case 'is':
   create('is', 'isolcpus', $isolcpus);
   echo "</tr>";
   break;
+case 'cmd':
+  $isolcpus_now = $isolcpus_new = '';
+  $cmdline = explode(' ',file_get_contents('/proc/cmdline'));
+  foreach ($cmdline as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_now = $cmd; break;}
+
+  $sys  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $size = count($sys);
+  $menu = $i = 0;
+  // find the default section
+  while ($i < $size) {
+    if (scan($sys[$i],'label ')) {
+      $n = $i + 1;
+      // find the current isolcpus setting
+      while (!scan($sys[$n],'label ') && $n < $size) {
+        if (scan($sys[$n],'menu default')) $menu = 1;
+        if (scan($sys[$n],'append')) foreach (explode(' ',$sys[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_new = $cmd; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  echo $isolcpus_now==$isolcpus_new ? 0 : 1;
+  break;
 }
 ?>

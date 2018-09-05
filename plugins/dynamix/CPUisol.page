@@ -22,8 +22,10 @@ Tag="leaf"
 </table>
 <input type="button" value="Apply" onclick="apply(this.form)" disabled><input type="button" value="Done" onclick="done()"><span id="wait-is" class="red-text" style="display:none"><i class="fa fa-spinner fa-spin"></i> Please wait...</span>
 </form>
+<div class="notice isol" style="display:none">System must be rebooted for changes to take effect!</div>
 
 > CPU isolation allows the user to specify CPU cores that are to be explicitly reserved for assignment (to VMs or Containers).
 >
 > This is incredibly important for gaming VMs to run smoothly because even if you manually pin your docker containers to not overlap with your gaming VM,
 > the host OS can still utilize those same cores as the guest VM needs for things like returning responses for the webGui, running a parity check, btrfs operations, etc.
+

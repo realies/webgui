@@ -100,7 +100,7 @@ function apply(form) {
             if (!--wait) {
               setTimeout(function(){$('#wait-'+id).hide();},500);
               $('input[value="Done"]').prop('disabled',false);
-              if (id == 'is') swal({html:true, type:'success', title:'CPU Isolation', text:'<b>Settings are only effective after a system reboot!</b>'});
+              if (id == 'is') notice();
             }
           }
         });
@@ -136,6 +136,12 @@ function is() {
     buttons(document.is);
   });
 }
+function notice() {
+  // notice to reboot system after changes
+  $.post('/webGui/include/CPUset.php',{id:'cmd'},function(d){
+    if (d==1) $('div.notice.isol').show(); else $('div.notice.isol').hide();
+  });
+}
 function reset(form) {
   // undo changes without a complete refresh of the page
   $(form).find('input[value="Apply"]').prop('disabled',true);
@@ -168,6 +174,7 @@ $(function(){
   ct();
 <?endif;?>
   is();
+  notice();
 });
 </script>
 
