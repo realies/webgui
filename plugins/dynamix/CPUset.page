@@ -44,7 +44,6 @@ function create() {
 }
 ?>
 <style>
-form{margin-bottom:20px}
 table.tablesorter tr>th+th{text-align:right;vertical-align:top}
 table.tablesorter tr>td+td+td{vertical-align:top}
 table.tablesorter tr>th+th+th,table.tablesorter tr>td+td{text-align:center}
@@ -178,11 +177,6 @@ $(function(){
   notice();
 });
 </script>
-
-<?if (!$libvirtd && !$dockerd):?>
-<div class="notice">No CPU pinning available. VM service or Docker service must be started</div>
-<?endif;?>
-
 <?if ($libvirtd):?>
 <form name="vm">
 <input type="hidden" name="names" id="names-vm" value="">
@@ -192,6 +186,8 @@ $(function(){
 </table>
 <input type="button" value="Apply" onclick="apply(this.form)" disabled><input type="button" value="Done" onclick="done()"><span id="wait-vm" class="red-text" style="display:none"><i class="fa fa-spinner fa-spin"></i> Please wait...</span>
 </form>
+<?else:?>
+<div class="notice">No CPU pinning available. VM service must be started</div>
 <?endif;?>
 
 > This page gives a total view of the current CPU pinning assignments for VMs.<br>
