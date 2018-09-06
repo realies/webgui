@@ -25,6 +25,7 @@ $busy = "<i class='fa fa-spin fa-circle-o-notch'></i> Please wait... starting up
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
+table#docker_containers{text-align:left}
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
 body{-webkit-overflow-scrolling:touch}
