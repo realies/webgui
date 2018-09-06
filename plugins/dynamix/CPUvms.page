@@ -16,7 +16,8 @@ Tag="map-marker"
 ?>
 <?
 $libvirtd = pgrep('libvirtd')!==false;
-$dockerd = pgrep('dockerd')!==false;
+$dockerd  = pgrep('dockerd')!==false;
+$safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
 
 $cpus = cpu_list();
 $total = count($cpus);
@@ -132,6 +133,9 @@ function is() {
   $.post('/webGui/include/CPUset.php',{id:'is',cpus:'<?=$cpuset?>'},function(d){
     $('#table-is').html(d);
     buttons(document.is);
+<?if ($safemode):?>
+    $('#table-is').find('input[type=checkbox]').prop('disabled',true);
+<?endif;?>
   });
 }
 function notice() {
