@@ -29,33 +29,38 @@ if (empty($strLoadedModules)) {
   exit;
 }
 
-$arrValidBridges = getNetworkBridges();
-
-// Check for PCIE ACS capabilities
-$boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
-
-// Check the /boot/syslinux/syslinux.cfg for the existance of pcie_acs_override=
-$arrSyslinuxCfg = file('/boot/syslinux/syslinux.cfg');
-$strCurrentLabel = '';
-$boolACSInSyslinux = false;
-
-foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
-  if (stripos(trim($strSyslinuxCfg), 'label ') === 0) $strCurrentLabel = trim(str_ireplace('label ', '', $strSyslinuxCfg));
-  if (stripos($strSyslinuxCfg, 'append ') !== false) {
-    if (stripos($strSyslinuxCfg, 'pcie_acs_override=') !== false) {
-      // pcie_acs_override= was found
-      $boolACSInSyslinux = true;
-    }
-    // We just examine the first append line
-    break;
-  }
+function scan($area, $text) {
+  return strpos($area,$text)!==false;
 }
-$bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
+function detect(&$syslinux, $key) {
+  $size = count($syslinux);
+  $menu = $i = 0;
+  $value = '';
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      // find the current requested setting
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,$key)) {$value = explode('=',$cmd)[1]; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  return $value;
+}
+$syslinux          = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+$arrValidBridges   = getNetworkBridges();
+$pcie_acs_override = detect($syslinux, 'pcie_acs_override');
+$vfio_allow_unsafe = detect($syslinux, 'allow_unsafe_interrupts');
+$bgcolor           = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
-
 <style>
 body{-webkit-overflow-scrolling:touch}
 .errortext{color:#EF3D47;display:none}
@@ -73,10 +78,6 @@ body{-webkit-overflow-scrolling:touch}
 </style>
 
 <span class="status vhshift"><input type="checkbox" class="advancedview"></span>
-<?if ($boolACSEnabled != $boolACSInSyslinux):?>
-  <br><p class="notice">You must reboot for changes to take effect</p>
-<?endif;?>
-
 <form markdown="1" id="settingsForm" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=htmlspecialchars($domain_cfgfile)?>">
 <input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
@@ -194,27 +195,35 @@ VM shutdown time-out:
 > When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
-Enable PCIe ACS Override:
+PCIe ACS override:
 : <select id="pcie_acs_override" class="narrow">
-  <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '0', 'No'); ?>
-  <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
+  <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
+  <?= mk_option($pcie_acs_override, 'multifunction', 'Multifunction'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream,multifunction', 'Both'); ?>
   </select>
 
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
 
+VFIO allow unsafe interrupts:
+: <select id="vfio_allow_unsafe" class="narrow">
+  <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
+  <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
+  </select>
+
+> Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
+> A reboot will be required for changes to this setting to take affect.
+
+</div>
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
-<input type="button" class="advanced" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
+<input type="button" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
 <?else:?>
 &nbsp;
 <?endif;?>
 : <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
-</div>
-<div class="basic" markdown="1">
-&nbsp;
-: <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
-</div>
 </form>
+<div class="notice reboot" style="display:none;margin-bottom:24px">System must be rebooted for changes to take effect!</div>
 
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
 
@@ -268,183 +277,156 @@ btrfs scrub status:
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js')?>"></script>
 <script>
 $(function(){
-	$("#applyBtn").click(function(){
-		if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
-			$("#removeForm").submit();
-			return;
-		}
-		if ($('#pcie_acs_override').val() == '1') {
-			$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action: "acs-override-enable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		} else {
-			$.getJSON("/plugins/dynamix.vm.manager/include/VMajax.php", {action: "acs-override-disable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		}
-	});
+  $("#applyBtn").click(function(){
+    if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
+      $("#removeForm").submit();
+      return;
+    }
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
+      $("#settingsForm").submit();
+    });
+  });
 
-	$("#mediadir").on("input change", function() {
-		$("#winvirtio_select").change();
-	});
+  $("#mediadir").on("input change", function(){
+    $("#winvirtio_select").change();
+  });
 
-	var checkDownloadTimer = null;
-	var checkOrInitDownload = function(checkonly) {
-		clearTimeout(checkDownloadTimer);
-
-		var $button = $("#download_button");
-		var $form = $button.closest('form');
-
-		var postdata = {
-			action: "virtio-win-iso-download",
-			download_version: $('#winvirtio_select').val(),
-			download_path: $('#mediadir').val(),
-			checkonly: ((typeof checkonly === 'undefined') ? false : !!checkonly) ? 1 : 0
-		};
-
-		$button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
-
-		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function( data ) {
-			if (postdata.download_version != $('#winvirtio_select').val())
-				return;
-			if (data.error) {
-				$("#download_status").html('<span style="color: red">' + data.error + '</span>');
-				$button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
-			} else {
-				$("#download_status").html(data.status);
-
-				if (data.pid) {
-					checkDownloadTimer = setTimeout(checkOrInitDownload, 1000);
-					return;
-				}
-
-				if (data.status == 'Done') {
-					$("#winvirtio_select").change();
-				}
-			}
-
-		}, "json");
-	};
-
-	$("#SERVICE").change(function changeService() {
-		if ($(this).val()=='enable') {
-			$('#arraystopped').fadeIn('slow');
-		} else {
-			$('#arraystopped').fadeOut('fast');
-		}
-	});
-	if ($("#SERVICE").val()!='enable') $('#arraystopped').hide();
-
-	$("#download_button").click(function downloadVirtIOVersion() {
-		if (!$(this).hasClass('fa-spin')) {
-			checkOrInitDownload(false);
-		}
-	});
-
-	$("#remove_button").click(function removeVirtIOVersion() {
-		var postdata = {
-			action: "virtio-win-iso-remove",
-			path: $('#mediadir').val(),
-			file: $('#winvirtio_select').val()
-		};
-		$.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function( data ) {
-			if (postdata.file != $('#winvirtio_select').val())
-				return;
-
-			if (data.success) {
-				$("#winvirtio_select").change();
-			}
-		}, "json");
-	});
-
-	// Fire events below once upon showing page
-	$("#winvirtio_select").change(function changeVirtIOVersion() {
-		clearTimeout(checkDownloadTimer);
-
-		if ($(this).val()=='manual') {
-			$("#download_button,#download_status").hide('fast');
-			$("#winvirtio").show('fast');
-			return;
-		}
-
-		$("#winvirtio").hide('fast');
-
-		var params = {
-			action: "virtio-win-iso-info",
-			path: $("#mediadir").val(),
-			file: $(this).val()
-		};
-
-		$.get("/plugins/dynamix.vm.manager/include/VMajax.php", params, function( data ) {
-
-			if (!data.exists || data.pid) {
-				$("#remove_button").hide('fast');
-				$("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
-				$("#download_status").html('').show('fast');
-				if (data.pid) {
-					checkOrInitDownload(true);
-				}
-			} else {
-				$("#download_button,#download_status").hide('fast');
-				$("#remove_button").show('fast');
-				$("#winvirtio").val(data.path);
-			}
-
-		}, "json");
-	}).change(); // Fire now too!
-
-	if ($.cookie('vmsettings_view_mode') == 'advanced') {
-		$('.advanced').show();
-		$('.basic').hide();
-	}
-	$('.advancedview').switchButton({
-		labels_placement: "left",
-		on_label: 'Advanced View',
-		off_label: 'Basic View',
-		checked: $.cookie('vmsettings_view_mode') == 'advanced'
-	});
-	$('.advancedview').change(function () {
-		$('.advanced').toggle('slow');
-		$('.basic').toggle('slow');
-		$.cookie('vmsettings_view_mode', $('.advancedview').is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
-	});
-
-	showStatus('pid','libvirt/libvirtd');
-
-	<?if ($var['fsState'] == "Started"):?>
-		$("input[data-pickroot]").fileTreeAttach();
-	<?endif;?>
-
-	if ($("#IMAGE_FILE").length) {
-		$("#IMAGE_FILE").on("input change", function () {
-			$("#IMAGE_ERROR").fadeOut();
-			$("#applyBtn").prop("disabled", false);
-			<? if (file_exists($domain_cfg['IMAGE_FILE'])) { ?>
-			if ($(this).val() != "<?=$domain_cfg['IMAGE_FILE']?>") {
-				$("#deleteCheckbox").prop("disabled", true).attr("checked", false);
-				$("#deletePanel").fadeOut();
-			} else {
-				$("#deleteCheckbox").attr("checked", false).prop("disabled", false);
-				$("#deletePanel").fadeIn();
-			}
-			<? } ?>
-		});
-
-		$("#deleteCheckbox").change(function () {
-			var checked = $(this).is(":checked");
-			$("#SERVICE").prop("disabled", checked).val('disable');
-			$("#IMAGE_SIZE").prop("disabled", checked);
-			$("#IMAGE_FILE").prop("disabled", checked).val("<?=$domain_cfg['IMAGE_FILE']?>");
-			$("#domaindir").prop("disabled", checked);
-			$("#mediadir").prop("disabled", checked);
-			$("#winvirtio_select").prop("disabled", checked);
-			$("#winvirtio").prop("disabled", checked);
-			$("#bridge").prop("disabled", checked);
-			$("#hostshutdown").prop("disabled", checked);
-			$("#pcie_acs_override").prop("disabled", checked);
-			$("#vm_shutdown_timeout").prop("disabled", checked);
-			$("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
-		});
-	}
+  var checkDownloadTimer = null;
+  var checkOrInitDownload = function(checkonly){
+    clearTimeout(checkDownloadTimer);
+    var $button = $("#download_button");
+    var $form = $button.closest('form');
+    var postdata = {
+      action: "virtio-win-iso-download",
+      download_version: $('#winvirtio_select').val(),
+      download_path: $('#mediadir').val(),
+      checkonly: ((typeof checkonly === 'undefined') ? false : !!checkonly) ? 1 : 0
+    };
+    $button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function(data){
+      if (postdata.download_version != $('#winvirtio_select').val())
+        return;
+      if (data.error) {
+        $("#download_status").html('<span style="color: red">' + data.error + '</span>');
+        $button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
+      } else {
+        $("#download_status").html(data.status);
+        if (data.pid) {
+          checkDownloadTimer = setTimeout(checkOrInitDownload, 1000);
+          return;
+        }
+        if (data.status == 'Done') {
+          $("#winvirtio_select").change();
+        }
+      }
+    }, "json");
+  };
+  $("#SERVICE").change(function changeService(){
+    if ($(this).val()=='enable') {
+      $('#arraystopped').fadeIn('slow');
+    } else {
+      $('#arraystopped').fadeOut('fast');
+    }
+  });
+  if ($("#SERVICE").val()!='enable') $('#arraystopped').hide();
+  $("#download_button").click(function downloadVirtIOVersion(){
+    if (!$(this).hasClass('fa-spin')) {
+      checkOrInitDownload(false);
+    }
+  });
+  $("#remove_button").click(function removeVirtIOVersion() {
+    var postdata = {
+      action: "virtio-win-iso-remove",
+      path: $('#mediadir').val(),
+      file: $('#winvirtio_select').val()
+    };
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function(data){
+      if (postdata.file != $('#winvirtio_select').val()) return;
+      if (data.success) {
+        $("#winvirtio_select").change();
+      }
+    }, "json");
+  });
+  // Fire events below once upon showing page
+  $("#winvirtio_select").change(function changeVirtIOVersion(){
+    clearTimeout(checkDownloadTimer);
+    if ($(this).val()=='manual') {
+      $("#download_button,#download_status").hide('fast');
+      $("#winvirtio").show('fast');
+      return;
+    }
+    $("#winvirtio").hide('fast');
+    var params = {
+      action: "virtio-win-iso-info",
+      path: $("#mediadir").val(),
+      file: $(this).val()
+    };
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data){
+      if (!data.exists || data.pid) {
+        $("#remove_button").hide('fast');
+        $("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
+        $("#download_status").html('').show('fast');
+        if (data.pid) {
+          checkOrInitDownload(true);
+        }
+      } else {
+        $("#download_button,#download_status").hide('fast');
+        $("#remove_button").show('fast');
+        $("#winvirtio").val(data.path);
+      }
+    }, "json");
+  }).change(); // Fire now too!
+  if ($.cookie('vmsettings_view_mode') == 'advanced') {
+    $('.advanced').show();
+    $('.basic').hide();
+  }
+  $('.advancedview').switchButton({
+    labels_placement: "left",
+    on_label: 'Advanced View',
+    off_label: 'Basic View',
+    checked: $.cookie('vmsettings_view_mode') == 'advanced'
+  });
+  $('.advancedview').change(function(){
+    $('.advanced').toggle('slow');
+    $('.basic').toggle('slow');
+    $.cookie('vmsettings_view_mode', $('.advancedview').is(':checked') ? 'advanced' : 'basic', {expires:3650});
+  });
+  showStatus('pid','libvirt/libvirtd');
+  <?if ($var['fsState'] == "Started"):?>
+    $("input[data-pickroot]").fileTreeAttach();
+  <?endif;?>
+  if ($("#IMAGE_FILE").length) {
+    $("#IMAGE_FILE").on("input change", function(){
+      $("#IMAGE_ERROR").fadeOut();
+      $("#applyBtn").prop("disabled", false);
+      <? if (file_exists($domain_cfg['IMAGE_FILE'])) { ?>
+      if ($(this).val() != "<?=$domain_cfg['IMAGE_FILE']?>") {
+        $("#deleteCheckbox").prop("disabled", true).attr("checked", false);
+        $("#deletePanel").fadeOut();
+      } else {
+        $("#deleteCheckbox").attr("checked", false).prop("disabled", false);
+        $("#deletePanel").fadeIn();
+      }
+      <? } ?>
+    });
+    $("#deleteCheckbox").change(function(){
+      var checked = $(this).is(":checked");
+      $("#SERVICE").prop("disabled", checked).val('disable');
+      $("#IMAGE_SIZE").prop("disabled", checked);
+      $("#IMAGE_FILE").prop("disabled", checked).val("<?=$domain_cfg['IMAGE_FILE']?>");
+      $("#domaindir").prop("disabled", checked);
+      $("#mediadir").prop("disabled", checked);
+      $("#winvirtio_select").prop("disabled", checked);
+      $("#winvirtio").prop("disabled", checked);
+      $("#bridge").prop("disabled", checked);
+      $("#hostshutdown").prop("disabled", checked);
+      $("#pcie_acs_override").prop("disabled", checked);
+      $("#vm_shutdown_timeout").prop("disabled", checked);
+      $("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
+    });
+  }
+  $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'reboot'}, function(data){
+    if (data.modified) $('div.notice.reboot').show(); else $('div.notice.reboot').hide();
+  });
 });
 </script>

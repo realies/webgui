@@ -13,6 +13,10 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
+function scan($area, $text) {
+  return strpos($area,$text)!==false;
+}
+
 $name = urldecode($_POST['name']);
 switch ($_POST['id']) {
 case 'vm':
@@ -111,6 +115,58 @@ case 'ct':
   // remove old orphan image since it's no longer used by this container
   if ($imageID && $imageID != $newImageID) {
     $DockerClient->removeImage($imageID);
+  }
+  $reply = ['success' => $name];
+  break;
+case 'is':
+  $cfg  = '/boot/syslinux/syslinux.cfg';
+  $syslinux  = file($cfg, FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $size = count($syslinux);
+  $menu = $i = 0;
+  $cmd = [];
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        // find the current command
+        if (scan($syslinux[$n],'append')) {$cmd = preg_split('/\s+/',trim($syslinux[$n])); break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  if ($cmd) {
+    // modify the current command
+    $file = "/var/tmp/$name.tmp";
+    // read new isolcpus assignments
+    $isolcpus = file_get_contents($file); unlink($file);
+    if ($isolcpus != '') {
+      $numbers = explode(',',$isolcpus);
+      sort($numbers,SORT_NUMERIC);
+      $isolcpus = $previous = array_shift($numbers);
+      $range = false;
+      // convert sequential numbers to a range
+      foreach ($numbers as $number) {
+        if ($number == $previous+1) {
+          $range = true;
+        } else {
+          if ($range) {$isolcpus .= '-'.$previous; $range = false;}
+          $isolcpus .= ','.$number;
+        }
+        $previous = $number;
+      }
+      if ($range) $isolcpus .= '-'.$previous;
+      $isolcpus = "isolcpus=$isolcpus";
+    }
+    // replace an existing setting
+    for ($c = 0; $c < count($cmd); $c++) if (scan($cmd[$c],'isolcpus')) {$cmd[$c] = $isolcpus; break;}
+    // or insert a new setting
+    if ($c == count($cmd) && $isolcpus) array_splice($cmd,-1,0,$isolcpus);
+    $syslinux[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
+    file_put_contents($cfg, implode("\n",$syslinux)."\n");
   }
   $reply = ['success' => $name];
   break;

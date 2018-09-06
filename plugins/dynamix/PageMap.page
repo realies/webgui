@@ -17,7 +17,7 @@ Tag="list"
 <?if ($display['resize']):?>
 <script>
 function resize() {
-  $('div.up').height(Math.max(window.innerHeight-280,370)).show();
+  $('div.up').height(Math.max(window.innerHeight-320,330)).show();
 }
 $(function() {
   resize();

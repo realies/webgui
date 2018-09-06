@@ -25,6 +25,7 @@ $busy = "<i class='fa fa-spin fa-circle-o-notch'></i> Please wait... starting up
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
+table#docker_containers{text-align:left}
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
 body{-webkit-overflow-scrolling:touch}
@@ -70,7 +71,7 @@ $('.tabs').append("<span id='busy' class='red-text strong' style='display:none;p
 function resize(bind) {
   var width = [];
   var h = $('#docker_list').height();
-  var s = Math.max(window.innerHeight-300,370);
+  var s = Math.max(window.innerHeight-340,330);
   if (h>s || bind) {
     $('#docker_list').height(s);
     $('#docker_containers tbody tr:first-child td').each(function(){width.push($(this).width());});

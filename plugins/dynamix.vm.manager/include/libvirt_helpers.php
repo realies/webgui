@@ -1092,24 +1092,28 @@
 		foreach ($hostnew as $key => $device) {
 			$auto = $device['tag'];
 			$vendor = $device['source']['vendor']['@attributes']['id'];
-			$remove = false;
-			list($product,$remove) = explode('#',$device['source']['product']['@attributes']['id']);
+			$remove_usb = $remove_pci = false;
+			list($product,$remove_usb) = explode('#',$device['source']['product']['@attributes']['id']);
 			$pci = $device['source']['address']['@attributes'];
-			if ($remove) unset($new['devices']['hostdev'][$key]);
+			list($function,$remove_pci) = explode('#',$pci['function']);
+			if ($remove_usb || $remove_pci) unset($new['devices']['hostdev'][$key]);
 			foreach ($hostold as $k => $d) {
 				$v = $d['source']['vendor']['@attributes']['id'];
 				$p = $d['source']['product']['@attributes']['id'];
 				$p2 = $d['source']['address']['@attributes'];
 				if ($v && $p && $v==$vendor && $p==$product) unset($old['devices']['hostdev'][$k]);
-				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$pci['function']) unset($old['devices']['hostdev'][$k]);
+				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$function) unset($old['devices']['hostdev'][$k]);
 			}
 		}
+		// do not overwrite existing driver type settings
+		$disks = $new['devices']['disk'];
+		foreach ($disks as $key => $disk) unset($new['devices']['disk'][$key]['driver']['@attributes']['type']);
 		// settings not in the GUI, but maybe customized
 		unset($new['memoryBacking'], $new['clock'], $new['features']);
 		// update parent arrays
 		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
 		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
-		unset($old['cputune']['vcpupin']);
+		unset($old['cputune']['vcpupin'],$old['devices']['graphics'],$old['devices']['video']);
 		// set namespace
 		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 	}

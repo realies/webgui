@@ -14,6 +14,10 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $cpus = explode(';',$_POST['cpus']);
 
+function scan($area, $text) {
+  return strpos($area,$text)!==false;
+}
+
 function create($id, $name, $vcpu) {
   // create the list of checkboxes. Make multiple rows when CPU cores are many ;)
   global $cpus;
@@ -82,6 +86,63 @@ case 'ct':
   }
   // return the cpu assignments and available container names
   echo "\0".implode(';',array_map('urlencode',$cts));
+  break;
+case 'is':
+  $syslinux  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $size = count($syslinux);
+  $menu = $i = 0;
+  $isolcpus = $isol = [];
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      // find the current isolcpus setting
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isol = explode('=',$cmd)[1]; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  if ($isol != '') {
+    // convert to individual numbers
+    foreach (explode(',',$isol) as $cpu) {
+      unset($first,$last);
+      list($first,$last) = explode('-',$cpu);
+      $last = $last ?: $first;
+      for ($x = $first; $x <= $last; $x++) $isolcpus[] = $x;
+    }
+    sort($isolcpus,SORT_NUMERIC);
+    $isolcpus = array_unique($isolcpus,SORT_NUMERIC);
+  }
+  echo "<tr><td>Isolated CPUs</td>";
+  create('is', 'isolcpus', $isolcpus);
+  echo "</tr>";
+  break;
+case 'cmd':
+  $isolcpus_now = $isolcpus_new = '';
+  $syslinux = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+  $cmdline = explode(' ',file_get_contents('/proc/cmdline'));
+  foreach ($cmdline as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_now = $cmd; break;}
+  $size = count($syslinux);
+  $menu = $i = 0;
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      // find the current isolcpus setting
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,'isolcpus')) {$isolcpus_new = $cmd; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  echo $isolcpus_now==$isolcpus_new ? 0 : 1;
   break;
 }
 ?>
