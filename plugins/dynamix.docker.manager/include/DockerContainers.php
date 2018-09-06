@@ -70,6 +70,7 @@ foreach ($containers as $ct) {
     $ports[] = sprintf('%s:%s/%s<i class="fa fa-arrows-h" style="margin:0 6px"></i>%s:%s', $intern, $port['PrivatePort'], strtoupper($port['Type']), $extern, $port['PublicPort']);
   }
   $paths = [];
+  $ct['Volumes'] = is_array($ct['Volumes']) ?: [];
   foreach ($ct['Volumes'] as $mount) {
     list($host_path,$container_path,$access_mode) = explode(':',$mount);
     $paths[] = sprintf('%s<i class="fa fa-%s" style="margin:0 6px"></i>%s', htmlspecialchars($container_path), $access_mode=='ro'?'long-arrow-left':'arrows-h', htmlspecialchars($host_path));
