@@ -1431,6 +1431,10 @@ $(function() {
 		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
 		});
+		// remove graphic cards for automatic rebuild
+		$button.closest('form').find('select[name="gpu[0][id]"] option').each(function(){
+			if ($(this).val() != 'vnc') $('form#vmform').append('<input type="hidden" name="pci[]" value="'+$(this).val()+'#remove">');
+		});
 		<?endif?>
 		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
 		<?if (!$boolNew):?>
