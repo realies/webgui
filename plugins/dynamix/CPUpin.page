@@ -39,3 +39,7 @@ Tag="map-marker"
 >
 > By default NO cores are selected for a Docker container, which means it uses all available cores.<br>
 > Do not select **ALL** cores for containers, just select **NO** cores if you want unrestricted core use.
+>
+> Do not select cores for containers which are *isolated*.
+> By design a container will only use a single core (the lowest numbered core) when multiple isolated cores are selected.<br>
+> Usually this is not what a user wants when selecting multiple cores.
