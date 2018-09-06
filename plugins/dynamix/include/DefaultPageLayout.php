@@ -32,6 +32,7 @@
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
 .back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:25px}
 <?
+$safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
 $tasks = find_pages('Tasks');
 $buttons = find_pages('Buttons');
 $banner = '/boot/config/plugins/dynamix/banner.png';
@@ -524,7 +525,7 @@ $(function() {
   var top = ($.cookie('top')||0) - $('.tabs').offset().top - 75;
   if (top>0) {$('html,body').scrollTop(top);}
   $.removeCookie('top',{path:'/'});
-<?if (strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false):?>
+<?if ($safemode):?>
   showNotice('System running in <b>safe</b> mode');
 <?else:?>
 <?$readme = @file_get_contents("$docroot/plugins/unRAIDServer/README.md",false,null,0,20);?>

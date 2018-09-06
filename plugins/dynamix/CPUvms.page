@@ -17,7 +17,6 @@ Tag="map-marker"
 <?
 $libvirtd = pgrep('libvirtd')!==false;
 $dockerd  = pgrep('dockerd')!==false;
-$safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
 
 $cpus = cpu_list();
 $total = count($cpus);
