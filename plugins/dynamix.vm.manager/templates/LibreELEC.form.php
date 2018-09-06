@@ -1127,7 +1127,7 @@ $(function() {
 		// remove unused graphic cards
 		var gpus = [], i = 0;
 		do {
-		  var gpu = $button.closest('form').find('select[name="gpu['+(i++)+'][id]"] option:selected').val();
+			var gpu = $button.closest('form').find('select[name="gpu['+(i++)+'][id]"] option:selected').val();
 			if (gpu) gpus.push(gpu);
 		} while (gpu);
 		$button.closest('form').find('select[name="gpu[0][id]"] option').each(function(){
