@@ -242,7 +242,7 @@ foreach ($disks as $disk) {
     $attr = 'profile';
     if (exec("/sbin/btrfs filesystem df /mnt/cache 2>/dev/null|grep -c '^Data'")>1) {
       if (empty($saved[$item][$attr])) {
-        exec("$notify -e ".escapeshellarg("Unraid $text message")." -s ".escapeshellarg("Warning [$server] - Cache pool BTRFS too many profiles")." -d ".escapeshellarg("$info")." -i \"warning\"");
+        exec("$notify -e ".escapeshellarg("Unraid $text message")." -s ".escapeshellarg("Warning [$server] - Cache pool BTRFS too many profiles (You can ignore this warning when a cache pool balance operation is in progress)")." -d ".escapeshellarg("$info")." -i \"warning\"");
         $saved[$item][$attr] = 1;
       }
     } elseif (isset($saved[$item][$attr])) unset($saved[$item][$attr]);
