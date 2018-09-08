@@ -229,7 +229,7 @@ div.Panel img.PanelImg{width:auto;max-width:48px;height:48px}
 div.Panel i.PanelIcon{font-size:48px}
 div.user-list{float:left;padding:10px;margin-right:10px;margin-bottom:24px;border:1px solid #2f2f2f;border-radius:5px;line-height:20px;height:100px;width:100px;background:#262626}
 div.user-list img{width:auto;max-width:48px;height:48px;margin-bottom:16px}
-div.up{margin-top:-20px;border:1px solid #2b2b2b;padding:4px 6px;overflow:auto}
+div.up{margin-top:-30px;border:1px solid #2b2b2b;padding:4px 6px;overflow:auto}
 div.spinner{margin:48px auto;text-align:center}
 div.spinner.fixed{display:none;position:fixed;top:50%;left:50%;margin-top:-16px;margin-left:-64px}
 div.spinner .unraid_mark{height:64px}

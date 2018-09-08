@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -18,39 +18,21 @@ $memory = '/tmp/memory.tmp';
 if (isset($_POST['#apply'])) {
   $cron = "";
   if ($_POST['mode']>0) {
-    $time = isset($_POST['hour']) ? $_POST['hour'] : '* *';
-    $dotm = isset($_POST['dotm']) ? $_POST['dotm'] : '*';
+    $time = $_POST['hour'] ?? '* *';
+    $dotm = $_POST['dotm'] ?? '*';
+    $term = $echo = '';
     switch ($dotm) {
-    case '28-31':
-      $term = '[[ $(date +%e -d +1day) -eq 1 ]] && ';
-      break;
-    case 'W1':
-      $dotm = '*';
-      $term = '[[ $(date +%e) -le 7 ]] && ';
-    break;
-    case 'W2':
-      $dotm = '*';
-      $term = '[[ $(date +%e -d -7days) -le 7 ]] && ';
-      break;
-    case 'W3':
-      $dotm = '*';
-      $term = '[[ $(date +%e -d -14days) -le 7 ]] && ';
-      break;
-    case 'W4':
-      $dotm = '*';
-      $term = '[[ $(date +%e -d -21days) -le 7 ]] && ';
-      break;
-    case 'WL':
-      $dotm = '*';
-      $term = '[[ $(date +%e -d +7days) -le 7 ]] && ';
-      break;
-    default:
-      $term = '';
+      case '28-31': $term = '[[ $(date +%e -d +1day) -eq 1 ]] && '; $echo = ' || :'; break;
+      case 'W1'   : $dotm = '1-7'; break;
+      case 'W2'   : $dotm = '8-14'; break;
+      case 'W3'   : $dotm = '15-21'; break;
+      case 'W4'   : $dotm = '22-28'; break;
+      case 'WL'   : $dotm = '24-31'; break;
     }
     $month = isset($_POST['month']) ? $_POST['month'] : '*';
     $day = isset($_POST['day']) ? $_POST['day'] : '*';
     $write = isset($_POST['write']) ? $_POST['write'] : '';
-    $cron = "# Generated parity check schedule:\n$time $dotm $month $day $term/usr/local/sbin/mdcmd check $write &> /dev/null || :\n\n";
+    $cron = "# Generated parity check schedule:\n$time $dotm $month $day $term/usr/local/sbin/mdcmd check $write &> /dev/null{$echo}\n\n";
   }
   parse_cron_cfg("dynamix", "parity-check", $cron);
   @unlink($memory);
