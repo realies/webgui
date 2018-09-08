@@ -92,6 +92,7 @@ case 'is':
   $size = count($syslinux);
   $menu = $i = 0;
   $isol = "";
+  $isolcpus = [];
   // find the default section
   while ($i < $size) {
     if (scan($syslinux[$i],'label ')) {
