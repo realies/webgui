@@ -91,7 +91,7 @@ case 'is':
   $syslinux  = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
   $size = count($syslinux);
   $menu = $i = 0;
-  $isolcpus = $isol = "";
+  $isol = "";
   // find the default section
   while ($i < $size) {
     if (scan($syslinux[$i],'label ')) {
