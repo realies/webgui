@@ -47,7 +47,7 @@ form+p{display:none}
 #header{position:fixed;top:0;left:0;width:100%;height:90px;z-index:100;margin:0;background-color:#edeaef;background-size:100% 90px;background-repeat:no-repeat;border-bottom:#9794a0 1px solid}
 #header .logo{float:left;margin-left:75px;color:#e22828;width:160px;text-align:center}
 #header .logo svg{width:160px;display:block;margin:25px 50px 8px 0}
-#header .block{margin:0;float:right;text-align:right;background-color:rgba(237,234,239,0.7);padding:7px 12px}
+#header .block{margin:0;float:right;text-align:right;background-color:rgba(237,234,239,0.7);padding:6px 12px 7px 12px}
 #header .text-left{float:left;text-align:right;padding-right:5px;border-right:solid medium #f15a2c}
 #header .text-right{float:right;text-align:left;padding-left:5px}
 #header .text-right a{color:#606e7f}
