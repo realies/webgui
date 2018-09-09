@@ -27,7 +27,7 @@ if (isset($_POST['#apply'])) {
       case 'W2'   : $dotm = '8-14'; break;
       case 'W3'   : $dotm = '15-21'; break;
       case 'W4'   : $dotm = '22-28'; break;
-      case 'WL'   : $dotm = '[[ $(date +%e -d +7days) -le 7 ]] && '; $echo = ' || :'; break;
+      case 'WL'   : $dotm = '*'; $term = '[[ $(date +%e -d +7days) -le 7 ]] && '; $echo = ' || :'; break;
     }
     $month = isset($_POST['month']) ? $_POST['month'] : '*';
     $day = isset($_POST['day']) ? $_POST['day'] : '*';
