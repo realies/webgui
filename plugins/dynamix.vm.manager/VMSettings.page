@@ -196,21 +196,21 @@ VM shutdown time-out:
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
 PCIe ACS override:
-: <select id="pcie_acs_override" class="narrow">
+: <select id="pcie_acs_override" class="narrow"<?=$safemode?' disabled':''?>>
   <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
   <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
   <?= mk_option($pcie_acs_override, 'multifunction', 'Multifunction'); ?>
   <?= mk_option($pcie_acs_override, 'downstream,multifunction', 'Both'); ?>
-  </select>
+  </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>
 
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
 
 VFIO allow unsafe interrupts:
-: <select id="vfio_allow_unsafe" class="narrow">
+: <select id="vfio_allow_unsafe" class="narrow"<?=$safemode?' disabled':''?>>
   <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
   <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
-  </select>
+  </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>
 
 > Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
 > A reboot will be required for changes to this setting to take affect.
@@ -282,9 +282,13 @@ $(function(){
       $("#removeForm").submit();
       return;
     }
+<?if ($safemode):?>
+    $("#settingsForm").submit();
+<?else:?>
     $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
       $("#settingsForm").submit();
     });
+<?endif;?>
   });
 
   $("#mediadir").on("input change", function(){
