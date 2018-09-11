@@ -1105,15 +1105,17 @@
 				if ($p2['bus'] && $p2['slot'] && $p2['function'] && $p2['bus']==$pci['bus'] && $p2['slot']==$pci['slot'] && $p2['function']==$function) unset($old['devices']['hostdev'][$k]);
 			}
 		}
-		// do not overwrite existing driver type settings
-		$disks = $new['devices']['disk'];
-		foreach ($disks as $key => $disk) unset($new['devices']['disk'][$key]['driver']['@attributes']['type']);
+		// preserve existing disk driver settings
+		foreach ($new['devices']['disk'] as $key => $disk) {
+			$source = $disk['source']['@attributes']['file'];
+			foreach ($old['devices']['disk'] as $k => $d) if ($source==$d['source']['@attributes']['file']) $new['devices']['disk'][$key]['driver']['@attributes'] = $d['driver']['@attributes'];
+		}
 		// settings not in the GUI, but maybe customized
 		unset($new['memoryBacking'], $new['clock'], $new['features']);
 		// update parent arrays
 		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
 		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
-		unset($old['cputune']['vcpupin'],$old['devices']['graphics'],$old['devices']['video']);
+		unset($old['cputune']['vcpupin'],$old['devices']['graphics'],$old['devices']['video'],$old['devices']['disk']);
 		// set namespace
 		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 	}
