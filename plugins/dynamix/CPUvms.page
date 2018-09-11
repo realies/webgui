@@ -50,7 +50,8 @@ input.flat{margin:0}
 input.lock{margin:0}
 </style>
 <script>
-String.prototype.stripper = function(){return this.replace(/ |\(|\)|\[|\]/g,'');}
+String.prototype.strip = function(){return this.replace(/ |\(|\)|\[|\]/g,'');}
+String.prototype.encode = function(){return this.replace(/\./g,'%2e');}
 
 function apply(form) {
   // disable buttons
@@ -61,10 +62,10 @@ function apply(form) {
   var id = $(form).prop('name');
   var args = {};
   args['id'] = id;
-  args['names'] = form.names.value;
+  args['names'] = form.names.value.encode();
   // get the 'checked' cpus
   $(form).find('input[type=checkbox]').each(function(){
-    if ($(this).prop('checked')) args[$(this).prop('name')] = 'on';
+    if ($(this).prop('checked')) args[$(this).prop('name').encode()] = 'on';
   });
   // show the instant wait message
   $('#wait-'+id).show();
@@ -80,7 +81,7 @@ function apply(form) {
       wait = data.length;
       for (var i=0; i < data.length; i++) {
         var name = data[i];
-        $('#'+id+'-'+name.stripper()).show('slow');
+        $('#'+id+'-'+name.strip()).show('slow');
         // step 2: apply the changes by updating the vm or container
         $.post('/webGui/include/UpdateTwo.php',{id:id,name:encodeURI(name)},function(reply){
           if (reply.error) {
@@ -91,7 +92,7 @@ function apply(form) {
               reset($('form[name="'+id+'"]'));
             });
           } else {
-            $('#'+id+'-'+reply.success.stripper()).hide('slow');
+            $('#'+id+'-'+reply.success.strip()).hide('slow');
             // cleanup when all is done
             if (!--wait) {
               setTimeout(function(){$('#wait-'+id).hide();},500);
