@@ -11,14 +11,18 @@
  */
 ?>
 <?
+function decode($data) {
+  return str_replace('%2e','.',urldecode($data));
+}
+
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $map = $changes = [];
-foreach (array_map('urldecode',explode(';',$_POST['names'])) as $name) $map[$name] = '';
+foreach (array_map('decode',explode(';',$_POST['names'])) as $name) $map[$name] = '';
 
 foreach($_POST as $key => $val) {
   if ($val != 'on') continue;
   list($name,$cpu) = explode(':',$key);
-  $map[urldecode($name)] .= "$cpu,";
+  $map[decode($name)] .= "$cpu,";
 }
 // map holds the list of each vm, container or isolcpus and its newly proposed cpu assignments
 $map = array_map(function($d){return substr($d,0,-1);},$map);

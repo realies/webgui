@@ -226,6 +226,7 @@ Default critical disk temperature threshold (&deg;<?=$display['unit']?>):
 <form markdown="1" name="smart_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDiskSettings(this)">
 <input type="hidden" name="#file" value="/boot/config/smart-all.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
+<input type="hidden" name="#cleanup" value="true">
 <input type="hidden" name="#top" value="1">
 <input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smIndex" value="0">
@@ -256,17 +257,18 @@ Default SMART notification tolerance level:
 
 Default SMART controller type:
 : <select name="smType" size="1" onchange="setIndex(this.form)">
-  <?=mk_option($disk['smType'], "", "Automatic")?>
-  <?=mk_option($disk['smType'], "-d ata", "ATA")?>
-  <?=mk_option($disk['smType'], "-d nvme", "NVMe")?>
-  <?=mk_option($disk['smType'], "-d sat", "SAT")?>
-  <?=mk_option($disk['smType'], "-d scsi", "SCSI")?>
-  <?=mk_option($disk['smType'], "-d 3ware", "3Ware")?>
-  <?=mk_option($disk['smType'], "-d aacraid", "Adaptec")?>
-  <?=mk_option($disk['smType'], "-d areca", "Areca")?>
-  <?=mk_option($disk['smType'], "-d hpt", "HighPoint")?>
-  <?=mk_option($disk['smType'], "-d marvell", "Marvell")?>
-  <?=mk_option($disk['smType'], "-d megaraid", "MegaRAID")?>
+  <?=mk_option($var['smType'], "", "Automatic")?>
+  <?=mk_option($var['smType'], "-d ata", "ATA")?>
+  <?=mk_option($var['smType'], "-d nvme", "NVMe")?>
+  <?=mk_option($var['smType'], "-d sat", "SAT")?>
+  <?=mk_option($var['smType'], "-d scsi", "SCSI")?>
+  <?=mk_option($var['smType'], "-d 3ware", "3Ware")?>
+  <?=mk_option($var['smType'], "-d aacraid", "Adaptec")?>
+  <?=mk_option($var['smType'], "-d areca", "Areca")?>
+  <?=mk_option($var['smType'], "-d hpt", "HighPoint")?>
+  <?=mk_option($var['smType'], "-d cciss", "HP cciss")?>
+  <?=mk_option($var['smType'], "-d marvell", "Marvell")?>
+  <?=mk_option($var['smType'], "-d megaraid", "MegaRAID")?>
   </select>
 
 > By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.

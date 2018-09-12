@@ -92,8 +92,9 @@ function setGlue(form,reset) {
    {glue:'' ,more:0,dev:0,type:''},                                                        // scsi
    {glue:',',more:1,dev:1,type:'',min1:0,max1:127},                                        // 3ware
    {glue:',',more:3,dev:1,type:'',min1:0,max1:15,min2:0,max2:7,min3:0,max3:7},             // adaptec
-   {glue:',',more:1,dev:1,type:'',min1:1,max1:24},                                         // areca
+   {glue:'/',more:2,dev:1,type:'',min1:1,max1:128,min2:1,max2:8},                          // areca
    {glue:'/',more:3,dev:1,type:'',min1:1,max1:4,min2:1,max2:128,min3:1,max3:4},            // highpoint
+   {glue:'' ,more:1,dev:1,type:'',min1:0,max1:15},                                         // hp cciss
    {glue:'' ,more:0,dev:0,type:''},                                                        // marvell
    {glue:',',more:1,dev:1,type:'',min1:0,max1:127}                                         // megaraid
   ];
@@ -525,6 +526,7 @@ xfs_repair status:
 <input type="hidden" name="#file" value="/boot/config/smart-one.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
 <input type="hidden" name="#section" value="<?=htmlspecialchars($name)?>">
+<input type="hidden" name="#cleanup" value="true">
 <input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smGlue" value="<?=htmlspecialchars($var['smGlue'])?>">
 SMART notification value:
@@ -566,6 +568,7 @@ SMART controller type:
   <?=mk_option($disk['smType'], "-d aacraid", "Adaptec")?>
   <?=mk_option($disk['smType'], "-d areca", "Areca")?>
   <?=mk_option($disk['smType'], "-d hpt", "HighPoint")?>
+  <?=mk_option($disk['smType'], "-d cciss", "HP cciss")?>
   <?=mk_option($disk['smType'], "-d marvell", "Marvell")?>
   <?=mk_option($disk['smType'], "-d megaraid", "MegaRAID")?>
   </select>
