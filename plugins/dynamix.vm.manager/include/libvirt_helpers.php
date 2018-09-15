@@ -1085,6 +1085,20 @@
 		];
 	}
 
+	function create_vdisk(&$new) {
+		global $lv;
+		$index = 0;
+		foreach ($new['disk'] as $i => $disk) {
+			$index++;
+			if ($disk['new']) {
+				$disk = $lv->create_disk_image($disk, $new['domain']['name'], $index);
+				if ($disk['error']) return $disk['error'];
+				$new['disk'][$i] = $disk;
+			}
+		}
+		return false;
+	}
+
 	function array_update_recursive(&$old, &$new) {
 		$hostold = $old['devices']['hostdev']; // existing devices including custom settings
 		$hostnew = $new['devices']['hostdev']; // GUI generated devices
@@ -1115,7 +1129,8 @@
 		// update parent arrays
 		if (!$old['devices']['hostdev']) unset($old['devices']['hostdev']);
 		if (!$new['devices']['hostdev']) unset($new['devices']['hostdev']);
-		unset($old['cputune']['vcpupin'],$old['devices']['graphics'],$old['devices']['video'],$old['devices']['disk']);
+		// remove existing auto-generated settings
+		unset($old['cputune']['vcpupin'],$old['devices']['graphics'],$old['devices']['video'],$old['devices']['disk'],$old['devices']['interface']);
 		// set namespace
 		$new['metadata']['vmtemplate']['@attributes']['xmlns'] = 'unraid';
 	}
