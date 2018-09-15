@@ -18,21 +18,21 @@ $memory = '/tmp/memory.tmp';
 if (isset($_POST['#apply'])) {
   $cron = "";
   if ($_POST['mode']>0) {
-    $time = $_POST['hour'] ?? '* *';
-    $dotm = $_POST['dotm'] ?? '*';
-    $term = $echo = '';
+    $time  = $_POST['hour'] ?: '* *';
+    $dotm  = $_POST['dotm'] ?: '*';
+    $month = $_POST['month'] ?: '*';
+    $day   = $_POST['day'] ?: '*';
+    $write = $_POST['write'] ?: '';
+    $term  = '';
     switch ($dotm) {
-      case '28-31': $term = '[[ $(date +%e -d +1day) -eq 1 ]] && '; $echo = ' || :'; break;
+      case '28-31': $term = '[[ $(date +%e -d +1day) -eq 1 ]] && '; break;
       case 'W1'   : $dotm = '1-7'; break;
       case 'W2'   : $dotm = '8-14'; break;
       case 'W3'   : $dotm = '15-21'; break;
       case 'W4'   : $dotm = '22-28'; break;
-      case 'WL'   : $dotm = '*'; $term = '[[ $(date +%e -d +7days) -le 7 ]] && '; $echo = ' || :'; break;
+      case 'WL'   : $dotm = '*'; $term = '[[ $(date +%e -d +7days) -le 7 ]] && '; break;
     }
-    $month = isset($_POST['month']) ? $_POST['month'] : '*';
-    $day = isset($_POST['day']) ? $_POST['day'] : '*';
-    $write = isset($_POST['write']) ? $_POST['write'] : '';
-    $cron = "# Generated parity check schedule:\n$time $dotm $month $day $term/usr/local/sbin/mdcmd check $write &> /dev/null{$echo}\n\n";
+    $cron = "# Generated parity check schedule:\n$time $dotm $month $day $term/usr/local/sbin/mdcmd check $write &> /dev/null || :\n\n";
   }
   parse_cron_cfg("dynamix", "parity-check", $cron);
   @unlink($memory);
