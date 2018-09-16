@@ -52,12 +52,17 @@ case 'vm':
   $xml->cpu->topology['cores'] = $cores;
   $xml->cpu->topology['threads'] = $threads;
   $xml->vcpu = $vcpus;
+  $pin = []; foreach ($xml->cputune->emulatorpin->attributes() as $key => $value) $pin[$key] = (string)$value;
   unset($xml->cputune);
   $xml->addChild('cputune');
   for ($i = 0; $i < $vcpus; $i++) {
     $vcpu = $xml->cputune->addChild('vcpupin');
     $vcpu['vcpu'] = $i;
     $vcpu['cpuset'] = $cpuset[$i];
+  }
+  if ($pin) {
+    $attr = $xml->cputune->addChild('emulatorpin');
+    foreach ($pin as $key => $value) $attr[$key] = $value;
   }
   // stop running vm first?
   $running = $lv->domain_get_state($dom)=='running';
