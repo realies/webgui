@@ -394,7 +394,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 		$boolRunning = $lv->domain_get_state($dom)=='running';
 		$strXML = $lv->domain_get_xml($dom);
 		$boolNew = false;
-		$arrConfig = domain_to_config($uuid);
+		$arrConfig = array_replace_recursive($arrConfigDefaults, domain_to_config($uuid));
 	} else {
 		// edit new VM
 		$boolRunning = false;
@@ -1118,29 +1118,40 @@ $(function() {
 	$("#vmform .formview #btnSubmit").click(function frmSubmit() {
 		var $button = $(this);
 		var $panel = $('.formview');
+		var form = $button.closest('form');
 
 		$panel.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
 
 		<?if (!$boolNew):?>
 		// signal devices to be added or removed
-		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
+		form.find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if (!$(this).prop('checked')) $(this).prop('checked',true).val($(this).val()+'#remove');
 		});
 		// remove unused graphic cards
 		var gpus = [], i = 0;
 		do {
-			var gpu = $button.closest('form').find('select[name="gpu['+(i++)+'][id]"] option:selected').val();
+			var gpu = form.find('select[name="gpu['+(i++)+'][id]"] option:selected').val();
 			if (gpu) gpus.push(gpu);
 		} while (gpu);
-		$button.closest('form').find('select[name="gpu[0][id]"] option').each(function(){
+		form.find('select[name="gpu[0][id]"] option').each(function(){
 			var gpu = $(this).val();
-			if (gpu != 'vnc' && !gpus.includes(gpu)) $('form#vmform').append('<input type="hidden" name="pci[]" value="'+gpu+'#remove">');
+			if (gpu != 'vnc' && !gpus.includes(gpu)) form.append('<input type="hidden" name="pci[]" value="'+gpu+'#remove">');
+		});
+		// remove unused sound cards
+		var sound = [], i = 0;
+		do {
+			var audio = form.find('select[name="audio['+(i++)+'][id]"] option:selected').val();
+			if (audio) sound.push(audio);
+		} while (audio);
+		form.find('select[name="audio[0][id]"] option').each(function(){
+			var audio = $(this).val();
+			if (audio && !sound.includes(audio)) form.append('<input type="hidden" name="pci[]" value="'+audio+'#remove">');
 		});
 		<?endif?>
-		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
+		var postdata = form.find('input,select').serialize().replace(/'/g,"%27");
 		<?if (!$boolNew):?>
 		// keep checkbox visually unchecked
-		$button.closest('form').find('input[name="usb[]"],input[name="pci[]"]').each(function(){
+		form.find('input[name="usb[]"],input[name="pci[]"]').each(function(){
 			if ($(this).val().indexOf('#remove')>0) $(this).prop('checked',false);
 		});
 		<?endif?>

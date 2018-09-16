@@ -34,7 +34,7 @@ class custom {
   * @param array $arr   - array object to be converterd
   * @return XML object
   */
-  public static function &createXML($root, $arr=array()) {
+  public static function &createXML($root, $arr) {
     $xml = self::getXMLRoot();
     $xml->appendChild(self::Array2XML($root, $arr));
     self::$xml = null; // clear the xml node in the class for 2nd time use
@@ -55,7 +55,7 @@ class custom {
  /*
   * Recursive conversion Array to XML
   */
-  private static function &Array2XML($node_name, $arr=array()) {
+  private static function &Array2XML($node_name, $arr) {
     $xml = self::getXMLRoot();
     $node = $xml->createElement($node_name);
     if (is_array($arr)) {
@@ -130,11 +130,11 @@ class custom {
       // store as single or multi array
       if (!isset($tags[$node])) {
         // specific for Unraid
-        if (in_array($node,['hostdev','controller','disk'])) $tags[$node][] = $data; else $tags[$node] = $data;
+        if (in_array($node,['hostdev','controller','disk','interface'])) $tags[$node][] = $data; else $tags[$node] = $data;
       } elseif (is_array($tags[$node]) && array_keys($tags[$node])===range(0, count($tags[$node])-1)) {
         $tags[$node][] = $data;
       } else {
-        $tags[$node] = array($tags[$node], $data);
+        $tags[$node] = [$tags[$node], $data];
       }
     }
     $textContent = [];
