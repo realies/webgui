@@ -1458,7 +1458,7 @@ $(function() {
 			if (audio && !sound.includes(audio)) form.append('<input type="hidden" name="pci[]" value="'+audio+'#remove">');
 		});
 		<?endif?>
-		var postdata = $button.closest('form').find('input,select').serialize().replace(/'/g,"%27");
+		var postdata = form.find('input,select').serialize().replace(/'/g,"%27");
 		<?if (!$boolNew):?>
 		// keep checkbox visually unchecked
 		form.find('input[name="usb[]"],input[name="pci[]"]').each(function(){
