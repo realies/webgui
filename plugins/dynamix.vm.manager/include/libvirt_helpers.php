@@ -519,7 +519,7 @@
 		return $abbreviation;
 	}
 
-	function renderVMContentIcon($uuid, $name, $icon, $state) {
+	function renderVMContentIcon($uuid, $name, $icon, $state, $text=false) {
 		switch ($state) {
 			case 'running':
 				$shape = 'play';
@@ -536,14 +536,11 @@
 				break;
 		}
 
-		return "<div class=\"Panel $status\">
-				<div id=\"vm-".htmlspecialchars($uuid)."\" style=\"display:block; cursor:pointer\">
-					<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
-						<img src=\"$icon\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
-						<i class=\"fa iconstatus fa-$shape $status\" title=\"$status\"></i>
-					</div></div>
-					<div class=\"PanelText\"><span class=\"PanelText $status\">$name</span></div>
-				</div>";
+		return "<div id=\"vm-".htmlspecialchars($uuid)."\" class=\"Panel $status\" style=\"cursor:pointer\">
+			<div style=\"display:block\"><div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
+			<img src=\"$icon\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
+			<i class=\"fa iconstatus fa-$shape $status\" title=\"$status\"></i>
+			</div></div>".($text?"<div class=\"PanelText\"><span class=\"PanelText $status\">$name</span></div>":"")."</div>";
 	}
 
 	function sanitizeVendor($strVendor) {
