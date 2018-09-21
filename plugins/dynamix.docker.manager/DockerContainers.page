@@ -65,7 +65,7 @@ input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;bac
 <?if (!$tabbed):?>
 $('#title').append("<span id='busy' class='red-text strong' style='display:none;margin-left:40px'><?=$busy?></span>");
 <?else:?>
-$('.tabs').append("<span id='busy' class='red-text strong' style='display:none;position:relative;top:<?=$top?>px;left:40px;font-size:16px;letter-spacing:2px'><?=$busy?></span>");
+$('.tabs').append("<span id='busy' class='red-text strong' style='display:none;position:relative;top:<?=$top?>px;left:40px;font-size:15px;letter-spacing:2px'><?=$busy?></span>");
 <?endif;?>
 <?if ($display['resize']):?>
 function resize(bind) {
