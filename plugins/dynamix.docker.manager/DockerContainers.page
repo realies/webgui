@@ -65,7 +65,7 @@ input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;bac
 <?if (!$tabbed):?>
 $('#title').append("<span id='busy' class='red-text strong' style='display:none;margin-left:40px'><?=$busy?></span>");
 <?else:?>
-$('.tabs').append("<span id='busy' class='red-text strong' style='display:none;position:relative;top:<?=$top?>px;left:40px;font-size:16px;letter-spacing:2px'><?=$busy?></span>");
+$('.tabs').append("<span id='busy' class='red-text strong' style='display:none;position:relative;top:<?=$top?>px;left:40px;font-size:15px;letter-spacing:2px'><?=$busy?></span>");
 <?endif;?>
 <?if ($display['resize']):?>
 function resize(bind) {
@@ -147,8 +147,10 @@ watchDocker.on('message', function(data){
   data = data.split('\n');
   for (var i=0,row; row=data[i]; i++) {
     var id = row.split(' ');
-    $('#cpu-'+id[0]).css('width',id[1]).text(id[1].replace('.','<?=$display['number'][0]?>'));
-    $('#mem-'+id[0]).css('width',id[2]).text(id[2].replace('.','<?=$display['number'][0]?>'));
+    var w1 = Math.min(id[1].substr(0,id[1].length-1),100)+'%';
+    var w2 = Math.min(id[2].substr(0,id[2].length-1),100)+'%';
+    $('#cpu-'+id[0]).css('width',w1).text(w1.replace('.','<?=$display['number'][0]?>'));
+    $('#mem-'+id[0]).css('width',w2).text(w2.replace('.','<?=$display['number'][0]?>'));
   }
 });
 $(function() {

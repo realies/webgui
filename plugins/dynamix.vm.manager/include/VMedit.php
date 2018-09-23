@@ -93,7 +93,7 @@ body{-webkit-overflow-scrolling:touch}
 #vmform table tr td:nth-child(even){width:100px}
 #vmform table tr td:last-child{width:inherit}
 #vmform .multiple{position:relative}
-#vmform .sectionbutton{position:absolute;left:2px;cursor:pointer;opacity:0.4;font-size:15px;line-height:17px;z-index:10;transition-property:opacity,left;transition-duration:0.1s;transition-timing-function:linear}
+#vmform .sectionbutton{position:absolute;left:2px;cursor:pointer;opacity:0.4;font-size:14px;line-height:17px;z-index:10;transition-property:opacity,left;transition-duration:0.1s;transition-timing-function:linear}
 #vmform .sectionbutton.remove{top:0;opacity:0.3}
 #vmform .sectionbutton.add{bottom:0}
 #vmform .sectionbutton:hover{opacity:1.0}

@@ -18,7 +18,7 @@ Markdown="false"
 <style type="text/css">
 	.vmheader {
 		padding: 10px;
-		font-size: 16px;
+		font-size: 15px;
 		text-align: left;
 		color: #888;
 	}

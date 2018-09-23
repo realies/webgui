@@ -50,9 +50,8 @@ if (pgrep('dockerd')!==false && ($display=='icons' || $display=='docker')) {
     $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
     $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
     $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
-    echo "<div class='Panel $status'>";
-    echo "<div id='$id' style='display:block; cursor:pointer'>";
-    echo "<div style='position:relative;width:48px;height:48px;margin:0px auto;'>";
+    echo "<div id='$id' class='Panel $status' style='cursor:pointer'>";
+    echo "<div style='display:block'><div style='position:relative;width:48px;height:48px;margin:0px auto;'>";
     echo "<img src='$icon' class='$status' style='position:absolute;top:0;bottom:0;left:0;right:0;width:48px;height:48px;'><i class='fa iconstatus fa-$shape $status' title='$status'></i></div></div>";
     echo "<div class='PanelText'><span class='PanelText ".($updateStatus=='false'?'update':$status)."'>$name</span></div></div>";
   }
@@ -87,7 +86,7 @@ if (pgrep('libvirtd')!==false && ($display=='icons' || $display=='vms')) {
     $log = (is_file("/var/log/libvirt/qemu/$vm.log") ? "libvirt/qemu/$vm.log" : '');
     $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');", addslashes($vm), addslashes($uuid), addslashes($template), $state, addslashes($vnc), addslashes($log));
     $vmicon = $lv->domain_get_icon_url($res);
-    echo renderVMContentIcon($uuid, $vm, $vmicon, $state);
+    echo renderVMContentIcon($uuid, $vm, $vmicon, $state, true);
   }
 }
 echo "\0".implode($menu);
