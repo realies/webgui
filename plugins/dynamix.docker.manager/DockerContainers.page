@@ -148,8 +148,8 @@ watchDocker.on('message', function(data){
   data = data.split('\n');
   for (var i=0,row; row=data[i]; i++) {
     var id = row.split(' ');
-    var w1 = Math.round(Math.min(id[1].substr(0,id[1].length-1)/<?=count($cpus)*count(preg_split('/[,-]/',$cpus[0]))?>,100)*100)/100+'%';
-    var w2 = Math.round(Math.min(id[2].substr(0,id[2].length-1),100)*100)/100+'%';
+    var w1 = Math.round(Math.min(id[1].slice(0,-1)/<?=count($cpus)*count(preg_split('/[,-]/',$cpus[0]))?>,100)*100)/100+'%';
+    var w2 = Math.round(Math.min(id[2].slice(0,-1),100)*100)/100+'%';
     $('#cpu-'+id[0]).css('width',w1).text(w1.replace('.','<?=$display['number'][0]?>'));
     $('#mem-'+id[0]).css('width',w2).text(w2.replace('.','<?=$display['number'][0]?>'));
   }
