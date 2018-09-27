@@ -279,7 +279,7 @@ optgroup.title{background-color:#625D5D;color:#f2f2f2;text-align:center;margin-t
 .switch-wrapper{display:inline-block;position:relative;top:3px;vertical-align:middle;margin-top:-30px}
 .switch-button-label.off{color:inherit;}
 .selectVariable{width:320px}
-.fa.button{color:maroon;font-size:24px;position:relative;top:4px;cursor:pointer}
+.fa.button{color:maroon;font-size:2.4rem;position:relative;top:4px;cursor:pointer}
 span.cpu,label.checkbox{display:inline-block;width:32px}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>

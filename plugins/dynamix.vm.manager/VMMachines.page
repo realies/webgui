@@ -100,7 +100,7 @@ if (empty($vms)) {
 <style type="text/css">
 body{-webkit-overflow-scrolling:touch;}
 .fileTree{width:305px;max-height:150px;overflow-y:scroll;position:absolute;z-index:100;display:none;}
-div.four{font-size:11px;width:300px}
+div.four{font-size:1.1rem;width:300px}
 div.four label{float:left;display:table-cell;width:25%}
 div.four label:nth-child(4n+4){float:none;clear:both}
 div.four label.cpu1{width:32%}

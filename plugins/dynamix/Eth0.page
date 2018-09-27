@@ -70,7 +70,7 @@ $vlan_eth0 = [0];
 if (isset($eth0)) foreach ($eth0 as $key => $val) if (strpos($key,$vlan_id)===0) $vlan_eth0[] = substr($key,strlen($vlan_id));
 ?>
 <style>
-span.pin i{font-size:20px;cursor:pointer}
+span.pin i{font-size:2rem;cursor:pointer}
 span.red{color:#E68A00}
 span.blue{color:#00529B}
 span.green{color:#4F8A10}
@@ -380,7 +380,7 @@ watchDHCP.on('message', function(data) {
   }
 });
 $(function() {
-  var ctrl = "<span id='wait_eth0' class='status red' style='display:none;font-size:small;font-style:italic'>Please wait... configuring interfaces</span>";
+  var ctrl = "<span id='wait_eth0' class='status red' style='display:none;font-size:1.2rem;font-style:italic'>Please wait... configuring interfaces</span>";
   var form = document.eth0_settings;
 <?if ($tabbed && !$service):?>
   $('#tab1').bind({click:function(){

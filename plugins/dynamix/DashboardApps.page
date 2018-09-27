@@ -13,8 +13,8 @@ $width = strstr('white,black',$display['theme']) ? -58: -44;
 body{-webkit-overflow-scrolling:touch}
 label{display:inline}
 iframe{overflow:scroll;-webkit-overflow-scrolling:touch}
-h2{color:#625D5D;letter-spacing:0;font-size:32px;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
-.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.3em;text-shadow:0 0 2px #FFF}
+h2{color:#625D5D;letter-spacing:0;font-size:3.2rem;line-height:1.2em;font-weight:300;padding:0 0 20px;margin:0}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.4rem;text-shadow:0 0 2px #FFF}
 img.started{opacity:1.0}
 img.stopped{opacity:0.3}
 img.paused{opacity:0.6}
@@ -25,7 +25,7 @@ img.paused{opacity:0.6}
 .show{display:block}
 div.Panel{float:none;display:inline-block;margin:0 18px 15px 0;height:90px;overflow:hidden;vertical-align:top;width:94px;word-wrap:break-word;border:none}
 div.Panel:hover{overflow:visible;z-index:10;background-color:unset}
-#noapps{display:none;font-style:italic;font-size:15px;opacity:0.5;padding:5px}
+#noapps{display:none;font-style:italic;font-size:1.4rem;opacity:0.5;padding:5px}
 .switch-button-label.off{color:inherit}
 .switch-button-label.on{color:#009900}
 </style>

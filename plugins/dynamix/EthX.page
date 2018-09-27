@@ -68,7 +68,7 @@ $(function() {
   selectProtocol(form,'ethX');
 <?if (!$tabbed):?>
   $('div[id=title]').each(function(){
-    if ($(this).text().indexOf('Interface ethX')==0) $(this).append("<span id='wait_ethX' class='status red' style='display:none;font-size:small;font-style:italic'>Please wait... configuring interfaces</span>");
+    if ($(this).text().indexOf('Interface ethX')==0) $(this).append("<span id='wait_ethX' class='status red' style='display:none;font-size:1.2rem;font-style:italic'>Please wait... configuring interfaces</span>");
   });
 <?endif;?>
 <?if ($master_ethX):?>

@@ -46,6 +46,6 @@ $(function(){
 </script>
 </head>
 <body style='margin:20px'>
-<pre style='font-family:bitstream;font-size:11px'></pre>
+<pre style='font-family:bitstream;font-size:1.2rem'></pre>
 </body>
 </html>

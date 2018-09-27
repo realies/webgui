@@ -28,9 +28,9 @@
 
 <style>
 .inline_help{display:none}
-.upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:14px;z-index:999}
+.upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:1.4rem;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
-.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:25px}
+.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:2.5rem}
 <?
 $safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
 $tasks = find_pages('Tasks');
