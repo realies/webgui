@@ -222,6 +222,11 @@ Custom banner:
 
 > Image will be scaled to 1920x90 pixels. The maximum image file upload size is 512 kB (524,288 bytes).
 
+Custom header text color:
+: <input type="text" class="narrow" name="header" value="<?=$display['header']?>" maxlength="6" pattern="[0-9a-fA-F]{3,6}" title="HTML color code of 3 or 6 hexadecimal digits">
+
+> Overrule the default text color in the header. This may be used to match text color with a background image.
+
 Show Dashboard apps:
 : <select name="dashapps" size="1">
   <?=mk_option($display['dashapps'], "icons", "Docker + VMs")?>
