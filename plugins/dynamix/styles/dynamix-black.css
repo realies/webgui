@@ -26,22 +26,22 @@ div.jGrowl div.jGrowl-closer.top{position:fixed;top:130px}
 .ui-dropdownchecklist-text{font-family:clear-sans;font-size:1.3rem;color:#f2f2f2}
 .ui-dropdownchecklist-item{height:24px;line-height:24px}
 .ui-dropdownchecklist-item input{vertical-align:top}
-#sb-info-inner,#sb-loading-inner,div.sb-message{color:#808080}
-#sb-title,#sb-title-inner{border-top-left-radius:10px;border-top-right-radius:10px;width:100%;height:50px;line-height:50px;font-size:1.8rem;font-weight:bold;letter-spacing:2px;background:#C0C0C0;color:#606060;text-indent:10px;text-align:center}
+#sb-info-inner,#sb-loading-inner,div.sb-message{color:#1c1c1c;background-color:#f2f2f2}
+#sb-title,#sb-title-inner{border-top-left-radius:10px;border-top-right-radius:10px;width:100%;height:50px;line-height:50px;font-family:clear-sans;font-size:1.8rem;font-weight:bold;letter-spacing:2px;background:#C0C0C0;color:#606060;text-indent:10px;text-align:center}
 #sb-title,#sb-info{position:relative;margin:0;padding:0;overflow:hidden}
 #sb-container{position:fixed;margin:0;padding:0;top:0;left:0;z-index:999;text-align:left;visibility:hidden;display:none}
 #sb-overlay{position:relative;height:100%;width:100%}
 #sb-wrapper{position:absolute;visibility:hidden;width:100px;border:1px #808080 solid;border-radius:10px;color:#1c1c1c;background:#f2f2f2}
 #sb-wrapper-inner{overflow:hidden;height:100px}
 #sb-body{position:relative;height:100%}
-#sb-body-inner{position:absolute;height:100%;width:100%;color:#1b1b1b;background:#f2f2f2}
+#sb-body-inner{position:absolute;height:100%;width:100%;color:#1c1c1c;background:#f2f2f2}
 #sb-body img{border:none}
 #sb-loading{position:relative;height:100%}
 #sb-loading-inner{position:absolute;font-size:1.8rem;line-height:20px;height:20px;top:50%;margin-top:-12px;width:100%;text-align:center}
 #sb-loading-inner span{background:url(../images/loading.gif) no-repeat;padding-left:22px;display:inline-block}
-#sb-body,#sb-loading{color:#1b1b1b;background-color:#f2f2f2}
+#sb-body,#sb-loading{color:#1c1c1c;background-color:#f2f2f2}
 #sb-info,#sb-info-inner{height:20px;line-height:20px}
-#sb-info-inner{font-size:1.3rem}
+#sb-info-inner{font-family:clear-sans;font-size:1.3rem}
 #sb-nav{float:right;height:16px;padding:2px 0;width:45%}
 #sb-nav a{display:block;float:right;height:16px;width:16px;margin-left:3px;cursor:pointer;background-repeat:no-repeat}
 #sb-nav-close{background-image:url(../images/close.png);position:absolute;display:block;z-index:999;width:32px;height:32px;top:-16px;right:-16px;cursor:pointer}
