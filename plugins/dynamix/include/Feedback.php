@@ -58,7 +58,7 @@ input[type=email]{margin-top:8px;float:left}
 </div>
 <div id="bugreport_panel" class="allpanels">
 <textarea id="bugDescription"></textarea>
-<p style="line-height:14px;margin-top:0;font-size:11px"><b>NOTE:</b> <i>Submission of this bug report will automatically send your system diagnostics to Lime Technology.</i></p>
+<p style="line-height:14px;margin-top:0;font-size:1.1rem"><b>NOTE:</b> <i>Submission of this bug report will automatically send your system diagnostics to Lime Technology.</i></p>
 <label for="anonymize" style="line-height:12px"><input type="checkbox" id="anonymize" value="1" /> Anonymize diagnostics (may make troubleshooting more difficult)</label>
 <input type="email" id="bugEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="bugSubmit" value="Submit"/>
 </div>

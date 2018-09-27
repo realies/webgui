@@ -93,7 +93,7 @@ body{-webkit-overflow-scrolling:touch}
 #vmform table tr td:nth-child(even){width:100px}
 #vmform table tr td:last-child{width:inherit}
 #vmform .multiple{position:relative}
-#vmform .sectionbutton{position:absolute;left:2px;cursor:pointer;opacity:0.4;font-size:14px;line-height:17px;z-index:10;transition-property:opacity,left;transition-duration:0.1s;transition-timing-function:linear}
+#vmform .sectionbutton{position:absolute;left:2px;cursor:pointer;opacity:0.4;font-size:1.4rem;line-height:17px;z-index:10;transition-property:opacity,left;transition-duration:0.1s;transition-timing-function:linear}
 #vmform .sectionbutton.remove{top:0;opacity:0.3}
 #vmform .sectionbutton.add{bottom:0}
 #vmform .sectionbutton:hover{opacity:1.0}
@@ -123,7 +123,7 @@ span.advancedview_panel{display:none;line-height:16px;margin-top:1px}
 #vmform .four label:nth-child(4n+4){}
 #vmform .four label.cpu1{width:28%;height:16px;line-height:16px}
 #vmform .four label.cpu2{width:3%;height:16px;line-height:16px}
-#vmform .mac_generate{cursor:pointer;margin-left:-5px;color:#08C;font-size:1.3em;transform:translate(0px, 2px)}
+#vmform .mac_generate{cursor:pointer;margin-left:-5px;color:#08C;font-size:1.3rem;transform:translate(0px, 2px)}
 #vmform .disk{display:none}
 #vmform .disk_preview{display:inline-block;color:#BBB;transform:translate(0px, 1px)}
 span#dropbox{border:1px solid <?=$border?>;background:<?=$bgcolor?>;padding:28px 12px;line-height:72px;margin-right:16px;}

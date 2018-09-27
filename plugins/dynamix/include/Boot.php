@@ -22,8 +22,10 @@ $var = parse_ini_file("/var/local/emhttp/var.ini");
 <meta name="robots" content="noindex, nofollow">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/default-fonts.css')?>">
 <style>
-div.notice{background-color:#FFF6BF;text-align:center;height:80px;line-height:80px;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324;font-family:clear-sans;font-size:18px;}
-span.title{font-size:28px;text-transform:uppercase;display:block;}
+html{font-family:clear-sans;font-size:62.5%;height:100%}
+body{font-size:1.3rem;color:#1c1c1c;background:#f2f2f2;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+div.notice{background-color:#FFF6BF;text-align:center;height:80px;line-height:80px;border-top:2px solid #FFD324;border-bottom:2px solid #FFD324;font-size:1.8rem;}
+span.title{font-size:2.8rem;text-transform:uppercase;display:block;}
 </style>
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>

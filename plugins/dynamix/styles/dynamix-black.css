@@ -1,5 +1,5 @@
 body>div.jGrowl{position:fixed}
-div.jGrowl{font-size:13px}
+div.jGrowl{font-size:1.3rem}
 div.jGrowl.top-left{left:10px;top:100px}
 div.jGrowl.top-right{right:10px;top:100px}
 div.jGrowl.bottom-left{left:10px;bottom:24px}
@@ -23,25 +23,25 @@ div.jGrowl div.jGrowl-closer.top{position:fixed;top:130px}
 .ui-dropdownchecklist-dropcontainer{color:#f2f2f2;background-color:#262626;border:#ff8c2f 1px solid}
 .ui-state-disabled{color:#f2f2f2;border-color:#6c6c6c;background:#262626;opacity:0.5;cursor:default}
 .ui-dropdownchecklist-indent{padding-left:7px}
-.ui-dropdownchecklist-text{font-family:clear-sans;font-size:13px;color:#f2f2f2}
+.ui-dropdownchecklist-text{font-family:clear-sans;font-size:1.3rem;color:#f2f2f2}
 .ui-dropdownchecklist-item{height:24px;line-height:24px}
 .ui-dropdownchecklist-item input{vertical-align:top}
-#sb-info-inner,#sb-loading-inner,div.sb-message{color:#808080}
-#sb-title,#sb-title-inner{border-top-left-radius:10px;border-top-right-radius:10px;width:100%;height:50px;line-height:50px;font-size:18px;font-weight:bold;letter-spacing:2px;background:#C0C0C0;color:#606060;text-indent:10px;text-align:center}
+#sb-info-inner,#sb-loading-inner,div.sb-message{color:#1c1c1c;background-color:#f2f2f2}
+#sb-title,#sb-title-inner{border-top-left-radius:10px;border-top-right-radius:10px;width:100%;height:50px;line-height:50px;font-family:clear-sans;font-size:1.8rem;font-weight:bold;letter-spacing:2px;background:#C0C0C0;color:#606060;text-indent:10px;text-align:center}
 #sb-title,#sb-info{position:relative;margin:0;padding:0;overflow:hidden}
 #sb-container{position:fixed;margin:0;padding:0;top:0;left:0;z-index:999;text-align:left;visibility:hidden;display:none}
 #sb-overlay{position:relative;height:100%;width:100%}
 #sb-wrapper{position:absolute;visibility:hidden;width:100px;border:1px #808080 solid;border-radius:10px;color:#1c1c1c;background:#f2f2f2}
 #sb-wrapper-inner{overflow:hidden;height:100px}
 #sb-body{position:relative;height:100%}
-#sb-body-inner{position:absolute;height:100%;width:100%;color:#1b1b1b;background:#f2f2f2}
+#sb-body-inner{position:absolute;height:100%;width:100%;color:#1c1c1c;background:#f2f2f2}
 #sb-body img{border:none}
 #sb-loading{position:relative;height:100%}
-#sb-loading-inner{position:absolute;font-size:18px;line-height:20px;height:20px;top:50%;margin-top:-12px;width:100%;text-align:center}
+#sb-loading-inner{position:absolute;font-size:1.8rem;line-height:20px;height:20px;top:50%;margin-top:-12px;width:100%;text-align:center}
 #sb-loading-inner span{background:url(../images/loading.gif) no-repeat;padding-left:22px;display:inline-block}
-#sb-body,#sb-loading{color:#1b1b1b;background-color:#f2f2f2}
+#sb-body,#sb-loading{color:#1c1c1c;background-color:#f2f2f2}
 #sb-info,#sb-info-inner{height:20px;line-height:20px}
-#sb-info-inner{font-size:13px}
+#sb-info-inner{font-family:clear-sans;font-size:1.3rem}
 #sb-nav{float:right;height:16px;padding:2px 0;width:45%}
 #sb-nav a{display:block;float:right;height:16px;width:16px;margin-left:3px;cursor:pointer;background-repeat:no-repeat}
 #sb-nav-close{background-image:url(../images/close.png);position:absolute;display:block;z-index:999;width:32px;height:32px;top:-16px;right:-16px;cursor:pointer}
@@ -63,7 +63,7 @@ table.tablesorter tbody tr td{padding:4px 20px 4px 6px;vertical-align:middle;tex
 table.tablesorter.plugins td:first-child{width:64px;text-align:center}
 table.tablesorter.plugins tr>td+td+td{width:9%;white-space:nowrap}
 table.tablesorter.plugins td:last-child{width:96px;padding:0}
-table.tablesorter .desc_readmore strong,table.tablesorter .desc_readmore h4{font-size:13px}
+table.tablesorter .desc_readmore strong,table.tablesorter .desc_readmore h4{font-size:1.3rem}
 table.tablesorter .desc_readmore h4,table.tablesorter .desc_readmore p:first-child{margin:0}
 table.tablesorter.left th,table.tablesorter.left td{text-align:left;width:20%}
 table.tablesorter.left th:first-child,table.tablesorter.left td:first-child{width:8%}
@@ -77,7 +77,7 @@ table.tablesorter.indexer thead th:first-child{width:4%}
 table.tablesorter.indexer thead th,table.tablesorter.indexer tbody td,table.tablesorter.indexer tfoot td{padding-left:10px}
 table.tablesorter.indexer thead tr>th+th{width:auto;text-align:left}
 table.tablesorter.indexer thead tr>th+th+th{width:14%}
-table.tablesorter.indexer tfoot td{padding-top:10px;font-size:11px}
+table.tablesorter.indexer tfoot td{padding-top:10px;font-size:1.1rem}
 span.select ul{display:none;list-style-type:none;margin:0 0 2px 0;padding:0}
 span.select ul.unused{display:block}
 span.select ul li.nosort{font-weight:bold}

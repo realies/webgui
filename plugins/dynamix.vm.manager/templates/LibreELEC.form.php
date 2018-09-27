@@ -421,7 +421,7 @@ $hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaratio
 		margin-left: -5px;
 		margin-right: 5px;
 		color: #CC0011;
-		font-size: 1.3em;
+		font-size: 1.4rem;
 		transform: translate(0px, 3px);
 	}
 </style>
