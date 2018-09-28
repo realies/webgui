@@ -4,8 +4,8 @@
   box-shadow:none;
   outline:none;
   cursor:pointer;
-  height:22px;
-  line-height:22px;
+  height:2.2rem;
+  line-height:2.2rem;
 }
 .ui-dropdownchecklist-group{
   font-weight:normal;
