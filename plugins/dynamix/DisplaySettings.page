@@ -121,6 +121,15 @@ $(function() {
 <form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="upload()">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="display">
+Font size:
+: <select name="font" size="1">
+  <?=mk_option($display['font'], "50%", "Very small")?>
+  <?=mk_option($display['font'], "56.25%", "Small")?>
+  <?=mk_option($display['font'], "", "Normal")?>
+  <?=mk_option($display['font'], "68.75%", "Large")?>
+  <?=mk_option($display['font'], "75%", "Very large")?>
+  </select>
+
 Date format:
 : <select name="date" size="1" onchange="presetTime(this.form)">
   <?=mk_option($display['date'], "%c", "System Setting")?>

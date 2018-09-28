@@ -27,6 +27,9 @@
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
+<?if ($display['font']):?>
+html{font-size:<?=$display['font']?>}
+<?endif;?>
 <?if ($display['header']):?>
 #header,#header .logo,#header .text-right a{color:#<?=$display['header']?>}
 #header .block{background-color:transparent}
