@@ -15,7 +15,7 @@ function autoscale($value) {
   $unit = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
   $size = count($unit);
   $base = $value ? floor(log($value, 1000)) : 0;
-  if ($base>$size) $base = $size-1;
+  if ($base>=$size) $base = $size-1;
   $value /= pow(1000, $base);
   $decimals = $base ? ($value>=100 ? 0 : ($value>=10 ? 1 : (round($value*100)%100===0 ? 0 : 2))) : 0;
   return number_format($value, $decimals, '.', $value>9999 ? ',' : '').$unit[$base];

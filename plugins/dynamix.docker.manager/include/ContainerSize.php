@@ -17,7 +17,7 @@ require_once "$docroot/webGui/include/Helpers.php";
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Benchmark</title>
+<title>Container Size</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="robots" content="noindex, nofollow">
