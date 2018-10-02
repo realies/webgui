@@ -13,6 +13,7 @@
 <?
 $unit = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
 $list = [];
+
 function autoscale($value) {
   global $unit;
   $size = count($unit);
@@ -32,11 +33,11 @@ function align($text, $w=13) {
   return sprintf("%{$w}s",$text);
 }
 
-exec("docker ps -sa --format='{{.Names}}|{{.Size}}'",$containers);
+exec("docker ps -sa --format='{{.Names}}|{{.Size}}'",$container);
 echo align('Name',-30).align('Container').align('Writable').align('Log')."\n";
 echo str_repeat('-',69)."\n";
-foreach ($containers as $container) {
-  list($name,$size) = explode('|',$container);
+foreach ($container as $ct) {
+  list($name,$size) = explode('|',$ct);
   list($writable,$dummy,$total) = explode(' ',str_replace(['(',')'],'',$size));
   list($value,$base) = explode(' ',gap($total));
   $list[] = ['name' => $name, 'total' => $value*pow(1000,array_search($base,$unit)), 'writable' => $writable, 'log' => exec("docker logs $name 2>/dev/null|wc -c")];
