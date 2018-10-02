@@ -11,8 +11,10 @@
  */
 ?>
 <?
+$unit = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
+$list = [];
 function autoscale($value) {
-  $unit = ['B','kB','MB','GB','TB','PB','EB','ZB','YB'];
+  global $unit;
   $size = count($unit);
   $base = $value ? floor(log($value, 1000)) : 0;
   if ($base>=$size) $base = $size-1;
@@ -21,19 +23,24 @@ function autoscale($value) {
   return number_format($value, $decimals, '.', $value>9999 ? ',' : '').$unit[$base];
 }
 
+function gap($text) {
+  return preg_replace('/([kMGTPEZY]?B)$/'," $1",$text);
+}
+
 function align($text, $w=13) {
-  if ($w>0) $text = preg_replace('/([kMGTPEZY]?B)/'," $1",$text);
+  if ($w>0) $text = gap($text);
   return sprintf("%{$w}s",$text);
 }
 
 exec("docker ps -sa --format='{{.Names}}|{{.Size}}'",$containers);
-natcasesort($containers);
 echo align('Name',-30).align('Container').align('Writable').align('Log')."\n";
 echo str_repeat('-',69)."\n";
 foreach ($containers as $container) {
   list($name,$size) = explode('|',$container);
   list($writable,$dummy,$total) = explode(' ',str_replace(['(',')'],'',$size));
-  $log = autoscale(exec("docker logs $name 2>/dev/null|wc -c"));
-  echo align($name,-30).align($total).align($writable).align($log)."\n";
+  list($value,$base) = explode(' ',gap($total));
+  $list[] = ['name' => $name, 'total' => $value*pow(1000,array_search($base,$unit)), 'writable' => $writable, 'log' => exec("docker logs $name 2>/dev/null|wc -c")];
 }
+array_multisort(array_column($list,'total'),SORT_DESC,$list); // sort on container size
+foreach ($list as $ct) echo align($ct['name'],-30).align(autoscale($ct['total'])).align($ct['writable']).align(autoscale($ct['log']))."\n";
 ?>
