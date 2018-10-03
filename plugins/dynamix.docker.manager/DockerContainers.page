@@ -59,6 +59,7 @@ input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;bac
 <input type="button" onclick="resumeAll()" value="Resume All" style="display:none">
 <input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll" style="display:none">
 <input type="button" onclick="updateAll()" value="Update All" id="updateAll" style="display:none">
+<input type="button" onclick="sizes()" value="Container Size" style="display:none">
 
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
@@ -142,6 +143,9 @@ function loadlist() {
     listview();
     if (data[2]==1) {$('#busy').show(); setTimeout(loadlist,5000);} else if ($('#busy').is(':visible')) {$('#busy').hide(); setTimeout(loadlist,3000);}
   });
+}
+function sizes() {
+  openBox('/plugins/dynamix.docker.manager/include/ContainerSize.php','Container Size',600,600);
 }
 var watchDocker = new NchanSubscriber('/sub/dockerload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchDocker.on('message', function(data){
