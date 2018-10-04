@@ -37,7 +37,7 @@ if (isset($_POST['reset'])) {
   if (file_exists($autostart_file)) {
     $prefs = parse_ini_file($user_prefs); $sort = [];
     $allAutoStart = file($autostart_file, FILE_IGNORE_NEW_LINES);
-    foreach ($allAutoStart as $ct) $sort[] = array_search($ct,$prefs) ?? 999;
+    foreach ($allAutoStart as $ct) $sort[] = array_search(explode(' ',$ct)[0],$prefs) ?? 999;
     array_multisort($sort,SORT_NUMERIC,$allAutoStart);
     file_put_contents($autostart_file, implode(PHP_EOL, $allAutoStart).PHP_EOL);
   }
