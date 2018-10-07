@@ -128,7 +128,7 @@ function ct() {
     buttons(document.ct);
     // inject global cpu pinning links
     $('form[name=ct]').find('thead tr th:gt(1)').each((i, elem) => {
-      elem.innerHTML = elem.innerHTML.replace(/(\d+)/g, `<a href="javascript:void(0)" data-state="false" onclick="$(this).data('state', !$(this).data('state')); $('form[name=ct]').find('[name$=&quot;:$1&quot;]').prop('checked', $(this).data('state'))">$1</a>`);
+      elem.innerHTML = elem.innerHTML.replace(/(\d+)/g, `<a href="javascript:void(0)" data-state="false" onclick="$(this).data('state', !$(this).data('state')); $('form[name=ct]').find('[name$=&quot;:$1&quot;]').prop('checked', $(this).data('state')).change()">$1</a>`);
     });
   });
 }
