@@ -133,9 +133,11 @@ function ct() {
     $('#names-ct').val(data[1]);
     buttons(document.ct);
     // inject thread to containers toggles
-    $('form[name=ct]').find('thead tr th:gt(1)').each((i, elem) => {
-      elem.innerHTML = elem.innerHTML.replace(/(\d+)/g, `<a href="#" onclick="thread2containers(this.innerText);return false;" title="Toggle thread to containers">$1</a>`);
-    });
+    if($('a[onclick^="thread2containers"]').length === 0) {
+      $('form[name=ct]').find('thead tr th:gt(1)').each((i, elem) => {
+        elem.innerHTML = elem.innerHTML.replace(/(\d+)/g, `<a href="#" onclick="thread2containers(this.innerText);return false;" title="Toggle thread to containers">$1</a>`);
+      });
+    }
   });
 }
 function is() {
