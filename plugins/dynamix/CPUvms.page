@@ -119,6 +119,12 @@ function vm() {
     buttons(document.vm);
   });
 }
+function thread2containers(n) {
+  const selector = $('form[name=ct]').find(`[name$=":${n}"]`);
+  const checkboxes = selector.length;
+  const checked = selector.filter(':checked').length;
+  selector.prop('checked', (checkboxes - checked > checked ? true : false)).change();
+}
 function ct() {
   // fetch the current container assignments
   $.post('/webGui/include/CPUset.php',{id:'ct',cpus:'<?=$cpuset?>'},function(d){
@@ -126,6 +132,12 @@ function ct() {
     $('#table-ct').html(data[0]);
     $('#names-ct').val(data[1]);
     buttons(document.ct);
+    // inject thread to containers toggles
+    if($('a[onclick^="thread2containers"]').length === 0) {
+      $('form[name=ct]').find('thead tr th:gt(1)').each((i, elem) => {
+        elem.innerHTML = elem.innerHTML.replace(/(\d+)/g, `<a href="#" onclick="thread2containers(this.innerText);return false;" title="Toggle thread to containers">$1</a>`);
+      });
+    }
   });
 }
 function is() {
