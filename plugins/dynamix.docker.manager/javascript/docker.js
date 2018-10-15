@@ -105,7 +105,6 @@ function updateContainer(container) {
     text:body,
     type:'warning',
     showCancelButton:true,
-    confirmButtonColor:'#8CD4F5',
     confirmButtonText:'Yes, update it!'
   },function(){
     execUpContainer(container);
@@ -120,7 +119,6 @@ function rmContainer(container, image, id) {
     type:'warning',
     html:true,
     showCancelButton:true,
-    confirmButtonColor:'#DD6B55',
     confirmButtonText:'Yes, delete it!',
     showLoaderOnConfirm:true
   },function(c){
@@ -140,7 +138,6 @@ function rmImage(image, imageName) {
     text:body,
     type:'warning',
     showCancelButton:true,
-    confirmButtonColor:'#DD6B55',
     confirmButtonText:'Yes, delete it!',
     showLoaderOnConfirm:true
   },function(c){
