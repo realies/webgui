@@ -579,7 +579,7 @@ class DockerClient {
 		return round(pow(1024, $base - floor($base)), 0).' '.$suffix[floor($base)];
 	}
 
-	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false) {
+	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false, $headers=null) {
 		$api = '/v1.37'; // used to force an API version. See https://docs.docker.com/develop/sdk/#api-version-matrix
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 		if ($fp === false) {
@@ -587,7 +587,11 @@ class DockerClient {
 			return null;
 		}
 		$protocol = $unchunk ? 'HTTP/1.0' : 'HTTP/1.1';
-		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
+		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n";
+		if (!empty($headers)) {
+			$out .= $headers;
+		}
+		$out .= "\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
@@ -684,9 +688,46 @@ class DockerClient {
 	}
 
 	public function pullImage($image, $callback=null) {
-		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback);
+		$header       = null;
+		$registryAuth = $this->getRegistryAuth( $image );
+		if ( $registryAuth ) {
+			$header = 'X-Registry-Auth: ' . base64_encode( json_encode( [
+					'username'      => $registryAuth['username'],
+					'password'      => $registryAuth['password'],
+					'serveraddress' => $registryAuth['apiUrl'],
+				] ) ) . "\r\n";
+		}
+
+		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback, false, $header);
 		$this->flushCache($this::$imagesCache);
 		return $ret;
+	}
+
+	public function getRegistryAuth($image) {
+		$image = DockerUtil::ensureImageTag($image);
+		$usesRegistry = preg_match('@^([^/]+)/(.+):(.+)$@', $image, $matches);
+		if (!$usesRegistry) {
+			return false;
+		}
+
+		$dockerConfig = '/root/.docker/config.json';
+		if (!file_exists($dockerConfig)) {
+			return false;
+		}
+		$dockerConfig = json_decode(file_get_contents($dockerConfig), true);
+		if ( empty( $dockerConfig['auths'] ) || empty( $dockerConfig['auths'][ $matches[1] ] ) ) {
+			return false;
+		}
+		list($user, $password) = explode(':', base64_decode($dockerConfig['auths'][ $matches[1] ]));
+
+		return [
+			'username'     => $user,
+			'password'     => $password,
+			'registryName' => $matches[1],
+			'imageName'    => $matches[2],
+			'imageTag'     => $matches[3],
+			'apiUrl'       => 'https://' . $matches[1] . '/v2/',
+		];
 	}
 
 	public function removeImage($id) {
