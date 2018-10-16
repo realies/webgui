@@ -356,40 +356,89 @@ class DockerUpdate{
 
 	public function getRemoteVersionV2($image) {
 		list($strRepo, $strTag) = explode(':', DockerUtil::ensureImageTag($image));
-		// First - get auth token:
-		//   https://auth.docker.io/token?service=registry.docker.io&scope=repository:needo/nzbget:pull
-		$strAuthURL = sprintf('https://auth.docker.io/token?service=registry.docker.io&scope=repository:%s:pull', $strRepo);
-		//$this->debug("Auth URL: $strAuthURL");
-		$arrAuth = json_decode($this->download_url($strAuthURL), true);
-		if (empty($arrAuth) || empty($arrAuth['token'])) {
-			//$this->debug("Error: Auth Token was missing/empty");
+
+		/*
+		 * Step 1: Check whether or not the image is in a private registry, get corresponding auth data and generate manifest url
+		 */
+		$DockerClient = new DockerClient();
+		$registryAuth = $DockerClient->getRegistryAuth( $image );
+		if ( $registryAuth ) {
+			$manifestURL = sprintf( '%s%s/manifests/%s', $registryAuth['apiUrl'], $registryAuth['imageName'], $registryAuth['imageTag'] );
+		} else {
+			$manifestURL = sprintf( 'https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag );
+		}
+		$this->debug('Manifest URL: ' . $manifestURL);
+
+		/*
+		 * Step 2: Get www-authenticate header from manifest url to generate token url
+		 */
+		$ch = getCurlHandle($manifestURL, 'HEAD');
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
 			return null;
 		}
-		//$this->debug("Auth Token: ".$arrAuth['token']);
-		// Next - get manifest:
-		//   curl -H 'Authorization: Bearer <TOKEN>' https://registry-1.docker.io/v2/needo/nzbget/manifests/latest
-		$strManifestURL = sprintf('https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag);
-		//$this->debug("Manifest URL: $strManifestURL");
-		$strManifest = $this->download_url_and_headers($strManifestURL, ['Accept: application/vnd.docker.distribution.manifest.v2+json', 'Authorization: Bearer '.$arrAuth['token']]);
-		if (empty($strManifest)) {
-			//$this->debug("Error: Manifest response was empty");
+
+		preg_match('@www-authenticate:\s*Bearer\s*(.*)@i', $response, $matches);
+		if (empty($matches[1])) {
+			$this->debug('Error: Www-Authenticate header is empty or missing');
 			return null;
 		}
-		// Look for 'Docker-Content-Digest' header in response:
-		//   Docker-Content-Digest: sha256:2070d781fc5f98f12e752b75cf39d03b7a24b9d298718b1bbb73e67f0443062d
-		$strDigest = '';
-		foreach (preg_split("/\r\n|\r|\n/", $strManifest) as $strLine) {
-			if (strpos($strLine, 'Docker-Content-Digest: ') === 0) {
-				$strDigest = substr($strLine, 23);
-				break;
-			}
+
+		$strArgs = explode(',', $matches[1]);
+		$args = [];
+		foreach ($strArgs as $arg) {
+			$arg = explode('=', $arg);
+			$args[$arg[0]] = trim($arg[1], "\" \r\n");
 		}
-		if (empty($strDigest)) {
-			//$this->debug("Error: Remote Digest was missing/empty");
+
+		if (empty($args['realm']) || empty($args['service']) || empty($args['scope'])) {
 			return null;
 		}
-		//$this->debug("Remote Digest: $strDigest");
-		return $strDigest;
+		$url = $args['realm'] . '?service=' . urlencode($args['service']) . '&scope=' . urlencode($args['scope']);
+		$this->debug('Token URL: ' . $url);
+
+		/**
+		 * Step 3: Get token from API and authenticate via username / password if in private registry and auth data was found
+		 */
+		$ch = getCurlHandle($url);
+		if ($registryAuth) {
+			curl_setopt( $ch, CURLOPT_USERPWD, $registryAuth['username'] . ':' . $registryAuth['password'] );
+		}
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting token: ' . curl_error($ch));
+			return null;
+		}
+		$response = json_decode($response, true);
+		if (!$response || empty($response['token'])) {
+			$this->debug('Error: Token response was empty or missing token');
+			return null;
+		}
+		$token = $response['token'];
+
+		/**
+		 * Step 4: Get Docker-Content-Digest header from manifest file
+		 */
+		$ch = getCurlHandle($manifestURL, 'HEAD');
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, [
+			'Accept: application/vnd.docker.distribution.manifest.v2+json',
+			'Authorization: Bearer ' . $token
+		]);
+
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
+			return null;
+		}
+		preg_match('@Docker-Content-Digest:\s*(.*)@', $response, $matches);
+		if (empty($matches[1])) {
+			$this->debug('Error: Docker-Content-Digest header is empty or missing');
+			return null;
+		}
+		$digest = trim($matches[1]);
+		$this->debug('Remote Digest: ' . $digest);
+		return $digest;
 	}
 
 	// DEPRECATED: Only used for Docker Index V1 type update checks
