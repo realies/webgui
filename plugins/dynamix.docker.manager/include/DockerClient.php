@@ -468,12 +468,30 @@ class DockerUpdate{
 			if (!empty($updateStatus[$img]) && array_key_exists('local', $updateStatus[$img])) {
 				$localVersion = $updateStatus[$img]['local'];
 			}
+			if ($localVersion === null) {
+				$localVersion = $this->inspectLocalVersion($img);
+			}
 			$remoteVersion = $this->getRemoteVersionV2($img);
 			$status = ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? 'true' : 'false') : 'undef';
 			$updateStatus[$img] = ['local' => $localVersion, 'remote' => $remoteVersion, 'status' => $status];
 			//$this->debug("Update status: Image='$img', Local='$localVersion', Remote='$remoteVersion', Status='$status'");
 		}
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+	}
+
+	public function inspectLocalVersion( $image ) {
+		$DockerClient = new DockerClient();
+		$inspect      = $DockerClient->getDockerJSON( '/images/' . $image . '/json' );
+		if ( empty( $inspect['RepoDigests'] ) ) {
+			return null;
+		}
+
+		$shaPos = strpos( $inspect['RepoDigests'][0], '@sha256:' );
+		if ( $shaPos === false ) {
+			return null;
+		}
+
+		return substr( $inspect['RepoDigests'][0], $shaPos + 1 );
 	}
 
 	public function setUpdateStatus($image, $version) {
