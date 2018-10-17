@@ -192,7 +192,7 @@ foreach ($devices as $device) {
 }
 // create cache pool information
 if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
-  exert("/sbin/btrfs filesystem usage /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-usage.txt"));
+  exert("/sbin/btrfs filesystem usage -T /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-usage.txt"));
 }
 // create installed plugin information
 $plugins = glob("/var/log/plugins/*.plg");
