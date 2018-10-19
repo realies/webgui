@@ -176,9 +176,9 @@ if ($_GET['updateContainer']){
       stopContainer($Name);
     }
     // force kill container if still running after 10 seconds
-   	if ( ! $_GET['communityApplications'] ) {
-			removeContainer($Name);
-		}
+    if ( ! $_GET['communityApplications'] ) {
+      removeContainer($Name);
+    }
     execCommand($cmd);
     $DockerClient->flushCaches();
     $newImageID = $DockerClient->getImageID($Repository);
