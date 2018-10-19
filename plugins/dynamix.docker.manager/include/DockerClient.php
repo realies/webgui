@@ -785,7 +785,7 @@ class DockerClient {
 		if ( empty( $dockerConfig['auths'] ) || empty( $dockerConfig['auths'][ $matches[1] ] ) ) {
 			return false;
 		}
-		list($user, $password) = explode(':', base64_decode($dockerConfig['auths'][ $matches[1] ]));
+		list($user, $password) = explode(':', base64_decode($dockerConfig['auths'][ $matches[1] ]['auth']));
 
 		return [
 			'username'     => $user,
