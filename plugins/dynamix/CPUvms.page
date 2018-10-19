@@ -208,7 +208,7 @@ $(function(){
 > It also allows to modify these assignments.
 >
 > Running VMs are **stopped first** and restarted after the modification.<br>
-> Stopped VMs are instantly modified and new assignments become active when the user manually starts the VM.
+> Stopped VMs are instantly modified and new assignments become active when the VM is started.
 >
 > When ***Apply*** is pressed a scan is performed to find the changes, subsequently only VMs which have changes are modified in parallel.
 >
