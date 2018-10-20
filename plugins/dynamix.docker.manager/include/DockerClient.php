@@ -14,6 +14,8 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
+require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
+
 $dockerManPaths = [
 	'autostart-file' => "/var/lib/docker/unraid-autostart",
 	'update-status'  => "/var/lib/docker/unraid-update-status.json",
@@ -356,40 +358,89 @@ class DockerUpdate{
 
 	public function getRemoteVersionV2($image) {
 		list($strRepo, $strTag) = explode(':', DockerUtil::ensureImageTag($image));
-		// First - get auth token:
-		//   https://auth.docker.io/token?service=registry.docker.io&scope=repository:needo/nzbget:pull
-		$strAuthURL = sprintf('https://auth.docker.io/token?service=registry.docker.io&scope=repository:%s:pull', $strRepo);
-		//$this->debug("Auth URL: $strAuthURL");
-		$arrAuth = json_decode($this->download_url($strAuthURL), true);
-		if (empty($arrAuth) || empty($arrAuth['token'])) {
-			//$this->debug("Error: Auth Token was missing/empty");
+
+		/*
+		 * Step 1: Check whether or not the image is in a private registry, get corresponding auth data and generate manifest url
+		 */
+		$DockerClient = new DockerClient();
+		$registryAuth = $DockerClient->getRegistryAuth( $image );
+		if ( $registryAuth ) {
+			$manifestURL = sprintf( '%s%s/manifests/%s', $registryAuth['apiUrl'], $registryAuth['imageName'], $registryAuth['imageTag'] );
+		} else {
+			$manifestURL = sprintf( 'https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag );
+		}
+		$this->debug('Manifest URL: ' . $manifestURL);
+
+		/*
+		 * Step 2: Get www-authenticate header from manifest url to generate token url
+		 */
+		$ch = getCurlHandle($manifestURL, 'HEAD');
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
 			return null;
 		}
-		//$this->debug("Auth Token: ".$arrAuth['token']);
-		// Next - get manifest:
-		//   curl -H 'Authorization: Bearer <TOKEN>' https://registry-1.docker.io/v2/needo/nzbget/manifests/latest
-		$strManifestURL = sprintf('https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag);
-		//$this->debug("Manifest URL: $strManifestURL");
-		$strManifest = $this->download_url_and_headers($strManifestURL, ['Accept: application/vnd.docker.distribution.manifest.v2+json', 'Authorization: Bearer '.$arrAuth['token']]);
-		if (empty($strManifest)) {
-			//$this->debug("Error: Manifest response was empty");
+
+		preg_match('@www-authenticate:\s*Bearer\s*(.*)@i', $response, $matches);
+		if (empty($matches[1])) {
+			$this->debug('Error: Www-Authenticate header is empty or missing');
 			return null;
 		}
-		// Look for 'Docker-Content-Digest' header in response:
-		//   Docker-Content-Digest: sha256:2070d781fc5f98f12e752b75cf39d03b7a24b9d298718b1bbb73e67f0443062d
-		$strDigest = '';
-		foreach (preg_split("/\r\n|\r|\n/", $strManifest) as $strLine) {
-			if (strpos($strLine, 'Docker-Content-Digest: ') === 0) {
-				$strDigest = substr($strLine, 23);
-				break;
-			}
+
+		$strArgs = explode(',', $matches[1]);
+		$args = [];
+		foreach ($strArgs as $arg) {
+			$arg = explode('=', $arg);
+			$args[$arg[0]] = trim($arg[1], "\" \r\n");
 		}
-		if (empty($strDigest)) {
-			//$this->debug("Error: Remote Digest was missing/empty");
+
+		if (empty($args['realm']) || empty($args['service']) || empty($args['scope'])) {
 			return null;
 		}
-		//$this->debug("Remote Digest: $strDigest");
-		return $strDigest;
+		$url = $args['realm'] . '?service=' . urlencode($args['service']) . '&scope=' . urlencode($args['scope']);
+		$this->debug('Token URL: ' . $url);
+
+		/**
+		 * Step 3: Get token from API and authenticate via username / password if in private registry and auth data was found
+		 */
+		$ch = getCurlHandle($url);
+		if ($registryAuth) {
+			curl_setopt( $ch, CURLOPT_USERPWD, $registryAuth['username'] . ':' . $registryAuth['password'] );
+		}
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting token: ' . curl_error($ch));
+			return null;
+		}
+		$response = json_decode($response, true);
+		if (!$response || empty($response['token'])) {
+			$this->debug('Error: Token response was empty or missing token');
+			return null;
+		}
+		$token = $response['token'];
+
+		/**
+		 * Step 4: Get Docker-Content-Digest header from manifest file
+		 */
+		$ch = getCurlHandle($manifestURL, 'HEAD');
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, [
+			'Accept: application/vnd.docker.distribution.manifest.v2+json',
+			'Authorization: Bearer ' . $token
+		]);
+
+		$response = curl_exec( $ch );
+		if (curl_errno($ch) !== 0) {
+			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
+			return null;
+		}
+		preg_match('@Docker-Content-Digest:\s*(.*)@', $response, $matches);
+		if (empty($matches[1])) {
+			$this->debug('Error: Docker-Content-Digest header is empty or missing');
+			return null;
+		}
+		$digest = trim($matches[1]);
+		$this->debug('Remote Digest: ' . $digest);
+		return $digest;
 	}
 
 	// DEPRECATED: Only used for Docker Index V1 type update checks
@@ -419,12 +470,30 @@ class DockerUpdate{
 			if (!empty($updateStatus[$img]) && array_key_exists('local', $updateStatus[$img])) {
 				$localVersion = $updateStatus[$img]['local'];
 			}
+			if ($localVersion === null) {
+				$localVersion = $this->inspectLocalVersion($img);
+			}
 			$remoteVersion = $this->getRemoteVersionV2($img);
 			$status = ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? 'true' : 'false') : 'undef';
 			$updateStatus[$img] = ['local' => $localVersion, 'remote' => $remoteVersion, 'status' => $status];
 			//$this->debug("Update status: Image='$img', Local='$localVersion', Remote='$remoteVersion', Status='$status'");
 		}
 		DockerUtil::saveJSON($dockerManPaths['update-status'], $updateStatus);
+	}
+
+	public function inspectLocalVersion( $image ) {
+		$DockerClient = new DockerClient();
+		$inspect      = $DockerClient->getDockerJSON( '/images/' . $image . '/json' );
+		if ( empty( $inspect['RepoDigests'] ) ) {
+			return null;
+		}
+
+		$shaPos = strpos( $inspect['RepoDigests'][0], '@sha256:' );
+		if ( $shaPos === false ) {
+			return null;
+		}
+
+		return substr( $inspect['RepoDigests'][0], $shaPos + 1 );
 	}
 
 	public function setUpdateStatus($image, $version) {
@@ -579,7 +648,7 @@ class DockerClient {
 		return round(pow(1024, $base - floor($base)), 0).' '.$suffix[floor($base)];
 	}
 
-	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false) {
+	public function getDockerJSON($url, $method='GET', &$code=null, $callback=null, $unchunk=false, $headers=null) {
 		$api = '/v1.37'; // used to force an API version. See https://docs.docker.com/develop/sdk/#api-version-matrix
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 		if ($fp === false) {
@@ -587,7 +656,11 @@ class DockerClient {
 			return null;
 		}
 		$protocol = $unchunk ? 'HTTP/1.0' : 'HTTP/1.1';
-		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n\r\n";
+		$out = "$method {$api}{$url} $protocol\r\nHost:127.0.0.1\r\nConnection:Close\r\n";
+		if (!empty($headers)) {
+			$out .= $headers;
+		}
+		$out .= "\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
@@ -684,9 +757,46 @@ class DockerClient {
 	}
 
 	public function pullImage($image, $callback=null) {
-		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback);
+		$header       = null;
+		$registryAuth = $this->getRegistryAuth( $image );
+		if ( $registryAuth ) {
+			$header = 'X-Registry-Auth: ' . base64_encode( json_encode( [
+					'username'      => $registryAuth['username'],
+					'password'      => $registryAuth['password'],
+					'serveraddress' => $registryAuth['apiUrl'],
+				] ) ) . "\r\n";
+		}
+
+		$ret = $this->getDockerJSON("/images/create?fromImage=".urlencode($image), 'POST', $code, $callback, false, $header);
 		$this->flushCache($this::$imagesCache);
 		return $ret;
+	}
+
+	public function getRegistryAuth($image) {
+		$image = DockerUtil::ensureImageTag($image);
+		$usesRegistry = preg_match('@^([^/]+)/(.+):(.+)$@', $image, $matches);
+		if (!$usesRegistry) {
+			return false;
+		}
+
+		$dockerConfig = '/root/.docker/config.json';
+		if (!file_exists($dockerConfig)) {
+			return false;
+		}
+		$dockerConfig = json_decode(file_get_contents($dockerConfig), true);
+		if ( empty( $dockerConfig['auths'] ) || empty( $dockerConfig['auths'][ $matches[1] ] ) ) {
+			return false;
+		}
+		list($user, $password) = explode(':', base64_decode($dockerConfig['auths'][ $matches[1] ]['auth']));
+
+		return [
+			'username'     => $user,
+			'password'     => $password,
+			'registryName' => $matches[1],
+			'imageName'    => $matches[2],
+			'imageTag'     => $matches[3],
+			'apiUrl'       => 'https://' . $matches[1] . '/v2/',
+		];
 	}
 
 	public function removeImage($id) {

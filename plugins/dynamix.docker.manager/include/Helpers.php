@@ -506,4 +506,17 @@ function getAllocations() {
   }
   return $ports;
 }
+
+function getCurlHandle($url, $method = 'GET') {
+	$ch = curl_init();
+	curl_setopt( $ch, CURLOPT_URL, $url );
+	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+	if ($method === 'HEAD') {
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'HEAD' );
+		curl_setopt( $ch, CURLOPT_HEADER, 1 );
+		curl_setopt( $ch, CURLOPT_NOBODY, true );
+    }
+
+    return $ch;
+}
 ?>
