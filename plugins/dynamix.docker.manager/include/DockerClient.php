@@ -14,6 +14,8 @@
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
+require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
+
 $dockerManPaths = [
 	'autostart-file' => "/var/lib/docker/unraid-autostart",
 	'update-status'  => "/var/lib/docker/unraid-update-status.json",
