@@ -720,7 +720,7 @@
 		exec("lsusb 2>/dev/null", $arrAllUSBDevices);
 
 		foreach ($arrAllUSBDevices as $strUSBDevice) {
-			if (preg_match('/^.+ID (?P<id>\S+)(?P<name>.*)$/', $strUSBDevice, $arrMatch)) {
+			if (preg_match('/^.+: ID (?P<id>\S+)(?P<name>.*)$/', $strUSBDevice, $arrMatch)) {
 				if (stripos($GLOBALS['var']['flashGUID'], str_replace(':', '-', $arrMatch['id'])) === 0) {
 					// Device id matches the unraid boot device, skip device
 					continue;
