@@ -18,6 +18,7 @@ $path  = $_POST['path'];
 $var   = parse_ini_file('state/var.ini');
 $devs  = parse_ini_file('state/devs.ini',true);
 $disks = parse_ini_file('state/disks.ini',true);
+$sec   = parse_ini_file('state/sec.ini',true);
 $diskio= @parse_ini_file('state/diskload.ini');
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'ioReads'=>0, 'ioWrites'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
@@ -357,8 +358,11 @@ case 'flash':
   $disk = &$disks['flash'];
   $data = explode(' ',$diskio[$disk['device']] ?? '0 0');
   $disk['fsUsed'] = $disk['fsSize']-$disk['fsFree'];
+  $flash = &$sec['flash']; $share = "";
+  if ($flash['export']=='e' && $flash['security']=='public')
+    $share = "<a class='info nohand' onclick='return false'><i class='fa fa-warning fa-fw orange-text'></i><span>Flash device is set as public share<br>Please change share SMB security</span></a>";
   echo "<tr>";
-  echo "<td>".device_info($disk,true)."</td>";
+  echo "<td>".$share.device_info($disk,true)."</td>";
   echo "<td>".device_desc($disk)."</td>";
   echo "<td>*</td>";
   echo "<td><span class='diskio'>".my_diskio($data[0])."</span><span class='number'>".my_number($disk['numReads'])."</span></td>";
