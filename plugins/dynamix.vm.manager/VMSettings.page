@@ -82,7 +82,7 @@ body{-webkit-overflow-scrolling:touch}
 <input type="hidden" name="#file" value="<?=htmlspecialchars($domain_cfgfile)?>">
 <input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
 Enable VMs:
-: <select id="SERVICE" name="SERVICE" class="narrow">
+: <select id="SERVICE" name="SERVICE">
   <?= mk_option($libvirt_service, 'disable', 'No'); ?>
   <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
   </select>
@@ -134,7 +134,7 @@ Default ISO storage path:
 
 </div>
 Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</span>:
-: <select id="winvirtio_select" class="narrow">
+: <select id="winvirtio_select">
   <?$iso_dir = $domain_cfg['MEDIADIR'];
     if (empty($iso_dir) || !is_dir($iso_dir)) {
       $iso_dir = '/mnt/user/isos/';
@@ -165,7 +165,7 @@ Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</
 
 <div class="advanced" markdown="1">
 Default network bridge:
-: <select id="bridge" name="BRNAME" class="narrow">
+: <select id="bridge" name="BRNAME">
   <?foreach ($arrValidBridges as $strBridge) echo mk_option($domain_cfg['BRNAME'], $strBridge, $strBridge);?>
   </select>
 
@@ -177,7 +177,7 @@ Default network bridge:
 > NOTE: You can also specify a network bridge on a per-VM basis.
 
 Upon host shutdown:
-: <select id="hostshutdown" name="HOSTSHUTDOWN" class="narrow">
+: <select id="hostshutdown" name="HOSTSHUTDOWN">
   <?echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'shutdown', 'Shutdown VMs');
     echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'hibernate', 'Hibernate VMs');
   ?>
@@ -196,7 +196,7 @@ VM shutdown time-out:
 > NOTE: It's recommended to shut down guest VMs from within the VM.
 
 PCIe ACS override:
-: <select id="pcie_acs_override" class="narrow"<?=$safemode?' disabled':''?>>
+: <select id="pcie_acs_override"<?=$safemode?' disabled':''?>>
   <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
   <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
   <?= mk_option($pcie_acs_override, 'multifunction', 'Multifunction'); ?>
@@ -207,7 +207,7 @@ PCIe ACS override:
 > A reboot will be required for changes to this setting to take affect.
 
 VFIO allow unsafe interrupts:
-: <select id="vfio_allow_unsafe" class="narrow"<?=$safemode?' disabled':''?>>
+: <select id="vfio_allow_unsafe"<?=$safemode?' disabled':''?>>
   <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
   <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
   </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>

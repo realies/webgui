@@ -140,7 +140,7 @@ span.disabled{color:#404040}
 <input type="hidden" name="#cleanup" value="true">
 <input type="hidden" name="DOCKER_CUSTOM_NETWORKS" value="<?=implode(' ',$unset)?> ">
 Enable Docker:
-: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
+: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED">
   <?=mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No')?>
   <?=mk_option($dockercfg['DOCKER_ENABLED'], 'yes', 'Yes')?>
   </select>
@@ -156,6 +156,13 @@ Enable Docker:
 
 <?if ($DockerStopped):?>
 
+Docker vDisk size:
+: <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE']?>" class="narrow" required>GB <span id="SIZE_ERROR" class="errortext"></span>
+
+> If the system needs to create a new docker image file, this is the default size to use specified in GB.
+>
+> To resize an existing image file, specify the new size here. Next time the Docker service is started the file (and file system) will increased to the new size (but never decreased).
+
 Docker vDisk location:
 : <input id="DOCKER_IMAGE_FILE" type="text" name="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE']?>" placeholder="e.g. /mnt/disk1/docker.img" data-pickcloseonfile="true" data-pickfilter="img" data-pickroot="/mnt/" data-pickfolders="true" required="required">
   <?if (file_exists($dockercfg['DOCKER_IMAGE_FILE'])):?>
@@ -170,13 +177,6 @@ Docker vDisk location:
 > You must specify an image file for Docker. The system will automatically create this file when the Docker service is first started.
 >
 > It is recommended to create this image file outside the array, e.g. on the Cache pool. For best performance SSD devices are preferred.
-
-Docker vDisk size:
-: <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE']?>" style="width:50px;" required="required">GB <span id="SIZE_ERROR" class="errortext"></span>
-
-> If the system needs to create a new docker image file, this is the default size to use specified in GB.
->
-> To resize an existing image file, specify the new size here. Next time the Docker service is started the file (and file system) will increased to the new size (but never decreased).
 
 Default appdata storage location:
 : <input id="DOCKER_APP_CONFIG_PATH" type="text" name="DOCKER_APP_CONFIG_PATH" value="<?=$dockercfg['DOCKER_APP_CONFIG_PATH']?>" placeholder="e.g. /mnt/user/appdata" data-pickfilter="HIDE_FILES_FILTER" data-pickroot="<?=(is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/')?>" data-pickfolders="true">
@@ -194,7 +194,7 @@ Default appdata storage location:
 
 <div markdown="1" class="advanced">
 Docker LOG rotation:
-: <select name="DOCKER_LOG_ROTATION" class="narrow" onchange="showLogOptions(this.value)">
+: <select name="DOCKER_LOG_ROTATION" onchange="showLogOptions(this.value)">
   <?=mk_option($dockercfg['DOCKER_LOG_ROTATION'], 'no', 'Disabled')?>
   <?=mk_option($dockercfg['DOCKER_LOG_ROTATION'], 'yes', 'Enabled')?>
   </select>
@@ -205,7 +205,7 @@ Docker LOG rotation:
 
 <div markdown="1" id="DOCKER_LOG_OPTIONS" style="display:none">
 Docker LOG maximum file size:
-: <select name="DOCKER_LOG_SIZE" class="narrow">
+: <select name="DOCKER_LOG_SIZE">
   <?=mk_option($dockercfg['DOCKER_LOG_SIZE'], '10m', '10 MB')?>
   <?=mk_option($dockercfg['DOCKER_LOG_SIZE'], '20m', '20 MB')?>
   <?=mk_option($dockercfg['DOCKER_LOG_SIZE'], '50m', '50 MB')?>
@@ -217,7 +217,7 @@ Docker LOG maximum file size:
 > Specifies the maximum LOG size. When exceeded LOG rotation will occur.
 
 Docker LOG number of files:
-: <select name="DOCKER_LOG_FILES" class="narrow">
+: <select name="DOCKER_LOG_FILES">
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '1', '1')?>
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '2', '2')?>
   <?=mk_option($dockercfg['DOCKER_LOG_FILES'], '3', '3')?>
@@ -228,7 +228,7 @@ Docker LOG number of files:
 </div>
 
 Template Authoring Mode:
-: <select id="DOCKER_AUTHORING_MODE" name="DOCKER_AUTHORING_MODE" class="narrow">
+: <select id="DOCKER_AUTHORING_MODE" name="DOCKER_AUTHORING_MODE">
   <?=mk_option($dockercfg['DOCKER_AUTHORING_MODE'], 'no', 'No')?>
   <?=mk_option($dockercfg['DOCKER_AUTHORING_MODE'], 'yes', 'Yes')?>
   </select>
@@ -236,7 +236,7 @@ Template Authoring Mode:
 > If set to **Yes**, when creating/editing containers the interface will be present with some extra fields related to template authoring.
 
 Preserve user defined networks:
-: <select name="DOCKER_USER_NETWORKS" class="narrow">
+: <select name="DOCKER_USER_NETWORKS">
   <?=mk_option($dockercfg['DOCKER_USER_NETWORKS'], 'remove', 'No')?>
   <?=mk_option($dockercfg['DOCKER_USER_NETWORKS'], 'preserve', 'Yes')?>
   </select>
