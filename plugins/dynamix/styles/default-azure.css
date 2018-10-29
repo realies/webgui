@@ -32,7 +32,7 @@ input:hover[type=button],input:hover[type=reset],input:hover[type=submit],button
 input:active[type=button],input:active[type=reset],input:active[type=submit],button:active,button:active[type=button],a.button:active{border-color:#0072C6;box-shadow:none}
 input[disabled],button[disabled],input:hover[type=button][disabled],input:hover[type=reset][disabled],input:hover[type=submit][disabled],button:hover[disabled],button:hover[type=button][disabled],input:active[type=button][disabled],input:active[type=reset][disabled],input:active[type=submit][disabled],button:active[disabled],button:active[type=button][disabled],textarea[disabled]{color:#808080;border-color:#808080;background:#c7c5cb;opacity:0.5;cursor:default}
 input::-webkit-input-placeholder{color:#00529b}
-select{font-family:clear-sans;font-size:1.3rem;min-width:188px;max-width:326px;padding:6px 6px;margin:0 10px 0 0;border:#606e7f 1px solid;box-shadow:none;color:#606e7f;background:transparent;outline:none;display:inline-block;cursor:pointer}
+select{font-family:clear-sans;font-size:1.3rem;min-width:188px;max-width:326px;padding:6px 6px;margin:0 10px 0 0;border:#606e7f 1px solid;box-shadow:none;border-radius:0;color:#606e7f;background:transparent;outline:none;display:inline-block;cursor:pointer}
 select option{color:#606e7f;background-color:#edeaef}
 select:focus{border-color:#0072C6}
 select[disabled]{color:#808080;border-color:#808080;background:#c7c5cb;opacity:0.5;cursor:default}
