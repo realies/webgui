@@ -20,7 +20,7 @@ var enabledAgents = new Object();
 var disabledAgents = new Object();
 var openPage = true;
 
-<?$width = [166,305]?>
+<?$width = [166,300]?>
 <?if ($tabbed):?>
 $('#tab3').bind({click:function(){initDropdown();}});
 $(function(){if ($('#tab3').is(':checked')) initDropdown();});
