@@ -266,7 +266,6 @@ $bgcolor = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.filetree.css")?>">
 <link rel="stylesheet" type="text/css" href="<?autov("/plugins/dynamix.docker.manager/styles/style-{$display['theme']}.css")?>">
 <style>
-table{border-collapse:separate}
 option.list{padding:0 0 0 7px}
 optgroup.bold{font-weight:bold;margin-top:5px}
 optgroup.title{background-color:#625D5D;color:#f2f2f2;text-align:center;margin-top:10px}
@@ -282,7 +281,9 @@ optgroup.title{background-color:#625D5D;color:#f2f2f2;text-align:center;margin-t
 .switch-button-label.off{color:inherit;}
 .selectVariable{width:320px}
 .fa.button{color:maroon;font-size:2.4rem;position:relative;top:4px;cursor:pointer}
+.spacer{padding:16px 0}
 span.cpu,label.checkbox{display:inline-block;width:32px}
+button[type=button]{margin:0 20px 0 0}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
@@ -587,13 +588,13 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
     $(el).prop('disabled',disabled);
     switch ($(el)[0].selectedIndex) {
     case 0: // Path
-      mode.html("<dt>Access Mode:</dt><dd><select name='Mode' class='narrow'><option value='rw'>Read/Write</option><option value='rw,slave'>RW/Slave</option><option value='rw,shared'>RW/Shared</option><option value='ro'>Read Only</option><option value='ro,slave'>RO/Slave</option><option value='ro,shared'>RO/Shared</option></select></dd>");
+      mode.html("<dt>Access Mode:</dt><dd><select name='Mode'><option value='rw'>Read/Write</option><option value='rw,slave'>RW/Slave</option><option value='rw,shared'>RW/Shared</option><option value='ro'>Read Only</option><option value='ro,slave'>RO/Slave</option><option value='ro,shared'>RO/Shared</option></select></dd>");
       value.bind("click", function(){openFileBrowser(this,$(this).val(), 'sh', true, false);});
       targetDiv.find('#dt1').text('Container Path:');
       valueDiv.find('#dt2').text('Host Path:');
       break;
     case 1: // Port
-      mode.html("<dt>Connection Type:</dt><dd><select name='Mode' class='narrow'><option value='tcp'>TCP</option><option value='udp'>UDP</option></select></dd>");
+      mode.html("<dt>Connection Type:</dt><dd><select name='Mode'><option value='tcp'>TCP</option><option value='udp'>UDP</option></select></dd>");
       value.addClass("numbersOnly");
       if (network==0) {
         if (target.val()) target.prop('disabled',<?=$disableEdit?>); else target.addClass("numbersOnly");
@@ -971,7 +972,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
       <tr <?=$showAdditionalInfo?>>
         <td>Network Type:</td>
         <td>
-          <select name="contNetwork" class="narrow" onchange="showSubnet(this.value)">
+          <select name="contNetwork" onchange="showSubnet(this.value)">
           <?=mk_option(1,'bridge','Bridge')?>
           <?=mk_option(1,'host','Host')?>
           <?=mk_option(1,'none','None')?>
@@ -997,15 +998,15 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
       </tr>
       <tr <?=$showAdditionalInfo?>>
         <td>Console shell command:</td>
-        <td><select name="contShell" class="narrow">
+        <td><select name="contShell">
             <?=mk_option(1,'sh','Shell')?>
             <?=mk_option(1,'bash','Bash')?>
             </select>
         </td>
       </tr>
       <tr <?=$showAdditionalInfo?>>
-        <td>Privileged:</td>
-        <td><input type="checkbox" name="contPrivileged" class="switch-on-off"></td>
+        <td class="spacer">Privileged:</td>
+        <td class="spacer"><input type="checkbox" name="contPrivileged" class="switch-on-off"></td>
       </tr>
       <tr <?=$showAdditionalInfo?>>
         <td colspan="2">
@@ -1016,8 +1017,8 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
         </td>
       </tr>
     </table>
-    <div id="configLocation" style="margin-top:12px"></div>
-    <table class="settings" style="margin-top:12px">
+    <div id="configLocation"></div>
+    <table class="settings">
       <tr>
         <td></td>
         <td id="readmore_toggle" class="readmore_collapsed"><a onclick="toggleReadmore()" style="cursor:pointer"><i class="fa fa-chevron-down"></i> Show more settings ...</a></td>
@@ -1063,7 +1064,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
   <dl>
     <dt>Config Type:</dt>
     <dd>
-      <select name="Type" class="narrow" onchange="toggleMode(this,false);">
+      <select name="Type" onchange="toggleMode(this,false);">
         <option value="Path">Path</option>
         <option value="Port">Port</option>
         <option value="Variable">Variable</option>
@@ -1093,7 +1094,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
     <div class="advanced">
       <dt>Display:</dt>
       <dd>
-        <select name="Display" class="narrow">
+        <select name="Display">
           <option value="always" selected>Always</option>
           <option value="always-hide">Always - Hide Buttons</option>
           <option value="advanced">Advanced</option>
@@ -1102,7 +1103,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
       </dd>
       <dt>Required:</dt>
       <dd>
-        <select name="Required" class="narrow">
+        <select name="Required">
           <option value="false" selected>No</option>
           <option value="true">Yes</option>
         </select>
@@ -1110,7 +1111,7 @@ span.cpu,label.checkbox{display:inline-block;width:32px}
       <div id="Mask">
         <dt>Password Mask:</dt>
         <dd>
-          <select name="Mask" class="narrow">
+          <select name="Mask">
             <option value="false" selected>No</option>
             <option value="true">Yes</option>
           </select>
