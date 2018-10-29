@@ -495,6 +495,9 @@ $(window).scroll(function() {
   } else {
     $('.back_to_top').fadeOut(backtotopduration);
   }
+<?if (strstr('black,white',$display['theme'])):?>
+  $('div#menu').css($(this).scrollTop()>90 ? {position:'fixed',top:'0'} : {position:'absolute',top:'90px'});
+<?endif;?>
 });
 $('.back_to_top').click(function(event) {
   event.preventDefault();
