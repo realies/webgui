@@ -497,7 +497,8 @@ $(window).scroll(function() {
     $('.back_to_top').fadeOut(backtotopduration);
   }
 <?if (strstr('black,white',$display['theme'])):?>
-  $('div#menu').css($(this).scrollTop() > $('div#header').height() ? {position:'fixed',top:'0'} : {position:'absolute',top:'90px'});
+  var top = $('div#header').height() - 1; // header height has 1 extra pixel to cover overlap
+  $('div#menu').css($(this).scrollTop() > top ? {position:'fixed',top:'0'} : {position:'absolute',top:top+'px'});
 <?endif;?>
 });
 $('.back_to_top').click(function(event) {
