@@ -1,7 +1,7 @@
 Menu="Docker:1"
 Title="Docker Containers"
 Tag="cubes"
-Cond="(pgrep('dockerd')!==false)"
+Cond="is_file('/var/run/dockerd.pid')"
 Markdown="false"
 ---
 <?PHP

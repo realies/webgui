@@ -4,8 +4,8 @@ Code="f108"
 Cond="exec(\"grep -o '^SERVICE=.enable' /boot/config/domain.cfg 2>/dev/null\")"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,13 +17,9 @@ Cond="exec(\"grep -o '^SERVICE=.enable' /boot/config/domain.cfg 2>/dev/null\")"
 ?>
 <?
 if ($var['fsState'] != "Started") {
-  echo "<p class='notice shift'>Array must be <span class='strong big'>started</span> to view Virtual Machines.</p>";
-  return;
+  echo "<div class='notice shift'>Array must be <span class='strong big'>started</span> to view Virtual Machines.</div>";
+} elseif (!is_file('/var/run/libvirt/libvirtd.pid') || (!is_dir('/proc/'.@file_get_contents('/var/run/libvirt/libvirtd.pid')))) {
+  echo "<div class='notice shift'>Libvirt Service failed to start.</div>";
 }
-if (!is_file('/var/run/libvirt/libvirtd.pid') || (!is_dir('/proc/'.@file_get_contents('/var/run/libvirt/libvirtd.pid')))) {
-  echo "<p class='notice shift'>Libvirt Service failed to start.</p>";
-  return;
-}
-
 if (count($pages)==2) $tabbed = false;
 ?>

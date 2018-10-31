@@ -16,7 +16,7 @@ Cond="(($var['shareNFSEnabled']!='no') && (isset($name)?array_key_exists($name,$
  */
 ?>
 <?
-$width = [123,305];
+$width = [123,300];
 ?>
 > *Read settings from* is used to preset the NFS security settings of the current selected share with the settings of an existing share.
 >

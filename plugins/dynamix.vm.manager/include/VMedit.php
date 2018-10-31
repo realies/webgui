@@ -85,7 +85,7 @@ if (!empty($_GET['uuid'])) {
 
 <style>
 body{-webkit-overflow-scrolling:touch}
-.fileTree{background:<?=$bgcolor?>;width:305px;max-height:150px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
+.fileTree{background:<?=$bgcolor?>;width:300px;max-height:150px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
 #vmform table{margin-top:0}
 #vmform div#title + table{margin-top:0}
 #vmform table tr{vertical-align:top;line-height:40px}
@@ -118,7 +118,7 @@ span.advancedview_panel{display:none;line-height:16px;margin-top:1px}
 #template_img_chooser div:hover{background-color:#eee;cursor:pointer;}
 #template_img_chooser_outer{position:absolute;display:none;border-radius:5px;border:1px solid <?=$border?>;background:<?=$bgcolor?>;z-index:10}
 #form_content{display:none}
-#vmform .four{overflow:auto}
+#vmform .four{overflow:hidden}
 #vmform .four label{float:left;display:table-cell;width:15%;}
 #vmform .four label:nth-child(4n+4){}
 #vmform .four label.cpu1{width:28%;height:16px;line-height:16px}

@@ -17,6 +17,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1280">
 <meta name="robots" content="noindex, nofollow">
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
@@ -495,6 +496,10 @@ $(window).scroll(function() {
   } else {
     $('.back_to_top').fadeOut(backtotopduration);
   }
+<?if (strstr('black,white',$display['theme'])):?>
+  var top = $('div#header').height() - 1; // header height has 1 extra pixel to cover overlap
+  $('div#menu').css($(this).scrollTop() > top ? {position:'fixed',top:'0'} : {position:'absolute',top:top+'px'});
+<?endif;?>
 });
 $('.back_to_top').click(function(event) {
   event.preventDefault();
@@ -522,7 +527,7 @@ $(function() {
 <?if ($notify['entity'] & 1 == 1):?>
   $.post('/webGui/include/Notify.php',{cmd:'init'},function(){timers.notifier = setTimeout(notifier,0);});
 <?endif;?>
-  $('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').attr('disabled','disabled');
+  $('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').prop('disabled',true);
   $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],input[type=file],textarea').each(function(){$(this).on('input change',function() {
     var form = $(this).parentsUntil('form').parent();
     form.find('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').not('input.lock').prop('disabled',false);

@@ -15,7 +15,7 @@ Tag="share-alt-square"
  */
 ?>
 <?
-$width = [123,305];
+$width = [123,300];
 
 if ($name == "") {
   /* default values when adding new share */

@@ -17,7 +17,7 @@ Tag="hand-paper-o"
 <?
 $newarray = $var['mdState']=='NEW_ARRAY';
 $disabled = $var['fsState']=="Started";
-$width    = [166,305];
+$width    = [166,300];
 if ($newarray) {
   @unlink('/boot/config/smart-one.cfg');
   @unlink('/boot/config/smart-all.cfg');
