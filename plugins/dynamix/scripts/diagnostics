@@ -151,12 +151,17 @@ foreach ($files as $file) {
   }
   @copy($file, $dest);
   if (!$all) exert("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
+  $share = pathinfo(basename($file),PATHINFO_FILENAME);
+  if ( is_dir("/mnt/user0/$share") ) { file_put_contents($dest,"# Share exists on array\r\n",FILE_APPEND); }
+  if ( is_dir("/mnt/cache/$share") ) { file_put_contents($dest,"# Share exists on cache drive\r\n",FILE_APPEND); }
 }
 // create default user shares information
 $shares = file_exists("$get/shares.ini") ? parse_ini_file("$get/shares.ini", true) : [];
 foreach ($shares as $share) {
   $name = $share['name'];
   if (!in_array("/boot/config/shares/$name.cfg",$files)) file_put_contents(anonymize("/$diag/shares/$name.cfg",2),"# This share has default settings.\r\n");
+  if ( is_dir("/mnt/user0/$name") ) { file_put_contents($dest,"# Share exists on array\r\n",FILE_APPEND); }
+  if ( is_dir("/mnt/cache/$name") ) { file_put_contents($dest,"# Share exists on cache drive\r\n",FILE_APPEND); }
 }
 // copy docker information (if existing)
 $max = 1*1024*1024; //=1MB
