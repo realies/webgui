@@ -28,7 +28,7 @@ function exert($cmd, &$save=null) {
   return implode("\n",$save);
 }
 function shareDisks($share) {
-  return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>&1");
+  return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>/dev/null") ?: "no drives";
 }
 
 function anonymize($text,$select) {
