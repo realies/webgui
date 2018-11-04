@@ -28,7 +28,7 @@ function exert($cmd, &$save=null) {
   return implode("\n",$save);
 }
 function shareDisks($share) {
-	return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>&1");
+  return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>&1");
 }
 
 function anonymize($text,$select) {
@@ -155,7 +155,7 @@ foreach ($files as $file) {
   @copy($file, $dest);
   if (!$all) exert("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
   $share = pathinfo(basename($file),PATHINFO_FILENAME);
-	file_put_contents($dest,"# Share exists on ".shareDisks($share)."\r\n",FILE_APPEND);
+  file_put_contents($dest,"# Share exists on ".shareDisks($share)."\r\n",FILE_APPEND);
 }
 // create default user shares information
 $shares = file_exists("$get/shares.ini") ? parse_ini_file("$get/shares.ini", true) : [];
