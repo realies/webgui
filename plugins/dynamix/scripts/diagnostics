@@ -27,12 +27,8 @@ function exert($cmd, &$save=null) {
   exec("timeout -s9 30 $cmd", $save);
   return implode("\n",$save);
 }
-
 function shareDisks($share) {
-  foreach ( array_diff(glob("/mnt/*"),array("/mnt/disks","/mnt/user","/mnt/user0","/mnt/RecycleBin")) as $disk) {
-    if ( is_dir("$disk/$share") ) $disks .= pathinfo($disk,PATHINFO_FILENAME).", ";
-  }
-  return rtrim($disks,", ");
+	return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>&1");
 }
 
 function anonymize($text,$select) {
@@ -159,16 +155,13 @@ foreach ($files as $file) {
   @copy($file, $dest);
   if (!$all) exert("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
   $share = pathinfo(basename($file),PATHINFO_FILENAME);
-  file_put_contents($dest,"# share Exists on: ".shareDisks($share),FILE_APPEND);
+	file_put_contents($dest,"# Share exists on ".shareDisks($share)."\r\n",FILE_APPEND);
 }
 // create default user shares information
 $shares = file_exists("$get/shares.ini") ? parse_ini_file("$get/shares.ini", true) : [];
 foreach ($shares as $share) {
   $name = $share['name'];
-  if (!in_array("/boot/config/shares/$name.cfg",$files)) {
-    file_put_contents(anonymize("/$diag/shares/$name.cfg",2),"# This share has default settings.\r\n");
-    file_put_contents("/$diag/shares/$name.cfg","# share exists on: ".shareDisks($name),FILE_APPEND);
-  }
+  if (!in_array("/boot/config/shares/$name.cfg",$files)) file_put_contents(anonymize("/$diag/shares/$name.cfg",2),"# This share has default settings.\r\n.# Share exists on ".shareDisks($name)."\r\n");
 }
 // copy docker information (if existing)
 $max = 1*1024*1024; //=1MB
