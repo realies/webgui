@@ -30,15 +30,20 @@ body{font-size:1.3rem;color:#1c1c1c;background:#f2f2f2;padding:0;margin:0;-webki
 </style>
 <script>
 parent.document.getElementById('progressFrame').style.zIndex = 10;
-var enablePage=parent.location;
+
+origin = parent.location.origin;
+search = parent.location.search;
 
 function replaceName(name) {
-  var x = enablePage.href.indexOf("name=");
-  if (x) enablePage.href = enablePage.href.substring(0,x+5) + name;
+  var x = search.indexOf("name=");
+  if (x) search = search.substring(0,x+5) + name;
 }
 
-function replaceOrigin(origin) {
-  enablePage=origin+enablePage.pathname;
+function replaceOrigin(new_origin,new_port) {
+  if (parent.location.hostname == "localhost")
+    origin = parent.location.protocol + "//" + parent.location.hostname + ":" + new_port;
+  else
+    origin = new_origin;
 }
 
 function addLog(logLine) {
@@ -51,8 +56,12 @@ function disablePage() {
   for (var i=0,link; link=top.document.getElementsByTagName('a')[i]; i++) link.style.color = "gray"; //fake disable
 }
 
+function enablePage() {
+  parent.location.assign(origin + parent.location.pathname + search);
+}
+
 disablePage();
 </script>
 </head>
-<body class="logLine" onload="parent.location=enablePage;"></body>
+<body class="logLine" onload="enablePage();"></body>
 </html>
