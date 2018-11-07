@@ -742,6 +742,13 @@
 				}
 			}
 
+			$memballoon = "<memballoon model='none'/>";
+			if (empty( array_filter(array_merge($gpudevs_used, $audiodevs_used, $pcidevs_used), function($k){ return strpos($k,'#remove')===false && $k!='vnc'; }) )) {
+				$memballoon = "<memballoon model='virtio'>
+							<alias name='balloon0'/>
+						</memballoon>";
+			}
+
 			return "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
 						<uuid>$uuid</uuid>
 						<name>$name</name>
@@ -783,9 +790,7 @@
 							<channel type='unix'>
 								<target type='virtio' name='org.qemu.guest_agent.0'/>
 							</channel>
-							<memballoon model='virtio'>
-								<alias name='balloon0'/>
-							</memballoon>
+							$memballoon
 						</devices>
 					</domain>";
 
