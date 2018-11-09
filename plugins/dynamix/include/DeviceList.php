@@ -313,7 +313,7 @@ function array_slots() {
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='csrf_token' value='{$var['csrf_token']}'>";
   $out .= "<input type='hidden' name='changeSlots' value='apply'>";
-  $out .= "<select class='auto' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select class='narrow' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $selected = ($n == $var['SYS_ARRAY_SLOTS'])? ' selected' : '';
     $out .= "<option value='$n'{$selected}>$n</option>";
@@ -328,7 +328,7 @@ function cache_slots() {
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='csrf_token' value='{$var['csrf_token']}'>";
   $out .= "<input type='hidden' name='changeSlots' value='apply'>";
-  $out .= "<select class='auto' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select class='narrow' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $option = $n ? $n : 'none';
     $selected = ($n == $var['SYS_CACHE_SLOTS'])? ' selected' : '';
