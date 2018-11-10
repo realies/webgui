@@ -32,17 +32,17 @@ input[type=button][disabled],input[type=reset][disabled],input[type=submit][disa
 input:hover[type=button][disabled],input:hover[type=reset][disabled],input:hover[type=submit][disabled],button:hover[disabled],button:hover[type=button][disabled],a.button:hover[disabled]
 input:active[type=button][disabled],input:active[type=reset][disabled],input:active[type=submit][disabled],button:active[disabled],button:active[type=button][disabled],a.button:active[disabled]{cursor:default;color:#808080;background:-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 0 no-repeat,-webkit-gradient(linear,left top,right top,from(#404040),to(#808080)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#404040),to(#404040)) 0 100% no-repeat,-webkit-gradient(linear,left bottom,left top,from(#808080),to(#808080)) 100% 100% no-repeat;background:linear-gradient(90deg,#404040 0,#808080) 0 0 no-repeat,linear-gradient(90deg,#404040 0,#808080) 0 100% no-repeat,linear-gradient(0deg,#404040 0,#404040) 0 100% no-repeat,linear-gradient(0deg,#808080 0,#808080) 100% 100% no-repeat;background-size:100% 2px,100% 2px,2px 100%,2px 100%}
 input::-webkit-input-placeholder{color:#486dba}
-select{-webkit-appearance:none;font-family:clear-sans;font-size:1.3rem;min-width:166px;max-width:300px;padding:4px 0;text-indent:0;margin:0 10px 0 0;border:none;border-bottom:#e5e5e5 1px solid;box-shadow:none;border-radius:0;color:#f2f2f2;background-color:transparent;background-image:linear-gradient(66.6deg, transparent 60%, #f2f2f2 40%),linear-gradient(113.4deg, #f2f2f2 40%, transparent 60%);background-position:calc(100% - 4px),100%;background-size:4px 6px,4px 6px;background-repeat:no-repeat;outline:none;display:inline-block;cursor:pointer}
+select{-webkit-appearance:none;font-family:clear-sans;font-size:1.3rem;min-width:166px;max-width:300px;padding:4px 8px 4px 0;text-indent:0;margin:0 10px 0 0;border:none;border-bottom:#e5e5e5 1px solid;box-shadow:none;border-radius:0;color:#f2f2f2;background-color:transparent;background-image:linear-gradient(66.6deg, transparent 60%, #f2f2f2 40%),linear-gradient(113.4deg, #f2f2f2 40%, transparent 60%);background-position:calc(100% - 4px),100%;background-size:4px 6px,4px 6px;background-repeat:no-repeat;outline:none;display:inline-block;cursor:pointer}
 select option{color:#f2f2f2;background-color:#262626}
 select:focus{outline:0}
 select[disabled]{color:#f2f2f2;border-bottom-color:#6c6c6c;opacity:0.5;cursor:default}
 select[name=enter_view]{padding:0;float:right}
 select[name=enter_share]{padding:0;float:right}
-select.narrow{min-width:64px}
+select.narrow{min-width:76px}
 select.auto{min-width:auto}
 select.slot{min-width:44rem;max-width:44rem}
 input.narrow{width:166px}
-input.trim{width:50px}
+input.trim{min-width:76px}
 #header{position:absolute;top:0;left:0;width:100%;height:91px;z-index:100;margin:0;color:#1c1b1b;background:#f2f2f2;background-size:100% 90px;background-repeat:no-repeat}
 #header .logo{float:left;margin-left:10px;color:#e22828;width:160px;text-align:center}
 #header .logo svg{width:160px;display:block;margin:25px 50px 8px 0}
