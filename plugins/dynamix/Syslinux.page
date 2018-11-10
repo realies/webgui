@@ -37,6 +37,7 @@ $mark    = 'label ';
 <style>
 div.basic{display:block}
 div.advanced{display:none}
+textarea.raw{resize:none;font-family:bitstream;width:65.5%}
 <?
 switch ($display['theme']) {
 case 'gray':
@@ -71,8 +72,6 @@ Array.prototype.spliceArray = function(i,n,a) {
 function prepareMenu(form) {
   $('input[name="#arg[1]"]').val(form.boot.checked?1:0);
   if ($('div.basic').is(':visible')) {
-    form.text.value = form.basic.value+'\n';
-  } else {
     var label = [], area = [];
     $(form).find('span[id^=label]').each(function(){
       label.push($(this).text());
@@ -90,9 +89,13 @@ function prepareMenu(form) {
         text.push(area[i].replace(/^|(\n)/g,'$1  '));
       }
     }
+    // menu view
     form.text.value = text.join('\n')+'\n';
+  } else {
+    // raw view
+    form.text.value = form.raw.value+'\n';
   }
-  form.basic.disabled = true;
+  form.raw.disabled = true;
 }
 function setDefault(form) {
   var text = <?=json_encode(array_map('strip',explode($mark,$default)))?>;
@@ -111,7 +114,7 @@ function setDefault(form) {
       $(this).remove();
     }
   });
-  $(form).find('textarea.text').val(<?=json_encode($default)?>).prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
+  $(form).find('textarea.raw').val(<?=json_encode($default)?>).prop('rows',$(this).val().match(/\n/g).length+1).trigger('change');
 }
 function changeMenu(form,id,update) {
   $(form).find('input.menu').each(function(){
@@ -127,16 +130,16 @@ function changeMenu(form,id,update) {
     }
   });
   if (update) {
-    // advanced view -> update basic view
+    // menu view -> update raw view
     var n = 0, o = null;
     var x = id.split('-')[1];
-    var text = form.basic.value.split('\n');
+    var text = form.raw.value.split('\n');
     for (var i=0; i < text.length; i++) {
       if (text[i].indexOf(mark) >= 0) if (++n == x) o = i + 1;
       if (text[i].indexOf(menu) >= 0) text.splice(i,1);
     }
     if (o) text.splice(o,0,'  '+menu);
-    $(form).find('textarea.text').val(text.join('\n')).prop('rows',text.length);
+    $(form).find('textarea.raw').val(text.join('\n')).prop('rows',text.length);
   }
 }
 $(function(){
@@ -146,12 +149,12 @@ $(function(){
     // propogate changes to 'other' view mode
     var form = $(this).closest('form');
     if ($(this).prop('class')=='menu') {
-      // advanced view -> update basic view
+      // menu view -> update raw view
       var n = 0, o = 0, x = null;
       var id = $(this).prop('id').split('-')[1];
       var area = $(this).val().split('\n');
-      var basic = form.find('textarea.text');
-      var text = basic.val().split('\n');
+      var raw = form.find('textarea.raw');
+      var text = raw.val().split('\n');
       for (var i=0; i < text.length; i++) {
         if (text[i].indexOf(mark) >= 0) {
           if (n++ == id) x = i; else o = i + 1;
@@ -160,14 +163,14 @@ $(function(){
         if (x) break;
       }
       text.spliceArray(o,(x||text.length)-o,area.indent(o));
-      basic.val(text.join('\n')).prop('rows',text.length);
+      raw.val(text.join('\n')).prop('rows',text.length);
     } else {
-      // basic view -> update advanced view
+      // raw view -> update menu view
       var n = 0, id = null, area = [];
       var text = $(this).val().split('\n');
       for (var i=0; i < text.length; i++) {
         if (text[i].indexOf(mark) >= 0) {
-          $('#text-'+(n++)).val(area.join('\n')).prop('rows',area.length);
+          $('#menu-'+(n++)).val(area.join('\n')).prop('rows',area.length);
           var label = $('#label-'+n);
           label.html(label.html().replace(/^.*(<span.*)/,text[i].replace(mark,'')+'$1'));
           area = [];
@@ -175,7 +178,7 @@ $(function(){
           if (text[i].indexOf(menu) >= 0) id = 'input-'+n; else if (text[i].length) area.push(text[i].replace(/^  /,''));
         }
       }
-      $('#text-'+n).val(area.join('\n')).prop('rows',area.length);
+      $('#menu-'+n).val(area.join('\n')).prop('rows',area.length);
       if (id) changeMenu(form,id,false);
     }
   });});
@@ -204,11 +207,6 @@ $(function(){
 <input type="hidden" name="#command" value="/webGui/scripts/bootmode">
 <input type="hidden" name="#arg[1]" value="">
 <input type="hidden" name="text" value="">
-<div markdown="1" class="advanced">
-Syslinux configuration:
-: <textarea class="text" name="basic" spellcheck="false" cols="80" rows="<?=substr_count($current,"\n")+1?>" maxlength="2048" style="resize:none;font-family:bitstream;width:65.5%"><?=$current?></textarea>
-
-</div>
 <div markdown="1" class="basic">
 Syslinux configuration:
 : <?$i=0;
@@ -219,8 +217,13 @@ Syslinux configuration:
   if ($start) unset($area[array_search($menu,$area)]);
 ?><span id="label-<?=$i?>" class="<?=$start?'array':'system'?>"><?=$label?>
   <?if ($i):?><span style="float:right"><input type="checkbox" id="input-<?=$i?>" class="menu" <?=$start?'checked':''?> title="Set default boot menu" onchange="changeMenu(this.form,this.id,true)"></span><?endif;?></span>
-  <textarea class="menu" id="text-<?=$i++?>" spellcheck="false" cols="80" rows="<?=count($area)?>" maxlength="2048"><?=implode("\n",$area)?></textarea>
+  <textarea class="menu" id="menu-<?=$i++?>" spellcheck="false" cols="80" rows="<?=count($area)?>" maxlength="2048"><?=implode("\n",$area)?></textarea>
   <?endforeach;?>
+
+</div>
+<div markdown="1" class="advanced">
+Syslinux configuration:
+: <textarea class="raw" name="raw" spellcheck="false" cols="80" rows="<?=substr_count($current,"\n")+1?>" maxlength="2048"><?=$current?></textarea>
 
 </div>
 Server boot mode:
