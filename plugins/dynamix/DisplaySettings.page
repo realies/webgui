@@ -50,6 +50,9 @@ function presetTime(form) {
   if (system) form.time.selectedIndex = 0;
   form.time.disabled = system;
 }
+function presetHeader(form) {
+  if (form.header.value) $('#background').show(); else $('#background').hide();
+}
 function presetBanner(form) {
   if (form.banner.selectedIndex == 0) $('#custom').hide(); else $('#custom').show();
 }
@@ -110,6 +113,7 @@ $(function() {
     if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();
   });
   presetTime(document.display_settings);
+  presetHeader(document.display_settings);
   presetBanner(document.display_settings);
 });
 </script>
@@ -216,11 +220,13 @@ Header custom text color:
 
 > Overrule the default text color in the header. This can be used to match the text color with a background image.
 
+<div id="background" markdown="1" style="display:none">
 Header custom background color:
 : <input type="text" class="narrow" name="background" value="<?=$display['background']?>" maxlength="6" pattern="[0-9a-fA-F]{3,6}" title="HTML color code of 3 or 6 hexadecimal digits">
 
 > Overrule the default background color in the header. This can be used to match the background color with a custom text color.
 
+</div>
 Show banner:
 : <select name="banner" size="1" onchange="presetBanner(this.form)">
   <?=mk_option($display['banner'], "", "No")?>
