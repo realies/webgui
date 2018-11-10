@@ -188,8 +188,8 @@ $(function(){
   }
   $('.advancedview').switchButton({
     labels_placement: 'left',
-    on_label: 'Advanced View',
-    off_label: 'Basic View',
+    off_label: 'Menu View',
+    on_label: 'Raw View',
     checked: $.cookie('syslinux_viewmode')=='advanced'
   });
   $('.advancedview').change(function() {
