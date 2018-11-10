@@ -10,6 +10,14 @@
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$font    = $display['font'];
+$theme   = $display['theme'];
+$header  = $display['header'];
+$backgnd = $display['background'];
+$themes1 = in_array($theme,['black','white']);
+$themes2 = in_array($theme,['gray','azure']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,12 +36,20 @@
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
-<?if ($display['font']):?>
-html{font-size:<?=$display['font']?>}
+<?if ($font):?>
+html{font-size:<?=$font?>}
 <?endif;?>
-<?if ($display['header']):?>
-#header,#header .logo,#header .text-right a{color:#<?=$display['header']?>}
+<?if ($header):?>
+#header,#header .logo,#header .text-right a{color:#<?=$header?>}
 #header .block{background-color:transparent}
+<?endif;?>
+<?if ($backgnd):?>
+#header{background-color:#<?=$backgnd?>}
+<?if ($header && $themes1):?>
+#menu{background-color:#<?=$backgnd?>}
+#nav-block #nav-item a{color:#<?=$header?>}
+#nav-block #nav-item.active:after{background-color:#<?=$header?>}
+<?endif;?>
 <?endif;?>
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:1.4rem;z-index:999}
@@ -47,7 +63,7 @@ $banner = '/boot/config/plugins/dynamix/banner.png';
 echo "#header.image{background-image:url(";
 echo file_exists($banner) ? autov($banner) : '/webGui/images/banner.png';
 echo ")}\n";
-if (strstr('gray,azure',$display['theme'])) {
+if ($themes2) {
   foreach ($tasks as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
   foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
 }
@@ -496,7 +512,7 @@ $(window).scroll(function() {
   } else {
     $('.back_to_top').fadeOut(backtotopduration);
   }
-<?if (strstr('black,white',$display['theme'])):?>
+<?if ($themes1):?>
   var top = $('div#header').height() - 1; // header height has 1 extra pixel to cover overlap
   $('div#menu').css($(this).scrollTop() > top ? {position:'fixed',top:'0'} : {position:'absolute',top:top+'px'});
 <?endif;?>
