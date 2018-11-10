@@ -14,11 +14,8 @@ Tag="edit"
  * all copies or substantial portions of the Software.
  */
 ?>
-> Use this page to make changes to your `syslinux.cfg` file.
-> You will need to reboot your server for these changes to take effect.
-
 <?
-$top = strstr('white,black',$display['theme']) ? -58 : -44;
+$top = $themes1 ? -58 : -44;
 
 function strip($area) {
   return preg_replace(["/^|(\n)  /","/\n$/"],["$1",""],$area);
@@ -200,6 +197,9 @@ $(function(){
 });
 </script>
 <span class="status" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
+
+> Use this page to make changes to your `syslinux.cfg` file.
+> You will need to reboot your server for these changes to take effect.
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareMenu(this)">
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
