@@ -481,8 +481,8 @@ function update60() {
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {
       var load = v.slice(0,-1);
-      if (load > red) var color = 'redbar';
-      else if (load > orange) var color = 'orangebar';
+      if (load >= red) var color = 'redbar';
+      else if (load >= orange) var color = 'orangebar';
       else var color = '';
       $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}}).text(v);
     });
@@ -539,8 +539,8 @@ $.each(json["cpuload"],function(k,v) {
   var ini = parseINI(data);
   $.each(ini,function(k,v) {
     var load = v['host'];
-    if (load > red) var color = 'redbar`';
-    else if (load > orange) var color = 'orangebar';
+    if (load >= red) var color = 'redbar';
+    else if (load >= orange) var color = 'orangebar';
     else var color = '';
     load += '%';
     $('#'+k).animate({width:load},{step:function(){$('#'+k).css('overflow','visible').removeClass().addClass(color);}}).text(load);
