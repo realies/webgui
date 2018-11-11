@@ -50,7 +50,7 @@ function my_smart(&$source,$name,$page) {
   my_insert($source, "<span id='smart-$name' name='$page' class='$thumb'><img src=\"$path/$thumb.png\" onmouseover=\"this.style.cursor='pointer'\" title=\"$title\"></span>");
 }
 function my_usage(&$source,$used,&$disk) {
-  if ($_POST['text']==2 || $_POST['text']==21) {
+  if ($used && ($_POST['text']==2 || $_POST['text']==21)) {
     $load = substr($used,0,-1);
     $critical = $disk['critical'] ?? $_POST['critical'];
     $warning = $disk['warning'] ?? $_POST['warning'];
