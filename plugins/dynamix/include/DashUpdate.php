@@ -58,7 +58,7 @@ function my_usage(&$source,$used,&$disk) {
     elseif ($load >= $warning) $class = 'orangebar';
     else $class = 'greenbar';
   } else $class = false;
-  my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'".($class?" class='$class'":"").">$used</span></div>" : "-");
+  my_insert($source, $used ? ($_POST['text']%10==0 ? $used : "<div class='usage-disk all'><span style='width:$used'".($class?" class='$class'":"").">$used</span></div>") : "-");
 }
 function my_temp($value,$unit) {
   return ($unit=='F' ? round(9/5*$value+32) : $value)." $unit";
