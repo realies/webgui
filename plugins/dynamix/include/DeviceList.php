@@ -313,7 +313,7 @@ function array_slots() {
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='csrf_token' value='{$var['csrf_token']}'>";
   $out .= "<input type='hidden' name='changeSlots' value='apply'>";
-  $out .= "<select class='auto' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select class='narrow' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $selected = ($n == $var['SYS_ARRAY_SLOTS'])? ' selected' : '';
     $out .= "<option value='$n'{$selected}>$n</option>";
@@ -328,7 +328,7 @@ function cache_slots() {
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='csrf_token' value='{$var['csrf_token']}'>";
   $out .= "<input type='hidden' name='changeSlots' value='apply'>";
-  $out .= "<select class='auto' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select class='narrow' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $option = $n ? $n : 'none';
     $selected = ($n == $var['SYS_CACHE_SLOTS'])? ' selected' : '';
@@ -359,7 +359,7 @@ case 'flash':
   $data = explode(' ',$diskio[$disk['device']] ?? '0 0');
   $disk['fsUsed'] = $disk['fsSize']-$disk['fsFree'];
   $flash = &$sec['flash']; $share = "";
-  if ($flash['export']=='e' && $flash['security']=='public')
+  if ($var['shareSMBEnabled']=='yes' && $flash['export']=='e' && $flash['security']=='public')
     $share = "<a class='info nohand' onclick='return false'><i class='fa fa-warning fa-fw orange-text'></i><span>Flash device is set as public share<br>Please change share SMB security</span></a>";
   echo "<tr>";
   echo "<td>".$share.device_info($disk,true)."</td>";

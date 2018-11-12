@@ -402,6 +402,8 @@ if (!count($shares)) echo "<tr><td colspan='4' style='text-align:center;padding-
 
 <script>
 var timer2,timer30;
+var orange = 70;
+var red = 90;
 
 function changeMode(item) {
   if (item==0) $.removeCookie('enter_share',{path:'/'}); else $.cookie('enter_share',item,{path:'/',expires:3650});
@@ -444,7 +446,7 @@ function update30() {
   $.post('<?=$url?>',{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#'+tag+k).html(v);});
   });
-  $.post('<?=$url?>',{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',slots:<?=$slots?>},function(data) {
+  $.post('<?=$url?>',{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',slots:<?=$slots?>,text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(data) {
 <?if ($slots <= 30):?>
     if (data) $('#dash0').html(data);
 <?else:?>
@@ -477,7 +479,13 @@ function update60() {
     if (data) $('#parity').html(data);
   });
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible');}}).text(v);});
+    if (data) $.each(data.split('#'),function(k,v) {
+      var load = v.slice(0,-1);
+      if (load >= red) var color = 'redbar';
+      else if (load >= orange) var color = 'orangebar';
+      else var color = '';
+      $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}}).text(v);
+    });
     setTimeout(update60,60000);
   });
 }
@@ -530,8 +538,12 @@ $.each(json["cpuload"],function(k,v) {
 //data is the cpuload.ini file contents
   var ini = parseINI(data);
   $.each(ini,function(k,v) {
-    var load = v['host']+'%';
-    $('#'+k).animate({width:load},{step:function(){$('#'+k).css('overflow','visible');}}).text(load);
+    var load = v['host'];
+    if (load >= red) var color = 'redbar';
+    else if (load >= orange) var color = 'orangebar';
+    else var color = '';
+    load += '%';
+    $('#'+k).animate({width:load},{step:function(){$('#'+k).css('overflow','visible').removeClass().addClass(color);}}).text(load);
   });
 });
 $(function() {

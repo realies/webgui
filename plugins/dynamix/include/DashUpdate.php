@@ -49,8 +49,16 @@ function my_smart(&$source,$name,$page) {
   $title .= "Click for context menu";
   my_insert($source, "<span id='smart-$name' name='$page' class='$thumb'><img src=\"$path/$thumb.png\" onmouseover=\"this.style.cursor='pointer'\" title=\"$title\"></span>");
 }
-function my_usage(&$source,$used) {
-  my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
+function my_usage(&$source,$used,&$disk) {
+  if ($used && ($_POST['text']==2 || $_POST['text']==21)) {
+    $load = substr($used,0,-1);
+    $critical = $disk['critical'] ?? $_POST['critical'];
+    $warning = $disk['warning'] ?? $_POST['warning'];
+    if ($load >= $critical) $class = 'redbar';
+    elseif ($load >= $warning) $class = 'orangebar';
+    else $class = 'greenbar';
+  } else $class = false;
+  my_insert($source, $used ? ($_POST['text']%10==0 ? $used : "<div class='usage-disk all'><span style='width:$used'".($class?" class='$class'":"").">$used</span></div>") : "-");
 }
 function my_temp($value,$unit) {
   return ($unit=='F' ? round(9/5*$value+32) : $value)." $unit";
@@ -207,7 +215,7 @@ case 'disk':
       else
         if (!strpos($state,'blink') && $temp>0) my_insert($row6[$n],"<span class='temp-text'>".my_temp($temp,$_POST['unit'])."</span>");
       if ($disk['device'] && !strpos($state,'blink')) my_smart($row7[$n],$disk['name'],'Device');
-      my_usage($row8[$n],($disk['type']!='Parity' && $disk['fsStatus']=='Mounted')?(($disk['fsSize'] ? round((1-$disk['fsFree']/$disk['fsSize'])*100):0).'%'):'');
+      my_usage($row8[$n],($disk['type']!='Parity' && $disk['fsStatus']=='Mounted')?(($disk['fsSize'] ? round((1-$disk['fsFree']/$disk['fsSize'])*100):0).'%'):'',$disk);
     }
   };
   $devRow = function($n,$disk) use (&$row4,&$row6,&$row7,$path) {
