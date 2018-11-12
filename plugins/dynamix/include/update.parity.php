@@ -18,11 +18,11 @@ $memory = '/tmp/memory.tmp';
 if (isset($_POST['#apply'])) {
   $cron = "";
   if ($_POST['mode']>0) {
-    $time  = $_POST['hour'] ?: '* *';
-    $dotm  = $_POST['dotm'] ?: '*';
-    $month = $_POST['month'] ?: '*';
-    $day   = $_POST['day'] ?: '*';
-    $write = $_POST['write'] ?: '';
+    $time  = $_POST['hour'] ?? '* *';
+    $dotm  = $_POST['dotm'] ?? '*';
+    $month = $_POST['month'] ?? '*';
+    $day   = $_POST['day'] ?? '*';
+    $write = $_POST['write'] ?? '';
     $term  = '';
     switch ($dotm) {
       case '28-31': $term = '[[ $(date +%e -d +1day) -eq 1 ]] && '; break;
