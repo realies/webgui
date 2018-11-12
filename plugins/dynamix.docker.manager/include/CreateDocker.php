@@ -81,16 +81,7 @@ if (isset($_POST['contName'])) {
   $userTmplDir = $dockerManPaths['templates-user'];
   if (!is_dir($userTmplDir)) mkdir($userTmplDir, 0777, true);
   if ($Name) {
-    $filename = sprintf('%s/my-%s', $userTmplDir, $Name);
-    // look for FAT32 filename hits due to different case
-    $userTemplates = glob("$userTmplDir/*.xml");
-    foreach ($userTemplates as $tmpl) {
-      if ( ($tmpl != "$filename.xml") && (strcasecmp($tmpl,"$filename.xml") == 0) ) {
-        $filename .= " (1)";
-        break;
-      }
-    }
-    $filename .= ".xml";
+    $filename = sprintf('%s/my-%s.xml', $userTmplDir, $Name);
     file_put_contents($filename, $postXML);
   }
   // Run dry
