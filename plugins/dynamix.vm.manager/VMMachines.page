@@ -31,7 +31,7 @@ function showCPUs($uuid) {
     list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
     $check = in_array($cpu1, $vcpu) ? 'fa-circle orange-text':'fa-circle-o';
     if (!$cpu2) {
-      echo "<label><i class='$check'></i>&nbsp;&nbsp;cpu $cpu1</label>";
+      echo "<label><i class='fa fa-fw $check'></i>&nbsp;&nbsp;cpu $cpu1</label>";
     } else {
       echo "<label class='cpu1'><i class='fa fa-fw $check'></i>&nbsp;&nbsp;cpu $cpu1 / $cpu2</label>";
       $check = in_array($cpu2, $vcpu) ? 'fa-circle orange-text':'fa-circle-o';
