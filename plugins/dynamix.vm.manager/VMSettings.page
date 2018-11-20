@@ -199,12 +199,17 @@ PCIe ACS override:
 : <select id="pcie_acs_override"<?=$safemode?' disabled':''?>>
   <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
   <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
-  <?= mk_option($pcie_acs_override, 'multifunction', 'Multifunction'); ?>
+  <?= mk_option($pcie_acs_override, 'multifunction', 'Multi-function'); ?>
   <?= mk_option($pcie_acs_override, 'downstream,multifunction', 'Both'); ?>
   </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>
 
-> Warning: Use of this setting could cause possible data corruption with certain hardware configurations. Please visit the Lime Technology forums for more information.
-> A reboot will be required for changes to this setting to take affect.
+> *PCIe ACS override* allows various hardware components to expose themselves as isolated devices.
+> Typically it is sufficient to isolate *Downstream* ports.
+> A hardware component may need the setting *Multi-function* or *Both* to further isolate different hardware functions.<br>
+> A reboot is required for changes to this setting to take affect.
+>
+> **Warning: use of this setting could cause possible data corruption with certain hardware configurations.**
+> Please visit the [Lime Technology forums](https://forums.unraid.net/forum/51-vm-engine-kvm) for more information.
 
 VFIO allow unsafe interrupts:
 : <select id="vfio_allow_unsafe"<?=$safemode?' disabled':''?>>
