@@ -25,36 +25,34 @@ function requireLibvirt() {
 	}
 }
 
-function scan($area, $text) {
-	return strpos($area,$text)!==false;
+function scan($line, $text) {
+	return stripos($line,$text)!==false;
 }
 
 function embed(&$syslinux, $key, $value) {
 	$size = count($syslinux);
-	$menu = $i = 0;
-	$cmd  = [];
 	$make = false;
-	// find the default section
+	$new = strlen($value) ? "$key=$value" : false;
+	$i = 0;
 	while ($i < $size) {
-		if (scan($syslinux[$i],'label ')) {
+		// find sections and exclude safemode
+		if (scan($syslinux[$i],'label ') && !scan($syslinux[$i],'safe mode') && !scan($syslinux[$i],'safemode')) {
 			$n = $i + 1;
 			// find the current requested setting
 			while (!scan($syslinux[$n],'label ') && $n < $size) {
-				if (scan($syslinux[$n],'menu default')) $menu = 1;
-				if (scan($syslinux[$n],'append')) {$cmd = preg_split('/\s+/',trim($syslinux[$n])); break;}
+				if (scan($syslinux[$n],'append ')) {
+					$cmd = preg_split('/\s+/',trim($syslinux[$n]));
+					// replace the existing setting
+					for ($c = 1; $c < count($cmd); $c++) if (scan($cmd[$c],$key)) {$make |= ($cmd[$c]!=$new); $cmd[$c] = $new; break;}
+					// or insert the new setting
+					if ($c==count($cmd) && $new) {array_splice($cmd,-1,0,$new); $make = true;}
+					$syslinux[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
+				}
 				$n++;
 			}
-			if ($menu) break; else $i = $n - 1;
+			$i = $n - 1;
 		}
 		$i++;
-	}
-	if ($cmd) {
-		$new = strlen($value) ? "$key=$value" : "";
-		// replace the existing setting
-		for ($c = 0; $c < count($cmd); $c++) if (scan($cmd[$c],$key)) {$make = ($cmd[$c]!=$new); $cmd[$c] = $new; break;}
-		// or insert the new setting
-		if ($c==count($cmd) && $new) {array_splice($cmd,-1,0,$new); $make = true;}
-		$syslinux[$n] = '  '.str_replace('  ',' ',implode(' ',$cmd));
 	}
 	return $make;
 }
