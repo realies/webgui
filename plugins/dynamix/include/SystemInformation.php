@@ -134,7 +134,7 @@ for ($i=0; $i<count($socket); $i++) {
 echo $size;
 ?>
 </div>
-<div><span class="key" style="text-decoration:underline;cursor:pointer" onclick="document.getElementsByClassName('memory_info')[0].classList.toggle('closed')">Memory:</span>
+<div><span class="key" style="text-decoration:underline;cursor:pointer" onclick="document.getElementsByClassName('dimm_info')[0].classList.toggle('closed')">Memory:</span>
 <?
 /*
  Memory Device (16) will get us each ram chip. By matching on MB it'll filter out Flash/Bios chips
@@ -168,7 +168,7 @@ foreach($memory_modules as $memory_module) {
 }
 ?>
 <style>.closed { display:none }</style>
-<div class="memory_info closed">
+<div class="dimm_info closed">
 <?
 foreach($memory_properties as $device) {
   echo "<div>{$device['Manufacturer']} - {$device['Part Number']} - {$device['Serial Number']} - {$device['Size']} @ {$device['Configured Clock Speed']}</div>";
