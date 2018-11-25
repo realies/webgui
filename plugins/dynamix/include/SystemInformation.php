@@ -134,7 +134,7 @@ for ($i=0; $i<count($socket); $i++) {
 echo $size;
 ?>
 </div>
-<div><span class="key">Memory:</span>
+<div><span class="key" style="text-decoration:underline;cursor:pointer" onclick="document.getElementsByClassName('memory_info')[0].classList.toggle('closed')">Memory:</span>
 <?
 /*
  Memory Device (16) will get us each ram chip. By matching on MB it'll filter out Flash/Bios chips
@@ -154,7 +154,27 @@ if ($memory_installed >= 1024) {
 } else $unit = 'MB';
 if ($memory_maximum < $memory_installed) {$memory_maximum = pow(2,ceil(log($memory_installed)/log(2))); $star = '*';} else $star = '';
 echo "$memory_installed $unit ".($ecc_support == "None" ? "" : "$ecc_support ")."(max. installable capacity $memory_maximum $unit)$star";
+
+$memory_information = shell_exec("dmidecode -qt17");
+$memory_modules = array_filter(explode("Memory Device", $memory_information));
+$memory_properties = array();
+foreach($memory_modules as $memory_module) {
+  preg_match_all("/(\s*(?<key>[^\n:]+):\s*(?<value>[^\n]+))/mi", $memory_module, $memory_module_properties, PREG_SET_ORDER, 0);
+  $properties = array();
+  foreach($memory_module_properties as $property) {
+    $properties[$property['key']] = $property['value'];
+  }
+  array_push($memory_properties, $properties);
+}
 ?>
+<style>.closed { display:none }</style>
+<div class="memory_info closed">
+<?
+foreach($memory_properties as $device) {
+  echo "<div>{$device['Manufacturer']} - {$device['Part Number']} - {$device['Serial Number']} - {$device['Size']} @ {$device['Configured Clock Speed']}</div>";
+}
+?>
+</div>
 </div>
 <div><span class="key">Network:</span>
 <?
