@@ -168,10 +168,12 @@ foreach($memory_modules as $memory_module) {
 }
 ?>
 <style>.closed { display:none }</style>
-<div class="dimm_info closed">
+<div class="dimm_info closed" style="margin-left:96px">
 <?
 foreach($memory_properties as $device) {
-  echo "<div>{$device['Manufacturer']} - {$device['Part Number']} - {$device['Serial Number']} - {$device['Size']} @ {$device['Configured Clock Speed']}</div>";
+  if(preg_match("/\d+/", $device['Size'])) {
+    echo "<div>{$device['Manufacturer']} - {$device['Part Number']} - {$device['Serial Number']} - {$device['Size']} @ {$device['Configured Clock Speed']}</div>";
+  }
 }
 ?>
 </div>
