@@ -39,13 +39,13 @@ function cpu_pinning() {
   global $xml,$cpus;
   $vcpu = explode(',',$xml['CPUset'] ?? '');
   $total = count($cpus);
-  $loop = floor(($total-1)/18)+1;
+  $loop = floor(($total-1)/16)+1;
   for ($c = 0; $c < $loop; $c++) {
     $row1 = $row2 = [];
-    $max = ($c == $loop-1 ? ($total%18?:18) : 18);
+    $max = ($c == $loop-1 ? ($total%16?:16) : 16);
     for ($n = 0; $n < $max; $n++) {
       unset($cpu1,$cpu2);
-      list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*18+$n]);
+      list($cpu1, $cpu2) = preg_split('/[,-]/',$cpus[$c*16+$n]);
       $check1 = in_array($cpu1, $vcpu) ? ' checked':'';
       $check2 = $cpu2 ? (in_array($cpu2, $vcpu) ? ' checked':''):'';
       $row1[] = "<label id='cpu$cpu1' class='checkbox'>$cpu1<input type='checkbox' id='box$cpu1'$check1><span class='checkmark'></span></label>";
