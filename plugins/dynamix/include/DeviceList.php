@@ -321,16 +321,17 @@ function array_slots() {
   $out .= "</select></form>";
   return $out;
 }
-function cache_slots() {
+function cache_slots($disabled) {
   global $var;
+  $off = $disabled ? ' disabled' : '';
   $min = $var['cacheSbNumDisks'];
   $max = $var['MAX_CACHESZ'];
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='csrf_token' value='{$var['csrf_token']}'>";
   $out .= "<input type='hidden' name='changeSlots' value='apply'>";
-  $out .= "<select class='narrow' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select class='narrow' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'{$off}>";
   for ($n=$min; $n<=$max; $n++) {
-    $option = $n ? $n : 'none';
+    $option = $n ?: 'none';
     $selected = ($n == $var['SYS_CACHE_SLOTS'])? ' selected' : '';
     $out .= "<option value='$n'{$selected}>$option</option>";
   }
@@ -373,12 +374,21 @@ case 'flash':
   break;
 case 'cache':
   $cache = array_filter($disks,'cache_only');
+  $tmp = '/var/tmp/cache_log.tmp';
   foreach ($cache as $disk) $crypto |= $disk['luksState']!=0 || vfs_luks($disk['fsType']);
   if ($var['fsState']=='Stopped') {
-    foreach ($cache as $disk) array_offline($disk);
-    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots()."</td><td></td></tr>";
+    $log = file_exists($tmp) ? parse_ini_file($tmp) : [];
+    $off = false;
+    foreach ($cache as $disk) {
+      array_offline($disk);
+      if (isset($log[$disk['name']])) $off |= ($log[$disk['name']]!=$disk['id']); else $log[$disk['name']] = $disk['id'];
+    }
+    $data = []; foreach ($log as $key => $value) $data[] = "$key=\"$value\"";
+    file_put_contents($tmp,implode("\n",$data));
+    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots($off)."</td><td></td></tr>";
   } else {
     foreach ($cache as $disk) array_online($disk);
+    @unlink($tmp);
     if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals('Pool of '.my_word($var['cacheNumDevices']).' devices');
   }
   break;
