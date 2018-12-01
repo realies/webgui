@@ -280,7 +280,7 @@ function read_disk($name, $part) {
 function show_totals($text) {
   global $var, $display, $sum;
   echo "<tr class='tr_last'>";
-  echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
+  echo "<td></td>";
   echo "<td>$text</td>";
   echo "<td>".($sum['count']>0 ? my_temp(round($sum['temp']/$sum['count'],1)) : '*')."</td>";
   echo "<td><span class='diskio'>".my_diskio($sum['ioReads'])."</span><span class='number'>".my_number($sum['numReads'])."</span></td>";
