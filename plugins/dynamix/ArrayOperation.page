@@ -387,20 +387,20 @@ $(function(){
     case "DISABLE_DISK":?>
       <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)" disabled></td>
       <td><strong>Start</strong> will disable the missing disk and then bring the array on-line. Install a replacement disk as soon as possible.
-      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="$('#cmdStart').prop('disabled',!arrayOps.confirmStart.checked)"><small>Yes I want to do this</small>
+      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="$('#cmdStart').prop('disabled',!arrayOps.confirmStart.checked)"><small>Yes I want to do this</small></td></tr>
 <?    maintenance_mode();
       check_encryption();
       break;
     case "RECON_DISK":?>
       <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Replacement disk installed.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
-      <td><strong>Start</strong> will start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.
+      <td><strong>Start</strong> will start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.</td></tr>
 <?    maintenance_mode();
       check_encryption();
       break;
     case "SWAP_DSBL":
       if ($var['fsCopyPrcnt']=="100"):?>
         <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Upgrading disk/swapping parity.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
-        <td><strong>Start</strong> will expand the file system of the data disk (if possible); then bring the array on-line and start Data-Rebuild.
+        <td><strong>Start</strong> will expand the file system of the data disk (if possible); then bring the array on-line and start Data-Rebuild.</td></tr>
 <?      maintenance_mode();
         check_encryption();
       else:?>
