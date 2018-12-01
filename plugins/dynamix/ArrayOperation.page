@@ -3,8 +3,8 @@ Title="Array Operation"
 Tag="snowflake-o"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -375,9 +375,9 @@ $(function(){
       check_encryption();
       break;
     case "DISABLE_DISK":?>
-      <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
-      <td><strong>Start</strong> will disable the missing disk and then bring the array on-line.
-      <br>Install a replacement disk as soon as possible.
+      <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)" disabled></td>
+      <td><strong>Start</strong> will disable the missing disk and then bring the array on-line. Install a replacement disk as soon as possible.
+      <br><input type="checkbox" name="confirmStart" value="OFF" onclick="$('#cmdStart').prop('disabled',!arrayOps.confirmStart.checked)"><small>Yes I want to do this</small>
 <?    maintenance_mode();
       check_encryption();
       break;
