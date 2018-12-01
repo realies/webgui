@@ -68,10 +68,7 @@ function status_indicator() {
 function missing_cache() {
   global $disks;
   $missing = false;
-  foreach ($disks as $disk) {
-    if ($disk['type']!='Cache') continue;
-    $missing |= (strpos($disk['status'],'_MISSING')!==false);
-  }
+  foreach ($disks as $disk) if ($disk['type']=='Cache') $missing |= (strpos($disk['status'],'_MISSING')!==false);
   return $missing;
 }
 ?>
