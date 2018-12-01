@@ -65,6 +65,15 @@ function status_indicator() {
   }
   echo "<a class='info nohand' onclick='return false'><img src='/webGui/images/{$var['mdColor']}.png' class='icon'><span>$help</span></a>";
 }
+function missing_cache() {
+  global $disks;
+  $missing = false;
+  foreach ($disks as $disk) {
+    if ($disk['type']!='Cache') continue;
+    $missing |= (strpos($disk['status'],'_MISSING')!==false);
+  }
+  return $missing;
+}
 ?>
 <style>
 tr#copy,tr#file{display:none}
@@ -353,6 +362,10 @@ $(function(){
         <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Unclean shutdown detected.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line and start <strong>Parity-Check</strong>.
         <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
+<?    elseif (missing_cache()):?>
+        <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing Cache disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
+        <td><strong>Start</strong> will remove the missing cache disk and then bring the array on-line.
+        <br><input type="checkbox" name="confirmStart" value="OFF" onclick="$('#cmdStart').prop('disabled',!arrayOps.confirmStart.checked)"><small>Yes I want to do this</small></td></tr>
 <?    else:?>
         <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Configuration valid.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
         <td><strong>Start</strong> will bring the array on-line.</td></tr>
