@@ -1,6 +1,4 @@
 Menu="Dashboard"
-Title="Statistics"
-Tag="pie-chart"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology
@@ -15,103 +13,18 @@ Tag="pie-chart"
 */
 ?>
 <?
-exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
-$fans  = exec("sensors -uA 2>/dev/null|grep -c 'fan[0-9]_input'");
-$group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
-$names = "";
-$url   = "/webGui/include/DashUpdate.php";
-
-foreach ($shares as $share) {
-  if ($names) $names .= ',';
-  $names .= $share['name'];
-}
-
-$total = exec("awk '/^MemTotal/{print $2*1024/1.048576}' /proc/meminfo");
-exec("ls /sys/class/net|grep -Po '^(lo|(bond|eth)\d+)$'",$ports);
-
-$memory_installed = exec("dmidecode -qt17|awk -F: '/^\tSize: [0-9]+ MB\$/{t+=\$2};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024};/^\tSize: [0-9]+ TB\$/{t+=\$2*1048576} END{print t}'");
-list($memory_maximum,$ecc_support) = array_map('trim',explode('#',exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024};/^\tMaximum Capacity: [0-9]+ TB\$/{t+=\$2*1048576};/^\tError Correction Type:/{e=\$2} END{print t\"#\"e}'")));
-if ($memory_installed >= 1024) {
-  $memory_installed = round($memory_installed/1024);
-  $memory_maximum = round($memory_maximum/1024);
-  $size = 'GB';
-} else $size = 'MB';
-
-// If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
-if ($memory_maximum < $memory_installed) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
-
-function init_row($label) {
-  echo "<tr><td>$label</td>".str_repeat("<td></td>",30)."</tr>";
-}
-function parity_status() {
-  global $var,$disks;
-  $parity_num_slots = 0;
-  $parity_disabled = [];
-  $parity_invalid = [];
-  foreach ($disks as $disk) {
-    if ($disk['type']=='Parity') {
-      $parity_num_slots++;
-      if (strpos($disk['status'],"DISK_NP")===0) {
-        $parity_disabled[] = trim('Parity ' . filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT));
-      }
-      if (strpos($disk['status'],"DISK_INVALID")===0) {
-        $parity_invalid[] = trim('Parity ' . filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT));
-      }
+function dmidecode($key,$n,$all=true) {
+  $entries = array_filter(explode($key,shell_exec("dmidecode -qt$n")));
+  $properties = [];
+  foreach ($entries as $entry) {
+    $property = [];
+    foreach (explode("\n",$entry) as $line) if (strpos($line,': ')!==false) {
+      list($key,$value) = explode(': ',trim($line));
+      $property[$key] = $value;
     }
+    $properties[] = $property;
   }
-  if ($parity_num_slots == count($parity_disabled)) {
-    echo "<tr style='vertical-align:top'><td><span class='red p0'><strong>Parity disk".($parity_num_slots>1?'s':'')." not present</strong></span></td><td id='parity'></td></tr>";
-    return;
-  }
-  if ($parity_num_slots > count($parity_invalid)) {
-    if (count($parity_invalid)==0) {
-      echo "<tr><td colspan='2'><span class='green p0'><strong>Parity is valid</strong></span></td></tr>";
-    } else {
-      echo "<tr><td colspan='2'><span class='orange p0'><strong>Degraded parity: </strong></span><span class='red p0'><strong>".implode(' and ',$parity_invalid)." ".(count($parity_invalid)>1?'are':'is')." invalid</strong></span></td></tr>";
-    }
-    if ($var['sbSyncExit']!=0) {
-      echo "<tr><td>Last check incomplete on <strong>".my_time($var['sbSynced2']).day_count($var['sbSynced2'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
-      echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: ".my_error($var['sbSyncExit'])."</em></td><td id='parity'></td></tr>";
-      return;
-    }
-    if ($var['sbSynced']==0) {
-      list($date,$duration,$speed,$status,$error) = last_parity_log();
-      if (!$date) {
-        echo "<tr><td><em>Parity has not been checked yet.<em></td><td id='parity'></td></tr>";
-      } elseif ($status==0) {
-        echo "<tr><td>Last checked on <strong>".my_time($date).day_count($date)."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
-        echo "<br><i class='fa fa-clock-o icon'></i><em>Duration: ".my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
-      } else {
-        echo "<tr><td>Last check incomplete on <strong>".my_time($date).day_count($date)."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
-        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: ".my_error($status)."</em></td><td id='parity'></td></tr>";
-      }
-      return;
-    }
-    if ($var['sbSynced2']==0) {
-      $idle = $var['mdResync']==0;
-      list($entry,$duration,$speed,$status,$error) = explode('|', read_parity_log($var['sbSynced'],!$idle));
-      if ($status==0) {
-        echo "<tr><td>".($idle ? "Last checked on " : "Activity started on ")."<strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
-        echo "<br><i class='fa fa-clock-o icon'></i><em>".($idle ? "Duration: " : "Last result: ").my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
-      } else {
-        echo "<tr><td>Last check incomplete on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>$error</strong> error".($error==1?'.':'s.');
-        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: ".my_error($status)."</em></td><td id='parity'></td></tr>";
-      }
-    } else {
-      $status = 0;
-      $duration = $var['sbSynced2']-$var['sbSynced'];
-      $speed = $duration?my_scale($var['mdResyncSize']*1024/$duration,$unit,1)." $unit/sec":'';
-      echo "<tr><td>Last checked on <strong>".my_time($var['sbSynced2']).day_count($var['sbSynced2'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
-      echo "<br><i class='fa fa-clock-o icon'></i><em>Duration: ".my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
-    }
-  } else {
-    if (empty($var['mdInvalidDisk'])) {
-      echo "<tr><td colspan='2'><span class='red p0'><strong>Parity is invalid</strong></span></td></tr>";
-    } else {
-      echo "<tr><td colspan='2'><span class='red p0'><strong>Data is invalid</strong></span></td></tr>";
-    }
-    echo "<tr><td id='parity' colspan='2'></td></tr>";
-  }
+  return $all ? $properties : $properties[0];
 }
 function truncate($string,$len) {
   return strlen($string) < $len ? $string : substr($string,0,$len-3).'...';
@@ -121,214 +34,304 @@ function export_settings($protocol,$share) {
   if ($share['export']=='e') return ucfirst($share['security']);
   return '<em>'.ucfirst($share['security']).'</em>';
 }
-function active_disks($disk) {
-  return substr($disk['status'],0,7)!='DISK_NP' && preg_match('/^(Parity|Data|Cache)$/',$disk['type']);
+function data_devices($disk) {
+  return $disk['type']=='Data';
 }
-$disks = array_filter($disks,'active_disks');
-$slots = count($disks) + count($devs);
-?>
-<table class='share_status fixed'>
-<thead><tr>
-<?
-$row0 = array_fill(0,30,"<td></td>"); $i = 0;
-foreach ($disks as $disk) if ($disk['type']=='Parity') $row0[$i++] = "<td>Parity<br>&nbsp;".filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT)."&nbsp;</td>";
-foreach ($disks as $disk) if ($disk['type']=='Data') $row0[$i++] = "<td>Disk<br>&nbsp;".filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT)."&nbsp;</td>";
-if ($slots <= 30) {
-  foreach ($disks as $disk) if ($disk['type']=='Cache') $row0[$i++] = "<td>Cache<br>&nbsp;".filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT)."&nbsp;</td>";
-  foreach ($devs as $dev) $row0[$i++] = "<td>{$dev['device']}</td>";
+function cache_devices($disk) {
+  return $disk['type']=='Cache';
 }
-echo "<td>Array Status</td>".implode('',$row0);
-?>
-</tr></thead>
-<tbody id='dash0'>
-<?init_row('Encrypted')?>
-<?init_row('Active')?>
-<?init_row('Inactive')?>
-<?init_row('Unassigned')?>
-<?init_row('Faulty')?>
-<?init_row('Heat alarm')?>
-<?init_row('SMART status')?>
-<?init_row('Utilization')?>
-</tbody>
-</table>
-<?if ($slots > 30):?>
-<br>
-<table class='share_status fixed'>
-<thead><tr>
-<?
-$row0 = array_fill(0,30,"<td>-</td>"); $i = 0;
-foreach ($disks as $disk) if ($disk['type']=='Cache') $row0[$i++] = "<td>Cache<br>&nbsp;".filter_var($disk['name'],FILTER_SANITIZE_NUMBER_INT)."&nbsp;</td>";
-foreach ($devs as $dev) $row0[$i++] = "<td>{$dev['device']}</td>";
-echo "<td>Array Status</td>".implode('',$row0);
-?>
-</tr></thead>
-<tbody id='dash1'>
-<?init_row('Encrypted')?>
-<?init_row('Active')?>
-<?init_row('Inactive')?>
-<?init_row('Unassigned')?>
-<?init_row('Faulty')?>
-<?init_row('Heat alarm')?>
-<?init_row('SMART status')?>
-<?init_row('Utilization')?>
-</tbody>
-</table>
-<?endif;?>
+$started = $var['fsState']=='Started';
+$array_size = $array_used = 0;
+$cache_size = $cache_used = 0;
+$extra_size = $extra_used = 0;
+$cache_type = 'disk';
 
-<table class='share_status table'>
-<thead><tr><td colspan='2'>Parity Status</td></tr></thead>
-<tbody><?=parity_status()?></tbody>
-</table>
-<table class='share_status dash line'>
-<thead><tr><td colspan='3'>System Status</td><td>
-<select name="enter_view" size="1" class="auto" onchange="changeView(this.value)">
-<?=mk_option("", "0", "General")?>
-<?=mk_option("", "1", "Counters")?>
-<?=mk_option("", "2", "Errors")?>
-</select>
-</td></tr><tr><td colspan='4' style='text-align:center'>Load Statistics</td></tr></thead>
-<tbody>
-<tr class='wide'><td><a onclick='toggle_CPU()' title='Click to toggle details' class='none' style='cursor:pointer'>Avg. CPU load</a><span class='red-text'> *</span></td><td colspan='3'><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td></tr>
+foreach ($disks as $disk) {
+  switch ($disk['type']) {
+  case 'Data':
+    if (isset($disk['fsFree'])) {
+      $array_size += $disk['fsSize'];
+      $array_used += $disk['fsSize']-$disk['fsFree'];
+    }
+    break;
+  case 'Cache':
+    if ($disk['name']=='cache') {
+      $cache_size = $disk['fsSize'];
+      $cache_used = $disk['fsSize']-$disk['fsFree'];
+      $cache_type = $disk['rotational'] ? ($disk['luksState'] ? 'disk-encrypted' : 'disk') : 'nvme';
+    }
+    break;
+  }
+}
+foreach ($devs as $disk) {
+  $extra_size += $disk['sectors']*$disk['sector_size'];
+}
+$array_percent = my_scale(100*$array_used/$array_size, $u, 1, 0);
+$cache_percent = my_scale(100*$cache_used/$cache_size, $u, 1, 0);
+
+exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
+$fans  = exec("sensors -uA 2>/dev/null|grep -c 'fan[0-9]_input'");
+$group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
+$url   = "/webGui/include/DashUpdate.php";
+
+$names = [];
+$cache_only = $encrypted = 0;
+foreach ($shares as $share) {
+  $names[] = $share['name'];
+  if ($share['useCache']=='only') $cache_only++;
+  if ($share['luksStatus']) $encrypted++;
+}
+$names = implode(',',$names);
+
+$passwd = $nopass = 0;
+foreach ($users as $user) if ($user['passwd']=='yes') $passwd++; else $nopass++;
+
+$boot   = "/boot/config";
+$myfile = "case-model.cfg";
+$mycase = file_exists("$boot/$myfile") ? file_get_contents("$boot/$myfile") : false;
+
+$board  = dmidecode('Base Board Information','2',0);
+$serial = "s/n: {$board['Serial Number']}";
+$board  = "{$board['Manufacturer']} {$board['Product Name']} - v{$board['Version']}";
+
+$bios = dmidecode('BIOS Information','0',0);
+$biosdate = "BIOS dated: ".my_time(strtotime($bios['Release Date']),$display['date']);
+$bios = "{$bios['Vendor']} - v{$bios['Version']}";
+
+$cpu = dmidecode('Processor Information','4',0);
+$cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu['Version']);
+$cpumodel .= (strpos($cpumodel,'@')!==false ? "" : " @ {$cpu['Current Speed']}");
+
+$total = exec("awk '/^MemTotal/{print $2*1024}' /proc/meminfo");
+exec("ls /sys/class/net|grep -Po '^(lo|(bond|eth)\d+)$'",$ports);
+
+$sizes = ['MB','GB','TB'];
+$memory_type = $ecc = '';
+$memory_installed = $memory_maximum = 0;
+$memory_devices = dmidecode('Memory Device','17');
+foreach ($memory_devices as $device) {
+  if ($device['Type']=='Unknown') continue;
+  list($size, $unit) = explode(' ',$device['Size']);
+  $base = array_search($unit,$sizes);
+  if ($base!==false) $memory_installed += $size*pow(1024,$base);
+  if (!$memory_type) $memory_type = $device['Type'];
+}
+$memory_array = dmidecode('Physical Memory Array','16');
+foreach ($memory_array as $device) {
+  list($size, $unit) = explode(' ',$device['Maximum Capacity']);
+  $base = array_search($unit,$sizes);
+  if ($base>=1) $memory_maximum += $size*pow(1024,$base);
+  if (!$ecc && $device['Error Correction Type']!='None') $ecc = "{$device['Error Correction Type']} ";
+}
+if ($memory_installed >= 1024) {
+  $memory_installed = round($memory_installed/1024);
+  $memory_maximum = round($memory_maximum/1024);
+  $unit = 'GiB';
+} else $unit = 'MiB';
+
+// If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
+$low = $memory_maximum < $memory_installed;
+if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
+?>
+<div style='float:left;margin:14px 0 36px 0'>
+<table class='share_status dashboard box1'>
+<thead><tr><td></td><td colspan='3'><?=$var['NAME']?><i class='fa blue-text chevron mt0' id='sys_view' onclick='toggle_chevron("sys_view",0)'></i></td><td></td></tr></thead>
+
+<tbody class='sys_view' style='display:none'>
+<tr><td></td><td colspan='2' class='top'>
+<span class='header'>Description</span><br>
+<?=$var['COMMENT']?><br>
+<?=$var['SYS_MODEL']?><br><br>
+<span class='header'>Registration</span><br>Unraid OS <b><em><?=$var['regTy']?></em></b><br><br>
+<span class='header'>Uptime</span><br><span class='uptime'></span>
+</td><td class='top' style='text-align:center'>
+<?if ($mycase):?>
+<i id='mycase' class='case-<?=$mycase?>'></i><br>
+<?else:?>
+<i id='mycase' class='fa fa-wpexplorer'></i><br>
+<?endif;?>
+<input type='button' value='Edit' onclick='openBox("/webGui/include/SelectCase.php?file=<?=$myfile?>&csrf=<?=$var['csrf_token']?>","Select Case Model",600,900,true,"setCase");return false' style='margin:12px 0 0 0;padding:5px 10px'>
+</td><td></td></tr>
 </tbody>
-<tbody class='cpu_open' style='display:none'>
-<?if (count($cpus)>1):?><tr><td rowspan='<?=count($cpus)?>'><?else:?><tr class='wide'><td><?endif;?>Per CPU load</td>
+
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-motherboard'></i><div class='section'>Motherboard<br><span id='mb-temp'></span><br><br></div>
+<i class='fa blue-text chevron' id='mb_view' onclick='toggle_chevron("mb_view",0)'></i></td><td></td></tr>
+<tr class='mb_view' style='display:none'><td></td><td colspan='3'><?=$board?><br><?=$bios?><br><?=$biosdate?></td><td></td></tr>
+</tbody>
+
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-cpu'></i><div class='section'>Processor<br>
+<span style='display:inline-block;width:80px'>Load: <span class='cpu'>0%</span></span><span id='cpu-temp'></span><br><br></div>
+<i class='fa blue-text chevron' id='cpu_view' onclick='toggle_chevron("cpu_view",1)'></i></td><td></td></tr>
+<tr class='cpu_view' style='display:none'><td></td><td colspan='3'><?=$cpumodel?><br>
+<a onclick='toggle_CPU()' title='Click to toggle details' class='cpu_close' style='cursor:pointer'>Show details</a></td><td></td></tr>
+<tr class='cpu_open' style='display:none'><td></td><td>Overall Load:</td>
+<td colspan='2'><span class='cpu load'>0%</span><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td><td></td></tr>
 <?
-$tr = false;
-foreach ($cpus as $pair):
+foreach ($cpus as $pair) {
   list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
-  if ($tr) echo "<tr>";
-  if (isset($cpu2))
-    echo "<td>cpu $cpu1 / $cpu2</td><td><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td><td><div class='usage-disk sys'><span id='cpu$cpu2' style='width:0'></span></div></td>";
+  echo "<tr class='cpu_open' style='display:none'><td></td>";
+  if ($cpu2)
+    echo "<td>CPU $cpu1 - HT $cpu2</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td><td><span class='cpu$cpu2 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu2' style='width:0'></span></div></td>";
   else
-    echo "<td>cpu $cpu1</td><td colspan='2'><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td>";
-  echo "</tr>";
-  $tr = true;
-endforeach;
+    echo "<td>CPU $cpu1</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td><td></td>";
+  echo "<td></td></tr>";
+}
 ?>
 </tbody>
+
 <tbody>
-<?
-if ($fans>0):
-  echo $fans>2 ? "<tr><td rowspan='".ceil($fans/2)."'>" : "<tr class='wide'><td>";
-  echo "FAN speed</td>";
-  for ($f=0; $f<$fans; $f+=2):
-    if ($f) echo "<tr>";
-    if ($f+1<$fans)
-      echo "<td>fan ".($f)." / ".($f+1)."</td><td class='blue' id='fan{$f}'>"."</td><td class='blue' id='fan".($f+1)."'></td>";
-    else
-      echo "<td>fan ".($f)."</td><td colspan='2' class='blue' id='fan{$f}'>";
-    echo "</tr>";
-  endfor;
-endif;
-$dck = exec("df /var/lib/docker|grep -om1 '^/'");
-?>
-<tr class='wide'><td>Memory usage</td><td colspan='3'><div class='usage-disk sys'><span id='sys0' style='width:0'></span></div></td></tr>
-<tr class='wide'><td>flash log docker</td><td><div class='usage-disk sys'><span id='sys1' style='width:0'></span></div></td><td><div class='usage-disk sys'><span id='sys2' style='width:0'></span></div></td>
-<td><?if ($dck):?><div class='usage-disk sys'><span id='sys3' style='width:0'></span></div><?else:?>Not available<?endif;?></td></tr>
-<tr><td rowspan='2'>Memory size</td><td>total usable</td><td colspan='2' class='blue'><?=my_scale($total,$unit,3)." $unit"?></td></tr>
-<tr><td>installed</td><td colspan='2' class='blue'><?="$memory_installed $size ".($ecc_support=='None'?'':$ecc_support)."<br>max. installable capacity $memory_maximum $size"?></td></tr>
+<tr><td></td><td colspan='3' class='next'><i class='icon-ram'></i><div class='section'>Memory<br><span><?="$memory_installed $unit $memory_type $ecc"?><span style='margin-left:20px'>Utilization: <span class='sys0'>0%</span></span><br><br></div>
+<i class='fa blue-text chevron' id='mem_view' onclick='toggle_chevron("mem_view",0)'></i></td><td></td></tr>
+<tr class='mem_view' style='display:none'><td></td><td>Maximum size: <?="$memory_maximum $unit"?><?=$low?'*':''?></td><td><i>RAM: </i><span class='sys0'>0%</span><div class='usage-disk sys mm'><span id='sys0' style='width:0'></span></div></td>
+<td><i>Flash: </i><span class='sys1'>0%</span><div class='usage-disk sys mm'><span id='sys1' style='width:0'></span></div></td><td></td></tr>
+<tr class='mem_view' style='display:none'><td></td><td>Usable size: <?=my_scale($total,$unit,1,null,1024)." $unit"?></td><td><i>Log: </i><span class='sys2'>0%</span><div class='usage-disk sys mm'><span id='sys2' style='width:0'></span></div></td>
+<td><?if (exec("df /var/lib/docker|grep -om1 '^/'")):?><i>Docker: </i><span class='sys3'>0%</span><div class='usage-disk sys mm'><span id='sys3' style='width:0'></span></div><?endif;?></td><td></td></tr>
 </tbody>
+
 <tbody>
-<?if (count($ports)>1):?><tr class='view1'><td rowspan='<?=count($ports)?>'><?else:?><tr class='view1 wide'><td><?endif;?>Network</td>
+<tr><td></td><td colspan='3' class='next'><i class='icon-ethernet'></i><div class='section'>Interface<br><span>Inbound: <span id='inbound' style='display:inline-block;width:70px'>---</span>Outbound: <span id='outbound'>---</span></span><br><br></div>
+<i class='fa blue-text chevron' id='port_view' onclick='toggle_chevron("port_view",2)'></i></td><td></td></tr>
+<tr class='port_view' style='display:none'><td></td>
+<td><select class='port_view' name="enter_view" size="1" style='display:none' onchange="changeView(this.value)">
+<?=mk_option("", "0", "General info")?>
+<?=mk_option("", "1", "Counters info")?>
+<?=mk_option("", "2", "Errors info")?>
+</select></td>
+<td><i class='view1' style='display:none'>Mode of operation</i><i class='view2' style='display:none'>Received packets</i><i class='view3' style='display:none'>Receive counters</i></td>
+<td><i class='view1' style='display:none'></i><i class='view2' style='display:none'>Transmitted packets</i><i class='view3' style='display:none'>Transmit counters</i></td><td></td></tr>
 <?
 $c = 0;
-foreach ($ports as $port):
-  if ($c) echo "<tr class='view1'>";
-  echo "<td>$port</td><td colspan='2' class='blue' id='main".($c++)."'></td></tr>";
-endforeach;
-?>
-<tr class='view2' style='display:none'><td rowspan='<?=count($ports)+1?>'>Network</td><td><i>Interface</i></td><td><i>Receive pkts</i></td><td><i>Transmit pkts</i></td></tr>
-<?
+foreach ($ports as $port) {
+  $last = ($port=='lo')?' last':'';
+  echo "<tr class='view1{$last}' style='display:none'><td></td><td>$port</td><td colspan='2' id='main".($c++)."'></td><td></td></tr>";
+}
 $c = 0;
-foreach ($ports as $port):
-  echo "<tr class='view2' style='display:none'><td>$port</td><td class='blue' id='port{$c}'></td><td id='port".($c+1)."' class='blue'></td></tr>";
+foreach ($ports as $port) {
+  $last = ($port=='lo')?' last':'';
+  echo "<tr class='view2{$last}' style='display:none'><td></td><td>$port</td><td id='port{$c}'></td><td id='port".($c+1)."'></td><td></td></tr>";
   $c += 2;
-endforeach;
-?>
-<tr class='view3' style='display:none'><td rowspan='<?=count($ports)+1?>'>Network</td><td><i>Interface</i></td><td><i>Receive</i></td><td><i>Transmit</i></td></tr>
-<?
+}
 $c = 0;
-foreach ($ports as $port):
-  echo "<tr class='view3' style='display:none'><td>$port</td><td class='blue' id='link{$c}'></td><td id='link".($c+1)."' class='blue'></td></tr>";
+foreach ($ports as $port) {
+  echo "<tr class='view3' style='display:none'><td></td><td>$port</td><td id='link{$c}'></td><td id='link".($c+1)."'></td><td></td></tr>";
   $c += 2;
-endforeach;
+}
 ?>
 </tbody>
+
+<?if ($fans>0) {
+  echo "<tbody>";
+  echo "<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: $fans</span><br><br></div><i class='fa blue-text chevron' id='fan_view' onclick='toggle_chevron(\"fan_view\",0)'></i></td><td></td></tr>";
+  for ($f=0; $f<$fans; $f+=2) {
+    if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
+    else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
+  }
+  echo "</tbody>";
+}?>
 </table>
-<table class='share_status dash m0'>
-<thead><tr><td colspan='4'>Users List</td></tr><tr><td>Name</td><td>Description</td><td>Write</td><td>Read</td></tr></thead>
+
+<table class='share_status dashboard box2'>
+<thead><tr><td></td><td colspan='5'>Parity<i class='fa blue-text chevron mt0' id='parity_view' onclick='toggle_chevron("parity_view",0)'></i><span class='info title'></span></td><td></td></tr></thead>
+
+<tbody class='parity_view' style='display:none'>
+<tr><td></td><td colspan='5' id='parity'></td><td></td></tr>
+<tr><td></td><td colspan='5' id='program'></td><td></td></tr>
+</tbody>
+
+<thead><tr><td></td><td colspan='5' class='next'>Array<i class='fa blue-text chevron mt0' id='array_view' onclick='toggle_chevron("array_view",0)'></i><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span></td><td></td></tr>
+<tr style='display:none'><td></td><td id='array_info' colspan='5'></td><td></td></tr>
+<tr id='array_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
+</thead>
+<tbody class='array_view' id='array_list' style='display:none'></tbody>
+
+<thead><tr><td></td><td colspan='5' class='next'>Cache<i class='fa blue-text chevron mt0' id='cache_view' onclick='toggle_chevron("cache_view",0)'></i><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span></td><td></td></tr>
+<tr style='display:none'><td></td><td id='cache_info' colspan='5'></td><td></td></tr>
+<tr id='cache_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
+</thead>
+<tbody class='cache_view' id='cache_list' style='display:none'></tbody>
+
+<?if ($devs):?>
+<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggle_chevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<tr style='display:none'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
+<tr id='extra_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
+</thead>
+<tbody class='extra_view' id='extra_list' style='display:none'></tbody>
+<?endif;?>
+</table>
+
+<table class='share_status dashboard box3'>
+<thead><tr><td></td><td colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggle_chevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
+</td><td></td></tr><tr id='users_view_on' style='display:none'><td></td><td>Name</td><td>Description</td><td>Write</td><td>Read</td><td></td></tr></thead>
+
 <?if ($var['shareSMBEnabled']=='yes'):?>
-<tbody class='smb'>
-<?
-foreach ($users as $user):
+<tbody class='smb user user1' style='display:none'><?
+foreach ($users as $user) {
   $list = truncate($user['name'],20);
   $desc = truncate($user['desc'],40);
-  $hrefLink = urlencode($user['name']);
-  if ($list=='root'):
+  if ($list=='root') {
     $write = '-'; $read = '-';
-  else:
+  } else {
     $write = 0; $read = 0;
-    foreach ($shares as $share):
+    foreach ($shares as $share) {
       if (strpos($sec[$share['name']]['writeList'],$list)!==false) $write++;
       if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
-    endforeach;
-  endif;
-  echo "<tr><td><a href='/Users/UserEdit?name=$hrefLink'>$list</a></td><td>$desc</td><td>$write</td><td>$read</td></tr>";
-endforeach;
-?>
-</tbody>
+    }
+  }
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
 <?endif;?>
+
 <?if ($var['shareAFPEnabled']=='yes'):?>
-<tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
-<?
-foreach ($users as $user):
+<tbody class='afp user user2' style='display:none'><?
+foreach ($users as $user) {
   $list = truncate($user['name'],20);
   $desc = truncate($user['desc'],40);
-  $hrefLink = urlencode($user['name']);
-  if ($list=='root'):
+  if ($list=='root') {
     $write = '-'; $read = '-';
-  else:
+  } else {
     $write = 0; $read = 0;
-    foreach ($shares as $share):
+    foreach ($shares as $share) {
       if (strpos($sec_afp[$share['name']]['writeList'],$list)!==false) $write++;
       if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
-    endforeach;
-  endif;
-  echo "<tr><td><a href='/Users/UserEdit?name=$hrefLink'>$list</a></td><td>$desc</td><td>$write</td><td>$read</td></tr>";
-endforeach;
-?>
-</tbody>
+    }
+  }
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
 <?endif;?>
+
 <?if ($var['shareNFSEnabled']=='yes'):?>
-<tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
-<?
-foreach ($users as $user):
+<tbody class='nfs user user3' style='display:none'><?
+foreach ($users as $user) {
   $list = truncate($user['name'],20);
   $desc = truncate($user['desc'],40);
-  $hrefLink = urlencode($user['name']);
   $write = '-'; $read = '-';
-  echo "<tr><td><a href='/Users/UserEdit?name=$hrefLink'>$list</a></td><td>$desc</td><td>$write</td><td>$read</td></tr>";
-endforeach;
-?>
-</tbody>
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
 <?endif;?>
+
 <?if (!$group):?>
-<tbody>
-<?
-foreach ($users as $user):
+<tbody><?
+foreach ($users as $user) {
   $list = truncate($user['name'],20);
   $desc = truncate($user['desc'],40);
-  $hrefLink = urlencode($user['name']);
-  echo "<tr><td><a href='/Users/UserEdit?name=$hrefLink'>$list</a></td><td>$desc</td><td>-</td><td>-</td></tr>";
-endforeach;
-?>
-</tbody>
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
+}
+?></tbody>
 <?endif;?>
-</table>
-<table class='share_status dash m36'>
-<thead><tr><td colspan='3'>Shares List</td><td>
+
+<thead><tr><td></td><td class='next' colspan='4'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggle_chevron("shares_view",4)'></i>
+<span class='info'>Share count: <?=count($shares)?> with <?=$cache_only?> cache only and <?=$encrypted?> encrypted</span>
 <?if ($group):?>
-<select name="enter_share" size="1" class="auto" onchange="changeMode(this.value)">
+<select name="enter_share" size="1" onchange="changeMode(this.value)">
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <?=mk_option("", "0", "SMB")?>
 <?endif;?>
@@ -340,81 +343,97 @@ endforeach;
 <?endif;?>
 </select>
 <?endif;?>
-</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Streams</td></tr></thead>
+</td><td></td></tr>
+<tr id='shares_view_on' style='display:none'><td></td><td>Name</td><td>Description</td><td>Security</td><td>Streams</td><td></td></tr>
+</thead>
+
 <?if ($var['shareSMBEnabled']=='yes'):?>
-<tbody class='smb'>
-<?
+<tbody class='smb share share1' style='display:none'><?
 $i = 0;
-foreach ($shares as $name => $share):
+foreach ($shares as $name => $share) {
   $i++;
   $list = truncate($name,20);
-  $hrefLink = urlencode($name);
+  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
+  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
-  echo "<tr><td><a href='/Shares/Share?name=$hrefLink'>$list</a></td><td>$comment</td><td>$security</td><td class='blue' id='share{$i}'>0</td></tr>";
-endforeach;
-if (!count($shares)) echo "<tr><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td></tr>";
-?>
-</tbody>
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td id='share{$i}'>0</td><td></td></tr>";
+}
+if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
+?></tbody>
 <?endif;?>
+
 <?if ($var['shareAFPEnabled']=='yes'):?>
-<tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
-<?
-foreach ($shares as $name => $share):
+<tbody class='afp share share2' style='display:none'><?
+foreach ($shares as $name => $share) {
   $list = truncate($name,20);
-  $hrefLink = urlencode($name);
+  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
+  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareAFPEnabled'], $sec_afp[$name]);
-  echo "<tr><td><a href='/Shares/Share?name=$hrefLink'>$list</a></td><td>$comment</td><td>$security</td><td>-</td></tr>";
-endforeach;
-if (!count($shares)) echo "<tr><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td></tr>";
-?>
-</tbody>
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+}
+if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
+?></tbody>
 <?endif;?>
+
 <?if ($var['shareNFSEnabled']=='yes'):?>
-<tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
-<?
-foreach ($shares as $name => $share):
+<tbody class='nfs share share3' style='display:none'><?
+foreach ($shares as $name => $share) {
   $list = truncate($name,20);
-  $hrefLink = urlencode($name);
+  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
+  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
-  echo "<tr><td><a href='/Shares/Share?name=$hrefLink'>$list</a></td><td>$comment</td><td>$security</td><td>-</td></tr>";
-endforeach;
-if (!count($shares)) echo "<tr><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td></tr>";
-?>
-</tbody>
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+}
+if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
+?></tbody>
 <?endif;?>
+
 <?if (!$group):?>
-<tbody>
-<?
-foreach ($shares as $name => $share):
+<tbody><?
+foreach ($shares as $name => $share) {
   $list = truncate($name,20);
-  $hrefLink = urlencode($name);
+  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
+  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
-  echo "<tr><td><a href='/Shares/Share?name=$hrefLink'>$list</a></td><td>$comment</td><td>-</td><td>-</td></tr>";
-endforeach;
-if (!count($shares)) echo "<tr><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td></tr>";
-?>
-</tbody>
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
+}
+if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
+?></tbody>
 <?endif;?>
 </table>
-
+</div>
 <script>
-var timer2,timer30;
+var timer30 = null;
 var orange = 70;
 var red = 90;
+var timestamp = 0, rx_bytes = 0, tx_bytes = 0;
 
+function setCase() {
+  $.post('/webGui/include/SelectCase.php',{mode:'get',file:'<?=$myfile?>'},function(model){
+    if (model) {
+      $('#mycase').removeClass().addClass('case-'+model);
+      $('#myinfo').show(); $('#nocase').hide();
+    }
+  });
+}
 function changeMode(item) {
+  var user = $.cookie('users_view');
+  var share = $.cookie('shares_view');
   if (item==0) $.removeCookie('enter_share',{path:'/'}); else $.cookie('enter_share',item,{path:'/',expires:3650});
 <?if ($var['shareSMBEnabled']=='yes'):?>
-  if (item==0) $('.smb').show(); else $('.smb').hide();
+  if (item==0 && user==null) $('.smb.user1').show(); else $('.smb.user1').hide();
+  if (item==0 && share==null) $('.smb.share1').show(); else $('.smb.share1').hide();
 <?endif;?>
 <?if ($var['shareAFPEnabled']=='yes'):?>
-  if (item==1) $('.afp').show(); else $('.afp').hide();
+  if (item==1 && user==null) $('.afp.user2').show(); else $('.afp.user2').hide();
+  if (item==1 && share==null) $('.afp.share2').show(); else $('.afp.share2').hide();
 <?endif;?>
 <?if ($var['shareNFSEnabled']=='yes'):?>
-  if (item==2) $('.nfs').show(); else $('.nfs').hide();
+  if (item==2 && user==null) $('.nfs.user3').show(); else $('.nfs.user3').hide();
+  if (item==2 && share==null) $('.nfs.share3').show(); else $('.nfs.share3').hide();
 <?endif;?>
 }
 function changeView(item) {
@@ -425,75 +444,109 @@ function changeView(item) {
   clearTimeout(timer30);
   update30();
 }
-function update3() {
+function smartMenu(table) {
+  $(table).find('[id^="smart-"]').each(function() {
+    var opts = [{header:$(this).attr('id'), image:'/webGui/icons/smart.png'}];
+    var id = '#'+$(this).attr('id');
+    var page = $(this).attr('name');
+    var view = $(this).attr('class');
+    var disk = id.substr(id.indexOf('-')+1);
+    opts.push({text:'Attributes',icon:'fa-sitemap',action:function(e){e.preventDefault();attributes(page,disk);}});
+    opts.push({divider:true});
+    opts.push({text:'Capabilities',icon:'fa-user',action:function(e){e.preventDefault();capabilities(page,disk);}});
+    opts.push({divider:true});
+    opts.push({text:'Identity',icon:'fa-home',action:function(e){e.preventDefault();identity(page,disk);}});
+    if (view == 'alert') {
+      opts.push({divider:true});
+      opts.push({text:'Acknowledge',icon:'fa-check-square-o',action:function(e){e.preventDefault();acknowledge(disk);}});
+    }
+    context.attach(id,opts);
+  });
+}
+function moreInfo(data,table) {
+  var info = [];
+  if (data[1]>0) info.push(data[1]+" failed device"+(data[1]==1?'':'s'));
+  if (data[2]>0) info.push(data[2]+" heat warning"+(data[2]==1?'':'s'));
+  if (data[3]>0) info.push(data[3]+" SMART error"+(data[3]==1?'':'s'));
+  if (data[4]>0) info.push(data[4]+" utilization warning"+(data[4]==1?'':'s'));
+  return info.length ? "<i class='icon-u-triangle failed'></i><span class='failed'>"+table+" has "+info.join('. ')+".</span>" : "";
+}
+function update5() {
 <?if ($fans>0):?>
   $.post('<?=$url?>',{cmd:'fan'},function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {$('#fan'+k).html(v);});
+    $.each(data.split('\0'),function(k,v) {$('#fan'+k).html(v);});
   });
 <?endif;?>
+  $.post('<?=$url?>',{cmd:'speed',ports:'<?=implode(',',$ports)?>',timestamp:timestamp,rx_bytes:rx_bytes,tx_bytes:tx_bytes},function(d) {
+    var data = d.split('\0');
+    $('#inbound').text(data[0]);
+    $('#outbound').text(data[1]);
+    timestamp = data[2];
+    rx_bytes = data[3];
+    tx_bytes = data[4];
+    setTimeout(update5,5000);
+  });
 }
 function update15() {
 <?if ($var['fsState']=='Started'):?>
   var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
   $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=addslashes(htmlspecialchars($names))?>'},function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {$('#share'+(k+1)).html(v);});
+    $.each(data.split('\0'),function(k,v) {$('#share'+(k+1)).html(v);});
+  });
+<?endif;?>
+  $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
+  $.post('<?=$url?>',{cmd:'parity',time:'<?=$display['date'].($display['date']!='%c'?", {$display['time']}":"")?>'},function(d) {
+    var data = d.split('\0');
+    $('#parity').html(data[0]);
+    $('#program').html(data[1]);
     setTimeout(update15,15000);
   });
-<?endif;?>
 }
 function update30() {
-  var tag = $('.view1').css('display')!='none' ? 'main' : $('.view2').css('display')!='none' ? 'port' : $('.view3').css('display')!='none' ? 'link' : '';
+  var tag = $.cookie('enter_view')==0 ? 'main' : $.cookie('enter_view')==1 ? 'port' : $.cookie('enter_view')==2 ? 'link' : 'main';
   $.post('<?=$url?>',{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {$('#'+tag+k).html(v);});
+    $.each(data.split('\0'),function(k,v) {$('#'+tag+k).html(v);});
   });
-  $.post('<?=$url?>',{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',slots:<?=$slots?>,text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(data) {
-<?if ($slots <= 30):?>
-    if (data) $('#dash0').html(data);
-<?else:?>
-    if (data) $.each(data.split('#'),function(k,v) {$('#dash'+k).html(v);});
+  $.post('<?=$url?>',{cmd:'array',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+    var data = d.split('\0');
+    var info = moreInfo(data,'Array');
+    $('#array_list').html(data[0]);
+    $('#array_info').parent().css('display',info?'':'none');
+    $('#array_info').html(info);
+    smartMenu('#array_list');
+    $.post('<?=$url?>',{cmd:'cache',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+      var data = d.split('\0');
+      var info = moreInfo(data,'Cache');
+      $('#cache_list').html(data[0]);
+      $('#cache_info').parent().css('display',info?'':'none');
+      $('#cache_info').html(info);
+      smartMenu('#cache_list');
+<?if ($devs):?>
+      $.post('<?=$url?>',{cmd:'extra',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+        var data = d.split('\0');
+        var info = moreInfo(data,'Extra');
+        $('#extra_list').html(data[0]);
+        $('#extra_info').parent().css('display',info?'':'none');
+        $('#extra_info').html(info);
+        smartMenu('#extra_list');
+      });
 <?endif;?>
-    clearTimeout(timer2);
-    timer2 = setTimeout(heatAlarm,2000);
-    $('[id^="smart-"]').each(function() {
-      var opts = [{header:$(this).attr('id'), image:'/webGui/icons/smart.png'}];
-      var id = '#'+$(this).attr('id');
-      var page = $(this).attr('name');
-      var view = $(this).attr('class');
-      var disk = id.substr(id.indexOf('-')+1);
-      opts.push({text:'Attributes',icon:'fa-sitemap',action:function(e){e.preventDefault();attributes(page,disk);}});
-      opts.push({divider:true});
-      opts.push({text:'Capabilities',icon:'fa-user',action:function(e){e.preventDefault();capabilities(page,disk);}});
-      opts.push({divider:true});
-      opts.push({text:'Identity',icon:'fa-home',action:function(e){e.preventDefault();identity(page,disk);}});
-      if (view == 'alert') {
-        opts.push({divider:true});
-        opts.push({text:'Acknowledge',icon:'fa-check-square-o',action:function(e){e.preventDefault();acknowledge(disk);}});
-      }
-      context.attach(id,opts);
     });
     timer30 = setTimeout(update30,30000);
   });
 }
 function update60() {
-  $.post('<?=$url?>',{cmd:'parity',time:'<?=$display['date'].($display['date']!='%c'?", {$display['time']}":"")?>'},function(data) {
-    if (data) $('#parity').html(data);
-  });
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {
+    $.each(data.split('\0'),function(k,v) {
       var load = v.slice(0,-1);
       if (load >= red) var color = 'redbar';
       else if (load >= orange) var color = 'orangebar';
       else var color = '';
-      $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}}).text(v);
+      $('.sys'+k).text(v);
+      $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}});
     });
     setTimeout(update60,60000);
   });
-}
-function heatAlarm() {
-  if ($('.heat-img').length) {
-    if ($('.heat-text').is(':visible')) {$('.heat-text').hide(); $('.heat-img').show();} else {$('.heat-img').hide(); $('.heat-text').show();}
-  }
-  timer2 = setTimeout(heatAlarm,2000);
 }
 function attributes(page,disk) {
   var tab = page=='New' ? 'tab2' : 'tab3';
@@ -511,19 +564,75 @@ function identity(page,disk) {
   location.replace('/Dashboard/'+page+'?name='+disk);
 }
 function acknowledge(disk) {
-  $.post('/webGui/include/Acknowledge.php',{disk:disk},function(data){clearTimeout(timer30);update30();});
+  $.post('/webGui/include/Acknowledge.php',{disk:disk},function(){clearTimeout(timer30);update30();});
 }
 function dropdown(menu) {
   var select = 'select[name="'+menu+'"]';
-  if ($.cookie(menu) == null || $.cookie(menu) >= $(select+' option').length) return;
-  $(select+' option')[$.cookie(menu)].selected = true;
+  var size   = $(select+' option').length;
+  var option = $.cookie(menu)||0;
+  if (option >= size) option = size - 1;
+  $(select+' option')[option].selected = true;
   $(select).change();
 }
-function toggle_CPU(init) {
-  if (!init) {
-    if ($.cookie('cpu')===undefined) $.cookie('cpu','close',{path:'/',expires:3650}); else $.removeCookie('cpu',{path:'/'});
+function toggle_chevron(field,action) {
+  switch (action) {
+    case 0:
+    case 1: var view = field; break;
+    case 2: var view = $.cookie('enter_view')||0; view++; view = 'view'+view; break;
+    case 3: var view = $.cookie('enter_share')||0; view++; view = 'user'+view; break;
+    case 4: var view = $.cookie('enter_share')||0; view++; view = 'share'+view; break;
   }
-  $.cookie('cpu')===undefined ? $('.cpu_open').show() : $('.cpu_open').hide();
+  toggle_view(field,false,view);
+  var visible = $('.'+view).is(':visible');
+  var chevron = visible ? 'fa-chevron-up' : 'fa-chevron-down';
+  var remove =  visible ? 'fa-chevron-down' : 'fa-chevron-up';
+  $('i#'+field).removeClass(remove).addClass(chevron);
+  if (action==1) {
+    if (visible) toggle_CPU(true); else $('.cpu_open').hide();
+  } else if (action==2) {
+    $('.'+field).toggle();
+  }
+}
+function toggle_CPU(init) {
+  if (!init) {if ($.cookie('cpu')===undefined) $.cookie('cpu','close',{path:'/',expires:3650}); else $.removeCookie('cpu',{path:'/'});}
+  if ($.cookie('cpu_view')===undefined) {
+    if ($.cookie('cpu')===undefined) {
+      $('.cpu_open').show();
+      $('.cpu_close').text('Hide details');
+      $('.cpu_view').find('td').css('padding-bottom','0');
+    } else {
+      $('.cpu_open').hide();
+      $('.cpu_close').text('Show details');
+      $('.cpu_view').find('td').css('padding-bottom','20px');
+    }
+  } else {
+    $('.cpu_open').hide();
+  }
+}
+function toggle_view(field,init,view) {
+  if (!view) view = $.cookie(field)||field;
+  if (!init) {if ($.cookie(field)===undefined) $.cookie(field,view,{path:'/',expires:3650}); else $.removeCookie(field,{path:'/'});}
+  if ($.cookie(field)===undefined) $('.'+view).show(); else $('.'+view).hide();
+  var visible = $('.'+view).is(':visible');
+  var unset = true;
+  switch (field) {
+  case 'users_view':
+    visible = $('.user').is(':visible');
+    unset = false;
+  case 'shares_view':
+    if (unset) visible = $('.share').is(':visible');
+  case 'array_view':
+  case 'cache_view':
+  case 'extra_view':
+    var on = $('#'+field+'_on');
+    var off = $('#'+field+'_off');
+    if (visible) {on.show(); off.hide();} else {off.show(); on.hide();}
+    break;
+  }
+  if (init) {
+    var chevron = visible ? 'fa-chevron-up' : 'fa-chevron-down';
+    $('#'+field).addClass(chevron);
+  }
 }
 var cpuload = new NchanSubscriber('/sub/cpuload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 cpuload.on('message',function(data) {
@@ -543,17 +652,33 @@ $.each(json["cpuload"],function(k,v) {
     else if (load >= orange) var color = 'orangebar';
     else var color = '';
     load += '%';
-    $('#'+k).animate({width:load},{step:function(){$('#'+k).css('overflow','visible').removeClass().addClass(color);}}).text(load);
+    $('.'+k).text(load);
+    $('#'+k).animate({width:load},{step:function(){$('#'+k).css('overflow','visible').removeClass().addClass(color);}});
   });
 });
 $(function() {
   dropdown('enter_share');
   dropdown('enter_view');
-  toggle_CPU(true);
-  update3();
-  update60();
-  update30();
+  update5();
   update15();
+  update60();
+  toggle_CPU(true);
+  toggle_view('sys_view',true);
+  toggle_view('mb_view',true);
+  toggle_view('cpu_view',true);
+  toggle_view('mem_view',true);
+  toggle_view('port_view',true);
+<?if ($fans>0):?>
+  toggle_view('fan_view',true);
+<?endif;?>
+  toggle_view('parity_view',true);
+  toggle_view('array_view',true);
+  toggle_view('cache_view',true);
+<?if ($devs):?>
+  toggle_view('extra_view',true);
+<?endif;?>
+  toggle_view('users_view',true);
+  toggle_view('shares_view',true);
   context.init({preventDoubleContext:false});
   cpuload.start();
 });
