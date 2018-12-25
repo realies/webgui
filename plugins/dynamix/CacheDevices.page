@@ -4,8 +4,8 @@ Tag="bullseye"
 Cond="($var['fsState']=='Stopped' || $var['cacheSbNumDisks'])"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -44,13 +44,13 @@ endforeach;
 
 > **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Cache Devices* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+> <i class='fa fa-circle orb green-orb'></i>Normal operation, device is active.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is in standby mode (spun-down).
+> <i class='fa fa-circle orb grey-orb'></i>Device is in standby mode (spun-down).
 >
-> <img src='/webGui/images/blue-on.png' class='icon'>New device.
+> <i class='fa fa-square orb blue-orb'></i>New device.
 >
-> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+> <i class='fa fa-square orb grey-orb'></i>No device present, position is empty.
 >
 > **Cache** is a device, or device pool, *outside* the Unraid array.  It may be exported for network access just
 > like an Array device.  Being outside the Unraid array results in significantly faster write access.
