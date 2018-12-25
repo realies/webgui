@@ -1,9 +1,9 @@
 Menu="Tasks:50"
 Type="xmenu"
 Title="Installed Plugins"
-Tag="puzzle-piece"
+Tag="icon-plugins"
 Tabs="true"
-Code="f1e6"
+Code="e944"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology
@@ -64,7 +64,7 @@ function loadlist(id) {
 <?endif;?>
     $('#plugin_table').tablesorter({sortList:[[4,0],[1,0]],sortAppend:[[1,0]],headers:{0:{sorter:false},5:{sorter:false}},textAttribute:'data'});
     $('.desc_readmore').readmore({maxHeight:66,moreLink:"<a href='#'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#'><i class='fa fa-chevron-up'></i></a>"});
-    if (data[1]>0) $('#updateall').show(); else $('#updateall').hide();
+    if (data[1]>1) $('#updateall').show(); else $('#updateall').hide();
 <?if ($check):?>
     $('#checkall').find('input').prop('disabled',false).show();
 <?endif;?>

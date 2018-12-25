@@ -1,6 +1,6 @@
 Menu="NetworkServices:2"
 Title="NFS"
-Icon="linux-logo.png"
+Icon="icon-linux"
 Tag="linux"
 ---
 <?PHP

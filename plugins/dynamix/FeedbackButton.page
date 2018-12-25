@@ -1,12 +1,12 @@
 Menu="Buttons"
 Title="Feedback"
-Icon="comment-o"
-Tag="commenting"
-Code="f075"
+Icon="icon-u-chat"
+Tag="icon-u-chat"
+Code="e93e"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,

@@ -1,12 +1,12 @@
 Cond="file_exists('/etc/nginx/htpasswd')"
 Menu="Buttons:1"
 Title="Logout"
-Icon="sign-out"
-Code="f08b"
+Icon="icon-u-logout"
+Code="e937"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,

@@ -1,7 +1,7 @@
 Menu="OtherSettings"
 Title="Docker"
-Icon="dynamix.docker.manager.png"
-Tag="docker"
+Icon="icon-docker"
+Tag="icon-docker"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

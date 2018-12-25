@@ -1,8 +1,8 @@
 Menu="OtherSettings"
 Type="xmenu"
 Title="Global Share Settings"
-Icon="share-settings.png"
-Tag="share-alt-square"
+Icon="icon-share"
+Tag="share-alt"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

@@ -1,6 +1,6 @@
 Menu="OtherSettings"
 Title="VM Manager"
-Icon="dynamix.vm.manager.png"
+Icon="icon-virtualization"
 Tag="columns"
 ---
 <?PHP

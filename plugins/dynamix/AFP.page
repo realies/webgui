@@ -1,6 +1,6 @@
 Menu="NetworkServices:1"
 Title="AFP"
-Icon="apple-logo.png"
+Icon="icon-apple"
 Tag="apple"
 ---
 <?PHP

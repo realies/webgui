@@ -1,6 +1,6 @@
 Menu="Tasks:70"
 Type="xmenu"
-Code="f108"
+Code="e918"
 Cond="exec(\"grep -o '^SERVICE=.enable' /boot/config/domain.cfg 2>/dev/null\")"
 ---
 <?PHP

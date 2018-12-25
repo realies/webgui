@@ -1,8 +1,8 @@
 Menu="OtherSettings"
 Type="xmenu"
 Title="Identification"
-Icon="ident.png"
-Tag="id-badge"
+Icon="icon-home"
+Tag="home"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

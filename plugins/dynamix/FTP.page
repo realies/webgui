@@ -1,6 +1,6 @@
 Menu="NetworkServices:999"
 Title="FTP Server"
-Icon="ftp-server.png"
+Icon="icon-ftp"
 Tag="globe"
 ---
 <?PHP
