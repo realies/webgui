@@ -16,12 +16,29 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 
 $var = parse_ini_file('state/var.ini');
+
+function dmidecode($key,$n,$all=true) {
+  $entries = array_filter(explode($key,shell_exec("dmidecode -qt$n")));
+  $properties = [];
+  foreach ($entries as $entry) {
+    $property = [];
+    foreach (explode("\n",$entry) as $line) if (strpos($line,': ')!==false) {
+      list($key,$value) = explode(': ',trim($line));
+      $property[$key] = $value;
+    }
+    $properties[] = $property;
+  }
+  return $all ? $properties : $properties[0];
+}
 ?>
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 <style>
 span.key{width:92px;display:inline-block;font-weight:bold}
+span.key.link{text-decoration:underline;cursor:pointer}
 div.box{margin-top:8px;line-height:30px;margin-left:40px}
+div.dimm_info{margin-left:96px}
+div.closed{display:none}
 </style>
 <script>
 // server uptime & update period
@@ -48,93 +65,78 @@ echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 </div>
 <div><span class="key">M/B:</span>
 <?
-echo exec("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}'");
+$board = dmidecode('Base Board Information','2',0);
+echo "{$board['Manufacturer']} {$board['Product Name']} - v{$board['Version']} - s/n: {$board['Serial Number']}";
+?>
+</div>
+<div><span class="key">BIOS:</span>
+<?
+$bios = dmidecode('BIOS Information','0',0);
+echo "{$bios['Vendor']} - v{$bios['Version']}. Dated: {$bios['Release Date']}";
 ?>
 </div>
 <div><span class="key">CPU:</span>
 <?
-function write($number) {
-  $words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty','twenty-one','twenty-two','twenty-three','twenty-four','twenty-five','twenty-six','twenty-seven','twenty-eight','twenty-nine','thirty'];
-  return $number<=count($words) ? $words[$number] : $number;
-}
-$cpu = explode('#',exec("dmidecode -qt4|awk -F: '/^\tVersion:/{v=\$2};/^\tCurrent Speed:/{s=\$2} END{print v\"#\"s}'"));
-$cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu[0]);
-if (strpos($cpumodel,'@')===false) {
-  $cpuspeed = explode(' ',$cpu[1]);
-  if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz') {
-    $cpuspeed[0] /= 1000;
-    $cpuspeed[1] = 'GHz';
-  }
-  echo "$cpumodel @ {$cpuspeed[0]}{$cpuspeed[1]}";
-} else {
-  echo $cpumodel;
-}
+$cpu = dmidecode('Processor Information','4',0);
+$cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu['Version']);
+echo $cpumodel.(strpos($cpumodel,'@')!==false ? "" : " @ {$cpu['Current Speed']}");
 ?>
 </div>
 <div><span class="key">HVM:</span>
 <?
-  // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-  // If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
-  $strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+// If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
+$strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
 
-  // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-  $strCPUInfo = file_get_contents('/proc/cpuinfo');
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+$strCPUInfo = file_get_contents('/proc/cpuinfo');
 
-  if (!empty($strLoadedModules)) {
-    // Yah! CPU and motherboard supported and enabled in BIOS
-    ?>Enabled<?
+if (!empty($strLoadedModules)) {
+  // Yah! CPU and motherboard supported and enabled in BIOS
+  echo "Enabled";
+} else {
+  echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
+  if (strpos($strCPUInfo,'vmx')===false && strpos($strCPUInfo, 'svm')===false) {
+    // CPU doesn't support virtualzation
+    echo "Not Available";
   } else {
-    echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
-    if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
-      // CPU doesn't support virtualzation
-      ?>Not Available<?
-    } else {
-      // Motherboard either doesn't support virtualzation or BIOS has it disabled
-      ?>Disabled<?
-    }
-    echo '</a>';
+    // Motherboard either doesn't support virtualzation or BIOS has it disabled
+    echo "Disabled";
   }
+  echo '</a>';
+}
 ?>
 </div>
 <div><span class="key">IOMMU:</span>
 <?
-  // Check for any IOMMU Groups
-  $iommu_groups = shell_exec("find /sys/kernel/iommu_groups/ -type l");
+// Check for any IOMMU Groups
+$iommu_groups = shell_exec("find /sys/kernel/iommu_groups/ -type l");
 
-  if (!empty($iommu_groups)) {
-    // Yah! CPU and motherboard supported and enabled in BIOS
-    ?>Enabled<?
+if (!empty($iommu_groups)) {
+  // Yah! CPU and motherboard supported and enabled in BIOS
+  echo "Enabled";
+} else {
+  echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
+  if (strpos($strCPUInfo,'vmx')===false && strpos($strCPUInfo, 'svm')===false) {
+    // CPU doesn't support virtualzation so iommu would be impossible
+    echo "Not Available";
   } else {
-    echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
-    if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
-      // CPU doesn't support virtualzation so iommu would be impossible
-      ?>Not Available<?
-    } else {
-      // Motherboard either doesn't support iommu or BIOS has it disabled
-      ?>Disabled<?
-    }
-    echo '</a>';
+    // Motherboard either doesn't support iommu or BIOS has it disabled
+    echo "Disabled";
   }
+  echo '</a>';
+}
 ?>
 </div>
 <div><span class="key">Cache:</span>
 <?
-$cache = explode('#',exec("dmidecode -qt7|awk -F: '/^\tSocket Designation:/{c=c\$2\";\"};/^\tInstalled Size:/{s=s\$2\";\"} END{print c\"#\"s}'"));
-$socket = array_map('trim',explode(';',$cache[0]));
-$volume = array_map('trim',explode(';',$cache[1]));
-$name = [];
-$size = "";
-for ($i=0; $i<count($socket); $i++) {
-  if ($volume[$i] && $volume[$i]!='0 kB' && !in_array($socket[$i],$name)) {
-    if ($size) $size .= ', ';
-    $size .= $volume[$i];
-    $name[] = $socket[$i];
-  }
-}
-echo $size;
+$cache_installed = [];
+$cache_devices = dmidecode('Cache Information','7');
+foreach ($cache_devices as $device) $cache_installed[] = str_replace('kB','KiB',$device['Installed Size']);
+echo implode(', ',$cache_installed);
 ?>
 </div>
-<div><span class="key" style="text-decoration:underline;cursor:pointer" onclick="document.getElementsByClassName('dimm_info')[0].classList.toggle('closed')">Memory:</span>
+<div><span class="key link" onclick="document.getElementsByClassName('dimm_info')[0].classList.toggle('closed')">Memory:</span>
 <?
 /*
  Memory Device (16) will get us each ram chip. By matching on MB it'll filter out Flash/Bios chips
@@ -145,35 +147,41 @@ echo $size;
  Extract error correction type, if none, do not include additional information in the output
  If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
 */
-$memory_installed = exec("dmidecode -qt17|awk -F: '/^\tSize: [0-9]+ MB\$/{t+=\$2};/^\tSize: [0-9]+ GB\$/{t+=\$2*1024};/^\tSize: [0-9]+ TB\$/{t+=\$2*1048576} END{print t}'");
-list($memory_maximum,$ecc_support) = array_map('trim',explode('#',exec("dmidecode -qt16|awk -F: '/^\tMaximum Capacity: [0-9]+ GB\$/{t+=\$2*1024};/^\tMaximum Capacity: [0-9]+ TB\$/{t+=\$2*1048576};/^\tError Correction Type:/{e=\$2} END{print t\"#\"e}'")));
+$sizes = ['MB','GB','TB'];
+$memory_type = $ecc = '';
+$memory_installed = $memory_maximum = 0;
+$memory_devices = dmidecode('Memory Device','17');
+foreach ($memory_devices as $device) {
+  if ($device['Type']=='Unknown') continue;
+  list($size, $unit) = explode(' ',$device['Size']);
+  $base = array_search($unit,$sizes);
+  if ($base!==false) $memory_installed += $size*pow(1024,$base);
+  if (!$memory_type) $memory_type = $device['Type'];
+}
+$memory_array = dmidecode('Physical Memory Array','16');
+foreach ($memory_array as $device) {
+  list($size, $unit) = explode(' ',$device['Maximum Capacity']);
+  $base = array_search($unit,$sizes);
+  if ($base>=1) $memory_maximum += $size*pow(1024,$base);
+  if (!$ecc && $device['Error Correction Type']!='None') $ecc = "{$device['Error Correction Type']} ";
+}
 if ($memory_installed >= 1024) {
   $memory_installed = round($memory_installed/1024);
   $memory_maximum = round($memory_maximum/1024);
-  $unit = 'GB';
-} else $unit = 'MB';
-if ($memory_maximum < $memory_installed) {$memory_maximum = pow(2,ceil(log($memory_installed)/log(2))); $star = '*';} else $star = '';
-echo "$memory_installed $unit ".($ecc_support == "None" ? "" : "$ecc_support ")."(max. installable capacity $memory_maximum $unit)$star";
+  $unit = 'GiB';
+} else $unit = 'MiB';
 
-$memory_information = shell_exec("dmidecode -qt17");
-$memory_modules = array_filter(explode("Memory Device", $memory_information));
-$memory_properties = array();
-foreach($memory_modules as $memory_module) {
-  preg_match_all("/(\s*(?<key>[^\n:]+):\s*(?<value>[^\n]+))/mi", $memory_module, $memory_module_properties, PREG_SET_ORDER, 0);
-  $properties = array();
-  foreach($memory_module_properties as $property) {
-    $properties[$property['key']] = $property['value'];
-  }
-  array_push($memory_properties, $properties);
-}
+// If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
+$low = $memory_maximum < $memory_installed;
+if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
+echo "$memory_installed $unit $memory_type $ecc(max. installable capacity $memory_maximum $unit".($low?'*':'').")";
 ?>
-<style>.closed { display:none }</style>
-<div class="dimm_info closed" style="margin-left:96px">
+<div class="dimm_info closed">
 <?
-foreach($memory_properties as $device) {
-  if(preg_match("/\d+/", $device['Size'])) {
-    echo "<div>{$device['Manufacturer']} - {$device['Part Number']} - {$device['Serial Number']} - {$device['Size']} @ {$device['Configured Clock Speed']}</div>";
-  }
+foreach ($memory_devices as $device) {
+  if ($device['Type']=='Unknown') continue;
+  $size = preg_replace('/( .)B$/','$1iB',$device['Size']);
+  echo "<div>{$device['Manufacturer']} {$device['Part Number']}, {$size} {$device['Type']} @ {$device['Configured Memory Speed']}</div>";
 }
 ?>
 </div>
@@ -183,14 +191,21 @@ foreach($memory_properties as $device) {
 exec("ls /sys/class/net|grep -Po '^(bond|eth)\d+$'",$sPorts);
 $i = 0;
 foreach ($sPorts as $port) {
-  $mtu = file_get_contents("/sys/class/net/$port/mtu");
+  $int = "/sys/class/net/$port";
+  $mtu = file_get_contents("$int/mtu");
+  $link = file_get_contents("$int/carrier")==1;
   if ($i++) echo "<br><span class='key'></span>&nbsp;";
-  if ($port=='bond0') {
-    echo "$port: ".exec("grep -Pom1 '^Bonding Mode: \K.+' /proc/net/bonding/bond0").", mtu $mtu";
+  if (substr($port,0,4)=='bond') {
+    if ($link) {
+      $bond_mode = str_replace('Bonding Mode: ','',file("/proc/net/bonding/$port",FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES)[1]);
+      echo "$port: $bond_mode, mtu $mtu";
+    } else echo "$port: bond down";
   } else {
-    unset($info);
-    exec("ethtool ".escapeshellarg($port)."|grep -Po '^\s+(Speed|Duplex|Link\sdetected): \K[^U\\n]+'",$info);
-    echo (array_pop($info)=='yes' && $info[0]) ? "$port: ".str_replace(['M','G'],[' M',' G'],$info[0]).", ".strtolower($info[1])." duplex, mtu $mtu" : "$port: not connected";
+    if ($link) {
+      $speed = file_get_contents("$int/speed");
+      $duplex = file_get_contents("$int/duplex");
+      echo "$port: $speed Mbps, $duplex duplex, mtu $mtu";
+    } else echo "$port: interface down";
   }
 }
 ?>

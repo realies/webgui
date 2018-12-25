@@ -44,19 +44,15 @@ function make_link($method, $arg, $extra='') {
 // trying our best to find an icon
 function icon($name) {
 // this should be the default location and name
-  $icon = "plugins/{$name}/images/{$name}.png";
+  $icon = "plugins/$name/images/$name.png";
   if (file_exists($icon)) return $icon;
 // try alternatives if default is not present
-  $plugin = strtok($name, '.');
-  $icon = "plugins/{$plugin}/images/{$plugin}.png";
+  $icon = "plugins/$name/$name.png";
   if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/images/{$name}.png";
+  $image = preg_split('/[\._- ]/',$name)[0];
+  $icon = "plugins/$name/images/$image.png";
   if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/{$plugin}.png";
-  if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/{$name}.png";
-  if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$name}.png";
+  $icon = "plugins/$name/$image.png";
   if (file_exists($icon)) return $icon;
 // last resort - plugin manager icon
   return "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";

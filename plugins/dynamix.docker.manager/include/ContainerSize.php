@@ -42,7 +42,7 @@ pre{font-family:bitstream;font-size:1.3rem}
 <script type="text/javascript" src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
 $(function(){
-  $('div.spinner').html('<?=file_get_contents("$docroot/webGui/images/animated-logo.svg")?>');
+  $('div.spinner').html('<?readfile("$docroot/webGui/images/animated-logo.svg")?>');
   $.get('/plugins/dynamix.docker.manager/include/GetContainerSize.php',function(data){
     $('div.spinner').hide();
     $('#data').text(data);
