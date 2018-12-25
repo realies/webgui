@@ -58,12 +58,12 @@ function maintenance_mode() {
 function status_indicator() {
   global $var;
   switch ($var['mdColor']) {
-   case 'green-on': $help = 'Started, array protected'; break;
-   case 'green-blink': $help = 'Stopped'; break;
-   case 'yellow-on': $help = 'Started, array unprotected'; break;
-   case 'yellow-blink': $help = 'Stopped'; break;
+   case 'green-on': $orb = 'circle'; $color = 'green'; $help = 'Started, array protected'; break;
+   case 'green-blink': $orb = 'circle'; $color = 'grey'; $help = 'Stopped'; break;
+   case 'yellow-on': $orb = 'warning'; $color = 'yellow'; $help = 'Started, array unprotected'; break;
+   case 'yellow-blink': $orb = 'warning'; $color = 'grey'; $help = 'Stopped'; break;
   }
-  echo "<a class='info nohand' onclick='return false'><img src='/webGui/images/{$var['mdColor']}.png' class='icon'><span>$help</span></a>";
+  echo "<a class='info nohand' onclick='return false'><i class='fa fa-$orb orb $color-orb'></i><span>$help</span></a>";
 }
 function missing_cache() {
   global $disks;
@@ -235,7 +235,7 @@ $(function(){
   $btrfs = exec('pgrep -cf /sbin/btrfs') ? '<br><small>Disabled -- BTRFS operation is running</small>' : '';
   switch ($var['fsState']):
   case "Started":?>
-    <tr><td><?status_indicator()?><span class="strong big">Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></span></td>
+    <tr><td><?status_indicator()?><span class="strong">Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></span></td>
     <td><input type="button" value="Stop" onclick="stopArray(this.form)"<?if ($parity||$mover||$btrfs):?> disabled<?endif;?>></td>
     <td id="stop"><strong>Stop</strong> will take the array off-line.<?=$parity?:$mover?:$btrfs?:''?></td></tr>
 <?  if ($var['fsNumUnmountable']>0):?>
@@ -245,7 +245,7 @@ $(function(){
       </td><td><input type="submit" id="btnFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
       <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
       <a class="info none img nohand"><input type="checkbox" name="confirmFormat" value="OFF" onclick="$('#btnFormat').prop('disabled',!arrayOps.confirmFormat.checked)">
-      <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i><span><b>All data is permanently lost !!!<br>This is not used to recover data</b></span></small></a>
+      <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i></small><span><b>All data is permanently lost !!!<br>This is not used to recover data</b><br><i>Format is never part of a rebuild</i></span></a>
       </td></tr>
 <?  endif;
     if (!$parity):
@@ -360,7 +360,7 @@ $(function(){
         <td><strong>Start</strong> will bring the array on-line and start <strong>Parity-Check</strong>.
         <br><input type="checkbox" name="optionCorrect" value="correct" checked><small>Write corrections to parity</small></td></tr>
 <?    elseif (missing_cache()):?>
-        <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing Cache disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)"></td>
+        <tr><td><?status_indicator()?><span class="strong big">Stopped</span>. Missing Cache disk.</td><td><input type="button" id="cmdStart" value="Start" onclick="prepareInput(this.form)" disabled></td>
         <td><strong>Start</strong> will remove the missing cache disk and then bring the array on-line.
         <br><input type="checkbox" name="confirmStart" value="OFF" onclick="$('#cmdStart').prop('disabled',!arrayOps.confirmStart.checked)"><small>Yes I want to do this</small></td></tr>
 <?    else:?>
@@ -499,13 +499,13 @@ enable_stop();
 
 > **Colored Status Indicator** the significance of the color indicator of the *Array* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Array is Started and Parity is valid.
+> <i class='fa fa-circle orb green-orb'></i>Array is Started and Parity is valid.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Array is Stopped, Parity is valid.
+> <i class='fa fa-circle orb grey-orb'></i>Array is Stopped, Parity is valid.
 >
-> <img src='/webGui/images/yellow-on.png' class='icon'>Array is Started, but Parity is invalid.
+> <i class='fa fa-warning orb yellow-orb'></i>Array is Started, but Parity is invalid.
 >
-> <img src='/webGui/images/yellow-blink.png' class='icon'>Array is Stopped, Parity is invalid.
+> <i class='fa fa-warning orb grey-orb'></i>Array is Stopped, Parity is invalid.
 >
 
 <?if ($var['fsState'] == "Stopped"):?>
