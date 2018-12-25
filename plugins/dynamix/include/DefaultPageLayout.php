@@ -29,6 +29,7 @@ $themes2 = in_array($theme,['gray','azure']);
 <meta name="robots" content="noindex, nofollow">
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-cases.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/font-awesome.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/context.standalone.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/jquery.sweetalert.css")?>">
@@ -45,14 +46,14 @@ html{font-size:<?=$font?>}
 <?endif;?>
 <?if ($backgnd):?>
 #header{background-color:#<?=$backgnd?>}
-<?if ($header && $themes1):?>
+<?if ($themes1):?>
 #menu{background-color:#<?=$backgnd?>}
 #nav-block #nav-item a{color:#<?=$header?>}
 #nav-block #nav-item.active:after{background-color:#<?=$header?>}
 <?endif;?>
 <?endif;?>
 .inline_help{display:none}
-.upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#E68A00;background:#FEEFB3;border-bottom:#E68A00 1px solid;text-align:center;font-size:1.4rem;z-index:999}
+.upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#e68a00;background:#feefb3;border-bottom:#e68a00 1px solid;text-align:center;font-size:1.4rem;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
 .back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:2.5rem}
 <?
@@ -64,8 +65,8 @@ echo "#header.image{background-image:url(";
 echo file_exists($banner) ? autov($banner) : '/webGui/images/banner.png';
 echo ")}\n";
 if ($themes2) {
-  foreach ($tasks as $page) if ($page['Code']) echo "#nav-item a[href='/{$page['name']}']:before{content:'\\{$page['Code']}'}\n";
-  foreach ($buttons as $page) if ($page['Code']) echo "#nav-item.{$page['name']} a:before{content:'\\{$page['Code']}'}\n";
+  foreach ($tasks as $button) if ($button['Code']) echo "#nav-item a[href='/{$button['name']}']:before{content:'\\{$button['Code']}'}\n";
+  foreach ($buttons as $button) if ($button['Code']) echo "#nav-item.{$button['name']} a:before{content:'\\{$button['Code']}'}\n";
 }
 $notes = '/var/tmp/unRAIDServer.txt';
 if (!file_exists($notes)) file_put_contents($notes,shell_exec("$docroot/plugins/dynamix.plugin.manager/scripts/plugin changes $docroot/plugins/unRAIDServer/unRAIDServer.plg"));
@@ -105,7 +106,7 @@ function updateTime() {
   var days = parseInt(uptime/86400);
   var hour = parseInt(uptime/3600%24);
   var mins = parseInt(uptime/60%60);
-  $('#uptime').html(((days|hour|mins)?plus(days,'day',(hour|mins)==0)+plus(hour,'hour',mins==0)+plus(mins,'minute',true):'less than a minute'));
+  $('span.uptime').html(((days|hour|mins)?plus(days,'day',(hour|mins)==0)+plus(hour,'hour',mins==0)+plus(mins,'minute',true):'less than a minute'));
   uptime += Math.round((now.getTime() - before.getTime())/1000);
   before = now;
   if (expiretime > 0) {
@@ -323,44 +324,53 @@ $.ajaxPrefilter(function(s, orig, xhr){
 });
 </script>
 </head>
-<body class="<?='page_'.strtolower($myPage['name'])?>">
+<body>
  <div id="template">
   <div class="upgrade_notice" style="display:none"></div>
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="https://unraid.net"><?=file_get_contents("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
+   <a href="https://unraid.net"><?readfile("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
    Version: <?=$var['version']?><?=$notes?>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Registration<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME']." &bullet; ".$eth0['IPADDR:0']?><br/><?=$var['COMMENT']?><br/>
     <a href="/Tools/Registration" title="Go to Registration page">Unraid OS <span id="licensetype"><?=$var['regTy']?></span><span id="licenseexpire"></span></a><br/>
-    <span id="uptime"></span></span>
+    <span class="uptime"></span></span>
    </div>
   </div>
   <a href="#" class="back_to_top" title="Back To Top"><i class="fa fa-arrow-circle-up"></i></a>
 <?
 // Build page menus
 echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
-foreach ($tasks as $page) {
-  $pagename = $page['name'];
+foreach ($tasks as $button) {
+  $page = $button['name'];
   echo "<div id='nav-item'";
-  echo $pagename==$task ? " class='active'>" : ">";
-  echo "<a href='/$pagename' onclick='initab()'>$pagename</a></div>";
+  echo $task==$page ? " class='active'>" : ">";
+  echo "<a href='/$page' onclick='initab()'>$page</a></div>";
 }
 unset($tasks);
 if ($display['usage']) my_usage();
 echo "</div>";
 echo "<div id='nav-right'>";
-foreach ($buttons as $page) {
-  eval("?>{$page['text']}");
-  if (empty($page['Link'])) {
-    $icon = substr($page['Icon'],-4)=='.png' ? "<img src='/{$page['root']}/icons/{$page['Icon']}' class='system'>" : "<i class='system fa fa-{$page['Icon']}'></i>";
-    echo "<div id='nav-item' class='{$page['name']}'><a href='".($page['Href'] ?? '#')."' onclick='{$page['name']}();return false;' title='{$page['Title']}'>$icon<span>{$page['Title']}</span></a></div>";
+foreach ($buttons as $button) {
+  eval("?>{$button['text']}");
+  if (empty($button['Link'])) {
+    $icon = $button['Icon'];
+    if (substr($icon,-4)=='.png') {
+      $icon = "<img src='/{$button['root']}/icons/$icon' class='system'>";
+    } elseif (substr($icon,0,5)=='icon-') {
+      $icon = "<i class='$icon system'></i>";
+    } else {
+      if (substr($icon,0,3)!='fa-') $icon = "fa-$icon";
+      $icon = "<i class='fa $icon system'></i>";
+    }
+    $title = $themes2 ? "" : " title='{$button['Title']}'";
+    echo "<div id='nav-item' class='{$button['name']} util'><a href='".($button['Href'] ?? '#')."' onclick='{$button['name']}();return false;'{$title}>$icon<span>{$button['Title']}</span></a></div>";
   } else
-    echo "<div id='{$page['Link']}'></div>";
+    echo "<div id='{$button['Link']}'></div>";
 }
-unset($buttons);
+unset($buttons,$button);
 if ($notify['display']) {
   echo "<span id='nav-tub1' class='tub'><i id='box-tub1' class='fa fa-square grey-text'></i><span id='txt-tub1' class='score one'>0</span></span>";
   echo "<span id='nav-tub2' class='tub'><i id='box-tub2' class='fa fa-square grey-text'></i><span id='txt-tub2' class='score one'>0</span></span>";
@@ -400,17 +410,21 @@ foreach ($pages as $page) {
     foreach ($pgs as $pg) {
       @eval("\$title=\"".htmlspecialchars($pg['Title'])."\";");
       $link = "$path/{$pg['name']}";
-      $icon = $pg['Icon'] ?? false;
-      if ($icon) {
-        if (substr($icon,-4)=='.png') {
-          $icon = "{$pg['root']}/images/$icon";
-          if (!file_exists($icon)) {$icon = "{$pg['root']}/$icon"; if (!file_exists($icon)) $icon = '/webGui/images/default.png';}
-          $icon = "<img class=\"PanelImg\" src=\"$icon\">";
+      $icon = $pg['Icon'] ?? "<i class='icon-app PanelIcon'></i>";
+      if (substr($icon,-4)=='.png') {
+        $root = $pg['root'];
+        if (file_exists("$docroot/$root/images/$icon")) {
+          $icon = "<img src='/$root/images/$icon' class='PanelImg'>";
+        } elseif (file_exists("$docroot/$root/$icon")) {
+          $icon = "<img src='/$root/$icon' class='PanelImg'>";
         } else {
-          $icon = "<i class='PanelIcon fa fa-$icon'></i>";
+          $icon = "<i class='icon-app PanelIcon'></i>";
         }
-      } else {
-        $icon = "<img class=\"PanelImg\" src=\"/webGui/images/default.png\">";
+      } elseif (substr($icon,0,5)=='icon-') {
+        $icon = "<i class='$icon PanelIcon'></i>";
+      } elseif ($icon[0]!='<') {
+        if (substr($icon,0,3)!='fa-') $icon = "fa-$icon";
+        $icon = "<i class='fa $icon PanelIcon'></i>";
       }
       echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\">$icon<div class=\"PanelText\">$title</div></a></div>";
     }
@@ -418,10 +432,10 @@ foreach ($pages as $page) {
   empty($page['Markdown']) || $page['Markdown']=='true' ? eval('?>'.Markdown($page['text'])) : eval('?>'.$page['text']);
   if ($close) echo "</div></div>";
 }
-unset($pages);
+unset($pages,$page,$pgs,$pg,$icon);
 ?>
- </div></div>
- <iframe id="progressFrame" name="progressFrame" frameborder="0"></iframe>
+</div></div>
+<iframe id="progressFrame" name="progressFrame" frameborder="0"></iframe>
 <?
 // Build footer
 echo '<div id="footer"><span id="statusraid"><span id="statusbar">';
@@ -475,7 +489,7 @@ function parseINI(data){
   return value;
 }
 // unraid animated logo
-var unraid_logo = '<?=file_get_contents("$docroot/webGui/images/animated-logo.svg")?>';
+var unraid_logo = '<?readfile("$docroot/webGui/images/animated-logo.svg")?>';
 
 var watchdog = new NchanSubscriber('/sub/var', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchdog.on('message', function(data) {
@@ -529,17 +543,6 @@ $(function() {
 <?elseif (!in_array($regTy,['trial','basic','plus','pro'])):?>
   $('#licensetype').addClass('red-text');
 <?endif;?>
-  if ($("div#nav-right").css('float').toLowerCase() == 'right') {
-    var origNavRightWidth = $('div#nav-right').width();
-    var adjustMenuSize = function() {
-      if ($('div#nav-block').width() - $('div#nav-left').width() <= origNavRightWidth+6) {
-        $('div#nav-right div#nav-item a').css('min-width', 0).find('span').hide();
-      } else {
-        $('div#nav-right div#nav-item a').css('min-width', '').find('span').show();
-      }
-    };
-    $(window).resize(adjustMenuSize).load(adjustMenuSize);
-  }
 <?if ($notify['entity'] & 1 == 1):?>
   $.post('/webGui/include/Notify.php',{cmd:'init'},function(){timers.notifier = setTimeout(notifier,0);});
 <?endif;?>
