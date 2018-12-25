@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?PHP
-/* Copyright 2005-2017, Lime Technology
+/* Copyright 2005-2018, Lime Technology
  * Copyright 2014-2017, Guilherme Jardim, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or

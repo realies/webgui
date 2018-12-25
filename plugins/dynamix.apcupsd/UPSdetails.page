@@ -3,8 +3,8 @@ Title="UPS Details"
 Tag="battery-0"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  * Copyright 2015, Dan Landon.
  *
  * This program is free software; you can redistribute it and/or
