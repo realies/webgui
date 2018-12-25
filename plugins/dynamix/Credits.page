@@ -1,6 +1,7 @@
 Menu="About"
 Title="Credits"
-Tag="diamond"
+Icon="icon-credits"
+Tag="trophy"
 ---
 **Unraid webGUI** Copyright &copy; 2005-2018, [Lime Technology, Inc.](http://lime-technology.com).
 
@@ -12,13 +13,15 @@ Tag="diamond"
 
 **APC UPS Configuration Page** Copyright &copy; 2015, Dan Landon.
 
-**Simple Features** Copyright &copy; 2012, Andrew Hamer-Adams. 
-
+**Simple Features** Copyright &copy; 2012, Andrew Hamer-Adams.
+<br><br><br>
 The Software comprising the Unraid webGui, which is all files within this repository except for
 files listed below, is licensed under GPL version 2.
 
 * The Lime Technology logo file(s) `webGui/images/limetech-*.*` are property of Lime Technology, Inc.
 and may not be used in any other project without written permission from Lime Technology, Inc.
+
+* Settings, Tools and Case icons. Copyright &copy; 2018, [Magnus Engø](http://www.magnusengo.net/). Used with permission.
 
 **Unraid**&reg; is a registered trademark of [Lime Technology, Inc.](http://lime-technology.com).
 
