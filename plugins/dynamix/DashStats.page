@@ -135,7 +135,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 ?>
 <div style='float:left;margin:14px 0 36px 0'>
 <table class='share_status dashboard box1'>
-<thead><tr><td></td><td colspan='3'><?=$var['NAME']?><i class='fa blue-text chevron mt0' id='sys_view' onclick='toggle_chevron("sys_view",0)'></i></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='3'><?=$var['NAME']?><i class='fa blue-text chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i></td><td></td></tr></thead>
 
 <tbody class='sys_view' style='display:none'>
 <tr><td></td><td colspan='2' class='top'>
@@ -156,16 +156,16 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-motherboard'></i><div class='section'>Motherboard<br><span id='mb-temp'></span><br><br></div>
-<i class='fa blue-text chevron' id='mb_view' onclick='toggle_chevron("mb_view",0)'></i></td><td></td></tr>
+<i class='fa blue-text chevron' id='mb_view' onclick='toggleChevron("mb_view",0)'></i></td><td></td></tr>
 <tr class='mb_view' style='display:none'><td></td><td colspan='3'><?=$board?><br><?=$bios?><br><?=$biosdate?></td><td></td></tr>
 </tbody>
 
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-cpu'></i><div class='section'>Processor<br>
 <span style='display:inline-block;width:80px'>Load: <span class='cpu'>0%</span></span><span id='cpu-temp'></span><br><br></div>
-<i class='fa blue-text chevron' id='cpu_view' onclick='toggle_chevron("cpu_view",1)'></i></td><td></td></tr>
+<i class='fa blue-text chevron' id='cpu_view' onclick='toggleChevron("cpu_view",1)'></i></td><td></td></tr>
 <tr class='cpu_view' style='display:none'><td></td><td colspan='3'><?=$cpumodel?><br>
-<a onclick='toggle_CPU()' title='Click to toggle details' class='cpu_close' style='cursor:pointer'>Show details</a></td><td></td></tr>
+<a onclick='toggleCPU()' title='Click to toggle details' class='cpu_close' style='cursor:pointer'>Show details</a></td><td></td></tr>
 <tr class='cpu_open' style='display:none'><td></td><td>Overall Load:</td>
 <td colspan='2'><span class='cpu load'>0%</span><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td><td></td></tr>
 <?
@@ -183,7 +183,7 @@ foreach ($cpus as $pair) {
 
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-ram'></i><div class='section'>Memory<br><span><?="$memory_installed $unit $memory_type $ecc"?><span style='margin-left:20px'>Utilization: <span class='sys0'>0%</span></span><br><br></div>
-<i class='fa blue-text chevron' id='mem_view' onclick='toggle_chevron("mem_view",0)'></i></td><td></td></tr>
+<i class='fa blue-text chevron' id='mem_view' onclick='toggleChevron("mem_view",0)'></i></td><td></td></tr>
 <tr class='mem_view' style='display:none'><td></td><td>Maximum size: <?="$memory_maximum $unit"?><?=$low?'*':''?></td><td><i>RAM: </i><span class='sys0'>0%</span><div class='usage-disk sys mm'><span id='sys0' style='width:0'></span></div></td>
 <td><i>Flash: </i><span class='sys1'>0%</span><div class='usage-disk sys mm'><span id='sys1' style='width:0'></span></div></td><td></td></tr>
 <tr class='mem_view' style='display:none'><td></td><td>Usable size: <?=my_scale($total,$unit,1,null,1024)." $unit"?></td><td><i>Log: </i><span class='sys2'>0%</span><div class='usage-disk sys mm'><span id='sys2' style='width:0'></span></div></td>
@@ -191,8 +191,14 @@ foreach ($cpus as $pair) {
 </tbody>
 
 <tbody>
-<tr><td></td><td colspan='3' class='next'><i class='icon-ethernet'></i><div class='section'>Interface<br><span>Inbound: <span id='inbound' style='display:inline-block;width:70px'>---</span>Outbound: <span id='outbound'>---</span></span><br><br></div>
-<i class='fa blue-text chevron' id='port_view' onclick='toggle_chevron("port_view",2)'></i></td><td></td></tr>
+<tr><td></td><td colspan='3' class='next'><i class='icon-ethernet'></i><div class='section'>Interface<br>
+<select name="port_select" size="1" onchange="portSelect(this.value)">
+<?foreach ($ports as $port):?>
+<?=mk_option("",$port,$port)?>
+<?endforeach;?>
+</select>
+<span>Inbound: <span id='inbound' style='display:inline-block;width:70px'>---</span>Outbound: <span id='outbound'>---</span></span><br><br></div>
+<i class='fa blue-text chevron' id='port_view' onclick='toggleChevron("port_view",2)'></i></td><td></td></tr>
 <tr class='port_view' style='display:none'><td></td>
 <td><select class='port_view' name="enter_view" size="1" style='display:none' onchange="changeView(this.value)">
 <?=mk_option("", "0", "General info")?>
@@ -223,7 +229,7 @@ foreach ($ports as $port) {
 
 <?if ($fans>0) {
   echo "<tbody>";
-  echo "<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: $fans</span><br><br></div><i class='fa blue-text chevron' id='fan_view' onclick='toggle_chevron(\"fan_view\",0)'></i></td><td></td></tr>";
+  echo "<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: $fans</span><br><br></div><i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron(\"fan_view\",0)'></i></td><td></td></tr>";
   for ($f=0; $f<$fans; $f+=2) {
     if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
     else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
@@ -233,27 +239,27 @@ foreach ($ports as $port) {
 </table>
 
 <table class='share_status dashboard box2'>
-<thead><tr><td></td><td colspan='5'>Parity<i class='fa blue-text chevron mt0' id='parity_view' onclick='toggle_chevron("parity_view",0)'></i><span class='info title'></span></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='5'>Parity<i class='fa blue-text chevron mt0' id='parity_view' onclick='toggleChevron("parity_view",0)'></i><span class='info title'></span></td><td></td></tr></thead>
 
 <tbody class='parity_view' style='display:none'>
 <tr><td></td><td colspan='5' id='parity'></td><td></td></tr>
 <tr><td></td><td colspan='5' id='program'></td><td></td></tr>
 </tbody>
 
-<thead><tr><td></td><td colspan='5' class='next'>Array<i class='fa blue-text chevron mt0' id='array_view' onclick='toggle_chevron("array_view",0)'></i><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Array<i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='array_info' colspan='5'></td><td></td></tr>
 <tr id='array_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
 <tbody class='array_view' id='array_list' style='display:none'></tbody>
 
-<thead><tr><td></td><td colspan='5' class='next'>Cache<i class='fa blue-text chevron mt0' id='cache_view' onclick='toggle_chevron("cache_view",0)'></i><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Cache<i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='cache_info' colspan='5'></td><td></td></tr>
 <tr id='cache_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
 <tbody class='cache_view' id='cache_list' style='display:none'></tbody>
 
 <?if ($devs):?>
-<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggle_chevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
 <tr id='extra_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
@@ -262,7 +268,7 @@ foreach ($ports as $port) {
 </table>
 
 <table class='share_status dashboard box3'>
-<thead><tr><td></td><td colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggle_chevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
+<thead><tr><td></td><td colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggleChevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
 </td><td></td></tr><tr id='users_view_on' style='display:none'><td></td><td>Name</td><td>Description</td><td>Write</td><td>Read</td><td></td></tr></thead>
 
 <?if ($var['shareSMBEnabled']=='yes'):?>
@@ -328,7 +334,7 @@ foreach ($users as $user) {
 ?></tbody>
 <?endif;?>
 
-<thead><tr><td></td><td class='next' colspan='4'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggle_chevron("shares_view",4)'></i>
+<thead><tr><td></td><td class='next' colspan='4'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggleChevron("shares_view",4)'></i>
 <span class='info'>Share count: <?=count($shares)?> with <?=$cache_only?> cache only and <?=$encrypted?> encrypted</span>
 <?if ($group):?>
 <select name="enter_share" size="1" onchange="changeMode(this.value)">
@@ -410,6 +416,7 @@ var timer30 = null;
 var orange = 70;
 var red = 90;
 var timestamp = 0, rx_bytes = 0, tx_bytes = 0;
+var port_select = $.cookie('port_select')||'<?=$ports[0]?>';
 
 function setCase() {
   $.post('/webGui/include/SelectCase.php',{mode:'get',file:'<?=$myfile?>'},function(model){
@@ -463,6 +470,18 @@ function smartMenu(table) {
     context.attach(id,opts);
   });
 }
+function portMenu() {
+  var select = 'select[name="port_select"]';
+  var option = $(select+' option');
+  for (var i=0; i < option.length; i++) {
+    if (option[i].value == port_select) {option[i].selected = true; break;}
+  }
+}
+function portSelect(name) {
+  $.cookie('port_select',name,{path:'/',expires:3650});
+  port_select = name;
+  timestamp = 0, rx_bytes = 0, tx_bytes = 0;
+}
 function moreInfo(data,table) {
   var info = [];
   if (data[1]>0) info.push(data[1]+" failed device"+(data[1]==1?'':'s'));
@@ -477,7 +496,7 @@ function update5() {
     $.each(data.split('\0'),function(k,v) {$('#fan'+k).html(v);});
   });
 <?endif;?>
-  $.post('<?=$url?>',{cmd:'speed',ports:'<?=implode(',',$ports)?>',timestamp:timestamp,rx_bytes:rx_bytes,tx_bytes:tx_bytes},function(d) {
+  $.post('<?=$url?>',{cmd:'speed',port:port_select,timestamp:timestamp,rx_bytes:rx_bytes,tx_bytes:tx_bytes},function(d) {
     var data = d.split('\0');
     $('#inbound').text(data[0]);
     $('#outbound').text(data[1]);
@@ -574,7 +593,7 @@ function dropdown(menu) {
   $(select+' option')[option].selected = true;
   $(select).change();
 }
-function toggle_chevron(field,action) {
+function toggleChevron(field,action) {
   switch (action) {
     case 0:
     case 1: var view = field; break;
@@ -582,18 +601,18 @@ function toggle_chevron(field,action) {
     case 3: var view = $.cookie('enter_share')||0; view++; view = 'user'+view; break;
     case 4: var view = $.cookie('enter_share')||0; view++; view = 'share'+view; break;
   }
-  toggle_view(field,false,view);
+  toggleView(field,false,view);
   var visible = $('.'+view).is(':visible');
   var chevron = visible ? 'fa-chevron-up' : 'fa-chevron-down';
-  var remove =  visible ? 'fa-chevron-down' : 'fa-chevron-up';
+  var remove  = visible ? 'fa-chevron-down' : 'fa-chevron-up';
   $('i#'+field).removeClass(remove).addClass(chevron);
   if (action==1) {
-    if (visible) toggle_CPU(true); else $('.cpu_open').hide();
+    if (visible) toggleCPU(true); else $('.cpu_open').hide();
   } else if (action==2) {
     $('.'+field).toggle();
   }
 }
-function toggle_CPU(init) {
+function toggleCPU(init) {
   if (!init) {if ($.cookie('cpu')===undefined) $.cookie('cpu','close',{path:'/',expires:3650}); else $.removeCookie('cpu',{path:'/'});}
   if ($.cookie('cpu_view')===undefined) {
     if ($.cookie('cpu')===undefined) {
@@ -609,7 +628,7 @@ function toggle_CPU(init) {
     $('.cpu_open').hide();
   }
 }
-function toggle_view(field,init,view) {
+function toggleView(field,init,view) {
   if (!view) view = $.cookie(field)||field;
   if (!init) {if ($.cookie(field)===undefined) $.cookie(field,view,{path:'/',expires:3650}); else $.removeCookie(field,{path:'/'});}
   if ($.cookie(field)===undefined) $('.'+view).show(); else $('.'+view).hide();
@@ -662,23 +681,24 @@ $(function() {
   update5();
   update15();
   update60();
-  toggle_CPU(true);
-  toggle_view('sys_view',true);
-  toggle_view('mb_view',true);
-  toggle_view('cpu_view',true);
-  toggle_view('mem_view',true);
-  toggle_view('port_view',true);
+  toggleCPU(true);
+  toggleView('sys_view',true);
+  toggleView('mb_view',true);
+  toggleView('cpu_view',true);
+  toggleView('mem_view',true);
+  toggleView('port_view',true);
 <?if ($fans>0):?>
-  toggle_view('fan_view',true);
+  toggleView('fan_view',true);
 <?endif;?>
-  toggle_view('parity_view',true);
-  toggle_view('array_view',true);
-  toggle_view('cache_view',true);
+  toggleView('parity_view',true);
+  toggleView('array_view',true);
+  toggleView('cache_view',true);
 <?if ($devs):?>
-  toggle_view('extra_view',true);
+  toggleView('extra_view',true);
 <?endif;?>
-  toggle_view('users_view',true);
-  toggle_view('shares_view',true);
+  toggleView('users_view',true);
+  toggleView('shares_view',true);
+  portMenu();
   context.init({preventDoubleContext:false});
   cpuload.start();
 });

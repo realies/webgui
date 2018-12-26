@@ -329,16 +329,9 @@ case 'port':
   echo implode("\0",$ports);
   break;
 case 'speed':
-  $i = 0;
-  $ports = explode(',',$_POST['ports']);
-  foreach ($ports as $port) {
-    if ($port=='bond0' || $port=='eth0') {
-      $int = "/sys/class/net/$port";
-      $rx_new = (float)file_get_contents("$int/statistics/rx_bytes");
-      $tx_new = (float)file_get_contents("$int/statistics/tx_bytes");
-      break;;
-    }
-  }
+  $int      = "/sys/class/net/{$_POST['port']}";
+  $rx_new   = (float)file_get_contents("$int/statistics/rx_bytes");
+  $tx_new   = (float)file_get_contents("$int/statistics/tx_bytes");
   $time_new = microtime(true);
   $time_old = (float)$_POST['timestamp'];
   $rx_old   = (float)$_POST['rx_bytes'];

@@ -37,6 +37,7 @@ select:focus{outline:0}
 select[disabled]{color:#1c1b1b;border-bottom-color:#a2a2a2;opacity:0.5;cursor:default}
 select[name=enter_view]{margin:0;padding:0;border:none;min-width:95px}
 select[name=enter_share]{font-size:1.1rem;padding:0;border:none;min-width:40px;float:right;margin-top:13px;margin-right:20px}
+select[name=port_select]{border:none;min-width:54px;padding-top:0;padding-bottom:0}
 select.narrow{min-width:76px}
 select.auto{min-width:auto}
 select.slot{min-width:44rem;max-width:44rem}

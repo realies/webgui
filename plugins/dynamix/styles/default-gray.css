@@ -38,6 +38,7 @@ select:focus{border-color:#0072c6}
 select[disabled]{color:#808080;border-color:#808080;background-color:#383a34;opacity:0.3;cursor:default}
 select[name=enter_view]{font-size:1.2rem;margin:0;padding:0;border:none;min-width:95px}
 select[name=enter_share]{font-size:1.1rem;color:#42453e;padding:0;border:none;min-width:40px;float:right;margin-top:18px;margin-right:20px}
+select[name=port_select]{border:none;min-width:54px;padding-top:0;padding-bottom:0}
 select.narrow{min-width:87px}
 select.auto{min-width:auto}
 select.slot{min-width:44rem;max-width:44rem}
