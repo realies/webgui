@@ -1,6 +1,6 @@
 Menu="UPSsettings"
 Title="UPS Details"
-Tag="battery-0"
+Tag="battery-3"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology
