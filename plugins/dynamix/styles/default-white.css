@@ -172,7 +172,7 @@ table.share_status.dashboard td i[class^="icon-u-"]{font-size:inherit}
 table.share_status.dashboard td span[class^="fa "]{font-size:1.6rem;margin-right:8px}
 table.share_status.dashboard td i#mycase[class^="case-"]{font-size:128px}
 table.share_status.dashboard td i#mycase[class^="fa "]{font-size:96px}
-table.share_status.dashboard td i.chevron{float:right;font-size:1.6rem!important;margin-top:-10px;margin-right:2px;cursor:pointer;color:#1c1b1b}
+table.share_status.dashboard td i.chevron{float:right;font-size:1.1rem!important;margin-top:-10px;margin-right:2px;cursor:pointer;color:#1c1b1b}
 table.share_status.dashboard td i.chevron.mt0{margin-top:0}
 table.share_status.dashboard td div.section{display:inline-block;vertical-align:top;margin-left:4px;font-size:1.2rem;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
 table.share_status.dashboard td div.section span{font-weight:normal;text-transform:none;letter-spacing:0}
