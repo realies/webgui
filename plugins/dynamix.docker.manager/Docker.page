@@ -1,6 +1,6 @@
 Menu="Tasks:60"
 Type="xmenu"
-Code="f100"
+Code="e90b"
 Cond="exec(\"grep -o '^DOCKER_ENABLED=.yes' /boot/config/docker.cfg 2>/dev/null\")"
 ----
 <?PHP

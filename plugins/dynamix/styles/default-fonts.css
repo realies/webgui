@@ -1,26 +1,99 @@
 @font-face{font-family:clear-sans;font-weight:normal;font-style:normal;
-src:url('clear-sans.eot');src:url('clear-sans.eot?#iefix') format('embedded-opentype'),url('clear-sans.woff') format('woff'),url('clear-sans.ttf') format('truetype'),url('clear-sans.svg#clear-sans') format('svg')}
+src:url('clear-sans.eot?20181221');src:url('clear-sans.eot?20181221#iefix') format('embedded-opentype'),url('clear-sans.woff?20181221') format('woff'),url('clear-sans.ttf?20181221') format('truetype'),url('clear-sans.svg?20181221#clear-sans') format('svg')}
 @font-face{font-family:clear-sans;font-weight:bold;font-style:normal;
-src:url('clear-sans-bold.eot');src:url('clear-sans-bold.eot?#iefix') format('embedded-opentype'),url('clear-sans-bold.woff') format('woff'),url('clear-sans-bold.ttf') format('truetype'),url('clear-sans-bold.svg#clear-sans-bold') format('svg')}
+src:url('clear-sans-bold.eot?20181221');src:url('clear-sans-bold.eot?20181221?#iefix') format('embedded-opentype'),url('clear-sans-bold.woff?20181221') format('woff'),url('clear-sans-bold.ttf?20181221') format('truetype'),url('clear-sans-bold.svg?20181221#clear-sans-bold') format('svg')}
 @font-face{font-family:clear-sans;font-weight:normal;font-style:italic;
-src:url('clear-sans-italic.eot');src:url('clear-sans-italic.eot?#iefix') format('embedded-opentype'),url('clear-sans-italic.woff') format('woff'),url('clear-sans-italic.ttf') format('truetype'),url('clear-sans-italic.svg#clear-sans-italic') format('svg')}
+src:url('clear-sans-italic.eot?20181221');src:url('clear-sans-italic.eot?20181221?#iefix') format('embedded-opentype'),url('clear-sans-italic.woff?20181221') format('woff'),url('clear-sans-italic.ttf?20181221') format('truetype'),url('clear-sans-italic.svg?20181221#clear-sans-italic') format('svg')}
 @font-face{font-family:clear-sans;font-weight:bold;font-style:italic;
-src:url('clear-sans-bold-italic.eot');src:url('clear-sans-bold-italic.eot?#iefix') format('embedded-opentype'),url('clear-sans-bold-italic.woff') format('woff'),url('clear-sans-bold-italic.ttf') format('truetype'),url('clear-sans-bold-italic.svg#clear-sans-bold-italic') format('svg')}
+src:url('clear-sans-bold-italic.eot?20181221');src:url('clear-sans-bold-italic.eot?20181221?#iefix') format('embedded-opentype'),url('clear-sans-bold-italic.woff?20181221') format('woff'),url('clear-sans-bold-italic.ttf?20181221') format('truetype'),url('clear-sans-bold-italic.svg?20181221#clear-sans-bold-italic') format('svg')}
 
 @font-face{font-family:arimo;font-weight:normal;font-style:normal;
-src:url('arimo.eot');src:url('arimo.eot?#iefix') format('embedded-opentype'),url('arimo.woff') format('woff'),url('arimo.ttf') format('truetype'),url('arimo.svg#arimo') format('svg')}
+src:url('arimo.eot?20181221');src:url('arimo.eot?20181221?#iefix') format('embedded-opentype'),url('arimo.woff?20181221') format('woff'),url('arimo.ttf?20181221') format('truetype'),url('arimo.svg?20181221#arimo') format('svg')}
 @font-face{font-family:arimo;font-weight:bold;font-style:normal;
-src:url('arimo-bold.eot');src:url('arimo-bold.eot?#iefix') format('embedded-opentype'),url('arimo-bold.woff') format('woff'),url('arimo-bold.ttf') format('truetype'),url('arimo-bold.svg#arimo-bold') format('svg')}
+src:url('arimo-bold.eot?20181221');src:url('arimo-bold.eot?20181221?#iefix') format('embedded-opentype'),url('arimo-bold.woff?20181221') format('woff'),url('arimo-bold.ttf?20181221') format('truetype'),url('arimo-bold.svg?20181221#arimo-bold') format('svg')}
 @font-face{font-family:arimo;font-weight:normal;font-style:italic;
-src:url('arimo-italic.eot');src:url('arimo-italic.eot?#iefix') format('embedded-opentype'),url('arimo-italic.woff') format('woff'),url('arimo-italic.ttf') format('truetype'),url('arimo-italic.svg#arimo-italic') format('svg')}
+src:url('arimo-italic.eot?20181221');src:url('arimo-italic.eot?20181221?#iefix') format('embedded-opentype'),url('arimo-italic.woff?20181221') format('woff'),url('arimo-italic.ttf?20181221') format('truetype'),url('arimo-italic.svg?20181221#arimo-italic') format('svg')}
 @font-face{font-family:arimo;font-weight:bold;font-style:italic;
-src:url('arimo-bold-italic.eot');src:url('arimo-bold-italic.eot?#iefix') format('embedded-opentype'),url('arimo-bold-italic.woff') format('woff'),url('arimo-bold-italic.ttf') format('truetype'),url('arimo-bold-italic.svg#arimo-bold-italic') format('svg')}
+src:url('arimo-bold-italic.eot?20181221');src:url('arimo-bold-italic.eot?20181221?#iefix') format('embedded-opentype'),url('arimo-bold-italic.woff?20181221') format('woff'),url('arimo-bold-italic.ttf?20181221') format('truetype'),url('arimo-bold-italic.svg?20181221#arimo-bold-italic') format('svg')}
 
 @font-face{font-family:bitstream;font-weight:normal;font-style:normal;
-src:url('bitstream.eot');src:url('bitstream.eot?#iefix') format('embedded-opentype'),url('bitstream.woff') format('woff'),url('bitstream.ttf') format('truetype'),url('bitstream.svg#bitstream') format('svg')}
+src:url('bitstream.eot?20181221');src:url('bitstream.eot?20181221?#iefix') format('embedded-opentype'),url('bitstream.woff?20181221') format('woff'),url('bitstream.ttf?20181221') format('truetype'),url('bitstream.svg?20181221#bitstream') format('svg')}
 
 @font-face{font-family:docker-icon;font-weight:normal;font-style:normal;
-src:url('docker-icon.eot');src:url('docker-icon.eot?#iefix') format('embedded-opentype'),url('docker-icon.woff') format('woff'),url('docker-icon.ttf') format('truetype'),url('docker-icon.svg#docker-icon') format('svg')}
-
+src:url('docker-icon.eot?20181221');src:url('docker-icon.eot?20181221?#iefix') format('embedded-opentype'),url('docker-icon.woff?20181221') format('woff'),url('docker-icon.ttf?20181221') format('truetype'),url('docker-icon.svg?20181221#docker-icon') format('svg')}
 [data-icon]:before{content:attr(data-icon)}
-[data-icon]:before,.fa-docker:before{font-family:docker-icon;content:'\f100'}
+[data-icon]:before,.fa-docker:before{font-family:docker-icon!important;content:'\f100'}
+
+@font-face{font-family:unraid;font-weight:normal;font-style:normal;
+src:url('font-unraid.eot?20181221');src:url('font-unraid.eot?20181221#iefix') format('embedded-opentype'),url('font-unraid.ttf?20181221') format('truetype'),url('font-unraid.woff?20181221') format('woff'),url('font-unraid.svg?20181221#unraid') format('svg')}
+[class^='icon-'],[class*=' icon-']{font-family:unraid!important;speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none}
+.icon-app:before{content:'\e900'}
+.icon-apple:before{content:'\e901'}
+.icon-apps:before{content:'\e942'}
+.icon-archive:before{content:'\e91a'}
+.icon-clock:before{content:'\e902'}
+.icon-config:before{content:'\e91b'}
+.icon-confirmations:before{content:'\e903'}
+.icon-cpu:before{content:'\e905'}
+.icon-cpu-pinning:before{content:'\e904'}
+.icon-credits:before{content:'\e91c'}
+.icon-dashboard:before{content:'\e943'}
+.icon-diagnostics:before{content:'\e91d'}
+.icon-disk:before{content:'\e907'}
+.icon-disk-encrypted:before{content:'\e906'}
+.icon-disks:before{content:'\e908'}
+.icon-display:before{content:'\e90a'}
+.icon-docker:before{content:'\e90b'}
+.icon-ethernet:before{content:'\e90c'}
+.icon-eula:before{content:'\e91e'}
+.icon-fan:before{content:'\e90d'}
+.icon-folder:before{content:'\e92a'}
+.icon-ftp:before{content:'\e90e'}
+.icon-hardware:before{content:'\e91f'}
+.icon-home:before{content:'\e90f'}
+.icon-key:before{content:'\e920'}
+.icon-linux:before{content:'\e910'}
+.icon-log:before{content:'\e921'}
+.icon-motherboard:before{content:'\e92c'}
+.icon-network:before{content:'\e911'}
+.icon-notifications:before{content:'\e912'}
+.icon-nvme:before{content:'\e929'}
+.icon-pagemap:before{content:'\e922'}
+.icon-permissions:before{content:'\e923'}
+.icon-plugins:before{content:'\e944'}
+.icon-processes:before{content:'\e924'}
+.icon-profile:before{content:'\e909'}
+.icon-ram:before{content:'\e913'}
+.icon-registration:before{content:'\e925'}
+.icon-scheduler:before{content:'\e914'}
+.icon-share:before{content:'\e915'}
+.icon-temp:before{content:'\e926'}
+.icon-update:before{content:'\e927'}
+.icon-ups:before{content:'\e916'}
+.icon-usb:before{content:'\e92b'}
+.icon-user:before{content:'\e917'}
+.icon-users:before{content:'\e945'}
+.icon-vars:before{content:'\e928'}
+.icon-virtualization:before{content:'\e918'}
+.icon-windows:before{content:'\e919'}
+.icon-u-chat:before{content:'\e93e'}
+.icon-u-circle:before{content:'\e92d'}
+.icon-u-compact:before{content:'\e92e'}
+.icon-u-delete:before{content:'\e92f'}
+.icon-u-display:before{content:'\e930'}
+.icon-u-edit:before{content:'\e931'}
+.icon-u-full:before{content:'\e932'}
+.icon-u-half:before{content:'\e933'}
+.icon-u-help:before{content:'\e934'}
+.icon-u-list:before{content:'\e935'}
+.icon-u-log:before{content:'\e936'}
+.icon-u-logout:before{content:'\e937'}
+.icon-u-pause:before{content:'\e939'}
+.icon-u-play:before{content:'\e93a'}
+.icon-u-polygon:before{content:'\e93b'}
+.icon-u-restart:before{content:'\e93c'}
+.icon-u-square:before{content:'\e93d'}
+.icon-u-tab:before{content:'\e938'}
+.icon-u-terminal:before{content:'\e93f'}
+.icon-u-third:before{content:'\e940'}
+.icon-u-triangle:before{content:'\e941'}

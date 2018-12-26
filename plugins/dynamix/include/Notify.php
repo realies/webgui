@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or

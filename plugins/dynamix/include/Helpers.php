@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,24 +15,24 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Wrappers.php";
 
 // Helper functions
-function my_scale($value, &$unit, $decimals=NULL, $scale=NULL) {
+function my_scale($value, &$unit, $decimals=NULL, $scale=NULL, $kilo=1000) {
   global $display;
   $scale = $scale ?? $display['scale'];
-  $number = $display['number'];
+  $number = $display['number'] ?? '.,';
   $units = ['B','KB','MB','GB','TB','PB','EB','ZB','YB'];
   $size = count($units);
   if ($scale==0 && ($decimals===NULL || $decimals<0)) {
     $decimals = 0;
     $unit = '';
   } else {
-    $base = $value ? floor(log($value, 1000)) : 0;
+    $base = $value ? floor(log($value, $kilo)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
     if ($base>$size) $base = $size-1;
-    $value /= pow(1000, $base);
+    $value /= pow($kilo, $base);
     if ($decimals===NULL) $decimals = $value>=100 ? 0 : ($value>=10 ? 1 : (round($value*100)%100===0 ? 0 : 2));
     elseif ($decimals<0) $decimals = $value>=100||round($value*10)%10===0 ? 0 : abs($decimals);
     if ($scale<0 && round($value,-1)==1000) {$value = 1; $base++;}
-    $unit = $units[$base];
+    $unit = $kilo!=1024 ? $units[$base] : preg_replace('/^(.)B$/','$1iB',$units[$base]);
   }
   return number_format($value, $decimals, $number[0], $value>9999 ? $number[1] : '');
 }
@@ -80,7 +80,7 @@ function my_usage() {
   }
   if ($var['fsNumMounted']>0) {
     $used = $arraysize ? 100-round(100*$arrayfree/$arraysize) : 0;
-    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($display,$used,false)."'><span>{$used}%</span></span></div>";
+    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($display,$used,false)."'>{$used}%</span></div>";
   } else {
     echo "<div class='usage-bar'><span style='text-align:center'>".($var['fsState']=='Started'?'Maintenance':'off-line')."</span></div>";
   }

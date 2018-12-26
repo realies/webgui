@@ -1,6 +1,7 @@
 Menu="About"
 Title="Update OS"
-Tag="thumbs-up"
+Icon="icon-update"
+Tag="upload"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

@@ -1,6 +1,6 @@
 Menu="CPUset:3"
 Title="CPU Isolation"
-Tag="leaf"
+Tag="icon-cpu"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

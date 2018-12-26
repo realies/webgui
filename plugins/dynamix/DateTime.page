@@ -1,6 +1,6 @@
 Menu="OtherSettings"
 Title="Date and Time"
-Icon="date-time.png"
+Icon="icon-clock"
 Tag="clock-o"
 ---
 <?PHP

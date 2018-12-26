@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -74,10 +74,9 @@ $row = 0;
 foreach ($disks as $name => $disk) {
   $color = $disk['fsColor'];
   $row++;
-  $ball = "/webGui/images/$color.png";
   switch ($color) {
-    case 'green-on':  $help = 'All files protected'; break;
-    case 'yellow-on': $help = 'All files unprotected'; break;
+    case 'green-on' : $orb = 'circle'; $color = 'green'; $help = 'All files protected'; break;
+    case 'yellow-on': $orb = 'warning'; $color = 'yellow'; $help = 'All files unprotected'; break;
   }
   if ($crypto) switch ($disk['luksState']) {
     case 0: $luks = "<i class='nolock fa fa-lock'></i>"; break;
@@ -86,7 +85,7 @@ foreach ($disks as $name => $disk) {
    default: $luks = "<a class='info' onclick='return false'><i class='padlock fa fa-lock red-text'></i><span>Unknown encryption state'</span></a>"; break;
   } else $luks = "";
   echo "<tr>";
-  echo "<td><a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span style='left:18px'>$help</span></a>$luks<a href='$path/Disk?name=$name' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a></td>";
+  echo "<td><a class='info nohand' onclick='return false'><i class='fa fa-$orb orb $color-orb'></i><span style='left:18px'>$help</span></a>$luks<a href='$path/Disk?name=$name' onclick=\"$.cookie('one','tab1',{path:'/'})\">$name</a></td>";
   echo "<td>{$disk['comment']}</td>";
   echo "<td>".disk_share_settings($var['shareSMBEnabled'], $sec[$name])."</td>";
   echo "<td>".disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";

@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2015-2017, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,

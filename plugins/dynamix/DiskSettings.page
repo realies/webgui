@@ -1,7 +1,7 @@
 Menu="OtherSettings"
 Title="Disk Settings"
-Icon="disk-settings.png"
-Tag="database"
+Icon="icon-disks"
+Tag="icon-disk"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

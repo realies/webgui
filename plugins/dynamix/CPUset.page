@@ -1,4 +1,4 @@
 Menu="OtherSettings"
 Title="CPU Pinning"
 Type="xmenu"
-Icon="grid.png"
+Icon="icon-cpu-pinning"

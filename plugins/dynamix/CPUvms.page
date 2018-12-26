@@ -1,6 +1,6 @@
 Menu="CPUset:1"
 Title="CPU Pinning VM"
-Tag="map-marker"
+Tag="icon-cpu"
 ---
 <?PHP
 /* Copyright 2005-2018, Lime Technology

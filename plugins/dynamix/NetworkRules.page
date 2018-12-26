@@ -1,6 +1,6 @@
 Menu="NetworkSettings"
 Title="Interface Rules"
-Tag="tags"
+Tag="icon-network"
 Cond="file_exists('/boot/config/network-rules.cfg')"
 ---
 <?PHP

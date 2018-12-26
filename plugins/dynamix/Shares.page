@@ -1,6 +1,6 @@
 Menu="Tasks:2"
 Type="xmenu"
-Code="f07b"
+Code="e92a"
 ----
 <?PHP
 if ($var['fsState']=="Stopped") {

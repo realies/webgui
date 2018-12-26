@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -69,10 +69,16 @@ function tab_title($name,$path,$tag) {
   global $docroot;
   if (!$tag || substr($tag,-4)=='.png') {
     $file = "$path/icons/".($tag ?: strtolower(str_replace(' ','',$name)).".png");
-    if (!file_exists("$docroot/$file")) $file = 'webGui/icons/default.png';
-    return "<img src='/$file' class='icon'>".htmlspecialchars(my_disk($name));
+    if (file_exists("$docroot/$file")) {
+      return "<img src='/$file' class='icon'>".htmlspecialchars(my_disk($name));
+    } else {
+      return "<i class='fa fa-th title'></i>".htmlspecialchars(my_disk($name));
+    }
+  } elseif (substr($tag,0,5)=='icon-') {
+    return "<i class='$tag title'></i>".htmlspecialchars(my_disk($name));
   } else {
-    return "<i class='title fa fa-$tag'></i>".htmlspecialchars(my_disk($name));
+    if (substr($tag,0,3)!='fa-') $tag = "fa-$tag";
+    return "<i class='fa $tag title'></i>".htmlspecialchars(my_disk($name));
   }
 }
 

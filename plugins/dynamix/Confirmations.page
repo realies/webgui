@@ -1,6 +1,6 @@
 Menu="UserPreferences"
 Title="Confirmations"
-Icon="confirmations.png"
+Icon="icon-confirmations"
 Tag="check-square"
 ---
 <?PHP
