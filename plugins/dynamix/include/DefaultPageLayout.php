@@ -572,7 +572,7 @@ $(function() {
 <?endif;?>
 <?if ($notify['display']):?>
   var opts = [{header:'Alerts', image:'/webGui/icons/alerts.png'}];
-  context.init({preventDoubleContext:false});
+  context.init({preventDoubleContext:false,left:true,above:false});
   opts.push({text:'View',icon:'fa-folder-open-o',action:function(e){e.preventDefault();openNotifier('alert');}});
   opts.push({divider:true});
   opts.push({text:'History',icon:'fa-file-text-o',action:function(e){e.preventDefault();viewHistory('alert');}});
@@ -581,7 +581,7 @@ $(function() {
   context.attach('#nav-tub1',opts);
 
   var opts = [{header:'Warnings', image:'/webGui/icons/warnings.png'}];
-  context.init({preventDoubleContext:false});
+  context.init({preventDoubleContext:false,left:true,above:false});
   opts.push({text:'View',icon:'fa-folder-open-o',action:function(e){e.preventDefault();openNotifier('warning');}});
   opts.push({divider:true});
   opts.push({text:'History',icon:'fa-file-text-o',action:function(e){e.preventDefault();viewHistory('warning');}});
@@ -590,7 +590,7 @@ $(function() {
   context.attach('#nav-tub2',opts);
 
   var opts = [{header:'Messages', image:'/webGui/icons/messages.png'}];
-  context.init({preventDoubleContext:false});
+  context.init({preventDoubleContext:false,left:true,above:false});
   opts.push({text:'View',icon:'fa-folder-open-o',action:function(e){e.preventDefault();openNotifier('normal');}});
   opts.push({divider:true});
   opts.push({text:'History',icon:'fa-file-text-o',action:function(e){e.preventDefault();viewHistory('normal');}});

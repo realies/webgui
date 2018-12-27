@@ -699,7 +699,7 @@ $(function() {
   toggleView('users_view',true);
   toggleView('shares_view',true);
   portMenu();
-  context.init({preventDoubleContext:false});
+  context.init({preventDoubleContext:false,left:true,above:false});
   cpuload.start();
 });
 </script>
