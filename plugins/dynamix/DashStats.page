@@ -463,7 +463,7 @@ function smartMenu(table) {
     opts.push({text:'Capabilities',icon:'fa-user',action:function(e){e.preventDefault();capabilities(page,disk);}});
     opts.push({divider:true});
     opts.push({text:'Identity',icon:'fa-home',action:function(e){e.preventDefault();identity(page,disk);}});
-    if (view == 'alert') {
+    if (view.search('green-text') == -1) {
       opts.push({divider:true});
       opts.push({text:'Acknowledge',icon:'fa-check-square-o',action:function(e){e.preventDefault();acknowledge(disk);}});
     }
