@@ -65,8 +65,8 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //link/icon
   $launch = plugin('launch',$plugin_file);
   if ( $icon = plugin("icon",$plugin_file) ) {
-		$iconDisplay = substr($icon,0,5) == "icon-" ? "<i class='$icon list'></i>" : "<i class='fa fa-$icon list'></i>";
-    if ( $launch )			
+    $iconDisplay = substr($icon,0,5) == "icon-" ? "<i class='$icon list'></i>" : "<i class='fa fa-$icon list'></i>";
+    if ( $launch )      
       $link = "<a href='/$launch' class='list'>$iconDisplay</a>";
     else
       $link = $iconDisplay;
