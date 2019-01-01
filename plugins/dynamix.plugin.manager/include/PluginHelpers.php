@@ -49,7 +49,7 @@ function icon($name) {
 // try alternatives if default is not present
   $icon = "plugins/$name/$name.png";
   if (file_exists($icon)) return $icon;
-  $image = preg_split('/[\._- ]/',$name)[0];
+  $image = @preg_split('/[\._- ]/',$name)[0];
   $icon = "plugins/$name/images/$image.png";
   if (file_exists($icon)) return $icon;
   $icon = "plugins/$name/$image.png";
