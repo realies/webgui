@@ -261,6 +261,7 @@ i.orb{font-size:1.1rem;margin:0 8px 0 3px}
 img.icon{margin:-3px 4px 0 0}
 img.list{width:auto;max-width:48px;height:48px}
 i.list{font-size:4rem;}
+a.list{text-decoration:none;}
 div.content{position:absolute;top:0;left:0;width:100%;padding-bottom:30px;z-index:-1;clear:both}
 div.content.shift{margin-top:1px}
 label+.content{margin-top:64px}
