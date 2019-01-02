@@ -1,9 +1,10 @@
 Menu="UserList"
 Title="Add User"
+Tag="user"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,15 +21,19 @@ $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='resto
 ?>
 
 <style>
-<?if ($display['theme'] == 'black'):?>
-span#dropbox{border:1px solid #202020;border-radius:5px;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);padding:28px 12px;line-height:72px;margin-right:16px;}
+<?if ($display['theme']=='gray'):?>
+span#dropbox{border:1px solid #606E7F;border-radius:5px;background:#121510;padding:28px 12px;line-height:72px;margin-right:16px;}
+<?elseif ($display['theme']=='azure'):?>
+span#dropbox{border:1px solid #606E7F;border-radius:5px;background:#EDEAEF;padding:28px 12px;line-height:72px;margin-right:16px;}
+<?elseif ($display['theme']=='black'):?>
+span#dropbox{border:1px solid #f2f2f2;border-radius:5px;background:#262626;padding:28px 12px;line-height:72px;margin-right:16px;}
 <?else:?>
-span#dropbox{border:1px solid #D0D0D0;border-radius:5px;background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);background:linear-gradient(#B0B0B0,#F0F0F0);padding:28px 12px;line-height:72px;margin-right:16px;}
+span#dropbox{border:1px solid #1c1c1c;border-radius:5px;background:#e8e8e8;padding:28px 12px;line-height:72px;margin-right:16px;}
 <?endif;?>
 i.top{position:absolute;padding-top:4px;cursor:pointer;}
 </style>
 
-<script src="/webGui/javascript/jquery.filedrop.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filedrop.js')?>"></script>
 <script>
 var path = '/boot/config/plugins/dynamix/users';
 var filename = '';
@@ -41,10 +46,6 @@ function restore() {
 
 function checkUsername(form) {
   var username = form.userName.value.trim();
-  if (username.length==0) {
-    swal({title:"Missing user name",text:"Please enter a user name",type:"error"});
-    return false;
-  }
   if (!username.match('^[a-z_][a-z0-9_-]*[$]?$')) {
     swal({title:"Invalid user name",text:"Use only lowercase letters, digits, underscores and dashes",type:"error"});
     return false;
@@ -118,7 +119,7 @@ $(function(){
 
 <form markdown="1" name="user_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this)">
 User name:
-: <input type="text" name="userName" maxlength="32">
+: <input type="text" name="userName" maxlength="32" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='')">
 
 > Usernames may be up to 32 characters long and must start with a **lower case letter** or an underscore,
 > followed by **lower case letters**, digits, underscores, or dashes. They can end with a dollar sign.
@@ -135,13 +136,13 @@ Custom image:
 > The image will be scaled to 48x48 pixels in size. The maximum image file upload size is 95 kB (97,280 bytes).
 
 Password:
-: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
+: <input type="password" name="userPassword" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='' || this.form.userPassword.value!=this.form.userPasswordConf.value)">
 
 > Up to 128 characters.
 
 Retype password:
-: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
+: <input type="password" name="userPasswordConf" maxlength="129" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userName.value=='' || this.form.userPassword.value!=this.form.userPasswordConf.value)">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Add"><input type="button" value="Done" onclick="done('UserAdd')">
+: <input type="submit" name="cmdUserEdit" value="Add" disabled><input type="button" value="Done" onclick="done('UserAdd')">
 </form>

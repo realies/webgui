@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2015-2016, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,100 +12,78 @@
  */
 ?>
 <?
-	$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+	$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 	require_once "$docroot/webGui/include/Helpers.php";
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
-	require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
+	require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-	$strXML = '';
-	$strUUID = '';
-	$boolRunning = false;
+	$hdrXML = "<?xml version='1.0' encoding='UTF-8'?>\n"; // XML encoding declaration
 
-	// If we are editing a existing VM load it's existing configuration details
-	if (!empty($_GET['uuid'])) {
-		$strUUID = $_GET['uuid'];
-		$res = $lv->domain_get_name_by_uuid($strUUID);
-		$dom = $lv->domain_get_info($res);
-
-		$strXML = $lv->domain_get_xml($res);
-		$boolRunning = ($lv->domain_state_translate($dom['state']) == 'running');
-	}
-
-
-	if (array_key_exists('createvm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_newxml.xml', $_POST['xmldesc']);
-
-		$tmp = $lv->domain_define($_POST['xmldesc']);
-		if (!$tmp){
-			$arrResponse = ['error' => $lv->get_last_error()];
+	// create new VM
+	if ($_POST['createvm']) {
+		$new = $lv->domain_define($_POST['xmldesc'], $_POST['domain']['startnow']==1);
+		if ($new){
+			$lv->domain_set_autostart($new, $_POST['domain']['autostart']==1);
+			$reply = ['success' => true];
 		} else {
-			$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
-
-			$arrResponse = ['success' => true];
+			$reply = ['error' => $lv->get_last_error()];
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
-	if (array_key_exists('updatevm', $_POST)) {
-		//DEBUG
-		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
-		file_put_contents('/tmp/debug_libvirt_updatexml.xml', $_POST['xmldesc']);
+	// update existing VM
+	if ($_POST['updatevm']) {
+		$uuid = $_POST['domain']['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
+		$oldAutoStart = $lv->domain_get_autostart($dom)==1;
+		$newAutoStart = $_POST['domain']['autostart']==1;
+		$strXML = $lv->domain_get_xml($dom);
 
-		// Backup xml for existing domain in ram
-		$strOldXML = '';
-		$boolOldAutoStart = false;
-		$dom = $lv->domain_get_domain_by_uuid($_POST['domain']['uuid']);
-		if ($dom) {
-			$strOldXML = $lv->domain_get_xml($dom);
-			$boolOldAutoStart = $lv->domain_get_autostart($dom);
-
-			//DEBUG
-			file_put_contents('/tmp/debug_libvirt_oldxml.xml', $strOldXML);
-		}
-
-		// Remove existing domain
-		$lv->nvram_backup($_POST['domain']['uuid']);
+		// delete and create the VM
+		$lv->nvram_backup($uuid);
 		$lv->domain_undefine($dom);
-		$lv->nvram_restore($_POST['domain']['uuid']);
-
-		// Save new domain
-		$tmp = $lv->domain_define($_POST['xmldesc']);
-		if (!$tmp){
-			$strLastError = $lv->get_last_error();
-
-			// Failure -- try to restore existing domain
-			$tmp = $lv->domain_define($strOldXML);
-			if ($tmp) $lv->domain_set_autostart($tmp, $boolOldAutoStart);
-
-			$arrResponse = ['error' => $strLastError];
+		$lv->nvram_restore($uuid);
+		$new = $lv->domain_define($_POST['xmldesc']);
+		if ($new) {
+			$lv->domain_set_autostart($new, $newAutoStart);
+			$reply = ['success' => true];
 		} else {
-			$lv->domain_set_autostart($tmp, $_POST['domain']['autostart'] == 1);
-
-			$arrResponse = ['success' => true];
+			// Failure -- try to restore existing VM
+			$reply = ['error' => $lv->get_last_error()];
+			$old = $lv->domain_define($strXML);
+			if ($old) $lv->domain_set_autostart($old, $oldAutoStart);
 		}
-
-		echo json_encode($arrResponse);
+		echo json_encode($reply);
 		exit;
 	}
 
+	if ($_GET['uuid']) {
+		// edit an existing VM
+		$uuid = $_GET['uuid'];
+		$dom = $lv->domain_get_domain_by_uuid($uuid);
+		$boolRunning = $lv->domain_get_state($dom)=='running';
+		$strXML = $lv->domain_get_xml($dom);
+	} else {
+		// edit new VM
+		$uuid = '';
+		$boolRunning = false;
+		$strXML = '';
+	}
 ?>
-<link rel="stylesheet" href="/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.css">
-<link rel="stylesheet" href="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.css">
+
+<link rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.css')?>">
+<link rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.css')?>">
 <style type="text/css">
 	.CodeMirror { border: 1px solid #eee; cursor: text; margin-top: 15px; margin-bottom: 10px; }
 	.CodeMirror pre.CodeMirror-placeholder { color: #999; }
 </style>
 
-<input type="hidden" name="domain[uuid]" value="<?=htmlspecialchars($strUUID)?>">
+<input type="hidden" name="domain[uuid]" value="<?=htmlspecialchars($uuid)?>">
 
-<textarea id="addcode" name="xmldesc" placeholder="Copy &amp; Paste Domain XML Configuration Here." autofocus><?= htmlspecialchars($strXML); ?></textarea>
+<textarea id="addcode" name="xmldesc" placeholder="Copy &amp; Paste Domain XML Configuration Here." autofocus><?=htmlspecialchars($hdrXML).htmlspecialchars($strXML)?></textarea>
 
 <? if (!$boolRunning) { ?>
-	<? if (!empty($strXML)) { ?>
+	<? if ($strXML) { ?>
 		<input type="hidden" name="updatevm" value="1" />
 		<input type="button" value="Update" busyvalue="Updating..." readyvalue="Update" id="btnSubmit" />
 	<? } else { ?>
@@ -114,18 +93,17 @@
 		<input type="button" value="Create" busyvalue="Creating..." readyvalue="Create" id="btnSubmit" />
 	<? } ?>
 	<input type="button" value="Cancel" id="btnCancel" />
-	<span><i class="fa fa-warning icon warning"></i> Manual XML edits may be lost if you later edit with the GUI editor.</span>
 <? } else { ?>
 	<input type="button" value="Done" id="btnCancel" />
 <? } ?>
 
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/display/placeholder.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/fold/foldcode.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/xml-hint.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/libvirt-schema.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/codemirror/mode/xml/xml.js"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/display/placeholder.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/fold/foldcode.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/xml-hint.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/libvirt-schema.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/scripts/codemirror/mode/xml/xml.js')?>"></script>
 <script>
 $(function() {
 	function completeAfter(cm, pred) {

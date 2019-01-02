@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,6 +13,6 @@
 <?
 $port = $_POST['port'] ?: 'eth0';
 if (exec("ip link show ".escapeshellarg($port)."|grep -om1 'NO-CARRIER'")) {
-  echo "<b>Interface $port is down. Check cable!</b>";
+  echo "<b>Interface ".str_replace('eth', 'Ethernet Port ', $port)." is down. Check cable!</b>";
 }
 ?>

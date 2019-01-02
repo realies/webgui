@@ -1,9 +1,11 @@
 Menu="UNRAID-OS"
 Title="System Log"
+Icon="icon-log"
+Tag="list"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -55,7 +57,7 @@ function toggle(checked) {
 }
 <?if ($display['resize']):?>
 function resize() {
-  $('pre.up').height(Math.max(window.innerHeight-280,370)).show();
+  $('pre.up').height(Math.max(window.innerHeight-320,330)).show();
 }
 $(function() {
   resize();

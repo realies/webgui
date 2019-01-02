@@ -1,3 +1,4 @@
 Menu="Tools:10"
 Type="menu"
-Title="unRAID OS"
+Title="Unraid OS"
+Tag="lemon-o"

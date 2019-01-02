@@ -1,10 +1,11 @@
 Menu="Docker:2"
 Title="Docker Repositories"
-Cond="(pgrep('docker')!==false)"
+Tag="clone"
+Cond="(pgrep('dockerd')!==false)"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2014-2016, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2014-2018, Guilherme Jardim, Eric Schultz, Jon Panozzo.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -22,7 +23,7 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 $template_repos = $dockerManPaths['template-repos'];
 ?>
 <form markdown="1" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
-<input type="hidden" name="#action" value="templates" />
+<input type="hidden" name="action" value="templates">
 Template repositories:
 : <textarea name="template_repos" rows="5" cols="100" style="width:550px"><?=@file_get_contents($template_repos);?></textarea>
 
@@ -32,5 +33,5 @@ Template repositories:
 > For a list of popular community-supported repositories, visit here: <a href="http://lime-technology.com/forum/index.php?topic=37958.0" target="_blank">http://lime-technology.com/forum/index.php?topic=37958.0</a>
 
 &nbsp;
-: <input type="submit" value="Save" />
+: <input type="submit" value="Save">
 </form>

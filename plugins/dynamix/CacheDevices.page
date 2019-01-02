@@ -1,10 +1,11 @@
 Menu="Main:2"
 Title="Cache Devices"
+Tag="bullseye"
 Cond="($var['fsState']=='Stopped' || $var['cacheSbNumDisks'])"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -18,25 +19,19 @@ Cond="($var['fsState']=='Stopped' || $var['cacheSbNumDisks'])"
 function cache_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'cache'},function(data) {
     if (data) {$('#cache_device').html(data); display_diskio();}
-<?if ($update && $var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('#tab2').is(':checked')) timer = setTimeout(cache_status,<?=abs($display['refresh'])?>);
-<?else:?>
-    setTimeout(cache_status,<?=abs($display['refresh'])?>);
-<?endif;?>
+<?if ($var['fsState']=='Started'):?>
+    timers.cache_status = setTimeout(cache_status,3000);
 <?endif;?>
   });
 }
-<?if ($update && $var['fsState']=='Started' && $tabbed):?>
-$('#tab2').bind({click:function() {clearTimeout(timer); cache_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('#tab2').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 
 cache_status();
 </script>
 
-<table class="disk_status <?=($var['fsState']=='Stopped'?'small':$display['view']).' '.$display['align']?>">
+<table class="disk_status wide">
 <thead><tr><td>Device</td><td>Identification</td><td>Temp.</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>Size</td><td>Used</td><td>Free</td><td>View</td></tr></thead>
 <tbody id="cache_device">
 <?
@@ -49,16 +44,16 @@ endforeach;
 
 > **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Cache Devices* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+> <i class='fa fa-circle orb green-orb'></i>Normal operation, device is active.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is in standby mode (spun-down).
+> <i class='fa fa-circle orb grey-orb'></i>Device is in standby mode (spun-down).
 >
-> <img src='/webGui/images/blue-on.png' class='icon'>New device.
+> <i class='fa fa-square orb blue-orb'></i>New device.
 >
-> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+> <i class='fa fa-square orb grey-orb'></i>No device present, position is empty.
 >
-> **Cache** is a device, or device pool, *outside* the unRAID array.  It may be exported for network access just
-> like an Array device.  Being outside the unRAID array results in significantly faster write access.
+> **Cache** is a device, or device pool, *outside* the Unraid array.  It may be exported for network access just
+> like an Array device.  Being outside the Unraid array results in significantly faster write access.
 >
 > There are two ways to configure the Cache:
 >
@@ -69,7 +64,7 @@ endforeach;
 > or xfs).  This configuration offers the highest performance, but at the cost of no data protection - if the
 > single Cache device fails all data contained on it may be lost.
 >
-> When configured as a multi-device pool, unRAID OS will automatically select *btrfs-raid1* format (for both data
+> When configured as a multi-device pool, Unraid OS will automatically select *btrfs-raid1* format (for both data
 > and meta-data).  btrfs permits any number of devices to be added to the pool and each copy of data is guaranteed
 > to be written to two different devices.  Hence the pool can withstand a single-disk failure without losing data.
 >

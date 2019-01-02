@@ -1,10 +1,12 @@
 Menu="Buttons"
 Title="Feedback"
-Icon="feedback.png"
+Icon="icon-u-chat"
+Tag="icon-u-chat"
+Code="e93e"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,6 +18,6 @@ Icon="feedback.png"
 ?>
 <script>
 function FeedbackButton() {
-	openBox('/webGui/include/Feedback.php','Feedback',450,450,false);
+	openBox('/webGui/include/Feedback.php','Feedback',600,600,false);
 }
 </script>

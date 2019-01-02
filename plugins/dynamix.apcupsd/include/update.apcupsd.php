@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
+/* Copyright 2005-2018, Lime Technology
  * Copyright 2015, Dan Landon.
  * Copyright 2015, Bergware International.
  *
@@ -20,9 +20,9 @@ exec("/etc/rc.d/rc.apcupsd stop");
 exec("sed -i -e '/^NISIP/c\\NISIP 0.0.0.0' $conf");
 exec("sed -i -e '/^UPSTYPE/c\\UPSTYPE '".str_replace("'","\\'",$new['UPSTYPE'])."'' $conf");
 exec("sed -i -e '/^DEVICE/c\\DEVICE '".str_replace("'","\\'",$new['DEVICE'])."'' $conf");
-exec("sed -i -e '/^BATTERYLEVEL/c\\BATTERYLEVEL '".str_replace("'","\\'",$new['BATTERYLEVEL'])."'' $conf");
-exec("sed -i -e '/^MINUTES/c\\MINUTES '".str_replace("'","\\'",$new['MINUTES'])."'' $conf");
-exec("sed -i -e '/^TIMEOUT/c\\TIMEOUT '".str_replace("'","\\'",$new['TIMEOUT'])."'' $conf");
+exec("sed -i -e '/^BATTERYLEVEL/c\\BATTERYLEVEL '".intval($new['BATTERYLEVEL'])."'' $conf");
+exec("sed -i -e '/^MINUTES/c\\MINUTES '".intval($new['MINUTES'])."'' $conf");
+exec("sed -i -e '/^TIMEOUT/c\\TIMEOUT '".intval($new['TIMEOUT'])."'' $conf");
 exec("sed -i -e '/^UPSCABLE/c\\UPSCABLE '".str_replace("'","\\'",$cable)."'' $conf");
 
 if ($new['KILLUPS']=='yes' && $new['SERVICE']=='enable')

@@ -1,11 +1,12 @@
 Menu="OtherSettings"
 Title="VM Manager"
-Icon="dynamix.vm.manager.png"
-Markdown="false"
+Icon="icon-virtualization"
+Tag="columns"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2015-2016, Derek Macias, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2015-2018, Derek Macias, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,474 +17,428 @@ Markdown="false"
  */
 ?>
 <?
-require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt.php";
-require_once "$docroot/plugins/dynamix.vm.manager/classes/libvirt_helpers.php";
+require_once "$docroot/plugins/dynamix.vm.manager/include/libvirt_helpers.php";
 
-
-// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-// If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualization support
+// If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualization support was found
 $strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
 if (empty($strLoadedModules)) {
-	?><p class="notice">Your hardware does not have Intel VT-x or AMD-V capability.  This is required to create VMs in KVM. <a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29" target="_blank">Click here to see the unRAID Wiki for more information</a></p><?php
-	exit;
+  echo "<p class='notice'>Your hardware does not have Intel VT-x or AMD-V capability. This is required to create VMs in KVM.";
+  echo "<a href='http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29' target='_blank'> Click here to see the Unraid Wiki for more information</a></p>";
+  echo "<input type='button' value='Done' onclick='done()'>";
+  exit;
 }
 
-
-$arrValidBridges = getNetworkBridges();
-
-
-// Check for PCIE ACS capabilities
-$boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
-
-// Check the /boot/syslinux/syslinux.cfg for the existance of pcie_acs_override=
-$arrSyslinuxCfg = file('/boot/syslinux/syslinux.cfg');
-$strCurrentLabel = '';
-$boolACSInSyslinux = false;
-
-foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
-	if (stripos(trim($strSyslinuxCfg), 'label ') === 0) {
-		$strCurrentLabel = trim(str_ireplace('label ', '', $strSyslinuxCfg));
-	}
-	if (stripos($strSyslinuxCfg, 'append ') !== false) {
-		if (stripos($strSyslinuxCfg, 'pcie_acs_override=') !== false) {
-			// pcie_acs_override= was found
-			$boolACSInSyslinux = true;
-		}
-
-		// We just examine the first append line
-		break;
-	}
+function scan($area, $text) {
+  return strpos($area,$text)!==false;
 }
+function detect(&$syslinux, $key) {
+  $size = count($syslinux);
+  $menu = $i = 0;
+  $value = '';
+  // find the default section
+  while ($i < $size) {
+    if (scan($syslinux[$i],'label ')) {
+      $n = $i + 1;
+      // find the current requested setting
+      while (!scan($syslinux[$n],'label ') && $n < $size) {
+        if (scan($syslinux[$n],'menu default')) $menu = 1;
+        if (scan($syslinux[$n],'append')) foreach (explode(' ',$syslinux[$n]) as $cmd) if (scan($cmd,$key)) {$value = explode('=',$cmd)[1]; break;}
+        $n++;
+      }
+      if ($menu) break; else $i = $n - 1;
+    }
+    $i++;
+  }
+  return $value;
+}
+$syslinux          = file('/boot/syslinux/syslinux.cfg',FILE_IGNORE_NEW_LINES+FILE_SKIP_EMPTY_LINES);
+$arrValidBridges   = getNetworkBridges();
+$pcie_acs_override = detect($syslinux, 'pcie_acs_override');
+$vfio_allow_unsafe = detect($syslinux, 'allow_unsafe_interrupts');
+$bgcolor           = strstr('white,azure',$display['theme']) ? '#f2f2f2' : '#1c1c1c';
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
-	body { -webkit-overflow-scrolling: touch;}
-	.errortext{color:#EF3D47;display:none;}
-	.fileTree {
-		width: 305px;
-		max-height: 150px;
-		overflow: scroll;
-		position: absolute;
-		z-index: 100;
-		display: none;
-	}
-	.basic{display:block;}
-	.advanced{display:none;}
-	#winvirtio{display:none;}
-	#download_status {
-		margin-left: 5px;
-		color: #777;
-		display: none;
-	}
-	#download_button {
-		cursor: pointer;
-		margin-left: -2px;
-		color: #08C;
-		font-size: 1.4em;
-		display: none;
-		transform: translate(0px, 4px);
-	}
-	#download_button.fa-spin {
-		cursor: default;
-		color: #777;
-	}
-	#download_button span {
-		font-size: 12px;
-		font-family: arimo;
-		vertical-align: top;
-	}
-	#download_button.fa-spin span {
-		display: none;
-	}
+body{-webkit-overflow-scrolling:touch}
+.errortext{color:#EF3D47;display:none}
+.fileTree{background:<?=$bgcolor?>;width:300px;max-height:150px;overflow-y:scroll;overflow-x:hidden;position:absolute;z-index:100;display:none}
+.basic{display:block}
+.advanced{display:none}
+#winvirtio{display:none}
+#download_status{margin-left:5px;color:#777;display:none}
+#download_button{cursor:pointer;margin-left:-2px;color:#08C;display:none;transform:translate(0px,2px)}
+#download_button.fa-spin{cursor:default;color:#777}
+#download_button span{font-family:clear-sans}
+#download_button.fa-spin span{font-family:clear-sans;display:none}
+#remove_button{cursor:pointer;margin-left:-2px;color:#EF3D47;display:none;transform:translate(0px,2px)}
+#remove_button span{font-family:clear-sans}
 </style>
-<span class="status" style="margin-top: -10px;"><input type="checkbox" class="advancedview"></span>
-<?if ($boolACSEnabled != $boolACSInSyslinux):?>
-	<br><p class="notice">You must reboot for changes to take effect</p>
-<?endif;?>
-<form id="settingsForm" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#file" value="<?=htmlspecialchars($domain_cfgfile)?>" />
 
-<dl>
-	<dt>Enable VMs:</dt>
-	<dd>
-		<select id="SERVICE" name="SERVICE" class="narrow">
-			<?= mk_option($libvirt_service, 'disable', 'No'); ?>
-			<?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
-		</select> <?if ($var['fsState'] != "Started"):?><span id="arraystopped"><i class="fa fa-warning icon warning"></i> <?=($libvirt_service=='enable')?'VMs will be available after Array is Started':'Apply to activate VMs after Array is Started'?></span><?elseif (!is_dir(dirname($domain_cfg['IMAGE_FILE'])) || !is_dir($domain_cfg['DOMAINDIR']) || !is_dir($domain_cfg['MEDIADIR'])):?><span class="basic" style="display:inline"><i class="fa fa-warning icon warning"></i> One or more paths do not exist (<a href="#" onclick="$('.advancedview').switchButton('option','checked',true); return false">view</a>)</span><?endif;?>
-	</dd>
-</dl>
-<blockquote class="inline_help">
-	<p>Stopping the VM Manager will first attempt to shutdown all running VMs.  After 60 seconds, any remaining VM instances will be terminated.</p>
-</blockquote>
+<span class="status vhshift"><input type="checkbox" class="advancedview"></span>
+<form markdown="1" id="settingsForm" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="<?=htmlspecialchars($domain_cfgfile)?>">
+<input type="hidden" name="#command" value="/plugins/dynamix/scripts/emhttpd_update">
+Enable VMs:
+: <select id="SERVICE" name="SERVICE">
+  <?= mk_option($libvirt_service, 'disable', 'No'); ?>
+  <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
+  </select>
+  <?if ($var['fsState'] != "Started"):?>
+  <span id="arraystopped"><i class="fa fa-warning icon warning"></i> <?=($libvirt_service=='enable')?'VMs will be available after Array is Started':'Apply to activate VMs after Array is Started'?></span>
+  <?elseif (!is_dir(dirname($domain_cfg['IMAGE_FILE'])) || !is_dir($domain_cfg['DOMAINDIR']) || !is_dir($domain_cfg['MEDIADIR'])):?>
+  <span class="basic" style="display:inline"><i class="fa fa-warning icon warning"></i> One or more paths do not exist (<a href="#" onclick="$('.advancedview').switchButton('option','checked',true); return false">view</a>)</span>
+  <?endif;?>
 
-<div class="advanced">
+> Stopping the VM Manager will first attempt to shutdown all running VMs. After 60 seconds, any remaining VM instances will be terminated.
+
+<div class="advanced" markdown="1">
 <?if ($libvirt_running == 'yes'):?>
-	<dl>
-		<dt>Libvirt version:</dt>
-		<dd><? $libvirt_info = libvirt_version('libvirt'); echo $libvirt_info['libvirt.major'].'.'.$libvirt_info['libvirt.minor'].'.'.$libvirt_info['libvirt.release']; ?></dd>
-	</dl>
+<?$libvirt_info = libvirt_version('libvirt')?>
+<?$qemu_info = $lv->get_connect_information()?>
+Libvirt version:
+: <?=$libvirt_info['libvirt.major'].'.'.$libvirt_info['libvirt.minor'].'.'.$libvirt_info['libvirt.release']?>
 
-	<dl>
-		<dt>QEMU version:</dt>
-		<dd><? $qemu_info = $lv->get_connect_information(); echo $qemu_info['hypervisor_major'].'.'.$qemu_info['hypervisor_minor'].'.'.$qemu_info['hypervisor_release']; ?></dd>
-	</dl>
+QEMU version:
+: <?=$qemu_info['hypervisor_major'].'.'.$qemu_info['hypervisor_minor'].'.'.$qemu_info['hypervisor_release']?>
 
-	<dl>
-		<dt>Libvirt storage location:</dt>
-		<dd><?=htmlspecialchars($domain_cfg['IMAGE_FILE'])?></dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>This is the libvirt volume.</p>
-	</blockquote>
+Libvirt storage location:
+: <?=htmlspecialchars($domain_cfg['IMAGE_FILE'])?>
+
+> This is the libvirt volume.
+
 <?else: /* Libvirt is stopped */ ?>
-	<dl>
-		<dt>Libvirt vdisk size:</dt>
-		<dd><input id="IMAGE_SIZE" type="number" min="1" name="IMAGE_SIZE" value="<?=htmlspecialchars($domain_cfg['IMAGE_SIZE']);?>" style="width:50px;" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span></dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>If the system needs to create a new libvirt image file, this is the default size to use specified in GB.</p>
-		<p>To resize an existing image file, specify the new size here.  Next time the Libvirt service is started the file (and file system) will increased to the new size (but never decreased).</p>
-	</blockquote>
+Libvirt vdisk size:
+: <input id="IMAGE_SIZE" type="number" min="1" name="IMAGE_SIZE" value="<?=htmlspecialchars($domain_cfg['IMAGE_SIZE']);?>" style="width:50px;" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span>
 
-	<dl>
-		<dt>Libvirt storage location:</dt>
-		<dd><input id="IMAGE_FILE" type="text" name="IMAGE_FILE" value="<?=htmlspecialchars($domain_cfg['IMAGE_FILE']);?>" placeholder="e.g. /mnt/user/system/libvirt/libvirt.img" data-pickcloseonfile="true" data-pickfilter="img" data-pickroot="/mnt/" data-pickfolders="true" required="required" /> <?php if (file_exists($domain_cfg['IMAGE_FILE'])) { ?><span id="deletePanel"><label><input type="checkbox" id="deleteCheckbox" /> Delete Image File</label></span><?php } ?> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir(dirname($domain_cfg['IMAGE_FILE']))):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?> <span id="IMAGE_ERROR" class="errortext"></span></dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>You must specify an image file for Libvirt.  The system will automatically create this file when the Libvirt service is first started.</p>
-	</blockquote>
+> If the system needs to create a new libvirt image file, this is the default size to use specified in GB.
+> To resize an existing image file, specify the new size here. Next time the Libvirt service is started the file (and file system) will increased to the new size (but never decreased).
+
+Libvirt storage location:
+: <input id="IMAGE_FILE" type="text" name="IMAGE_FILE" value="<?=htmlspecialchars($domain_cfg['IMAGE_FILE']);?>" placeholder="e.g. /mnt/user/system/libvirt/libvirt.img" data-pickcloseonfile="true" data-pickfilter="img" data-pickroot="/mnt/" data-pickfolders="true" required="required" /> <?php if (file_exists($domain_cfg['IMAGE_FILE'])) { ?><span id="deletePanel"><label><input type="checkbox" id="deleteCheckbox" /> Delete Image File</label></span><?php } ?> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir(dirname($domain_cfg['IMAGE_FILE']))):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?> <span id="IMAGE_ERROR" class="errortext"></span>
+
+> You must specify an image file for Libvirt. The system will automatically create this file when the Libvirt service is first started.
+
 <?endif;?>
+Default VM storage path:
+: <input type="text" id="domaindir" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="DOMAINDIR" value="<?=htmlspecialchars($domain_cfg['DOMAINDIR'])?>" placeholder="Click to Select"> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir($domain_cfg['DOMAINDIR'])):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?>
 
-	<dl>
-		<dt>Default VM storage path:</dt>
-		<dd><input type="text" id="domaindir" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="DOMAINDIR" value="<?=htmlspecialchars($domain_cfg['DOMAINDIR'])?>" placeholder="Click to Select"> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir($domain_cfg['DOMAINDIR'])):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?></dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>Specify a user share that contains all your VM subdirectories with vdisks</p>
-	</blockquote>
+> Specify a user share that contains all your VM subdirectories with vdisks
 
-	<dl>
-		<dt>Default ISO storage path:</dt>
-		<dd><input type="text" id="mediadir" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" value="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" placeholder="Click to Select"> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir($domain_cfg['MEDIADIR'])):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?></dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>Specify a user share that contains all your installation media for operating systems</p>
-	</blockquote>
+Default ISO storage path:
+: <input type="text" id="mediadir" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" value="<?=htmlspecialchars($domain_cfg['MEDIADIR'])?>" placeholder="Click to Select"> <?if ($var['fsState'] != "Started"):?><span><i class="fa fa-warning icon warning"></i> Modify with caution: unable to validate path until Array is Started</span><?elseif (!is_dir($domain_cfg['MEDIADIR'])):?><span><i class="fa fa-warning icon warning"></i> Path does not exist</span><?endif;?>
+
+> Specify a user share that contains all your installation media for operating systems
+
 </div>
+Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</span>:
+: <select id="winvirtio_select">
+  <?$iso_dir = $domain_cfg['MEDIADIR'];
+    if (empty($iso_dir) || !is_dir($iso_dir)) {
+      $iso_dir = '/mnt/user/isos/';
+    } else {
+      $iso_dir = str_replace('//', '/', $iso_dir.'/');
+    }
+    $strMatch = '';
+    if (!empty($domain_cfg['MEDIADIR']) && !empty($domain_cfg['VIRTIOISO']) && dirname($domain_cfg['VIRTIOISO']) != '.' && is_file($domain_cfg['VIRTIOISO'])) {
+      $strMatch = 'manual';
+    }
+    foreach ($virtio_isos as $key => $value) {
+      if (($domain_cfg['VIRTIOISO'] == $iso_dir.$value['name']) && is_file($iso_dir.$value['name'])) {
+        $strMatch = $value['name'];
+      }
+        echo mk_option($strMatch, $value['name'], $value['name']);
+    }
+    echo mk_option($strMatch, 'manual', 'Manual');
+  ?>
+  </select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-trash" id="remove_button" title="Remove Windows VirtIO driver ISO"> <span>Remove</span></i><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
 
-<dl>
-	<dt>Default Windows VirtIO driver ISO <span style="font-weight: normal">(optional)</span>:</dt>
-	<dd>
-		<select id="winvirtio_select" class="narrow">
-		<?
-			$iso_dir = $domain_cfg['MEDIADIR'];
-			if (empty($iso_dir) || !is_dir($iso_dir)) {
-				$iso_dir = '/mnt/user/isos/';
-			} else {
-				$iso_dir = str_replace('//', '/', $iso_dir.'/');
-			}
+> Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.
+> Download the latest ISO from here: <a href="https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html#virtio-win-direct-downloads" target="_blank">fedoraproject.org</a>
+>
+> When installing Windows, you will reach a step where no disk devices will be found. There is an option to browse for drivers on that screen.
+> Click browse and locate the additional CD-ROM in the menu. Inside there will be various folders for the different versions of Windows.
+> Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).
+> Three drivers will be found. Select them all, click next, and the vDisks you have assigned will appear.
 
-			$strMatch = '';
-			if (!empty($domain_cfg['MEDIADIR']) &&
-				!empty($domain_cfg['VIRTIOISO']) &&
-				dirname($domain_cfg['VIRTIOISO']) != '.' &&
-				is_file($domain_cfg['VIRTIOISO'])) {
-				$strMatch = 'manual';
-			}
+<div class="advanced" markdown="1">
+Default network bridge:
+: <select id="bridge" name="BRNAME">
+  <?foreach ($arrValidBridges as $strBridge) echo mk_option($domain_cfg['BRNAME'], $strBridge, $strBridge);?>
+  </select>
 
-			foreach ($virtio_isos as $key => $value) {
-				if (($domain_cfg['VIRTIOISO'] == $iso_dir.$value['name']) && is_file($iso_dir.$value['name'])) {
-					$strMatch = $value['name'];
-				}
-				echo mk_option($strMatch, $value['name'], $value['name']);
-			}
+> Select the name of the network bridge you wish to use as default for your VMs,
+> the setting 'virbr0' will let libvirt create a virtual bridge that utilizes NAT (network address translation)
+> and act as a DHCP server to hand out IP addresses to virtual machines directly.
+> More optional selections are present when virtual bridges are created under network settings.
+>
+> NOTE: You can also specify a network bridge on a per-VM basis.
 
-			echo mk_option($strMatch, 'manual', 'Manual');
-		?>
-		</select><input type="text" id="winvirtio" name="VIRTIOISO" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" value="<?=htmlspecialchars($domain_cfg['VIRTIOISO'])?>"<?if ($var['fsState'] == "Started"):?> placeholder="Click to Select"><i class="fa fa-download" id="download_button" title="Download Windows VirtIO driver ISO"> <span>Download</span></i><span id="download_status"></span<?endif;?>>
-	</dd>
-</dl>
-<blockquote class="inline_help">
-	<p>Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project. Download the latest ISO from here: <a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download</a></p>
-	<p>When installing Windows, you will reach a step where no disk devices will be found. There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu. Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64). Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.</p>
-</blockquote>
+Upon host shutdown:
+: <select id="hostshutdown" name="HOSTSHUTDOWN">
+  <?echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'shutdown', 'Shutdown VMs');
+    echo mk_option($domain_cfg['HOSTSHUTDOWN'], 'hibernate', 'Hibernate VMs');
+  ?>
+  </select>
 
-<div class="advanced">
-	<dl>
-		<dt>Default network bridge:</dt>
-		<dd>
-			<select id="bridge" name="BRNAME" class="narrow">
-			<?
-				foreach ($arrValidBridges as $strBridge) {
-					echo mk_option($domain_cfg['BRNAME'], $strBridge, $strBridge);
-				}
-			?>
-			</select>
-		</dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>Select the name of the network bridge you wish to use as default for your VMs, the setting 'virbr0' will let libvirt create a virtual bridge that utilizes NAT (network address translation) and act as a DHCP server to hand out IP addresses to virtual machines directly.</p>
-		<p>More optional selections are present when virtual bridges are created under network settings.</p>
-		<p>NOTE: You can also specify a network bridge on a per-VM basis.</p>
-	</blockquote>
-	<dl>
-		<dt>VM shutdown time-out:</dt>
-		<dd>
-			<input type="number" name="TIMEOUT" value="<?=htmlspecialchars($domain_cfg['TIMEOUT'])?>" class="narrow">
-			<?if (!empty($var['shutdownTimeout']) && !empty($domain_cfg['TIMEOUT']) && (int)$domain_cfg['TIMEOUT'] > (int)$var['shutdownTimeout']):?>
-			<span id="arraystopped"><i class="fa fa-warning icon warning"></i> exceeds Disk Shutdown <?=htmlspecialchars($var['shutdownTimeout'])?>s time-out (<a href="/Settings/DiskSettings">edit</a>)</span>
-			<?endif;?>
-		</dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>When shutting down the server, this defines how long to wait in seconds for <em>graceful</em> VM shutdown before forcing shutdown to continue.</p>
-		<p>NOTE: It's recommended to shut down guest VMs from within the VM.</p>
-	</blockquote>
-	<dl>
-		<dt>Enable PCIe ACS Override:</dt>
-		<dd>
-			<select id="pcie_acs_override" class="narrow">
-			<?= mk_option(($boolACSInSyslinux ? '1' : '0'), '0', 'No'); ?>
-			<?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
-			</select>
-		</dd>
-	</dl>
-	<blockquote class="inline_help">
-		<p>Warning:  Use of this setting could cause possible data corruption with certain hardware configurations.  Please visit the Lime Technology forums for more information.</p>
-		<p>A reboot will be required for changes to this setting to take affect.</p>
-	</blockquote>
+> When shutting down the server, this defines the action to take upon running VMs. If *Hibernate VMs* is chosen,
+> the VM will be instructed to hibernate (if supported) otherwise it will attempt a VM shutdown.
+
+VM shutdown time-out:
+: <input type="number" id="vm_shutdown_timeout" name="TIMEOUT" value="<?=htmlspecialchars($domain_cfg['TIMEOUT'])?>" class="narrow">
+  <?if (!empty($var['shutdownTimeout']) && !empty($domain_cfg['TIMEOUT']) && (int)$domain_cfg['TIMEOUT'] > (int)$var['shutdownTimeout']):?>
+  <span id="arraystopped"><i class="fa fa-warning icon warning"></i> exceeds Disk Shutdown <?=htmlspecialchars($var['shutdownTimeout'])?>s time-out (<a href="/Settings/DiskSettings">edit</a>)</span>
+  <?endif;?>
+
+> When shutting down the server, this defines how long to wait in seconds for *graceful* VM shutdown before forcing shutdown to continue.
+> NOTE: It's recommended to shut down guest VMs from within the VM.
+
+PCIe ACS override:
+: <select id="pcie_acs_override"<?=$safemode?' disabled':''?>>
+  <?= mk_option($pcie_acs_override, '', 'Disabled'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream', 'Downstream'); ?>
+  <?= mk_option($pcie_acs_override, 'multifunction', 'Multi-function'); ?>
+  <?= mk_option($pcie_acs_override, 'downstream,multifunction', 'Both'); ?>
+  </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>
+
+> *PCIe ACS override* allows various hardware components to expose themselves as isolated devices.
+> Typically it is sufficient to isolate *Downstream* ports.
+> A hardware component may need the setting *Multi-function* or *Both* to further isolate different hardware functions.<br>
+> A reboot is required for changes to this setting to take affect.
+>
+> **Warning: use of this setting could cause possible data corruption with certain hardware configurations.**
+> Please visit the [Lime Technology forums](https://forums.unraid.net/forum/51-vm-engine-kvm) for more information.
+
+VFIO allow unsafe interrupts:
+: <select id="vfio_allow_unsafe"<?=$safemode?' disabled':''?>>
+  <?= mk_option($vfio_allow_unsafe, '', 'No'); ?>
+  <?= mk_option($vfio_allow_unsafe, '1', 'Yes'); ?>
+  </select><?if($safemode):?><span>*Setting disabled in **safe mode***</span><?endif;?>
+
+> If your system doesn't support interrupt remapping, these can be enabled by allowing unsafe interrupts.<br>
+> A reboot will be required for changes to this setting to take affect.
+>
+> **Warning: use of this setting could cause possible data corruption with certain hardware configurations.**
+> Please visit the [Lime Technology forums](https://forums.unraid.net/forum/51-vm-engine-kvm) for more information.
+
 </div>
-
-<dl>
-	<dt><?if (file_exists("/var/log/libvirt/libvirtd.log")):?><input type="button" class="advanced" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/><?endif;?>&nbsp;</dt>
-	<dd><input type="button" id="applyBtn" value="Apply"/><input type="button" value="Done" onclick="done()"></dd>
-</dl>
+<?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
+<input type="button" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);" value="View libvirt log"/>
+<?else:?>
+&nbsp;
+<?endif;?>
+: <input type="button" id="applyBtn" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
+<div class="notice reboot" style="display:none;margin-bottom:24px">System must be rebooted for changes to take effect!</div>
 
 <?if (file_exists("/var/log/libvirt/libvirtd.log")):?>
-<blockquote class="inline_help">
-	<p>View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);">/var/log/libvirt/libvirtd.log</a></p>
-</blockquote>
+
+> View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/webGui/scripts/tail_log&arg1=libvirt/libvirtd.log','Libvirt Log',600,900);">/var/log/libvirt/libvirtd.log</a>
+
 <?endif;?>
 
-<?if ($libvirt_running == 'yes' && trim(shell_exec('stat -c %T -f /etc/libvirt')) == 'btrfs'):?>
-<div class="advanced">
-  <div id="title"><span class="left"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Libvirt volume info</span></div>
+<?if ($libvirt_running == 'yes' && trim(shell_exec('stat -c %T -f /etc/libvirt'))=='btrfs'):?>
+<div class="advanced" markdown="1">
+<div id="title"><span class="left"><i class="title fa fa-list"></i>Libvirt volume info</span></div>
+btrfs filesystem show:
+: <?="<pre>".shell_exec("btrfs filesystem show /etc/libvirt")."</pre>"?>
 
-  <dl>
-    <dt>btrfs filesystem show:</dt>
-    <dd><?="<pre>".shell_exec("btrfs filesystem show /etc/libvirt")."</pre>"?></dd>
-  </dl>
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<?exec("$docroot/webGui/scripts/btrfs_scrub status /etc/libvirt", $scrub_status, $retval);?>
+btrfs scrub status:
+: <?="<pre>".implode("\n", $scrub_status)."</pre>"?>
 
-  <form method="POST" action="/update.php" target="progressFrame">
-  <?exec("$docroot/webGui/scripts/btrfs_scrub status /etc/libvirt", $scrub_status, $retval);?>
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
+<input type="hidden" name="#arg[1]" value="start">
+<input type="hidden" name="#arg[2]" value="/etc/libvirt">
+<input type="hidden" name="#arg[3]" value="-r">
+&nbsp;
+: <input type="submit" value="Scrub"><label><input type="checkbox" name="#arg[3]" value="">Correct file system errors</label>
 
-  <dl>
-    <dt>btrfs scrub status:</dt>
-    <dd><?="<pre>".implode("\n", $scrub_status)."</pre>"?></dd>
-  </dl>
+> **Scrub** runs the *btrfs scrub* program to check file system integrity.
+> If repair is needed you should check the *Correct file system errors* and run a second Scrub pass; this will permit *btrfs scrub* to fix the file system.
 
-  <?if ($retval != 0):?>
-  <input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
-  <input type="hidden" name="#arg[1]" value="start">
-  <input type="hidden" name="#arg[2]" value="/etc/libvirt">
-  <input type="hidden" name="#arg[3]" value="-r">
+<?else:?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
+<input type="hidden" name="#arg[1]" value="cancel">
+<input type="hidden" name="#arg[2]" value="/etc/libvirt">
+&nbsp;
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel">*Running*
 
-  <dl>
-    <dt>&nbsp;</dt>
-    <dd><input type="submit" value="Scrub"><label><input type="checkbox" name="#arg[3]" value=""> Correct file system errors</label></dd>
-  </dl>
-  <blockquote class="inline_help">
-    <p><b>Scrub</b> runs the <i>btrfs scrub</i> program to check file system integrity.</p>
-    <p>If repair is needed you should check the <i>Correct file system errors</i> and run a second Scrub pass; this will permit <i>btrfs scrub</i> to fix the file system.</p>
-  </blockquote>
+> **Cancel* will cancel the Scrub operation in progress.
 
-  <?else:?>
-  <input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
-  <input type="hidden" name="#arg[1]" value="cancel">
-  <input type="hidden" name="#arg[2]" value="/etc/libvirt">
-
-  <dl>
-    <dt>&nbsp;</dt>
-    <dd><input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> <i>Running</i></dd>
-  </dl>
-  <blockquote class="inline_help">
-    <p><b>Cancel</b> will cancel the Scrub operation in progress.</p>
-  </blockquote>
-
-  </form>
-  <?endif;?>
+</form>
+<?endif;?>
 </div>
+
 <?elseif ($libvirt_running != 'yes'):?>
 <form id="removeForm" method="POST" action="/update.php" target="progressFrame">
-  <input type="hidden" name="#command" value="/plugins/dynamix.vm.manager/scripts/libvirt_rm" />
+  <input type="hidden" name="#command" value="/plugins/dynamix.vm.manager/scripts/libvirt_rm">
 </form>
 <?endif;?>
 
-<script src="/webGui/javascript/jquery.filetree.js"></script>
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js')?>"></script>
 <script>
 $(function(){
-	$("#applyBtn").click(function(){
-		if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
-			$("#removeForm").submit();
-			return;
-		}
-		if ($('#pcie_acs_override').val() == '1') {
-			$.getJSON("/plugins/dynamix.vm.manager/VMajax.php", {action: "acs-override-enable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		} else {
-			$.getJSON("/plugins/dynamix.vm.manager/VMajax.php", {action: "acs-override-disable"}, function(data) {
-				$("#settingsForm").submit();
-			});
-		}
-	});
+  $("#applyBtn").click(function(){
+    if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
+      $("#removeForm").submit();
+      return;
+    }
+<?if ($safemode):?>
+    $("#settingsForm").submit();
+<?else:?>
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'syslinux',pcie:$('#pcie_acs_override').val(),vfio:$('#vfio_allow_unsafe').val()}, function(data){
+      $("#settingsForm").submit();
+    });
+<?endif;?>
+  });
 
-	$("#mediadir").on("input change", function() {
-		$("#winvirtio_select").change();
-	});
+  $("#mediadir").on("input change", function(){
+    $("#winvirtio_select").change();
+  });
 
-	var checkDownloadTimer = null;
-	var checkOrInitDownload = function(checkonly) {
-		clearTimeout(checkDownloadTimer);
-
-		var $button = $("#download_button");
-		var $form = $button.closest('form');
-
-		var postdata = {
-			action: "virtio-win-iso-download",
-			download_version: $('#winvirtio_select').val(),
-			download_path: $('#mediadir').val(),
-			checkonly: ((typeof checkonly === 'undefined') ? false : !!checkonly) ? 1 : 0
-		};
-
-		$form.find('input,select').prop('disabled', true);
-		$button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
-
-		$.post("/plugins/dynamix.vm.manager/VMajax.php", postdata, function( data ) {
-			if (data.error) {
-				$("#download_status").html('<span style="color: red">' + data.error + '</span>');
-			} else {
-				$("#download_status").html(data.status);
-
-				if (data.pid) {
-					checkDownloadTimer = setTimeout(checkOrInitDownload, 1000);
-					return;
-				}
-
-				if (data.status == 'Done') {
-					$("#winvirtio_select").change();
-				}
-			}
-
-			$button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
-			$form.find('input,select').prop('disabled', false);
-		}, "json");
-	};
-
-	$("#SERVICE").change(function changeService() {
-		if ($(this).val()=='enable') {
-			$('#arraystopped').fadeIn('slow');
-		} else {
-			$('#arraystopped').fadeOut('fast');
-		}
-	});
-	if ($("#SERVICE").val()!='enable') $('#arraystopped').hide();
-
-	$("#download_button").click(function downloadVirtIOVersion() {
-		if (!$(this).hasClass('fa-spin')) {
-			checkOrInitDownload(false);
-		}
-	});
-
-	// Fire events below once upon showing page
-	$("#winvirtio_select").change(function changeVirtIOVersion() {
-		clearTimeout(checkDownloadTimer);
-
-		if ($(this).val()=='manual') {
-			$("#download_button,#download_status").hide('fast');
-			$("#winvirtio").show('fast');
-			return;
-		}
-
-		$("#winvirtio").hide('fast');
-
-		var params = {
-			action: "virtio-win-iso-info",
-			path: $("#mediadir").val(),
-			file: $(this).val()
-		};
-
-		$.get("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
-
-			if (!data.exists) {
-				$("#download_button").show('fast');
-				$("#download_status").html('').show('fast');
-				if (data.pid) {
-					checkOrInitDownload(true);
-				}
-			} else {
-				$("#download_button,#download_status").hide('fast');
-				$("#winvirtio").val(data.path);
-			}
-
-		}, "json");
-	}).change(); // Fire now too!
-
-	if ($.cookie('vmsettings_view_mode') == 'advanced') {
-		$('.advanced').show();
-		$('.basic').hide();
-	}
-	$('.advancedview').switchButton({
-		labels_placement: "left",
-		on_label: 'Advanced View',
-		off_label: 'Basic View',
-		checked: $.cookie('vmsettings_view_mode') == 'advanced'
-	});
-	$('.advancedview').change(function () {
-		$('.advanced').toggle('slow');
-		$('.basic').toggle('slow');
-		$.cookie('vmsettings_view_mode', $('.advancedview').is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
-	});
-
-	showStatus('pid','libvirt/libvirtd');
-
-	<?if ($var['fsState'] == "Started"):?>
-		$("input[data-pickroot]").fileTreeAttach();
-	<?endif;?>
-
-	if ($("#IMAGE_FILE").length) {
-		$("#IMAGE_FILE").on("input change", function () {
-			$("#IMAGE_ERROR").fadeOut();
-			$("#applyBtn").prop("disabled", false);
-			<? if (file_exists($domain_cfg['IMAGE_FILE'])) { ?>
-			if ($(this).val() != "<?=$domain_cfg['IMAGE_FILE']?>") {
-				$("#deleteCheckbox").prop("disabled", true).attr("checked", false);
-				$("#deletePanel").fadeOut();
-			} else {
-				$("#deleteCheckbox").attr("checked", false).prop("disabled", false);
-				$("#deletePanel").fadeIn();
-			}
-			<? } ?>
-		});
-
-		$("#deleteCheckbox").change(function () {
-			var checked = $(this).is(":checked");
-			$("#SERVICE").prop("disabled", checked).val('disable');
-			$("#IMAGE_SIZE").prop("disabled", checked);
-			$("#IMAGE_FILE").prop("disabled", checked).val("<?=$domain_cfg['IMAGE_FILE']?>");
-			$("#domaindir").prop("disabled", checked);
-			$("#mediadir").prop("disabled", checked);
-			$("#winvirtio_select").prop("disabled", checked);
-			$("#winvirtio").prop("disabled", checked);
-			$("#bridge").prop("disabled", checked);
-			$("#pcie_acs_override").prop("disabled", checked);
-			$("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
-		});
-	}
+  var checkDownloadTimer = null;
+  var checkOrInitDownload = function(checkonly){
+    clearTimeout(checkDownloadTimer);
+    var $button = $("#download_button");
+    var $form = $button.closest('form');
+    var postdata = {
+      action: "virtio-win-iso-download",
+      download_version: $('#winvirtio_select').val(),
+      download_path: $('#mediadir').val(),
+      checkonly: ((typeof checkonly === 'undefined') ? false : !!checkonly) ? 1 : 0
+    };
+    $button.removeClass('fa-download').addClass('fa-circle-o-notch fa-spin');
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function(data){
+      if (postdata.download_version != $('#winvirtio_select').val())
+        return;
+      if (data.error) {
+        $("#download_status").html('<span style="color: red">' + data.error + '</span>');
+        $button.removeClass('fa-circle-o-notch fa-spin').addClass('fa-download');
+      } else {
+        $("#download_status").html(data.status);
+        if (data.pid) {
+          checkDownloadTimer = setTimeout(checkOrInitDownload, 1000);
+          return;
+        }
+        if (data.status == 'Done') {
+          $("#winvirtio_select").change();
+        }
+      }
+    }, "json");
+  };
+  $("#SERVICE").change(function changeService(){
+    if ($(this).val()=='enable') {
+      $('#arraystopped').fadeIn('slow');
+    } else {
+      $('#arraystopped').fadeOut('fast');
+    }
+  });
+  if ($("#SERVICE").val()!='enable') $('#arraystopped').hide();
+  $("#download_button").click(function downloadVirtIOVersion(){
+    if (!$(this).hasClass('fa-spin')) {
+      checkOrInitDownload(false);
+    }
+  });
+  $("#remove_button").click(function removeVirtIOVersion() {
+    var postdata = {
+      action: "virtio-win-iso-remove",
+      path: $('#mediadir').val(),
+      file: $('#winvirtio_select').val()
+    };
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", postdata, function(data){
+      if (postdata.file != $('#winvirtio_select').val()) return;
+      if (data.success) {
+        $("#winvirtio_select").change();
+      }
+    }, "json");
+  });
+  // Fire events below once upon showing page
+  $("#winvirtio_select").change(function changeVirtIOVersion(){
+    clearTimeout(checkDownloadTimer);
+    if ($(this).val()=='manual') {
+      $("#download_button,#download_status").hide('fast');
+      $("#winvirtio").show('fast');
+      return;
+    }
+    $("#winvirtio").hide('fast');
+    var params = {
+      action: "virtio-win-iso-info",
+      path: $("#mediadir").val(),
+      file: $(this).val()
+    };
+    $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data){
+      if (!data.exists || data.pid) {
+        $("#remove_button").hide('fast');
+        $("#download_button").removeClass('fa-circle-o-notch fa-spin').addClass('fa-download').show('fast');
+        $("#download_status").html('').show('fast');
+        if (data.pid) {
+          checkOrInitDownload(true);
+        }
+      } else {
+        $("#download_button,#download_status").hide('fast');
+        $("#remove_button").show('fast');
+        $("#winvirtio").val(data.path);
+      }
+    }, "json");
+  }).change(); // Fire now too!
+  if ($.cookie('vmsettings_view_mode') == 'advanced') {
+    $('.advanced').show();
+    $('.basic').hide();
+  }
+  $('.advancedview').switchButton({
+    labels_placement: "left",
+    on_label: 'Advanced View',
+    off_label: 'Basic View',
+    checked: $.cookie('vmsettings_view_mode') == 'advanced'
+  });
+  $('.advancedview').change(function(){
+    $('.advanced').toggle('slow');
+    $('.basic').toggle('slow');
+    $.cookie('vmsettings_view_mode', $('.advancedview').is(':checked') ? 'advanced' : 'basic', {expires:3650});
+  });
+  showStatus('pid','libvirt/libvirtd');
+  <?if ($var['fsState'] == "Started"):?>
+    $("input[data-pickroot]").fileTreeAttach();
+  <?endif;?>
+  if ($("#IMAGE_FILE").length) {
+    $("#IMAGE_FILE").on("input change", function(){
+      $("#IMAGE_ERROR").fadeOut();
+      $("#applyBtn").prop("disabled", false);
+      <? if (file_exists($domain_cfg['IMAGE_FILE'])) { ?>
+      if ($(this).val() != "<?=$domain_cfg['IMAGE_FILE']?>") {
+        $("#deleteCheckbox").prop("disabled", true).attr("checked", false);
+        $("#deletePanel").fadeOut();
+      } else {
+        $("#deleteCheckbox").attr("checked", false).prop("disabled", false);
+        $("#deletePanel").fadeIn();
+      }
+      <? } ?>
+    });
+    $("#deleteCheckbox").change(function(){
+      var checked = $(this).is(":checked");
+      $("#SERVICE").prop("disabled", checked).val('disable');
+      $("#IMAGE_SIZE").prop("disabled", checked);
+      $("#IMAGE_FILE").prop("disabled", checked).val("<?=$domain_cfg['IMAGE_FILE']?>");
+      $("#domaindir").prop("disabled", checked);
+      $("#mediadir").prop("disabled", checked);
+      $("#winvirtio_select").prop("disabled", checked);
+      $("#winvirtio").prop("disabled", checked);
+      $("#bridge").prop("disabled", checked);
+      $("#hostshutdown").prop("disabled", checked);
+      $("#pcie_acs_override").prop("disabled", checked);
+      $("#vm_shutdown_timeout").prop("disabled", checked);
+      $("#applyBtn").val(checked ? "Delete" : "Apply").removeAttr('disabled');
+    });
+  }
+  $.post("/plugins/dynamix.vm.manager/include/VMajax.php", {action:'reboot'}, function(data){
+    if (data.modified) $('div.notice.reboot').show(); else $('div.notice.reboot').hide();
+  });
 });
 </script>

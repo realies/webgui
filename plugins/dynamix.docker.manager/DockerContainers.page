@@ -1,11 +1,13 @@
 Menu="Docker:1"
 Title="Docker Containers"
-Cond="(pgrep('docker')!==false)"
+Tag="cubes"
+Cond="is_file('/var/run/dockerd.pid')"
 Markdown="false"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2014-2016, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2014-2018, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,204 +18,62 @@ Markdown="false"
  */
 ?>
 <?
-// Add the Docker JSON client
-require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
-
-$DockerClient    = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
-$DockerTemplates = new DockerTemplates();
+$width = strstr('white,black',$display['theme']) ? -58: -44;
+$top = strstr('white,black',$display['theme']) ? 40 : 20;
+$busy = "<i class='fa fa-spin fa-circle-o-notch'></i> Please wait... starting up containers";
+$cpus = cpu_list();
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
-body {-webkit-overflow-scrolling: touch;}
-img.started{opacity:1.0;}
-img.stopped{opacity:0.3;}
-.log{cursor:zoom-in;}
-.exec{cursor:pointer;}
-.fa-custom{font-size: 1.3em;}
-.basic{display: block;}
-.advanced{display:none;white-space: nowrap;}
-.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF;}
-.iconstatus.started{font-size:1.3em;}
-.iconstatus.stopped{font-size:1.2em;}
-.started{color:#009900;}
-.stopped{color:#EF3D47;}
-.switch-button-label.off{color:inherit;}
+table#docker_containers{text-align:left}
+.basic{display:block}
+.advanced{display:none;white-space:nowrap}
+body{-webkit-overflow-scrolling:touch}
+img.started{opacity:1.0}
+img.stopped{opacity:0.3}
+img.paused{opacity:0.6}
+.log{cursor:zoom-in}
+.exec{cursor:pointer}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.4rem;text-shadow:0 0 2px #FFF}
+.started{color:#009900}
+.stopped{color:#EF3D47}
+.paused{color:#F0DD33}
+.switch-button-label.off{color:inherit}
+th.five{width:5%}
+th.eight{width:8%}
+th.load{width:100px}
+tbody > tr.sortable:hover{cursor:move}
+input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
 </style>
-<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
-  <input type="hidden" name="action" value="autostart" />
-  <input type="hidden" name="container" value="none" />
-</form>
-<form id="formStartStop" method="POST" action="/update.php" target="progressFrame">
-  <input type="hidden" id="cmdStartStop" name="#command" value="">
-  <input type="hidden" id="cmdArg1" name="#arg[1]" value="">
-  <input type="hidden" id="cmdArg2" name="#arg[2]" value="">
-</form>
-<div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top: -44px;"><input type="checkbox" class="advancedview"></span>
-<table class="tablesorter shift" id="docker_containers">
-	<thead>
-		<tr>
-			<th>&nbsp;</th>
-			<th>Application</th>
-			<th>Version</th>
-			<th>Port Mappings <small>(App to Host)</small></th>
-			<th>Volume Mappings <small>(App to Host)</small></th>
-			<th width="80px" style="text-align: center">Autostart</th>
-			<th>Log</th>
-		</tr>
-	</thead>
-	<tbody id="docker_list">
-		<?
-		$all_containers = $DockerClient->getDockerContainers();
-		if (!$all_containers) {
-			$all_containers = [];
-			echo "<tr><td></td><td colspan=\"7\">No Docker Containers Installed</td></tr>";
-		}
-		$info = $DockerTemplates->getAllInfo();
-		$contextMenus = [];
-
-		$IP = $eth0["IPADDR:0"];
-		foreach ($all_containers as $ct) {
-			$name           = $ct["Name"];
-			$is_autostart   = ($info[$name]['autostart']) ? 'true' : 'false';
-			$updateStatus   = $info[$name]['updated'];
-			$updateStatus   = ($updateStatus == "true" || $updateStatus == "undef") ? 'true' : 'false';
-			$running        = ($ct['Running']) ? 'true' : 'false';
-			$webGuiUrl      = $info[$name]['url'];
-			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl), $ct["Id"]);
-			$shape          = ($ct["Running"]) ? "play" : "square";
-			$status         = ($ct["Running"]) ? "started" : "stopped";
-
-			$Icon           = $info[$name]['icon'];
-			if (!$Icon) {
-				$Icon = "/plugins/dynamix.docker.manager/images/question.png";
-			}
-
-			$ports = [];
-			foreach ($ct['Ports'] as $p) {
-				if (strlen($p['PublicPort'])) {
-					$ipAddr    = sprintf("%s:%s", $IP, $p['PublicPort']);
-					$outFormat = sprintf('<a href="http://%s" target="_blank">%s/%s <i class="fa fa-arrows-h" style="margin: 0 3px"></i> %s</a>', $ipAddr, $p['PrivatePort'], $p['Type'], htmlspecialchars($ipAddr));
-				} else {
-					$outFormat = sprintf("%s/%s", $p['PrivatePort'], $p['Type']);
-				}
-				$ports[] = $outFormat;
-			}
-
-			$paths = [];
-			if (count($ct['Volumes'])){
-				foreach ($ct['Volumes'] as $value) {
-					if (preg_match('/localtime/', $value) == true) continue;
-					list($host_path, $container_path, $access_mode) = explode(":", $value);
-
-					$tip = 'Container volume \'' . $container_path . '\' has ' . ($access_mode == 'ro' ? 'read-only' : 'read-write') . ' access to Host path \'' . $host_path . '\'';
-
-					$paths[] = sprintf('<a href="/Shares/Browse?dir=%s" target="_blank" title="%s">%s <i class="fa fa-%s" style="margin: 0 3px"></i> %s</a>', urlencode($host_path), htmlspecialchars($tip), htmlspecialchars($container_path), ($access_mode == 'ro' ? 'long-arrow-left' : 'arrows-h'), htmlspecialchars($host_path));
-				}
-			}
-			?>
-		<tr>
-			<td style="width: 48px; padding: 4px">
-				<?
-				echo "	<div id=\"context-".htmlspecialchars($name)."\" style=\"display:block; cursor:pointer\">
-							<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-								<img src=\"".htmlspecialchars($Icon)."\" class=\"".htmlspecialchars($status)."\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
-								<i class=\"fa iconstatus fa-$shape $status\" title=\"".htmlspecialchars($status)."\"></i>
-							</div>
-						</div>";
-
-				?>
-			</td>
-			<td>
-				<?if($info[$ct['Name']]['template']):?>
-					<a class="exec" onclick="editContainer('<?=addslashes(htmlspecialchars($ct['Name']));?>','<?=addslashes(htmlspecialchars($info[$ct['Name']]['template']));?>');"><?=htmlspecialchars($ct['Name']);?></a>
-				<?else:?>
-					<?=htmlspecialchars($ct['Name']);?>
-				<?endif;?>
-				<div class="advanced" style="color:#888; width: 160px;">Container ID: <?=htmlspecialchars($ct['Id']);?></div>
-				<?if($ct['BaseImage']):?>
-					<div class="advanced" style="color:#888; width: 160px;"><i class="fa fa-cubes" style="margin-right: 5px"></i><?=htmlspecialchars(${ct[BaseImage]})?></div>
-				<?endif;?>
-				<div class="advanced" style="color:#888; width: 160px;">By:
-				<?if($Registry = $info[$ct['Name']]['registry']):?>
-					<a href="<?=htmlspecialchars($Registry)?>" target="_blank"><?=htmlspecialchars($ct['Image'])?></a>
-				<?else:?>
-					<?=htmlspecialchars($ct['Image']);?>
-				<?endif;?>
-				</div>
-			</td>
-			<td class="updatecolumn">
-				<?
-				$updateStatus = $info[$ct['Name']]['updated'];
-				if ($updateStatus == "false") {
-					echo "<a class=\"exec\" onclick=\"updateContainer('" . addslashes(htmlspecialchars($ct["Name"])) . "');\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> update ready</span></a>";
-				} elseif ($updateStatus == "true") {
-					echo "<span style=\"color:#44B012;white-space:nowrap;\"><i class=\"fa fa-check\"></i> up-to-date</span>";
-					echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('" . addslashes(htmlspecialchars($ct["Name"])) . "');\" style=\"color:#888;\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
-				} else {
-					echo "<span style=\"color:#FF2400;white-space:nowrap;\"><i class=\"fa fa-exclamation-triangle\"></i> not available</span>";
-					echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('" . addslashes(htmlspecialchars($ct["Name"])) . "');\" style=\"color:#888;\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
-				}
-				?>
-			</td>
-			<td style="white-space:nowrap;"><span class="docker_readmore"><?= implode("<br>", $ports); ?></span></td>
-			<td style="word-break:break-all;"><span class="docker_readmore"><?= implode("<br>", $paths); ?></span></td>
-			<td data-sort-value="<?=$is_autostart?>"><input type="checkbox" class="autostart" container="<?=htmlspecialchars($ct['Name']);?>" <?=$info[$ct['Name']]['autostart'] ? "checked" : ""?>></td>
-			<td><a class="log" onclick="containerLogs('<?=addslashes(htmlspecialchars($ct['Name']));?>','<?=$ct['Id'];?>', false, false)"><img class="basic" src="/plugins/dynamix/icons/log.png"/><div class="advanced" style="width: 124px;"><?=htmlspecialchars($ct['Status'])?></div><div class="advanced" style="color:#888;">Created <?=htmlspecialchars($ct['Created'])?></div></a></td>
-		</tr>
-		<?}?>
-
-
-		<?
-		foreach ($DockerClient->getDockerImages() as $image) {
-			if (count($image['usedBy'])) {
-				continue;
-			}
-
-			$contextMenus[] = sprintf("addDockerImageContext('%s', '%s');", $image['Id'], implode(', ', $image['Tags']));
-
-			?>
-		<tr class="advanced">
-			<td style="width: 48px; padding: 4px">
-				<?
-				echo "	<div id=\"context-".htmlspecialchars($image['Id'])."\" style=\"display:block; cursor:pointer\">
-							<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-								<img src=\"/webGui/images/disk.png\" style=\"position: absolute; z-index: 1; opacity: 0.3; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
-							</div>
-						</div>";
-
-				?>
-			</td>
-			<td data-sort-value="ZZZZZZZZZZZ">
-				<i>(orphan image)</i>
-				<div style="color:#888; width: 160px;">Image ID: <?=htmlspecialchars($image['Id'])?></div>
-				<?if(strpos(implode($image['Tags']), "&lt;none&gt;:&lt;none&gt;") === false):?>
-					<div style="color:#888; width: 160px;"><?=implode("<br>", array_map('htmlspecialchars',$image['Tags']))?></div>
-				<?endif;?>
-			</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td><div class="advanced" style="width: 124px; color:#888;">Created <?=htmlspecialchars($image['Created'])?></div></td>
-		</tr>
-		<?}?>
-	</tbody>
+<span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
+<table id="docker_containers" class="tablesorter shift">
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
+<tbody id="docker_list"><tr><td class="advanced"></td><td colspan='8'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
-<input type="button" onclick="addContainer()" value="Add Container"/>
-<input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
+<input type="button" onclick="addContainer()" value="Add Container" style="display:none">
+<input type="button" onclick="startAll()" value="Start All" style="display:none">
+<input type="button" onclick="stopAll()" value="Stop All" style="display:none">
+<input type="button" onclick="pauseAll()" value="Pause All" style="display:none">
+<input type="button" onclick="resumeAll()" value="Resume All" style="display:none">
+<input type="button" onclick="checkAll()" value="Check for Updates" id="checkAll" style="display:none">
+<input type="button" onclick="updateAll()" value="Update All" id="updateAll" style="display:none">
+<input type="button" onclick="sizes()" value="Container Size" style="display:none">
 
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<script src="/plugins/dynamix.docker.manager/javascript/docker.js"></script>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
 <script>
+<?if (!$tabbed):?>
+$('#title').append("<span id='busy' class='red-text strong' style='display:none;margin-left:40px'><?=$busy?></span>");
+<?else:?>
+$('.tabs').append("<span id='busy' class='red-text strong' style='display:none;position:relative;top:<?=$top?>px;left:40px;font-size:1.4rem;letter-spacing:2px'><?=$busy?></span>");
+<?endif;?>
 <?if ($display['resize']):?>
 function resize(bind) {
   var width = [];
   var h = $('#docker_list').height();
-  var s = Math.max(window.innerHeight-300,370);
+  var s = Math.max(window.innerHeight-340,330);
   if (h>s || bind) {
     $('#docker_list').height(s);
     $('#docker_containers tbody tr:first-child td').each(function(){width.push($(this).width());});
@@ -222,44 +82,91 @@ function resize(bind) {
   }
 }
 <?endif;?>
-$(function() {
-	if ($.cookie('docker_listview_mode') == 'advanced') {
-		$('.advanced').show();
-		$('.basic').hide();
-	}
-
-	$('.autostart').switchButton({
-		labels_placement: "right"
-	});
-	$('.autostart').change(function () {
-		$.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
-			$(this).prop('checked', data.autostart );
-		}, "json");
-	});
-
-	$('.advancedview').switchButton({
-		labels_placement: "left",
-		on_label: 'Advanced View',
-  		off_label: 'Basic View',
-  		checked: $.cookie('docker_listview_mode') == 'advanced'
-	});
-	$('.advancedview').change(function () {
-		$('.advanced').toggle('slow');
-		$('.basic').toggle('slow');
-		$.cookie('docker_listview_mode', $('.advancedview').is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
-	});
-
+function resetSorting() {
+  $('input[type=button]').prop('disabled',true);
+  $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{reset:true},function(){loadlist();});
+}
+function listview() {
+  var more = $.cookie('docker_listview_mode')=='advanced';
+  if (more) {
+    $('.docker_readmore').readmore('destroy');
+  } else {
+    $('.docker_readmore').readmore({maxHeight:32,moreLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-down'></i></a>",lessLink:"<a href='#' style='text-align:center'><i class='fa fa-chevron-up'></i></a>"});
+  }
+  $('input.autostart').each(function(){
+    var wait = $('#'+$(this).prop('id').replace('auto','wait'));
+    var auto = $(this).prop('checked');
+    if (auto && more) wait.show(); else wait.hide();
+  });
+}
+var sortableHelper = function(e,i){
+  i.children().each(function(){
+    $(this).width($(this).width());
+  });
+  return i;
+};
+function loadlist() {
+  $.get('/plugins/dynamix.docker.manager/include/DockerContainers.php',function(d) {
+    var data = d.split(/\0/);
+    $('div.spinner').hide('slow').remove();
+    $('#docker_list').html(data[0]).sortable({helper:sortableHelper,items:'tr.sortable',opacity:0.4,update:function(e,i){
+      var row = $('#docker_list').find('tr:first');
+      var names = ''; var index = '';
+      row.parent().children().find('td.ct-name').each(function(){names+=$(this).text().replace(/Container ID.*$/,'')+';';index+=$(this).parent().parent().children().index($(this).parent())+';';});
+      $.post('/plugins/dynamix.docker.manager/include/UserPrefs.php',{names:names,index:index});
+    }});
+    $('head').append('<script>'+data[1]+'<\/script>');
 <?if ($display['resize']):?>
-  resize();
-  $(window).bind('resize',function(){resize(true);});
+    resize();
+    $(window).bind('resize',function(){resize(true);});
 <?endif;?>
-
-	$('#docker_containers').tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }, 7: {sorter: false }}});
-	$('#docker_containers tr:even').addClass('odd');
-
-	context.init({ preventDoubleContext: false });
-	<?=htmlspecialchars(implode("\n\t", $contextMenus));?>
-
-	$('.docker_readmore').readmore({maxHeight:48, moreLink: '<a href="#" style="text-align:center;"><i class="fa fa-chevron-down"></i></a>', lessLink: '<a href="#" style="text-align:center;"><i class="fa fa-chevron-up"></i></a>'});
+    $('.iconstatus').each(function(){
+      if ($(this).hasClass('stopped')) $('div.'+$(this).prop('id')).hide();
+    });
+    $('.autostart').switchButton({labels_placement:'right'});
+    $('.autostart').change(function(){
+      var more = $.cookie('docker_listview_mode')=='advanced';
+      var wait = $('#'+$(this).prop('id').replace('auto','wait'));
+      var auto = $(this).prop('checked');
+      if (auto && more) wait.show(); else wait.hide();
+      $.post('/plugins/dynamix.docker.manager/include/UpdateConfig.php',{action:'autostart',container:$(this).attr('container'),auto:auto,wait:wait.find('input.wait').val()});
+    });
+    $('input.wait').change(function(){
+      $.post('/plugins/dynamix.docker.manager/include/UpdateConfig.php',{action:'wait',container:$(this).attr('container'),wait:$(this).val()});
+    });
+    if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
+    context.init({preventDoubleContext:false});
+    $('input[type=button]').prop('disabled',false).show('slow');
+    var update = false;
+    for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') {update = true; break;};
+    if (!update) $('input#updateAll').hide();
+    listview();
+    if (data[2]==1) {$('#busy').show(); setTimeout(loadlist,5000);} else if ($('#busy').is(':visible')) {$('#busy').hide(); setTimeout(loadlist,3000);}
+  });
+}
+function sizes() {
+  openBox('/plugins/dynamix.docker.manager/include/ContainerSize.php','Container Size',600,600);
+}
+var watchDocker = new NchanSubscriber('/sub/dockerload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
+watchDocker.on('message', function(data){
+  data = data.split('\n');
+  for (var i=0,row; row=data[i]; i++) {
+    var id = row.split(' ');
+    var w1 = Math.round(Math.min(id[1].slice(0,-1)/<?=count($cpus)*count(preg_split('/[,-]/',$cpus[0]))?>,100)*100)/100+'%';
+    var w2 = Math.round(Math.min(id[2].slice(0,-1),100)*100)/100+'%';
+    $('#cpu-'+id[0]).css('width',w1).text(w1.replace('.','<?=$display['number'][0]?>'));
+    $('#mem-'+id[0]).css('width',w2).text(w2.replace('.','<?=$display['number'][0]?>'));
+  }
+});
+$(function() {
+  $('.advancedview').switchButton({labels_placement:'left', on_label:'Advanced View', off_label:'Basic View', checked:$.cookie('docker_listview_mode')=='advanced'});
+  $('.advancedview').change(function(){
+    $('.advanced').toggle('slow');
+    $('.basic').toggle('slow');
+    $.cookie('docker_listview_mode',$('.advancedview').is(':checked')?'advanced':'basic',{expires:3650});
+    listview();
+  });
+  loadlist();
+  watchDocker.start();
 });
 </script>

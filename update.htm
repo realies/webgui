@@ -1,37 +1,49 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+<meta name="robots" content="noindex, nofollow">
 <style>
 @font-face{
-font-family:'arimo';font-weight:normal;font-style:normal;
-src:url('/webGui/styles/arimo.eot');src:url('/webGui/styles/arimo.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/arimo.woff') format('woff'),url('/webGui/styles/arimo.ttf') format('truetype'),url('/webGui/styles/arimo.svg#arimo') format('svg');
+font-family:'clear-sans';font-weight:normal;font-style:normal;
+src:url('/webGui/styles/clear-sans.eot');src:url('/webGui/styles/clear-sans.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/clear-sans.woff') format('woff'),url('/webGui/styles/clear-sans.ttf') format('truetype'),url('/webGui/styles/clear-sans.svg#clear-sans') format('svg');
 }
 @font-face{
-font-family:'arimo';font-weight:bold;font-style:normal;
-src:url('/webGui/styles/arimo-bold.eot');src:url('/webGui/styles/arimo-bold.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/arimo-bold.woff') format('woff'),url('/webGui/styles/arimo-bold.ttf') format('truetype'),url('/webGui/styles/arimo-bold.svg#arimo-bold') format('svg');
+font-family:'clear-sans';font-weight:bold;font-style:normal;
+src:url('/webGui/styles/clear-sans-bold.eot');src:url('/webGui/styles/clear-sans-bold.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/clear-sans-bold.woff') format('woff'),url('/webGui/styles/clear-sans-bold.ttf') format('truetype'),url('/webGui/styles/clear-sans-bold.svg#clear-sans-bold') format('svg');
 }
 @font-face{
-font-family:'arimo';font-weight:normal;font-style:italic;
-src:url('/webGui/styles/arimo-italic.eot');src:url('/webGui/styles/arimo-italic.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/arimo-italic.woff') format('woff'),url('/webGui/styles/arimo-italic.ttf') format('truetype'),url('/webGui/styles/arimo-italic.svg#arimo-italic') format('svg');
+font-family:'clear-sans';font-weight:normal;font-style:italic;
+src:url('/webGui/styles/clear-sans-italic.eot');src:url('/webGui/styles/clear-sans-italic.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/clear-sans-italic.woff') format('woff'),url('/webGui/styles/clear-sans-italic.ttf') format('truetype'),url('/webGui/styles/clear-sans-italic.svg#clear-sans-italic') format('svg');
 }
 @font-face{
-font-family:'arimo';font-weight:bold;font-style:italic;
-src:url('/webGui/styles/arimo-bold-italic.eot');src:url('/webGui/styles/arimo-bold-italic.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/arimo-bold-italic.woff') format('woff'),url('/webGui/styles/arimo-bold-italic.ttf') format('truetype'),url('/webGui/styles/arimo-bold-italic.svg#arimo-bold-italic') format('svg');
+font-family:'clear-sans';font-weight:bold;font-style:italic;
+src:url('/webGui/styles/clear-sans-bold-italic.eot');src:url('/webGui/styles/clear-sans-bold-italic.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/clear-sans-bold-italic.woff') format('woff'),url('/webGui/styles/clear-sans-bold-italic.ttf') format('truetype'),url('/webGui/styles/clear-sans-bold-italic.svg#clear-sans-bold-italic') format('svg');
 }
 @font-face{
 font-family:'bitstream';font-weight:normal;font-style:normal;
 src:url('/webGui/styles/bitstream.eot');src:url('/webGui/styles/bitstream.eot?#iefix') format('embedded-opentype'),url('/webGui/styles/bitstream.woff') format('woff'),url('/webGui/styles/bitstream.ttf') format('truetype'),url('/webGui/styles/bitstream.svg#bitstream') format('svg');
 }
-.logLine{font-family:bitstream;font-size:10px;color:#505050;margin:0 8px;padding:0;}
+html{font-family:clear-sans;font-size:62.5%;height:100%}
+body{font-size:1.3rem;color:#1c1c1c;background:#f2f2f2;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.logLine{font-family:bitstream;font-size:1.2rem;margin:0 8px;padding:0}
 .logLine.spacing{margin:10px;}
 </style>
 <script>
 parent.document.getElementById('progressFrame').style.zIndex = 10;
-var enablePage=parent.location;
+
+origin = parent.location.origin;
+search = parent.location.search;
 
 function replaceName(name) {
-  var x = enablePage.href.indexOf("name=");
-  if (x) enablePage.href = enablePage.href.substring(0,x+5) + name;
+  var x = search.indexOf("name=");
+  if (x) search = search.substring(0,x+5) + name;
+}
+
+function replaceOrigin(new_origin,new_port) {
+  if (parent.location.hostname == "localhost")
+    origin = parent.location.protocol + "//" + parent.location.hostname + ":" + new_port;
+  else
+    origin = new_origin;
 }
 
 function addLog(logLine) {
@@ -44,8 +56,12 @@ function disablePage() {
   for (var i=0,link; link=top.document.getElementsByTagName('a')[i]; i++) link.style.color = "gray"; //fake disable
 }
 
+function enablePage() {
+  parent.location.assign(origin + parent.location.pathname + search);
+}
+
 disablePage();
 </script>
 </head>
-<body class="logLine" onload="parent.location=enablePage;"></body>
+<body class="logLine" onload="enablePage();"></body>
 </html>

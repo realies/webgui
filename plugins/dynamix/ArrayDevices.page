@@ -1,9 +1,10 @@
 Menu="Main:1"
 Title="Array Devices"
+Tag="database"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,8 +15,22 @@ Title="Array Devices"
  */
 ?>
 <script>
-var timer = null;
-
+function toggle_state(device,name,action) {
+  var event = null;
+  var button = null;
+  if (name) {
+    if (name.match(/^(parity|disk)/)!==null) event = 'array_status';
+    else if (name.match(/^cache/)!==null) event = 'cache_status';
+    else if (name.match(/^flash/)!==null) event = 'boot_status';
+    else event = 'open_status';
+    $('#dev-'+name).removeClass('fa-sort-up fa-sort-down').addClass('fa-refresh fa-spin');
+  } else if (device!='Clear') {
+    $('[id^="dev-"]').removeClass('fa-sort-up fa-sort-down').addClass('fa-refresh fa-spin');
+    button = '[id^=button-]';
+  }
+  pauseEvents(event);
+  $.post('/webGui/include/ToggleState.php',{device:device,name:name,action:action,state:'<?=$var['mdState']?>',csrf:'<?=$var['csrf_token']?>'},function(){resumeEvents(event,500);if (button) $(button).prop('disabled',false);});
+}
 function display_diskio() {
   if ($.cookie('diskio')===undefined) {
     $('span.number').show(); $('span.diskio').hide();
@@ -38,25 +53,19 @@ function array_status() {
   var diskio = $.cookie('diskio')===undefined ? 0 : 1;
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'array'},function(data) {
     if (data) {$('#array_devices').html(data); display_diskio();}
-<?if ($update && $var['fsState']=='Started'):?>
-<?if ($tabbed):?>
-    if ($('#tab1').is(':checked')) timer = setTimeout(array_status,<?=abs($display['refresh'])?>);
-<?else:?>
-    setTimeout(array_status,<?=abs($display['refresh'])?>);
-<?endif;?>
+<?if ($var['fsState']=='Started'):?>
+    timers.array_status = setTimeout(array_status,3000);
 <?endif;?>
   });
 }
-<?if ($update && $var['fsState']=='Started' && $tabbed):?>
-$('#tab1').bind({click:function() {clearTimeout(timer); array_status(); $('i.toggle').show('slow');}});
-<?else:?>
+<?if ($var['fsState']=='Started'):?>
 $('#tab1').bind({click:function() {$('i.toggle').show('slow');}});
 <?endif;?>
 
 array_status();
 </script>
 
-<table class="disk_status <?=($var['fsState']=='Stopped'?'small':$display['view']).' '.$display['align']?>">
+<table class="disk_status wide">
 <thead><tr><td>Device</td><td>Identification</td><td>Temp.</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>Size</td><td>Used</td><td>Free</td><td>View</td></tr></thead>
 <tbody id="array_devices">
 <?
@@ -71,17 +80,17 @@ if ($display['total']) echo "<tr class='tr_last'><td colspan='11'>&nbsp;</td></t
 
 > **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Array Devices* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+> <i class='fa fa-circle orb green-orb'></i>Normal operation, device is active.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is in standby mode (spun-down).
+> <i class='fa fa-circle orb grey-orb'></i>Device is in standby mode (spun-down).
 >
-> <img src='/webGui/images/yellow-on.png' class='icon'>Device contents emulated.
+> <i class='fa fa-warning orb yellow-orb'></i>Device contents emulated.
 >
-> <img src='/webGui/images/red-on.png' class='icon'>Device is disabled, contents emulated.
+> <i class='fa fa-times orb red-orb'></i>Device is disabled, contents emulated.
 >
-> <img src='/webGui/images/blue-on.png' class='icon'>New device.
+> <i class='fa fa-square orb blue-orb'></i>New device.
 >
-> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+> <i class='fa fa-square orb grey-orb'></i>No device present, position is empty.
 >
 > **Identification** is the *signature* that uniquely identifies a storage device. The signature
 > includes the device model number, serial number, linux device id, and the device size.
@@ -117,7 +126,7 @@ if ($display['total']) echo "<tr class='tr_last'><td colspan='11'>&nbsp;</td></t
 >
 > The Array must be Stopped in order to change Array device assignments.
 >
-> An unRAID array consists of a single Parity disk and a number of Data disks. The Data
+> An Unraid array consists of a single Parity disk and a number of Data disks. The Data
 > disks are exclusively used to store user data, and the Parity disk provides the redundancy necessary
 > to recover from any singe disk failure.
 >

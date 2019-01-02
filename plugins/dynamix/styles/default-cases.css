@@ -1,0 +1,23 @@
+@font-face{font-family:cases;font-weight:normal;font-style:normal;
+src:url('font-cases.eot?20181216');src:url('font-cases.eot?20181216#iefix') format('embedded-opentype'),url('font-cases.ttf?20181216') format('truetype'),url('font-cases.woff?20181216') format('woff'),url('font-cases.svg?20181216#cases') format('svg')}
+[class^='case-'],[class*=' case-']{font-family:cases!important;speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none}
+.case-nova-x2m:before{content:'\e90f'}
+.case-mercury-s8:before{content:'\e910'}
+.case-core-wp200:before{content:'\e911'}
+.case-poweredge-t630:before{content:'\e912'}
+.case-css-cs380:before{content:'\e913'}
+.case-define-r5:before{content:'\e900'}
+.case-h500:before{content:'\e901'}
+.case-a79:before{content:'\e902'}
+.case-nineteen-hundred:before{content:'\e903'}
+.case-dark-base-700:before{content:'\e906'}
+.case-node-804:before{content:'\e904'}
+.case-elite-110:before{content:'\e905'}
+.case-4u-fans:before{content:'\e907'}
+.case-4u-disks:before{content:'\e908'}
+.case-3u-fans:before{content:'\e909'}
+.case-3u-disks:before{content:'\e90a'}
+.case-2u-disks:before{content:'\e90b'}
+.case-2u-vents:before{content:'\e90c'}
+.case-1u-disks:before{content:'\e90d'}
+.case-1u-vents:before{content:'\e90e'}

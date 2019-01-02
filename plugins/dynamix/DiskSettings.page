@@ -1,10 +1,11 @@
 Menu="OtherSettings"
 Title="Disk Settings"
-Icon="disk-settings.png"
+Icon="icon-disks"
+Tag="icon-disk"
 ---
 <?PHP
-/* Copyright 2005-2017, Lime Technology
- * Copyright 2012-2017, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -23,6 +24,9 @@ function displayTemp($temp) {
   return $display['unit']=='F' ? round(9/5*$temp)+32 : $temp;
 }
 ?>
+<style>
+span.code{display:inline-block;width:186px}
+</style>
 <script>
 function doDispatch(form) {
   var fields = {};
@@ -31,6 +35,7 @@ function doDispatch(form) {
   form.display_max.value = Math.round((form.display_max.value-32)*5/9);
 <?endif;?>
   fields['#cfg'] = "/boot/config/plugins/dynamix/dynamix.cfg";
+  fields['#cleanup'] = true;
   $(form).find('input[name^="display_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
   $.post('/webGui/include/Dispatcher.php',fields);
 }
@@ -114,9 +119,12 @@ Default partition format:
 
 Default file system:
 : <select name="defaultFsType" size="1">
-  <?=mk_option($var['defaultFsType'], "btrfs", "Btrfs");?>
-  <?=mk_option($var['defaultFsType'], "reiserfs", "ReiserFS");?>
-  <?=mk_option($var['defaultFsType'], "xfs", "XFS");?>
+  <?=mk_option($var['defaultFsType'], "xfs", "xfs");?>
+  <?=mk_option($var['defaultFsType'], "btrfs", "btrfs");?>
+  <?=mk_option($var['defaultFsType'], "reiserfs", "reiserfs");?>
+  <?=mk_option($var['defaultFsType'], "luks:xfs", "xfs - encrypted");?>
+  <?=mk_option($var['defaultFsType'], "luks:btrfs", "btrfs - encrypted");?>
+  <?=mk_option($var['defaultFsType'], "luks:reiserfs", "reiserfs - encrypted");?>
   </select>
 
 > Defines the default file system type to create when an *unmountable* array device is formatted.
@@ -144,11 +152,11 @@ Tunable (enable NCQ):
 > If set to **Yes** then *Native Command Queuing* is enabled for all array devices that support NCQ.
 >
 > Note: After changing from **No** to **Yes** you must reboot the server for the change to take effect.  Changing
-> from **Yes* to **No** however, takes effect immediately.
+> from **Yes** to **No** however, takes effect immediately.
 >
 > Most users find that overall system performance is better with NCQ disabled.
 >
-> *Auto* selects `No`.
+> **Auto** selects `No`.
 
 Tunable (nr_requests):
 : <input type="text" name="nr_requests" maxlength="10" value="<?=$var['nr_requests']?>" class="narrow"><?=$var['nr_requests_status']?>
@@ -164,7 +172,7 @@ Tunable (md_sync_window):
 Tunable (md_sync_thresh):
 : <input type="text" name="md_sync_thresh" maxlength="10" value="<?=$var['md_sync_thresh']?>" class="narrow"><?=$var['md_sync_thresh_status']?>
 
-> These tunables let you control certain properties of the unRAID driver.
+> These tunables let you control certain properties of the Unraid driver.
 >
 > Note: For each of these settings, if you set to blank and click Apply, the setting is restored to its default.
 
@@ -210,14 +218,15 @@ Default critical disk temperature threshold (&deg;<?=$display['unit']?>):
 > A value of zero will disable the critical threshold (including notifications).
 
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeDisk" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
-<div id="title"><span class="left"><img src="/webGui/icons/smartchecks.png" class="icon">Global SMART Settings</span></div>
+<div id="title"><span class="left"><i class="title fa fa-plus-square"></i>Global SMART Settings</span></div>
 
 <form markdown="1" name="smart_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDiskSettings(this)">
 <input type="hidden" name="#file" value="/boot/config/smart-all.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
+<input type="hidden" name="#cleanup" value="true">
 <input type="hidden" name="#top" value="1">
 <input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smIndex" value="0">
@@ -250,11 +259,14 @@ Default SMART controller type:
 : <select name="smType" size="1" onchange="setIndex(this.form)">
   <?=mk_option($var['smType'], "", "Automatic")?>
   <?=mk_option($var['smType'], "-d ata", "ATA")?>
-  <?=mk_option($var['smType'], "-d sat", "SATA")?>
+  <?=mk_option($var['smType'], "-d nvme", "NVMe")?>
+  <?=mk_option($var['smType'], "-d sat", "SAT")?>
   <?=mk_option($var['smType'], "-d scsi", "SCSI")?>
   <?=mk_option($var['smType'], "-d 3ware", "3Ware")?>
+  <?=mk_option($var['smType'], "-d aacraid", "Adaptec")?>
   <?=mk_option($var['smType'], "-d areca", "Areca")?>
   <?=mk_option($var['smType'], "-d hpt", "HighPoint")?>
+  <?=mk_option($var['smType'], "-d cciss", "HP cciss")?>
   <?=mk_option($var['smType'], "-d marvell", "Marvell")?>
   <?=mk_option($var['smType'], "-d megaraid", "MegaRAID")?>
   </select>
@@ -267,10 +279,10 @@ Default SMART controller type:
 Default SMART attribute notifications:
 : <input type="text" name="smCustom" value="<?=$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
 
-  <?for ($x = 0; $x < count($preselect); $x++):?>
+<?for ($x = 0; $x < count($preselect); $x++):?>
 &nbsp;
-: <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span style="display:inline-block;width:136px"><?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
-  <?endfor;?>
+: <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span class="code">Attribute = <?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
+<?endfor;?>
 
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
@@ -280,5 +292,5 @@ Default SMART attribute notifications:
 > This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
 
 <input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="#apply" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>

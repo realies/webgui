@@ -1,10 +1,10 @@
 Menu="Scheduler:2"
 Title="Mover Settings"
-Cond="(($var['shareUser']!='-')&&(isset($disks['cache']))&&($disks['cache']['status']!='DISK_NP')&&($var['shareCacheEnabled']=='yes'))"
+Tag="calendar-check-o"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -14,8 +14,14 @@ Cond="(($var['shareUser']!='-')&&(isset($disks['cache']))&&($disks['cache']['sta
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
+if (empty($disks['cache']) || $disks['cache']['status']=='DISK_NP') {
+  echo "<p class='notice'>No Cache disk present!</p>";
+} elseif ($var['shareCacheEnabled']!='yes') {
+  echo "<p class='notice'>Cache disk not enabled!</p>";
+} elseif ($var['shareUser']=='-') {
+  echo "<p class='notice'>User shares not enabled!</p>";
+}
 $cron = explode(' ',$var['shareMoverSchedule']);
 $move = $cron[2]!='*' ? 3 : ($cron[4]!='*' ? 2 : (substr($cron[1],0,1)!='*' ? 1 : 0));
 $mode = ['Hourly','Daily','Weekly','Monthly'];
@@ -25,7 +31,7 @@ $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 $(function() {
   presetMover(document.mover_schedule);
 });
-// Fool unRAID by simulating the original input field
+// Fool Unraid by simulating the original input field
 function prepareMover(form) {
   var mode = form.shareMoverSchedule.value;
   var min = mode!=0 ? form.min.value : 0;
@@ -112,12 +118,14 @@ Mover logging:
 > Write mover messages to the syslog file.
 
 &nbsp;
-: <input type="submit" name="changeMover" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeMover" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 
+<?if ($var['shareCacheEnabled']=="yes" && is_dir("/mnt/cache")):?>
 &nbsp;
 <?if (file_exists("/var/run/mover.pid")):?>
 : <input type="submit" name="cmdStartMover" value="Move now" disabled> Mover is running.
 <?else:?>
 : <input type="submit" name="cmdStartMover" value="Move now"> Click to invoke the Mover.
+<?endif;?>
 <?endif;?>
 </form>

@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 function PsExecute($command, $timeout = 20, $sleep = 2) {
   exec($command.'>/dev/null & echo $!',$op);
@@ -33,7 +33,7 @@ function PsEnded($pid) {
 function PsKill($pid) {
   exec("kill -9 $pid");
 }
-if (PsExecute("$docroot/webGui/scripts/notify -s 'unRAID SMTP Test' -d 'Test message received!' -i 'alert' -t")) {
+if (PsExecute("$docroot/webGui/scripts/notify -s 'Unraid SMTP Test' -d 'Test message received!' -i 'alert' -t")) {
   $result = exec("tail -3 /var/log/syslog|awk '/sSMTP/ {getline;print}'|cut -d']' -f2|cut -d'(' -f1");
   $color = strpos($result, 'Sent mail') ? 'green' : 'red';
   echo "Test result<span class='$color'>$result</span>";

@@ -1,10 +1,11 @@
 Menu="NetworkServices:1"
 Title="AFP"
-Icon="apple-logo.png"
+Icon="icon-apple"
+Tag="apple"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -35,11 +36,11 @@ Connected users:
     endif;?>
 
 &nbsp;
-: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 </form>
 
 > ### Overview
-> AFP for unRAID includes both `netatalk` to implement Apple Filing Protocol, and `avahi`
+> AFP for Unraid includes both `netatalk` to implement Apple Filing Protocol, and `avahi`
 > to implement Zeroconf, aka, Bonjour.
 >
 > As with SMB and NFS, you may export both disk shares and user shares via AFP.  There are some important
@@ -53,7 +54,7 @@ Connected users:
 > * The netatalk documentation includes a strong warning to not use symlinks anywhere in a file system
 > being exprted via AFP.
 >
-> AFP for unRAID supports Time Machine, and all three security modes.
+> AFP for Unraid supports Time Machine, and all three security modes.
 >
 > ### Bonjour
 > When AFP is enabled, your server name, with a `-AFP` suffix, should automatically appear in the left-hand pane of

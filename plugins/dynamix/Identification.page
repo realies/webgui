@@ -1,10 +1,12 @@
 Menu="OtherSettings"
+Type="xmenu"
 Title="Identification"
-Icon="ident.png"
+Icon="icon-home"
+Tag="home"
 ---
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -41,7 +43,7 @@ Model:
 > This is the server model number.
 
 &nbsp;
-: <input type="submit" name="changeNames" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
+: <input type="submit" name="changeNames" value="Apply" disabled><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
 </form>
 <script>
 $("#NAME").keypress(function(event) {

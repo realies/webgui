@@ -1,5 +1,5 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
+/* Copyright 2005-2018, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,12 +10,15 @@
  */
 ?>
 <?
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+require_once "$docroot/webGui/include/Helpers.php";
+
 $var = parse_ini_file('state/var.ini');
 $keyfile = base64_encode(file_get_contents($var['regFILE']));
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
-<script src="/webGui/javascript/dynamix.js"></script>
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
+<link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
+<script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
 function replaceKey(email, guid, keyfile) {
   if (email.length) {
@@ -49,7 +52,7 @@ function replaceKey(email, guid, keyfile) {
 }
 </script>
 <body>
-<div style="margin-top:20px;font-size:12px;line-height:30px;color:#303030;margin-left:40px;">
+<div style="margin-top:20px;line-height:30px;margin-left:40px">
 <div id="status_panel"></div>
 <form markdown="1" id="input_form">
 

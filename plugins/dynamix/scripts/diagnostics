@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2012-2016, Bergware International.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,8 +19,17 @@ $cli = empty($zip);
 $get = "/var/local/emhttp";
 $var = file_exists("$get/var.ini") ? parse_ini_file("$get/var.ini") : [];
 
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 $folders = ['/boot','/boot/config','/boot/config/plugins','/boot/extra','/boot/syslinux','/var/log','/var/log/plugins','/var/log/packages','/tmp'];
+
+function exert($cmd, &$save=null) {
+// execute command with timeout of 30s
+  exec("timeout -s9 30 $cmd", $save);
+  return implode("\n",$save);
+}
+function shareDisks($share) {
+  return exec("shopt -s dotglob; getfattr --no-dereference --absolute-names --only-values -n system.LOCATIONS ".escapeshellarg("/usr/local/emhttp/mnt/user/$share")." 2>/dev/null") ?: "no drives";
+}
 
 function anonymize($text,$select) {
   global $all;
@@ -51,7 +60,7 @@ function anonymize($text,$select) {
 if ($cli) {
 // script is called from CLI
   echo "Starting diagnostics collection... ";
-  exec("mkdir -p /boot/logs");
+  exert("mkdir -p /boot/logs");
   $server = isset($var['NAME']) ? str_replace(' ','_',strtolower($var['NAME'])) : 'tower';
   $date = date('Ymd-Hi');
   $diag = "$server-diagnostics-$date";
@@ -63,99 +72,148 @@ if ($cli) {
   $date = "{$split[2]}-{$split[3]}";
 }
 // create folder structure
-exec("mkdir -p ".escapeshellarg("/$diag/system")." ".escapeshellarg("/$diag/config")." ".escapeshellarg("/$diag/logs")." ".escapeshellarg("/$diag/shares")." ".escapeshellarg("/$diag/smart")." ".escapeshellarg("/$diag/qemu"));
-// make unRAID version reference
+exert("mkdir -p ".escapeshellarg("/$diag/system")." ".escapeshellarg("/$diag/config")." ".escapeshellarg("/$diag/logs")." ".escapeshellarg("/$diag/shares")." ".escapeshellarg("/$diag/smart")." ".escapeshellarg("/$diag/qemu"));
+// get utilization of running processes
+exert("top -bn1 -o%CPU 2>/dev/null|todos >".escapeshellarg("/$diag/system/top.txt"));
+// make Unraid version reference
 $unraid = parse_ini_file('/etc/unraid-version');
-file_put_contents("/$diag/unRAID-".$unraid['version'].".txt",$unraid['version']);
+file_put_contents("/$diag/unraid-".$unraid['version'].".txt",$unraid['version']);
 // copy ini variables
 foreach (glob("$get/*.ini") as $file) {
   $ini = basename($file,".ini");
   // skip users file in anonymized mode
   if ($all || $ini != "users") file_put_contents("/$diag/system/vars.txt",preg_replace(["/\n/","/^Array/"],["\r\n",$ini],anonymize(print_r(parse_ini_file($file,true),true),1)),FILE_APPEND);
 }
+// Create loads.txt
+$cpuload = exert("uptime")."  Cores: ".exert("nproc")."\r\n".file_get_contents("/var/local/emhttp/cpuload.ini")."\r\n";
+$diskload = file("/var/local/emhttp/diskload.ini");
+$disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
+foreach ( $diskload as $loadLine ) {
+  $load = explode("=",$loadLine);
+  foreach ( $disks as $disk ) {
+    if ( $load[0] == $disk['device'] ) {
+      $loadTxt[] = "{$disk['device']} ({$disk['name']})=".trim($load[1]);
+      break;
+    }
+  }
+}
+file_put_contents("/$diag/system/loads.txt",$cpuload.implode("\r\n",$loadTxt));
 // individual commands execution (suppress errors)
-exec("lscpu 2>/dev/null|todos >".escapeshellarg("/$diag/system/lscpu.txt"));
-exec("lsscsi -vgl 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsscsi.txt"));
-exec("lspci -knn 2>/dev/null|todos >".escapeshellarg("/$diag/system/lspci.txt"));
-exec("lsusb 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsusb.txt"));
-exec("free -mt 2>/dev/null|todos >".escapeshellarg("/$diag/system/memory.txt"));
-exec("ps -ef 2>/dev/null|todos >".escapeshellarg("/$diag/system/ps.txt"));
-exec("lsof -Pni 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsof.txt"));
-exec("lsmod 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsmod.txt"));
-exec("df -h 2>/dev/null|todos >".escapeshellarg("/$diag/system/df.txt"));
-exec("ifconfig -a -s 2>/dev/null|grep -Po '^(eth|bond)[0-9]+'", $ports);
+exert("lscpu 2>/dev/null|todos >".escapeshellarg("/$diag/system/lscpu.txt"));
+exert("lsscsi -vgl 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsscsi.txt"));
+exert("lspci -knn 2>/dev/null|todos >".escapeshellarg("/$diag/system/lspci.txt"));
+exert("lsusb 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsusb.txt"));
+exert("free -mth 2>/dev/null|todos >".escapeshellarg("/$diag/system/memory.txt"));
+exert("ps -auxf --sort=-pcpu 2>/dev/null|todos >".escapeshellarg("/$diag/system/ps.txt"));
+exert("lsof -Pni 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsof.txt"));
+exert("lsmod|sort 2>/dev/null|todos >".escapeshellarg("/$diag/system/lsmod.txt"));
+exert("df -h 2>/dev/null|todos >".escapeshellarg("/$diag/system/df.txt"));
+exert("ifconfig -a -s 2>/dev/null|grep -Po '^(eth|bond)[0-9]+'", $ports);
+exert("dmidecode -qt2|awk -F: '/^\tManufacturer:/{m=\$2};/^\tProduct Name:/{p=\$2} END{print m\" -\"p}' 2>/dev/null|todos >".escapeshellarg("/$diag/system/motherboard.txt"));
+exert("dmidecode -qt0 2>/dev/null|todos >>".escapeshellarg("/$diag/system/motherboard.txt"));
+exert("cat /proc/meminfo 2>/dev/null|todos >".escapeshellarg("/$diag/system/meminfo.txt"));
 // create ethernet information information (suppress errors)
 foreach ($ports as $port) {
-  exec("ethtool ".escapeshellarg($port)." 2>/dev/null|todos >>".escapeshellarg("/$diag/system/ethtool.txt"));
+  exert("ethtool ".escapeshellarg($port)." 2>/dev/null|todos >>".escapeshellarg("/$diag/system/ethtool.txt"));
   file_put_contents("/$diag/system/ethtool.txt", "\r\n", FILE_APPEND);
-  exec("ethtool -i ".escapeshellarg($port)." 2>/dev/null|todos >>".escapeshellarg("/$diag/system/ethtool.txt"));
+  exert("ethtool -i ".escapeshellarg($port)." 2>/dev/null|todos >>".escapeshellarg("/$diag/system/ethtool.txt"));
   file_put_contents("/$diag/system/ethtool.txt", "--------------------------------\r\n", FILE_APPEND);
 }
-exec("ifconfig -a 2>/dev/null|todos >".escapeshellarg("/$diag/system/ifconfig.txt"));
+exert("ifconfig -a 2>/dev/null|todos >".escapeshellarg("/$diag/system/ifconfig.txt"));
 // create system information (suppress errors)
-exec("find /sys/kernel/iommu_groups/ -type l 2>/dev/null|todos >".escapeshellarg("/$diag/system/iommu_groups.txt"));
-exec("todos </proc/cmdline >".escapeshellarg("/$diag/system/cmdline.txt"));
+exert("find /sys/kernel/iommu_groups/ -type l 2>/dev/null|sort -V|todos >".escapeshellarg("/$diag/system/iommu_groups.txt"));
+exert("todos </proc/cmdline >".escapeshellarg("/$diag/system/cmdline.txt"));
 // create folder structure listing
 $dest = "/$diag/system/folders.txt";
 foreach ($folders as $folder) {
-  if (is_dir($folder)) exec("echo -ne ".escapeshellarg("\r\n$folder\r\n")." >>".escapeshellarg($dest).";ls -l ".escapeshellarg($folder)."|todos >>".escapeshellarg("$dest")); else exec("echo -ne ".escapeshellarg("\r\n$folder\r\nfolder does not exist\r\n")." >>".escapeshellarg("$dest"));
+  if (is_dir($folder)) exert("echo -ne ".escapeshellarg("\r\n$folder\r\n")." >>".escapeshellarg($dest).";ls -l ".escapeshellarg($folder)."|todos >>".escapeshellarg("$dest")); else exert("echo -ne ".escapeshellarg("\r\n$folder\r\nfolder does not exist\r\n")." >>".escapeshellarg("$dest"));
 }
 // copy configuration files (suppress errors)
-exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go ".escapeshellarg("/$diag/config")." 2>/dev/null");
+exert("cp /boot/config/*.{cfg,conf,dat} /boot/config/go ".escapeshellarg("/$diag/config")." 2>/dev/null");
 // anonymize configuration files
-if (!$all) exec("sed -ri 's/^((disk|flash)(Read|Write)List.*=\")[^\"]+/\\1.../' ".escapeshellarg("/$diag/config/*.cfg")." 2>/dev/null");
+if (!$all) exert("sed -ri 's/^((disk|flash)(Read|Write)List.*=\")[^\"]+/\\1.../' ".escapeshellarg("/$diag/config/*.cfg")." 2>/dev/null");
+
+// don't anonymize system share names
+$vardomain = file_exists('/boot/config/domain.cfg') ? parse_ini_file('/boot/config/domain.cfg') : [];
+$vardocker = file_exists('/boot/config/docker.cfg') ? parse_ini_file('/boot/config/docker.cfg') : [];
+$showshares = [];
+$showshares[] = current(array_slice(explode('/',$vardomain['IMAGE_FILE']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['DOMAINDIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['MEDIADIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardomain['DISKDIR']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_IMAGE_FILE']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_APP_CONFIG_PATH']), 3, 1)).'.cfg';
+$showshares[] = current(array_slice(explode('/',$vardocker['DOCKER_HOME']), 3, 1)).'.cfg';
 
 // copy share information (anonymize if applicable)
 $files = glob("/boot/config/shares/*.cfg");
 foreach ($files as $file) {
-  $dest = anonymize("/$diag/shares/".basename($file),2);
+  $dest = "/$diag/shares/".basename($file);
+  if (!in_array(basename($file),$showshares)) {
+    $dest = anonymize($dest,2);
+  }
   @copy($file, $dest);
-  if (!$all) exec("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
+  if (!$all) exert("sed -ri 's/^(share(Comment|ReadList|WriteList)=\")[^\"]+/\\1.../' ".escapeshellarg($dest)." 2>/dev/null");
+  $share = pathinfo(basename($file),PATHINFO_FILENAME);
+  file_put_contents($dest,"# Share exists on ".shareDisks($share)."\r\n",FILE_APPEND);
 }
 // create default user shares information
 $shares = file_exists("$get/shares.ini") ? parse_ini_file("$get/shares.ini", true) : [];
 foreach ($shares as $share) {
   $name = $share['name'];
-  if (!in_array("/boot/config/shares/$name.cfg",$files)) file_put_contents(anonymize("/$diag/shares/$name.cfg",2),"# This share has default settings.\r\n");
-}
-// copy syslog information (anonymize if applicable)
-$max = 2*1024*1024; //=2MB
-foreach (glob("/var/log/syslog*") as $file) {
-  $log = "/$diag/logs/".basename($file);
-  exec("todos <".escapeshellarg($file)." >".escapeshellarg("$log.txt"));
-  if (!$all) {
-    unset($titles,$rows);
-    exec("grep -Po 'logger: moving \"\K[^\"]+' ".escapeshellarg("$log.txt")." 2>/dev/null|sort|uniq", $titles);
-    exec("sed -ri 's|\b\S+@\S+\.\S+\b|xxx@removed.com|;s|\b(username\|password)([=:])\S+\b|\\1\\2xxx|;s|(GUID: \S)\S+(\S) |\\1..\\2 |;s|(moving \"\S\|\"/mnt/user/\S).*(\S)\"|\\1..\\2\"|' ".escapeshellarg("$log.txt"));
-    foreach ($titles as $mover) {
-      $title = "/{$mover[0]}..".substr($mover,-1)."/...";
-      exec("sed -ri 's|(logger: [.>cr].*)[ /]$mover/.*$|\\1 file: $title|' ".escapeshellarg("$log.txt")." 2>/dev/null");
-    }
-    exec("grep -n ' cache_dirs: -' ".escapeshellarg("$log.txt")." 2>/dev/null|cut -d: -f1", $rows);
-    for ($i = 0; $i < count($rows); $i += 2) for ($row = $rows[$i]+1; $row < $rows[$i+1]; $row++) exec("sed -ri '$row s|(cache_dirs: \S).*(\S)|\\1..\\2|' ".escapeshellarg("$log.txt")." 2>/dev/null");
-  }
-  if (basename($file)=='syslog' && filesize($file)>=$max) exec("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
-  exec("truncate -s '<$max' ".escapeshellarg("$log.txt"));
+  if (!in_array("/boot/config/shares/$name.cfg",$files)) file_put_contents(anonymize("/$diag/shares/$name.cfg",2),"# This share has default settings.\r\n# Share exists on ".shareDisks($name)."\r\n");
 }
 // copy docker information (if existing)
 $max = 1*1024*1024; //=1MB
 $docker = "/var/log/docker.log";
 if (file_exists($docker)) {
   $log = "/$diag/logs/docker";
-  exec("todos <$docker >".escapeshellarg("$log.txt"));
+  exert("todos <$docker >".escapeshellarg("$log.txt"));
   if (filesize($docker)>=$max) {
-    exec("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
-    exec("truncate -s '<$max' ".escapeshellarg("$log.txt"));
+    exert("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
+    exert("truncate -s '<$max' ".escapeshellarg("$log.txt"));
   }
 }
+// create SMART reports (suppress errors)
+$disks = file_exists("$get/disks.ini") ? parse_ini_file("$get/disks.ini", true) : [];
+include_once "$docroot/webGui/include/CustomMerge.php";
+include_once "$docroot/webGui/include/Wrappers.php";
+exert("ls -l /dev/disk/by-id/[asun]* 2>/dev/null|sed '/-part/d;s|^.*/by-id/[^-]*-||;s|-> ../../||;s|:|-|'", $devices);
+foreach ($devices as $device) {
+  list($name,$port) = explode(' ',$device);
+  $diskName = ''; $type = '';
+  foreach ($disks as $find) {
+    if ($find['device']==$port) {
+      $diskName = $find['name'];
+      $type = get_value($find,'smType','');
+      get_ctlr_options($type, $find);
+      $port = $find['smDevice'] ?? $port;
+      break;
+    }
+  }
+  $port = port_name($port);
+  $status = $find['status'] == "DISK_OK" ? "" : " - {$find['status']}";
+  exert("smartctl -x $type ".escapeshellarg("/dev/$port")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date $diskName ($port)$status.txt"));
+}
+// create cache pool information
+if (is_dir('/mnt/cache') && strpos($disks['cache']['fsType'],'btrfs')!==false) {
+  exert("/sbin/btrfs filesystem usage -T /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-usage.txt"));
+}
+// create installed plugin information
+$plugins = glob("/var/log/plugins/*.plg");
+foreach ($plugins as $plugin) {
+  $installedPlugins .= basename($plugin)." - ".exert("plugin version ".escapeshellarg($plugin))."\r\n";
+}
+$installedPlugins = $installedPlugins ?: "No additional Plugins Installed";
+file_put_contents("/$diag/system/plugins.txt",$installedPlugins);
 // copy libvirt information (if existing)
 $libvirtd = "/var/log/libvirt/libvirtd.log";
 if (file_exists($libvirtd)) {
   $log = "/$diag/logs/libvirt";
-  exec("todos <$libvirtd >".escapeshellarg("$log.txt"));
+  exert("todos <$libvirtd >".escapeshellarg("$log.txt"));
   if (filesize($libvirtd)>=$max) {
-    exec("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
-    exec("truncate -s '<$max' ".escapeshellarg("$log.txt"));
+    exert("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
+    exert("truncate -s '<$max' ".escapeshellarg("$log.txt"));
   }
 }
 // copy VMs information (if existing)
@@ -163,47 +221,38 @@ $qemu = glob("/var/log/libvirt/qemu/*.log*");
 if ($qemu) {
   foreach ($qemu as $file) {
     $log = "/$diag/qemu/".basename($file,'.log');
-    exec("todos <".escapeshellarg($file)." >".escapeshellarg("$log.txt"));
+    exert("todos <".escapeshellarg($file)." >".escapeshellarg("$log.txt"));
     if (filesize($file)>=$max) {
-      exec("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
-      exec("truncate -s '<$max' ".escapeshellarg("$log.txt"));
+      exert("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
+      exert("truncate -s '<$max' ".escapeshellarg("$log.txt"));
     }
   }
 } else
   file_put_contents("/$diag/qemu/no qemu log files","");
-// create SMART reports (suppress errors)
-$disks = file_exists("$get/disks.ini") ? parse_ini_file("$get/disks.ini", true) : [];
-include_once "$docroot/webGui/include/CustomMerge.php";
-exec("ls -l /dev/disk/by-id/[asun]* 2>/dev/null|sed '/-part/d;s|^.*/by-id/[^-]*-||;s|-> ../../||;s|:|-|'", $devices);
-foreach ($devices as $device) {
-  list($name,$dev) = explode(' ',$device);
-  $type = '';
-  foreach ($disks as $find) {
-    if ($find['device']==$dev) {
-      $type = isset($find['smType']) ? $find['smType'] : -1;
-      if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
-      if ($type) {
-        $ports = [];
-        if (isset($find['smDevice']) && strlen($find['smDevice'])) $port = $find['smDevice'];
-        if (isset($find['smPort1']) && strlen($find['smPort1'])) $ports[] = $find['smPort1'];
-        if (isset($find['smPort2']) && strlen($find['smPort2'])) $ports[] = $find['smPort2'];
-        if (isset($find['smPort3']) && strlen($find['smPort3'])) $ports[] = $find['smPort3'];
-        if ($ports) {
-          $glue = isset($find['smGlue']) ? $find['smGlue'] : ',';
-          $type .= ','.implode($glue,$ports);
-        }
-      }
-      break;
+// copy syslog information (anonymize if applicable)
+$max = 2*1024*1024; //=2MB
+foreach (glob("/var/log/syslog*") as $file) {
+  $log = "/$diag/logs/".basename($file);
+  exert("todos <".escapeshellarg($file)." >".escapeshellarg("$log.txt"));
+  if (!$all) {
+    unset($titles,$rows);
+    exert("grep -Po 'logger: moving \"\K[^\"]+' ".escapeshellarg("$log.txt")." 2>/dev/null|sort|uniq", $titles);
+    exert("sed -ri 's|\b\S+@\S+\.\S+\b|email@removed.com|;s|\b(username\|password)([=:])\S+\b|\\1\\2xxx|;s|(GUID: \S)\S+(\S) |\\1..\\2 |;s|(moving \"\S\|\"/mnt/user/\S).*(\S)\"|\\1..\\2\"|' ".escapeshellarg("$log.txt"));
+    exert("sed -ri 's|(host: \").+(\.unraid\.net:[0-9]+\")|\\1hash\\2|;s|(referrer: \"https?://).+(\.unraid\.net)|\\1hash\\2|' ".escapeshellarg("$log.txt"));
+    foreach ($titles as $mover) {
+      $title = "/{$mover[0]}..".substr($mover,-1)."/...";
+      exert("sed -ri 's|(logger: [.>cr].*)[ /]$mover/.*$|\\1 file: $title|' ".escapeshellarg("$log.txt")." 2>/dev/null");
     }
+    exert("grep -n ' cache_dirs: -' ".escapeshellarg("$log.txt")." 2>/dev/null|cut -d: -f1", $rows);
+    for ($i = 0; $i < count($rows); $i += 2) for ($row = $rows[$i]+1; $row < $rows[$i+1]; $row++) exert("sed -ri '$row s|(cache_dirs: \S).*(\S)|\\1..\\2|' ".escapeshellarg("$log.txt")." 2>/dev/null");
   }
-  exec("smartctl -a $type ".escapeshellarg("/dev/$dev")." 2>/dev/null|todos >".escapeshellarg("/$diag/smart/$name-$date.txt"));
-}
-// create cache pool information
-if (is_dir('/mnt/cache') && $disks['cache']['fsType']=='btrfs') {
-  exec("/sbin/btrfs filesystem show /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-show.txt"));
-  exec("/sbin/btrfs filesystem df /mnt/cache 2>/dev/null|todos >".escapeshellarg("/$diag/system/btrfs-df.txt"));
+  // replace consecutive repeated lines in syslog
+  exert("awk -i inplace '{if(s!=substr(\$0,17)){if(x>0)print\"### [PREVIOUS LINE REPEATED \"x\" TIMES] ###\\r\";print;x=0}else{x++}s=substr(\$0,17)}END{if(x>0)print\"### [PREVIOUS LINE REPEATED \"x\" TIMES] ###\\r\"}' ".escapeshellarg("$log.txt"));
+  // truncate syslog if too big
+  if (basename($file)=='syslog' && filesize($file)>=$max) exert("tail -n 200 ".escapeshellarg("$log.txt")." >".escapeshellarg("$log.last200.txt"));
+  exert("truncate -s '<$max' ".escapeshellarg("$log.txt"));
 }
 // create resulting zip file and remove temp folder
-exec("zip -qmr ".escapeshellarg($zip)." ".escapeshellarg("/$diag"));
+exert("zip -qmr ".escapeshellarg($zip)." ".escapeshellarg("/$diag"));
 if ($cli) echo "done.\nZIP file '$zip' created.\n";
 ?>

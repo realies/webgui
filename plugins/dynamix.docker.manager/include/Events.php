@@ -1,6 +1,7 @@
 <?PHP
-/* Copyright 2005-2016, Lime Technology
- * Copyright 2014-2016, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2014-2018, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,46 +12,43 @@
  */
 ?>
 <?
-$docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 
 $DockerClient = new DockerClient();
-
-$_REQUEST = array_merge($_GET, $_POST);
-
-$action = array_key_exists('action', $_REQUEST) ? $_REQUEST['action'] : '';
-$container = array_key_exists('container', $_REQUEST) ? $_REQUEST['container'] : '';
-$image = array_key_exists('image', $_REQUEST) ? $_REQUEST['image'] : '';
-
-$arrResponse = ['error' => 'Missing parameters'];
+$_REQUEST     = array_merge($_GET, $_POST);
+$action       = $_REQUEST['action'] ?? '';
+$container    = $_REQUEST['container'] ?? '';
+$name         = $_REQUEST['name'] ?? '';
+$image        = $_REQUEST['image'] ?? '';
+$arrResponse  = ['error' => 'Missing parameters'];
 
 switch ($action) {
-
 	case 'start':
 		if ($container) $arrResponse = ['success' => $DockerClient->startContainer($container)];
 		break;
-
+	case 'pause':
+		if ($container) $arrResponse = ['success' => $DockerClient->pauseContainer($container)];
+		break;
 	case 'stop':
 		if ($container) $arrResponse = ['success' => $DockerClient->stopContainer($container)];
 		break;
-
+	case 'resume':
+		if ($container) $arrResponse = ['success' => $DockerClient->resumeContainer($container)];
+		break;
 	case 'restart':
 		if ($container) $arrResponse = ['success' => $DockerClient->restartContainer($container)];
 		break;
-
 	case 'remove_container':
-		if ($container) $arrResponse = ['success' => $DockerClient->removeContainer($container)];
+		if ($container) $arrResponse = ['success' => $DockerClient->removeContainer($name, $container, 1)];
 		break;
-
 	case 'remove_image':
 		if ($image) $arrResponse = ['success' => $DockerClient->removeImage($image)];
 		break;
-
 	case 'remove_all':
 		if ($container && $image) {
 			// first: try to remove container
-			$ret = $DockerClient->removeContainer($container);
+			$ret = $DockerClient->removeContainer($name, $container, 2);
 			if ($ret === true) {
 				// next: try to remove image
 				$arrResponse = ['success' => $DockerClient->removeImage($image)];
@@ -60,11 +58,10 @@ switch ($action) {
 			}
 		}
 		break;
-
 	case 'log':
 		if ($container) {
-			$since = array_key_exists('since', $_REQUEST) ? $_REQUEST['since'] : '';
-			$title = array_key_exists('title', $_REQUEST) ? $_REQUEST['title'] : '';
+			$since = $_REQUEST['since'] ?? '';
+			$title = $_REQUEST['title'] ?? '';
 			require_once "$docroot/webGui/include/ColorCoding.php";
 			if (!$since) {
 				readfile("$docroot/plugins/dynamix.docker.manager/log.htm");
@@ -85,7 +82,6 @@ switch ($action) {
 						}
 					}
 				}
-
 				echo "<script>addLog('".addslashes("<$span>".htmlspecialchars($line)."</span>")."');</script>";
 				@flush();
 			};
@@ -95,9 +91,15 @@ switch ($action) {
 			exit;
 		}
 		break;
-
+	case 'terminal':
+		$shell = $_REQUEST['shell'] ?: 'sh';
+		$pid = exec("pgrep -a ttyd|awk '/\\/$name\\.sock/{print \$1}'");
+		if ($pid) exec("kill $pid");
+		@unlink("/var/tmp/$name.sock");
+		exec("exec ttyd -o -d0 -i '/var/tmp/$name.sock' docker exec -it '$name' $shell &>/dev/null &");
+		break;
 	default:
-		$arrResponse = ['error' => 'Unknown action \'' . $action . '\''];
+		$arrResponse = ['error' => "Unknown action '$action'"];
 		break;
 }
 

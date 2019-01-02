@@ -1,4 +1,5 @@
 Menu="$display['users'] Tasks:3"
 Type="xmenu"
 Title="Users"
-Icon="users.png"
+Icon="icon-users"
+Code="e945"
