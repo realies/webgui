@@ -249,7 +249,8 @@
       fi
 
       CHATID=$(cat /boot/config/telegram/chatid);
-      MESSAGE=$(echo -e "$(hostname): $MESSAGE");
+      MESSAGE=$(echo -e "$(hostname): $TITLE
+$MESSAGE");
       curl -G -v "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$MESSAGE" 2>&1;
       ]]>
     </Script>
