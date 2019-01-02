@@ -3,8 +3,7 @@
   <Agent>
     <Name>Boxcar</Name>
     <Variables>
-      <Variable Help="Get your access token as explained [a href='http://help.boxcar.io/knowledgebase/articles/314474-how-to-get-my-boxcar-access-token' target='_blank'][u]here[/u].[/a]" Desc="Access Token" 
-Default="">ACCESS_TOKEN</Variable>
+      <Variable Help="Get your access token as explained [a href='http://help.boxcar.io/knowledgebase/articles/314474-how-to-get-my-boxcar-access-token' target='_blank'][u]here[/u].[/a]" Desc="Access Token" Default="">ACCESS_TOKEN</Variable>
       <Variable Help="Specify the fields which are included in the title of the notification." Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
       <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
     </Variables>
@@ -241,7 +240,7 @@ Default="">ACCESS_TOKEN</Variable>
 
       if [ ! -f /boot/config/telegram/chatid ]; then
         mkdir -p /boot/config/telegram/;
-        curl https://api.telegram.org/bot732434840:AAGZrCtRmqX6YpKghfzUck8q4z_hDluwIDQ/getUpdates | jq ".result | last .message .chat .id" > /boot/config/telegram/chatid;
+        curl https://api.telegram.org/bot$BOT_TOKEN/getUpdates | jq ".result | last .message .chat .id" > /boot/config/telegram/chatid;
       fi
 
       CHATID=$(cat /boot/config/telegram/chatid)
