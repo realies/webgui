@@ -558,8 +558,8 @@ function update60() {
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
     $.each(data.split('\0'),function(k,v) {
       var load = v.slice(0,-1);
-      if (load >= red) var color = 'redbar';
-      else if (load >= orange) var color = 'orangebar';
+      if (load >= <?=$display['critical']?>) var color = 'redbar';
+      else if (load >= <?=$display['warning']?>) var color = 'orangebar';
       else var color = '';
       $('.sys'+k).text(v);
       $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}});
