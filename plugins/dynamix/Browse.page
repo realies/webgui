@@ -14,7 +14,10 @@ Markdown="false"
  * all copies or substantial portions of the Software.
  */
 ?>
-<style>.loc{text-align:left;white-space:nowrap}</style>
+<style>
+.loc{text-align:left;white-space:nowrap}
+#title span.left{text-transform:none}
+</style>
 <script>
 $(function(){
   $.get('/webGui/include/Browse.php',{dir:"<?=addslashes(urlencode($dir))?>",path:"<?=$path?>",user:<?=strpos($dir,'/mnt/user')===0?1:0?>},function(data){

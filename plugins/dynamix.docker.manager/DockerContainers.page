@@ -135,7 +135,7 @@ function loadlist() {
       $.post('/plugins/dynamix.docker.manager/include/UpdateConfig.php',{action:'wait',container:$(this).attr('container'),wait:$(this).val()});
     });
     if ($.cookie('docker_listview_mode')=='advanced') {$('.advanced').show(); $('.basic').hide();}
-    context.init({preventDoubleContext:false});
+    context.init({preventDoubleContext:false,left:true,above:false});
     $('input[type=button]').prop('disabled',false).show('slow');
     var update = false;
     for (var i=0,ct; ct=docker[i]; i++) if (ct.update=='false') {update = true; break;};

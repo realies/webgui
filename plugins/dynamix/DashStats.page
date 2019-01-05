@@ -463,7 +463,7 @@ function smartMenu(table) {
     opts.push({text:'Capabilities',icon:'fa-user',action:function(e){e.preventDefault();capabilities(page,disk);}});
     opts.push({divider:true});
     opts.push({text:'Identity',icon:'fa-home',action:function(e){e.preventDefault();identity(page,disk);}});
-    if (view == 'alert') {
+    if (view.search('green-text') == -1) {
       opts.push({divider:true});
       opts.push({text:'Acknowledge',icon:'fa-check-square-o',action:function(e){e.preventDefault();acknowledge(disk);}});
     }
@@ -558,8 +558,8 @@ function update60() {
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
     $.each(data.split('\0'),function(k,v) {
       var load = v.slice(0,-1);
-      if (load >= red) var color = 'redbar';
-      else if (load >= orange) var color = 'orangebar';
+      if (load >= <?=$display['critical']?>) var color = 'redbar';
+      else if (load >= <?=$display['warning']?>) var color = 'orangebar';
       else var color = '';
       $('.sys'+k).text(v);
       $('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css('overflow','visible').removeClass().addClass(color);}});
@@ -699,7 +699,7 @@ $(function() {
   toggleView('users_view',true);
   toggleView('shares_view',true);
   portMenu();
-  context.init({preventDoubleContext:false});
+  context.init({preventDoubleContext:false,left:true,above:false});
   cpuload.start();
 });
 </script>
