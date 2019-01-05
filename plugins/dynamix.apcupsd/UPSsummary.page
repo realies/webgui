@@ -1,6 +1,6 @@
 Menu="Dashboard:2"
 Title="UPS Summary"
-Tag="battery-3"
+Tag="icon-ups"
 Cond="file_exists('/var/run/apcupsd.pid')"
 ---
 <?PHP
