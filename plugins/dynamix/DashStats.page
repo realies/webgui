@@ -272,73 +272,7 @@ foreach ($ports as $port) {
 </table>
 
 <table class='share_status dashboard box3'>
-<thead><tr><td></td><td colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggleChevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
-</td><td></td></tr><tr id='users_view_on' style='display:none'><td></td><td>Name</td><td>Description</td><td>Write</td><td>Read</td><td></td></tr></thead>
-
-<?if ($var['shareSMBEnabled']=='yes'):?>
-<tbody class='smb user user1' style='display:none'><?
-foreach ($users as $user) {
-  $list = truncate($user['name'],20);
-  $desc = truncate($user['desc'],40);
-  if ($list=='root') {
-    $write = '-'; $read = '-';
-  } else {
-    $write = 0; $read = 0;
-    foreach ($shares as $share) {
-      if (strpos($sec[$share['name']]['writeList'],$list)!==false) $write++;
-      if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
-    }
-  }
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
-}
-?></tbody>
-<?endif;?>
-
-<?if ($var['shareAFPEnabled']=='yes'):?>
-<tbody class='afp user user2' style='display:none'><?
-foreach ($users as $user) {
-  $list = truncate($user['name'],20);
-  $desc = truncate($user['desc'],40);
-  if ($list=='root') {
-    $write = '-'; $read = '-';
-  } else {
-    $write = 0; $read = 0;
-    foreach ($shares as $share) {
-      if (strpos($sec_afp[$share['name']]['writeList'],$list)!==false) $write++;
-      if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
-    }
-  }
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
-}
-?></tbody>
-<?endif;?>
-
-<?if ($var['shareNFSEnabled']=='yes'):?>
-<tbody class='nfs user user3' style='display:none'><?
-foreach ($users as $user) {
-  $list = truncate($user['name'],20);
-  $desc = truncate($user['desc'],40);
-  $write = '-'; $read = '-';
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
-}
-?></tbody>
-<?endif;?>
-
-<?if (!$group):?>
-<tbody><?
-foreach ($users as $user) {
-  $list = truncate($user['name'],20);
-  $desc = truncate($user['desc'],40);
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
-}
-?></tbody>
-<?endif;?>
-
-<thead><tr><td></td><td class='next' colspan='4'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggleChevron("shares_view",4)'></i>
+<thead><tr><td></td><td colspan='4'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggleChevron("shares_view",4)'></i>
 <span class='info'>Share count: <?=count($shares)?> with <?=$cache_only?> cache only and <?=$encrypted?> encrypted</span>
 <?if ($group):?>
 <select name="enter_share" size="1" onchange="changeMode(this.value)">
@@ -411,6 +345,72 @@ foreach ($shares as $name => $share) {
   echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
+?></tbody>
+<?endif;?>
+
+<thead><tr><td></td><td class='next' colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggleChevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
+</td><td></td></tr><tr id='users_view_on' style='display:none'><td></td><td>Name</td><td>Description</td><td>Write</td><td>Read</td><td></td></tr></thead>
+
+<?if ($var['shareSMBEnabled']=='yes'):?>
+<tbody class='smb user user1' style='display:none'><?
+foreach ($users as $user) {
+  $list = truncate($user['name'],20);
+  $desc = truncate($user['desc'],40);
+  if ($list=='root') {
+    $write = '-'; $read = '-';
+  } else {
+    $write = 0; $read = 0;
+    foreach ($shares as $share) {
+      if (strpos($sec[$share['name']]['writeList'],$list)!==false) $write++;
+      if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
+    }
+  }
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
+<?endif;?>
+
+<?if ($var['shareAFPEnabled']=='yes'):?>
+<tbody class='afp user user2' style='display:none'><?
+foreach ($users as $user) {
+  $list = truncate($user['name'],20);
+  $desc = truncate($user['desc'],40);
+  if ($list=='root') {
+    $write = '-'; $read = '-';
+  } else {
+    $write = 0; $read = 0;
+    foreach ($shares as $share) {
+      if (strpos($sec_afp[$share['name']]['writeList'],$list)!==false) $write++;
+      if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
+    }
+  }
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
+<?endif;?>
+
+<?if ($var['shareNFSEnabled']=='yes'):?>
+<tbody class='nfs user user3' style='display:none'><?
+foreach ($users as $user) {
+  $list = truncate($user['name'],20);
+  $desc = truncate($user['desc'],40);
+  $write = '-'; $read = '-';
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+}
+?></tbody>
+<?endif;?>
+
+<?if (!$group):?>
+<tbody><?
+foreach ($users as $user) {
+  $list = truncate($user['name'],20);
+  $desc = truncate($user['desc'],40);
+  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
+}
 ?></tbody>
 <?endif;?>
 </table>
