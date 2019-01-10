@@ -706,11 +706,11 @@ function toggleView(field,init,view) {
     if (visible) {on.show(); off.hide();} else {off.show(); on.hide();}
     break;
   case 'docker_view':
-    if (visible) $('span.apps').show(); else $('span.apps').hide();
+    if (visible) $('span.info.apps').show(); else $('span.info.apps').hide();
     if (init) setTimeout(noApps,200); else noApps();
     break;
   case 'vm_view':
-    if (visible) $('span.vms').show(); else $('span.vms').hide();
+    if (visible) $('span.info.vms').show(); else $('span.info.vms').hide();
     if (init) setTimeout(noVMs,200); else noVMs();
     break;
   }
