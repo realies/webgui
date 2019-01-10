@@ -141,11 +141,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 .switch-button-label{float:left;cursor:pointer}
 .switch-button-background{float:left;position:relative;top:12px;background:#ccc;border:1px solid #aaa;margin:0 10px;border-radius:4px;cursor:pointer}
 .switch-button-button{position:absolute;left:-1px;top:-1px;background:#fafafa;border:1px solid #aaa;border-radius:4px}
-img,i.img{width:32px;height:32px;margin-right:10px}
-i.started{color:#009900}
-i.stopped{color:#ef3d47}
-i.paused{color:#f0dd33}
-span.update{color:#3b5998}
+img.img,i.img{width:32px;height:32px;margin-right:10px}
 span.outer{float:left;margin-bottom:20px;margin-right:20px;cursor:pointer}
 span.outer.started>img,span.outer.started>i.img{opacity:1.0}
 span.outer.stopped>img,span.outer.stopped>i.img{opacity:0.3}
@@ -452,8 +448,8 @@ function noVMs() {
 }
 function loadlist(init) {
   if (init) {
-    $('#apps').switchButton({show_labels:false, checked:$.cookie('my_apps')=='startedOnly'});
-    $('#vms').switchButton({show_labels:false, checked:$.cookie('my_vms')=='startedOnly'});
+    $('#apps').switchButton({labels_placement:'left', off_label:'All Apps', on_label:'Started only',  checked:$.cookie('my_apps')=='startedOnly'});
+    $('#vms').switchButton({labels_placement:'left', off_label:'All VMs', on_label:'Started only',  checked:$.cookie('my_vms')=='startedOnly'});
     $('#apps').change(function(){
       $('span.outer.apps.stopped').finish().toggle('fast',function(){noApps();})
       $('#apps').is(':checked') ? $.cookie('my_apps','startedOnly',{expires:3650}) : $.removeCookie('my_apps');

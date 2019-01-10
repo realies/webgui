@@ -48,10 +48,11 @@ if ($display=='icons' || $display=='docker') {
       $menu[] = sprintf("addDockerContainerContext('%s','%s','%s',%s,%s,%s,%s,'%s','%s','%s','%s','%s');", addslashes($name), addslashes($ct['ImageId']), addslashes($template), $running, $paused, $updateStatus, $is_autostart, addslashes($webGui), $shell, $id, addslashes($support), addslashes($project));
       $shape = $running ? ($paused ? 'pause' : 'play') : 'square';
       $status = $running ? ($paused ? 'paused' : 'started') : 'stopped';
-      $update = $updateStatus=='false' ? 'update' : '';
+      $color = $status=='started' ? 'green-text' : ($status=='paused' ? 'orange-text' : 'red-text');
+      $update = $updateStatus=='false' ? 'blue-text' : '';
       $icon = $info['icon'] ?: '/plugins/dynamix.docker.manager/images/question.png';
-      $image = substr($icon,-4)=='.png' ? "<img src='$icon'>" : (substr($icon,0,5)=='icon-' ? "<i class='$icon img'></i>" : "<i class='fa fa-$icon img'></i>");
-      echo "<span id='$id' class='outer apps $status'>$image<span class='inner'><span class='$update'>$name</span><br><i class='fa fa-$shape $status'></i><span class='state'>$status</span></span></span>";
+      $image = substr($icon,-4)=='.png' ? "<img src='$icon' class='img'>" : (substr($icon,0,5)=='icon-' ? "<i class='$icon img'></i>" : "<i class='fa fa-$icon img'></i>");
+      echo "<span id='$id' class='outer apps $status'>$image<span class='inner'><span class='$update'>$name</span><br><i class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span>";
     }
     $none = count($containers) ? "No running docker containers" : "No docker containers defined";
     echo "<span id='no_apps' style='display:none'>$none<br><br></span>";
@@ -96,19 +97,22 @@ if ($display=='icons' || $display=='vms') {
       case 'running':
         $shape = 'play';
         $status = 'started';
+        $color = 'green-text';
         break;
       case 'paused':
       case 'pmsuspended':
         $shape = 'pause';
         $status = 'paused';
+        $color = 'orange-text';
         break;
       default:
         $shape = 'square';
         $status = 'stopped';
+        $color = 'red-text';
         break;
       }
-      $image = substr($icon,-4)=='.png' ? "<img src='$icon'>" : (substr($icon,0,5)=='icon-' ? "<i class='$icon img'></i>" : "<i class='fa fa-$icon img'></i>");
-      echo "<span id='vm-$uuid' class='outer vms $status'>$image<span class='inner'>$vm<br><i class='fa fa-$shape $status'></i><span class='state'>$status</span></span></span>";
+      $image = substr($icon,-4)=='.png' ? "<img src='$icon' class='img'>" : (substr($icon,0,5)=='icon-' ? "<i class='$icon img'></i>" : "<i class='fa fa-$icon img'></i>");
+      echo "<span id='vm-$uuid' class='outer vms $status'>$image<span class='inner'>$vm<br><i class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span>";
     }
     $none = count($vms) ? "No running virtual machines" : "No virtual machines defined";
     echo "<span id='no_vms' style='display:none'>$none<br><br></span>";
