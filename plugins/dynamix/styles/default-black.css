@@ -150,7 +150,7 @@ table.share_status.share tr td:last-child{width:4%;text-align:right;padding-righ
 table.share_status.fixed tr>td+td{min-width:39px;font-size:1.1rem;text-align:center;padding:0}
 table.share_status.table{margin-top:36px}
 table.share_status.table tr>td{width:50%}
-table.share_status.dashboard{float:left;margin:6px 10px 20px 10px;border:1px solid #2b2b2b}
+table.share_status.dashboard{float:left;margin:6px 10px 14px 10px;border:1px solid #2b2b2b}
 table.share_status.dashboard thead tr:last-child{border-bottom:none}
 table.share_status.dashboard thead tr:first-child>td{background-color:transparent;height:4rem;line-height:4rem;font-size:1.6rem;font-weight:bold;letter-spacing:1.8px;text-transform:capitalize;vertical-align:middle}
 table.share_status.dashboard tbody tr:nth-child(even){background-color:transparent}

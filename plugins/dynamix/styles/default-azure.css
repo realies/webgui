@@ -153,7 +153,7 @@ table.share_status.share tr td:last-child{width:4%;text-align:right;padding-righ
 table.share_status.fixed tr>td+td{min-width:39px;font-size:1.1rem;text-align:center;padding:0}
 table.share_status.table{margin-top:36px}
 table.share_status.table tr>td{width:50%}
-table.share_status.dashboard{float:left;margin:6px 10px 20px 10px;border:1px solid #606e7f}
+table.share_status.dashboard{float:left;margin:6px 10px 14px 10px;border:1px solid #606e7f}
 table.share_status.dashboard thead tr:first-child>td{line-height:5rem;font-size:1.6rem;font-weight:bold;letter-spacing:1.8px;border:none;padding-top:10px}
 table.share_status.dashboard tbody tr>td{line-height:normal;padding-top:3px;padding-bottom:3px}
 table.share_status.dashboard tbody tr{border-bottom:none}
