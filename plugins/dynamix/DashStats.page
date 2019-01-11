@@ -139,9 +139,11 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <style>
-.switch-button-background{top:12px}
 <?if ($themes2):?>
-.switch-button-label{margin-top:-4px}
+.switch-button-background{top:16px}
+.switch-button-label{margin-top:0}
+<?else:?>
+.switch-button-background{top:12px}
 <?endif;?>
 span.outer{float:left}
 span.inner{width:124px}
