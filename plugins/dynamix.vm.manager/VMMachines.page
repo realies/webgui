@@ -109,7 +109,7 @@ tbody>tr.sortable:hover{cursor:move}
 table.domdisk tbody tr:nth-child(even){background-color:transparent}
 </style>
 <table id="kvm_table" class="tablesorter four shift">
-<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="eight">Autostart</th></tr></thead>
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px;display:inline-block;width:32px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a>Name</th><th>Description</th><th>CPUs</th><th>Memory</th><th>vDisks</th><th>Graphics</th><th class="eight">Autostart</th></tr></thead>
 <tbody id="kvm_list"><tr><td colspan='8'><div class="spinner"></div></td></tr></tbody>
 </table>
 <input type="button" onclick="addVM()" id="btnAddVM" value="Add VM" style="display:none">
