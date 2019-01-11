@@ -241,10 +241,17 @@ span.two{margin-left:-20px}
 span.three{margin-left:-23px}
 span.tub{margin-right:8px;font-size:2.4rem;cursor:pointer}
 span.score{font-size:1.2rem;color:#1c1b1b;position:absolute}
+span.outer{float:left;margin-bottom:20px;margin-right:20px;cursor:pointer}
+span.outer.started>img,span.outer.started>i.img{opacity:1.0}
+span.outer.stopped>img,span.outer.stopped>i.img{opacity:0.3}
+span.outer.paused>img,span.outer.paused>i.img{opacity:0.6}
+span.inner{display:inline-block;vertical-align:top}
+span.state{font-size:1.1rem;margin-left:7px}
 i.padlock{margin-right:8px;cursor:default;vertical-align:middle}
 i.nolock{visibility:hidden;margin-right:8px;vertical-align:middle}
 i.lock{margin-left:8px;cursor:default;vertical-align:middle}
 i.orb{font-size:1.1rem;margin:0 8px 0 3px}
+img.img,i.img{width:32px;height:32px;margin-right:10px}
 img.icon{margin:-3px 4px 0 0}
 img.list{width:auto;max-width:48px;height:48px}
 i.list{font-size:4rem;color:#1c1b1b}

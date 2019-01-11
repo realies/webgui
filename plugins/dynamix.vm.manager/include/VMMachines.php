@@ -42,7 +42,8 @@ foreach ($vms as $vm) {
   $id = $lv->domain_get_id($res) ?: '-';
   $is_autostart = $lv->domain_get_autostart($res);
   $state = $lv->domain_state_translate($dom['state']);
-  $vmicon = $lv->domain_get_icon_url($res);
+  $icon = $lv->domain_get_icon_url($res);
+  $image = substr($icon,-4)=='.png' ? "<img src='$icon' class='img'>" : (substr($icon,0,5)=='icon-' ? "<i class='$icon img'></i>" : "<i class='fa fa-$icon img'></i>");
   $arrConfig = domain_to_config($uuid);
   if ($state == 'running') {
     $mem = $dom['memory'] / 1024;
@@ -81,11 +82,28 @@ foreach ($vms as $vm) {
   unset($dom);
   $menu[] = sprintf("addVMContext('%s','%s','%s','%s','%s','%s');", addslashes($vm),addslashes($uuid),addslashes($template),$state,addslashes($vnc),addslashes($log));
   $kvm[] = "kvm.push({id:'$uuid',state:'$state'});";
+  switch ($state) {
+  case 'running':
+    $shape = 'play';
+    $status = 'started';
+    $color = 'green-text';
+    break;
+  case 'paused':
+  case 'pmsuspended':
+    $shape = 'pause';
+    $status = 'paused';
+    $color = 'orange-text';
+    break;
+  default:
+    $shape = 'square';
+    $status = 'stopped';
+    $color = 'red-text';
+    break;
+  }
 
   /* VM information */
-  echo "<tr parent-id='$i' class='sortable'>";
-  echo "<td style='width:48px;padding:4px'>".renderVMContentIcon($uuid, $vm, $vmicon, $state)."</td>";
-  echo "<td class='vm-name'><a href='#' onclick='return toggle_id(\"name-$i\")' title='click for more VM info'>$vm</a></td>";
+  echo "<tr parent-id='$i' class='sortable'><td class='vm-name' style='width:220px;padding:8px'>";
+  echo "<span class='outer'><span id='vm-$uuid'>$image</span><span class='inner'><a href='#' onclick='return toggle_id(\"name-$i\")' title='click for more VM info'>$vm</a><br><i class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span></td>";
   echo "<td>$desc</td>";
   echo "<td><a class='vcpu-$uuid' style='cursor:pointer'>$vcpu</a></td>";
   echo "<td>$mem</td>";
@@ -95,9 +113,9 @@ foreach ($vms as $vm) {
 
   /* Disk device information */
   echo "<tr child-id='$i' id='name-$i".(in_array('name-'.$i++,$show) ? "'>" : "' style='display:none'>");
-  echo "<td colspan='8' style='overflow:hidden'>";
+  echo "<td colspan='7' style='overflow:hidden'>";
   echo "<table class='tablesorter domdisk' id='domdisk_table'>";
-  echo "<thead><tr><th><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th></tr></thead>";
+  echo "<thead><tr><th><i class='fa fa-hdd-o'></i> <b>Disk devices</b></th><th>Bus</th><th>Capacity</th><th>Allocation</th></tr></thead>";
   echo "<tbody id='domdisk_list'>";
 
   /* Display VM disks */
