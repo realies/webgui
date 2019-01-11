@@ -251,12 +251,12 @@ foreach ($ports as $port) {
 
 <table class='share_status dashboard box3'>
 <?if ($display['dashapps']!='none'):?>
-<?if ($display['dashapps']=='icons' || $display['dashapps']=='docker'):?>
+<?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
 <thead><tr><td></td><td colspan='4'>Docker Containers<i class='fa blue-text chevron mt0' id='docker_view' onclick='toggleChevron("docker_view",0)'></i><span class='info apps'><input type='checkbox' id='apps'></span></td><td></td></tr></thead>
 <tbody class='docker_view' style='display:none'>
 </tbody>
 <?endif;?>
-<?if ($display['dashapps']=='icons' || $display['dashapps']=='vms'):?>
+<?if ($libvirtd && ($display['dashapps']=='icons' || $display['dashapps']=='vms')):?>
 <thead><tr><td></td><td colspan='4' class='next'>Virtual Machines<i class='fa blue-text chevron mt0' id='vm_view' onclick='toggleChevron("vm_view",0)'></i><span class='info vms'><input type='checkbox' id='vms'></span></td><td></td></tr></thead>
 <tbody class='vm_view' style='display:none'>
 </tbody>
@@ -457,7 +457,7 @@ function loadlist(init) {
     });
     context.init({preventDoubleContext:false,left:true,above:false});
   }
-  $.post('/webGui/include/DashboardApps.php',{display:'<?=$display['dashapps']?>',docker:'<?=$dockerd?>',vm:'<?=$libvirtd?>'},function(d) {
+  $.post('/webGui/include/DashboardApps.php',{display:'<?=$display['dashapps']?>'},function(d) {
     var data = d.split(/\0/);
     $('.docker_view').html(data[0]);
     $('.vm_view').html(data[1]);
@@ -749,10 +749,10 @@ $(function() {
 <?if ($fans>0):?>
   toggleView('fan_view',true);
 <?endif;?>
-<?if ($display['dashapps']=='icons' || $display['dashapps']=='docker'):?>
+<?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
   toggleView('docker_view',true);
 <?endif;?>
-<?if ($display['dashapps']=='icons' || $display['dashapps']=='vms'):?>
+<?if ($libvirtd && ($display['dashapps']=='icons' || $display['dashapps']=='vms')):?>
   toggleView('vm_view',true);
 <?endif;?>
   toggleView('parity_view',true);
