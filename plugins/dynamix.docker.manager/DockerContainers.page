@@ -29,27 +29,25 @@ $cpus = cpu_list();
 table#docker_containers{text-align:left}
 .basic{display:block}
 .advanced{display:none;white-space:nowrap}
-body{-webkit-overflow-scrolling:touch}
-img.started{opacity:1.0}
-img.stopped{opacity:0.3}
-img.paused{opacity:0.6}
 .log{cursor:zoom-in}
 .exec{cursor:pointer}
-.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.4rem;text-shadow:0 0 2px #FFF}
-.started{color:#009900}
-.stopped{color:#EF3D47}
-.paused{color:#F0DD33}
-.switch-button-label.off{color:inherit}
 th.five{width:5%}
-th.eight{width:8%}
+th.nine{width:9%}
 th.load{width:100px}
-tbody > tr.sortable:hover{cursor:move}
+tbody>tr.sortable:hover{cursor:move}
 input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
+img.img,i.img{width:32px;height:32px;margin-right:10px}
+span.outer{float:left;margin-bottom:20px;margin-right:20px;cursor:pointer}
+span.outer.started>img,span.outer.started>i.img{opacity:1.0}
+span.outer.stopped>img,span.outer.stopped>i.img{opacity:0.3}
+span.outer.paused>img,span.outer.paused>i.img{opacity:0.6}
+span.inner{display:inline-block;vertical-align:top}
+span.state{font-size:1.1rem;margin-left:7px}
 </style>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
 <table id="docker_containers" class="tablesorter shift">
-<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="eight">Autostart</th><th class="five">Log</th></tr></thead>
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a></th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="nine">Autostart</th><th class="five">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td class="advanced"></td><td colspan='8'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
@@ -154,8 +152,10 @@ watchDocker.on('message', function(data){
     var id = row.split(' ');
     var w1 = Math.round(Math.min(id[1].slice(0,-1)/<?=count($cpus)*count(preg_split('/[,-]/',$cpus[0]))?>,100)*100)/100+'%';
     var w2 = Math.round(Math.min(id[2].slice(0,-1),100)*100)/100+'%';
-    $('#cpu-'+id[0]).css('width',w1).text(w1.replace('.','<?=$display['number'][0]?>'));
-    $('#mem-'+id[0]).css('width',w2).text(w2.replace('.','<?=$display['number'][0]?>'));
+    $('.cpu-'+id[0]).text(w1.replace('.','<?=$display['number'][0]?>'));
+    $('.mem-'+id[0]).text(w2.replace('.','<?=$display['number'][0]?>'));
+    $('#cpu-'+id[0]).css('width',w1);
+    $('#mem-'+id[0]).css('width',w2);
   }
 });
 $(function() {
