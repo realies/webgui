@@ -20,14 +20,6 @@ $template_repos = $dockerManPaths['template-repos'];
 $user_prefs     = $dockerManPaths['user-prefs'];
 
 switch ($_POST['action']) {
-case 'docker_load_start':
-  $daemon = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker_load";
-  if (!exec("pgrep -f $daemon")) passthru("$daemon &>/dev/null &");
-  break;
-case 'docker_load_stop':
-  $daemon = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker_load";
-  if (exec("pgrep -f $daemon")) passthru("pkill -f $daemon &>/dev/null &");
-  break;
 case 'autostart':
   // update container autostart setting
   $container = urldecode(($_POST['container']));
