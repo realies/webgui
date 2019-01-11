@@ -146,7 +146,7 @@ function rmImage(image, imageName) {
   });
 }
 function eventControl(params, spin) {
-  if (spin) $('#'+params['container']).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+  if (spin) $('#'+params['container']).parent().find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
   $.post(eventURL, params, function(data) {
     if (data.success === true) {
       if (spin) setTimeout(spin+'()',500); else location=window.location.href;

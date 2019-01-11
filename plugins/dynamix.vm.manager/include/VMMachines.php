@@ -103,7 +103,7 @@ foreach ($vms as $vm) {
 
   /* VM information */
   echo "<tr parent-id='$i' class='sortable'><td class='vm-name' style='width:220px;padding:8px'>";
-  echo "<span class='outer'><span id='vm-$uuid'>$image</span><span class='inner'><a href='#' onclick='return toggle_id(\"name-$i\")' title='click for more VM info'>$vm</a><br><i class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span></td>";
+  echo "<span class='outer'><span id='vm-$uuid' class='hand'>$image</span><span class='inner'><a href='#' onclick='return toggle_id(\"name-$i\")' title='click for more VM info'>$vm</a><br><i class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span></td>";
   echo "<td>$desc</td>";
   echo "<td><a class='vcpu-$uuid' style='cursor:pointer'>$vcpu</a></td>";
   echo "<td>$mem</td>";

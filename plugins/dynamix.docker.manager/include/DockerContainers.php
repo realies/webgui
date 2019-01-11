@@ -84,7 +84,7 @@ foreach ($containers as $ct) {
   } else {
     $appname = htmlspecialchars($name);
   }
-  echo "<span id='$id' class='outer'>$image<span class='inner'><span class='appname $update'>$appname</span><br><i id='load-$id' class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span>";
+  echo "<span class='outer'><span id='$id' class='hand'>$image</span><span class='inner'><span class='appname $update'>$appname</span><br><i id='load-$id' class='fa fa-$shape $status $color'></i><span class='state'>$status</span></span></span>";
   echo "<span class='advanced'>Container ID: $id<br>";
   if ($ct['BaseImage']) echo "<i class='fa fa-cubes' style='margin-right:5px'></i>".htmlspecialchars(${ct['BaseImage']})."<br>";
   echo "By: ";
@@ -122,7 +122,7 @@ foreach ($images as $image) {
   $id = $image['Id'];
   $menu[] = sprintf("addDockerImageContext('%s','%s');", $id, implode(',',$image['Tags']));
   echo "<tr class='advanced'><td style='width:220px;padding:8px'>";
-  echo "<span id='$id' class='outer apps'><img src='/webGui/images/disk.png' class='img'><span class='inner'>(orphan image)<br><i class='fa fa-square stopped grey-text'></i><span class='state'>stopped</span></span></span>";
+  echo "<span class='outer apps'><span id='$id' class='hand'><img src='/webGui/images/disk.png' class='img'></span><span class='inner'>(orphan image)<br><i class='fa fa-square stopped grey-text'></i><span class='state'>stopped</span></span></span>";
   echo "</td><td colspan='7'>Image ID: $id<br>";
   echo implode(', ',array_map('htmlspecialchars',$image['Tags']));
   echo "</td><td>Created ".htmlspecialchars($image['Created'])."</td></tr>";
