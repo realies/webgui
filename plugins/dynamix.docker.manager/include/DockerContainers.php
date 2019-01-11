@@ -120,15 +120,11 @@ foreach ($images as $image) {
   if (count($image['usedBy'])) continue;
   $id = $image['Id'];
   $menu[] = sprintf("addDockerImageContext('%s','%s');", $id, implode(',',$image['Tags']));
-  echo "<tr class='advanced'><td style='width:48px;padding:4px'>";
-  echo "<div id='$id' style='display:block;cursor:pointer'>";
-  echo "<div style='position:relative;width:48px;height:48px;margin:0 auto'>";
-  echo "<img src='/webGui/images/disk.png' style='position:absolute;opacity:0.3;top:0;bottom:0;left:0;right:0;width:48px;height:48px'>";
-  echo "</div></div></td>";
-  echo "<td><i>(orphan image)</i><div style='width:160px;'>Image ID: $id</div>";
-  echo "<div style='width:160px'>".implode('<br>',array_map('htmlspecialchars',$image['Tags']))."</div></td>";
-  echo "<td colspan='5'></td><td class='advanced' colspan='2'></td>";
-  echo "<td><div class='advanced' style='width:124px'>Created ".htmlspecialchars($image['Created'])."</div></td></tr>";
+  echo "<tr class='advanced'><td style='width:220px;padding:8px'>";
+  echo "<span id='$id' class='outer apps'><img src='/webGui/images/disk.png' class='img'><span class='inner'>(orphan image)<br><i class='fa fa-square stopped grey-text'></i><span class='state'>stopped</span></span></span>";
+  echo "</td><td colspan='7'>Image ID: $id<br>";
+  echo implode(', ',array_map('htmlspecialchars',$image['Tags']));
+  echo "</td><td>Created ".htmlspecialchars($image['Created'])."</td></tr>";
 }
 echo "\0".implode($menu).implode($docker)."\0".(pgrep('rc.docker')!==false ? 1:0);
 ?>
