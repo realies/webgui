@@ -1,5 +1,5 @@
 function ajaxVMDispatch(params, spin){
-  if (spin) $('#vm-'+params['uuid']).find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+  if (spin) $('#vm-'+params['uuid']).parent().find('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
   $.post("/plugins/dynamix.vm.manager/include/VMajax.php", params, function(data) {
     if (data.error) {
       swal({
