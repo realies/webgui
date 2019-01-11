@@ -96,12 +96,13 @@ foreach ($containers as $ct) {
   }
   echo "</span></td><td class='updatecolumn'>";
   if ($updateStatus=='false') {
+    echo "<div class='advanced'><span class='orange-text' style='white-space:nowrap;'><i class='fa fa-flash fa-fw'></i> update required</span></div>";
     echo "<a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download fa-fw'></i> update ready</span></a>";
   } elseif ($updateStatus=='true') {
-    echo "<span style='color:#44B012;white-space:nowrap;'><i class='fa fa-check fa-fw'></i> up-to-date</span>";
+    echo "<span class='green-text' style='white-space:nowrap;'><i class='fa fa-check fa-fw'></i> up-to-date</span>";
     echo "<div class='advanced'><a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download fa-fw'></i> force update</span></a></div>";
   } else {
-    echo "<span style='color:#FF2400;white-space:nowrap;'><i class='fa fa-exclamation-triangle'></i> not available</span>";
+    echo "<span class='orange-text' style='white-space:nowrap;'><i class='fa fa-warning'></i> not available</span>";
     echo "<div class='advanced'><a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download fa-fw'></i> force update</span></a></div>";
   }
   echo "<div class='advanced'><i class='fa fa-info-circle fa-fw'></i> $version</div></td>";
