@@ -36,6 +36,7 @@ th.five{width:5%}
 th.nine{width:9%}
 th.load{width:100px}
 input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
+table tbody td{line-height:normal}
 </style>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
