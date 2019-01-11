@@ -141,7 +141,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 <style>
 .switch-button-background{top:12px}
 span.outer{float:left}
-span.inner{width:135px}
+span.inner{width:124px}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
