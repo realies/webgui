@@ -26,6 +26,7 @@ $check = $notify['version'] ? 0 : 1;
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.filetree.css')?>">
 <style>
 #plugin_tree{width:33%;height:200px;overflow-y:scroll}
+table tbody td{line-height:normal}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script>
