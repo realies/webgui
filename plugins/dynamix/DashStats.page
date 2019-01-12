@@ -459,7 +459,7 @@ function loadlist(init) {
     });
     context.init({preventDoubleContext:false,left:true,above:false});
   }
-  $.post('/webGui/include/DashboardApps.php',{display:'<?=$display['dashapps']?>'},function(d) {
+  $.post('/webGui/include/DashboardApps.php',{display:'<?=$display['dashapps']?>',docker:'<?=$dockerd?>',vms:'<?=$libvirtd?>'},function(d) {
     var data = d.split(/\0/);
     $('.docker_view').html(data[0]);
     $('.vm_view').html(data[1]);
