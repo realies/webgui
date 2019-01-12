@@ -684,8 +684,13 @@ function toggleCPU(init) {
 function toggleView(field,init,view) {
   if (!view) view = $.cookie(field)||field;
   if (!init) {if ($.cookie(field)===undefined) $.cookie(field,view,{path:'/',expires:3650}); else $.removeCookie(field,{path:'/'});}
-  if ($.cookie(field)===undefined) $('.'+view).show(); else $('.'+view).hide();
-  var visible = $('.'+view).is(':visible');
+  if ($.cookie(field)===undefined) {
+    $('.'+view).show();
+    var visible = true;
+  } else {
+    $('.'+view).hide();
+    var visible = false;
+  }
   var unset = true;
   switch (field) {
   case 'users_view':
