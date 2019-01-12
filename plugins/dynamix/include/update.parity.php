@@ -25,12 +25,29 @@ if (isset($_POST['#apply'])) {
     $write = $_POST['write'] ?? '';
     $term  = '';
     switch ($dotm) {
-      case '28-31': $term = '[[ $(date +%e -d +1day) -eq 1 ]] && '; break;
-      case 'W1'   : $dotm = '1-7'; break;
-      case 'W2'   : $dotm = '8-14'; break;
-      case 'W3'   : $dotm = '15-21'; break;
-      case 'W4'   : $dotm = '22-28'; break;
-      case 'WL'   : $dotm = '22-31'; $term = '[[ $(date +%e -d +7days) -le 7 ]] && '; break;
+      case '28-31': 
+				$term = '[[ $(date +%e -d +1day) -eq 1 ]] && ';
+				break;
+      case 'W1'   :
+				$dotm = '*';
+				$term = '[[ $(date +%e) -le 7 ]] && ';
+				break;
+      case 'W2'   :
+				$dotm = '*';
+				$term = '[[ $(date +%e -d -7days) -le 7 ]] && ';
+				break;
+      case 'W3'   :
+				$dotm = '*';
+				$term = '[[ $(date +%e -d -14days) -le 7 ]] && ';
+				break;
+      case 'W4'   : 
+			  $dotm = '*';
+				$term = '[[ $(date +%e -d -21days) -le 7 ]] && ';
+				break;
+      case 'WL'   : 
+			  $dotm = '*';
+				$term = '[[ $(date +%e -d +7days) -le 7 ]] && ';
+				break;
     }
     $cron = "# Generated parity check schedule:\n$time $dotm $month $day $term/usr/local/sbin/mdcmd check $write &> /dev/null || :\n\n";
   }
