@@ -14,7 +14,7 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 
-$boot  = "/boot/config";
+$boot  = "/boot/config/plugins/dynamix";
 $file  = $_GET['file'] ?? $_POST['file'];
 $model = $_POST['model'] ?? false;
 $exist = file_exists("$boot/$file");

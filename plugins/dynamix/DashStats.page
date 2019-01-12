@@ -89,7 +89,7 @@ $names = implode(',',$names);
 $passwd = $nopass = 0;
 foreach ($users as $user) if ($user['passwd']=='yes') $passwd++; else $nopass++;
 
-$boot   = "/boot/config";
+$boot   = "/boot/config/plugins/dynamix";
 $myfile = "case-model.cfg";
 $mycase = file_exists("$boot/$myfile") ? file_get_contents("$boot/$myfile") : false;
 
