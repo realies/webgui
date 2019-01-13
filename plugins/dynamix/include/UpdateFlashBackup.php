@@ -54,7 +54,7 @@ $keyfile = @base64_encode($keyfile);
 // check if activated
 if ($command != 'activate') {
   exec('git -C /boot config --get remote.origin.url', $config_output, $return_var);
-  if (($return_var != 0) || (strpos($config_output,'backup.unraid.net') === false)) {
+  if (($return_var != 0) || (strpos($config_output[0],'backup.unraid.net') === false)) {
     response_complete(406, '{"error":"Not activated"}');
   }                                              
 }                                              
