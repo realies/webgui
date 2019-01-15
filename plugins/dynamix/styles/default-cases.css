@@ -1,6 +1,9 @@
 @font-face{font-family:cases;font-weight:normal;font-style:normal;
-src:url('font-cases.eot?20190111');src:url('font-cases.eot?20190111#iefix') format('embedded-opentype'),url('font-cases.ttf?20190111') format('truetype'),url('font-cases.woff?20190111') format('woff'),url('font-cases.svg?20190111#cases') format('svg')}
+src:url('font-cases.eot?20190115');src:url('font-cases.eot?20190115#iefix') format('embedded-opentype'),url('font-cases.ttf?20190115') format('truetype'),url('font-cases.woff?20190115') format('woff'),url('font-cases.svg?20190115#cases') format('svg')}
 [class^='case-'],[class*=' case-']{font-family:cases!important;speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none}
+.case-3u-md1510:before{content:'\e91a'}
+.case-4u-storinator:before{content:'\e91b'}
+.case-storinator-ws:before{content:'\e91c'}
 .case-full-tower:before{content:'\e914'}
 .case-htpc:before{content:'\e915'}
 .case-mid-tower:before{content:'\e916'}
