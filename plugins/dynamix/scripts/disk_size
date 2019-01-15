@@ -22,9 +22,8 @@ function check {
     total=$(($total + $size))
   fi
 }
-shares=$(ls -vd /mnt/user/*)
-for share in $shares; do
+while IFS=$'\n' read -r share; do
  [[ -d $share ]] && check "$(basename "$share")" "$disk"
-done
+done <<< $(ls -vd /mnt/user/*)
 echo "share.total=$total" >>"$output"
 echo "total disk usage: $total"

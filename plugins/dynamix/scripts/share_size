@@ -23,9 +23,8 @@ function check {
 }
 
 check "/mnt/cache" "$share"
-disks=$(ls -vd /mnt/disk*)
-for disk in $disks ; do
+while IFS=$'\n' read -r disk; do
   check "$disk" "$share"
-done
+done <<< $(ls -vd /mnt/disk[0-9]*)
 echo "disk.total=$total" >>"$output"
 echo "total disk usage: $total"
