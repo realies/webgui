@@ -1,5 +1,17 @@
+<?PHP
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2014-2018, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+ * Copyright 2012-2018, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
 <?
-
 function xml_encode($string) {
   return htmlspecialchars($string, ENT_XML1, 'UTF-8');
 }
@@ -242,7 +254,7 @@ function xmlSecurity(&$template) {
 }
 
 function xmlToCommand($xml, $create_paths=false) {
-  global $docroot, $var, $driver;
+  global $docroot, $var, $cfg, $driver;
   $xml           = xmlToVar($xml);
   $cmdName       = strlen($xml['Name']) ? '--name='.escapeshellarg($xml['Name']) : '';
   $cmdPrivileged = strtolower($xml['Privileged'])=='true' ? '--privileged=true' : '';
@@ -294,10 +306,16 @@ function xmlToCommand($xml, $create_paths=false) {
       $Devices[] = escapeshellarg($hostConfig);
     }
   }
-
-  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s %s',
-         $cmdName, $cmdNetwork, $cmdMyIP, $cmdCPUset, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
-  return [preg_replace('/\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
+  $logSize = $logFile = '';
+  if ($cfg['DOCKER_LOG_ROTATION']=='yes') {
+    $logSize = $cfg['DOCKER_LOG_SIZE'] ?? '10m';
+    $logSize = "--log-opt max-size='$logSize'";
+    $logFile = $cfg['DOCKER_LOG_FILES'] ?? '1';
+    $logFile = "--log-opt max-file='$logFile'";
+  }
+  $cmd = sprintf($docroot.'/plugins/dynamix.docker.manager/scripts/docker create %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s',
+         $cmdName, $cmdNetwork, $cmdMyIP, $cmdCPUset, $logSize, $logFile, $cmdPrivileged, implode(' -e ', $Variables), implode(' -l ', $Labels), implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], escapeshellarg($xml['Repository']), $xml['PostArgs']);
+  return [preg_replace('/\s\s+/', ' ', $cmd), $xml['Name'], $xml['Repository']];
 }
 function stopContainer($name, $t=10, $echo=true) {
   global $DockerClient;

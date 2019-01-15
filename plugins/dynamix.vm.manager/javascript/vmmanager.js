@@ -108,12 +108,12 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 }
 function startAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).find('i').removeClass('fa-square').addClass('fa-refresh fa-spin');
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state!='running') $('#vm-'+vm.id).parent().find('i').removeClass('fa-square').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'start'}, function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
+  for (var i=0,vm; vm=kvm[i]; i++) if (vm.state=='running') $('#vm-'+vm.id).parent().find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.vm.manager/include/VMManager.php',{action:'stop'}, function(){loadlist();});
 }
 function vncOpen() {

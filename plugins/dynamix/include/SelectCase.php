@@ -33,9 +33,10 @@ $casemodel = $exist ? file_get_contents("$boot/$file") : '';
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-cases.css")?>">
 <style>
-div.case-list{float:left;padding:10px;margin-right:10px;margin-bottom:30px;height:88px;width:88px;text-align:center}
-div.case-list i{width:auto;max-width:88px;height:88px;font-size:88px;}
-div.case-list:hover{color:#f0000c}
+div.case-list{float:left;padding:10px;margin-right:10px;margin-bottom:44px;height:72px;width:72px;text-align:center}
+div.case-list i{width:auto;max-width:72px;height:72px;font-size:72px;}
+div.case-list:hover{color:#f0000c;transform:scale(1.4,1.4);-webkit-transform:scale(1.4,1.4)}
+div.case-list:hover .case-name{margin-top:-5px;font-size:1rem}
 div.case-name{margin-top:8px;font-family:clear-sans}
 </style>
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>

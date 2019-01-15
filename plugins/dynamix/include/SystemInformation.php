@@ -84,11 +84,11 @@ echo $cpumodel.(strpos($cpumodel,'@')!==false ? "" : " @ {$cpu['Current Speed']}
 </div>
 <div><span class="key">HVM:</span>
 <?
-// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-// If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualization support
+// If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualization support was found
 $strLoadedModules = shell_exec("/etc/rc.d/rc.libvirt test");
 
-// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualization support
 $strCPUInfo = file_get_contents('/proc/cpuinfo');
 
 if (!empty($strLoadedModules)) {
@@ -97,10 +97,10 @@ if (!empty($strLoadedModules)) {
 } else {
   echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
   if (strpos($strCPUInfo,'vmx')===false && strpos($strCPUInfo, 'svm')===false) {
-    // CPU doesn't support virtualzation
+    // CPU doesn't support virtualization
     echo "Not Available";
   } else {
-    // Motherboard either doesn't support virtualzation or BIOS has it disabled
+    // Motherboard either doesn't support virtualization or BIOS has it disabled
     echo "Disabled";
   }
   echo '</a>';
@@ -118,7 +118,7 @@ if (!empty($iommu_groups)) {
 } else {
   echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
   if (strpos($strCPUInfo,'vmx')===false && strpos($strCPUInfo, 'svm')===false) {
-    // CPU doesn't support virtualzation so iommu would be impossible
+    // CPU doesn't support virtualization so iommu would be impossible
     echo "Not Available";
   } else {
     // Motherboard either doesn't support iommu or BIOS has it disabled

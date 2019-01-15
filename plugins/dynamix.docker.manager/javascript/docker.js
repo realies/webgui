@@ -162,22 +162,22 @@ function eventControl(params, spin) {
 }
 function startAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==0) $('#'+ct.id).find('i').removeClass('fa-square').addClass('fa-refresh fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==0) $('#'+ct.id).parent().find('i').removeClass('fa-square').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'start'},function(){loadlist();});
 }
 function stopAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1) $('#'+ct.id).find('i').removeClass('fa-play fa-pause').addClass('fa-refresh fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1) $('#'+ct.id).parent().find('i').removeClass('fa-play fa-pause').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'stop'},function(){loadlist();});
 }
 function pauseAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==0) $('#'+ct.id).find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==0) $('#'+ct.id).parent().find('i').removeClass('fa-play').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'pause'},function(){loadlist();});
 }
 function resumeAll() {
   $('input[type=button]').prop('disabled',true);
-  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==1) $('#'+ct.id).find('i').removeClass('fa-pause').addClass('fa-refresh fa-spin');
+  for (var i=0,ct; ct=docker[i]; i++) if (ct.state==1 && ct.pause==1) $('#'+ct.id).parent().find('i').removeClass('fa-pause').addClass('fa-refresh fa-spin');
   $.post('/plugins/dynamix.docker.manager/include/ContainerManager.php',{action:'unpause'},function(){loadlist();});
 }
 function checkAll() {
