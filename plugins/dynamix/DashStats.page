@@ -69,8 +69,8 @@ foreach ($disks as $disk) {
 foreach ($devs as $disk) {
   $extra_size += $disk['sectors']*$disk['sector_size'];
 }
-$array_percent = my_scale(100*$array_used/$array_size, $u, 1, 0);
-$cache_percent = my_scale(100*$cache_used/$cache_size, $u, 1, 0);
+$array_percent = my_scale(100*$array_used/($array_size ?: 1), $u, 1, 0);
+$cache_percent = my_scale(100*$cache_used/($cache_size ?: 1), $u, 1, 0);
 
 exec('cat /sys/devices/system/cpu/*/topology/thread_siblings_list|sort -nu', $cpus);
 $fans  = exec("sensors -uA 2>/dev/null|grep -c 'fan[0-9]_input'");
