@@ -18,7 +18,6 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
 $var = parse_ini_file('state/var.ini');
-$cfg = parse_ini_file('boot/config/docker.cfg');
 ignore_user_abort(true);
 
 $DockerClient = new DockerClient();
@@ -342,7 +341,7 @@ button[type=button]{margin:0 20px 0 0}
                                  opts.Display,
                                  opts.Required,
                                  opts.Mask,
-                                 opts.Value,
+                                 escapeQuote(opts.Value),
                                  opts.Buttons,
                                  (opts.Required == "true") ? "required" : ""
                                 );
@@ -369,7 +368,11 @@ button[type=button]{margin:0 20px 0 0}
     }
     return newConfig.prop('outerHTML');
   }
-
+	
+	function escapeQuote(string) {
+		return string.replace(new RegExp('"','g'),"&quot;");
+	}
+	
   function makeAllocations(container,current) {
     var html = [];
     for (var i=0,ct; ct=container[i]; i++) {
@@ -387,6 +390,7 @@ button[type=button]{margin:0 20px 0 0}
       return "";
     }
   }
+
 
   function addConfigPopup() {
     var title = 'Add Configuration';
