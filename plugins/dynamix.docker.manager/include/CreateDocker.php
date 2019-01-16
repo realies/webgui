@@ -18,6 +18,7 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
 $var = parse_ini_file('state/var.ini');
+$cfg = parse_ini_file('boot/config/docker.cfg');
 ignore_user_abort(true);
 
 $DockerClient = new DockerClient();
