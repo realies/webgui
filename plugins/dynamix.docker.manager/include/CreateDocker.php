@@ -392,7 +392,6 @@ button[type=button]{margin:0 20px 0 0}
     }
   }
 
-
   function addConfigPopup() {
     var title = 'Add Configuration';
     var popup = $( "#dialogAddConfig" );
