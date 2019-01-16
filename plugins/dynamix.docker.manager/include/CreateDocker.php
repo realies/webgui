@@ -369,9 +369,9 @@ button[type=button]{margin:0 20px 0 0}
     return newConfig.prop('outerHTML');
   }
 	
-	function escapeQuote(string) {
-		return string.replace(new RegExp('"','g'),"&quot;");
-	}
+  function escapeQuote(string) {
+    return string.replace(new RegExp('"','g'),"&quot;");
+  }
 	
   function makeAllocations(container,current) {
     var html = [];
