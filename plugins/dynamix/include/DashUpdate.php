@@ -198,8 +198,8 @@ function device_usage(&$disk, $array, &$full, &$high) {
       $load = substr($used,0,-1);
       $critical = $disk['critical'] ?? $_POST['critical'];
       $warning = $disk['warning'] ?? $_POST['warning'];
-      if ($load >= $critical) {$class = 'redbar'; $full++;}
-      elseif ($load >= $warning) {$class = 'orangebar'; $high++;}
+      if ($critical > 0 && $load >= $critical) {$class = 'redbar'; $full++;}
+      elseif ($warning > 0 && $load >= $warning) {$class = 'orangebar'; $high++;}
       else $class = 'greenbar';
     } else $class = false;
   } else $used = false;
@@ -240,8 +240,8 @@ function extra_group(&$disks) {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = parse_ini_file('state/var.ini');
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $var = parse_ini_file('state/var.ini') ?: [];
+  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
