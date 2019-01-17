@@ -240,8 +240,8 @@ function extra_group(&$disks) {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = parse_ini_file('state/var.ini');
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $var = parse_ini_file('state/var.ini') ?: [];
+  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
