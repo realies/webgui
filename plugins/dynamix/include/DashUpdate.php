@@ -126,9 +126,9 @@ function device_name(&$disk, $array) {
     return "<i class='icon-disk'></i> {$disk['device']}";
   }
 }
-function device_status(&$disk, &$error, &$warning) {
+function device_status(&$disk, $array, &$error, &$warning) {
   global $var;
-  if ($var['fsState']=='Stopped') {
+  if ($array && $var['fsState']=='Stopped') {
     $color = 'green'; $text = 'off-line';
   } else switch ($disk['color']) {
     case 'green-on'    : $color = 'green';  $text = 'active';     break;
@@ -214,7 +214,7 @@ function array_group($type) {
   foreach ($disks as $disk) if ($disk['type']==$type && strpos($disk['status'],'DISK_NP')===false) {
     echo "<tr><td></td>";
     echo "<td>".device_name($disk,true)."</td>";
-    echo "<td>".device_status($disk,$error,$warning)."</td>";
+    echo "<td>".device_status($disk,true,$error,$warning)."</td>";
     echo "<td>".device_temp($disk,$red,$orange)."</td>";
     echo "<td>".device_smart($disk,false,$fail,$smart)."</td>";
     echo "<td>".device_usage($disk,true,$full,$high)."</td>";
@@ -226,12 +226,11 @@ function extra_group() {
   foreach ($devs as $disk) {
     $name = $disk['device'];
     $port = port_name($name);
-    $smart = "state/smart/$name";
     $disk['color'] = exec("hdparm -C /dev/$port|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
-    $disk['temp'] = file_exists($smart) ? exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=\$4;exit} END{if(t!=\"*\")print t; else print s}' $smart") : '*';
+    $disk['temp'] = exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=\$4;exit} END{if(t!=\"*\")print t; else print s}' state/smart/$name 2>/dev/null");
     echo "<tr><td></td>";
     echo "<td>".device_name($disk,false)."</td>";
-    echo "<td>".device_status($disk,$error,$warning)."</td>";
+    echo "<td>".device_status($disk,false,$error,$warning)."</td>";
     echo "<td>".device_temp($disk,$red,$orange)."</td>";
     echo "<td>".device_smart($disk,$name,$fail,$smart)."</td>";
     echo "<td>".device_usage($disk,false,$full,$high)."</td>";
