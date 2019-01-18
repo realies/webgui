@@ -424,7 +424,7 @@ foreach ($users as $user) {
 <tbody class='cache_view' id='cache_list' style='display:none'></tbody>
 <?endif;?>
 <?if ($devs):?>
-<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Unassigned<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
 <tr id='extra_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
