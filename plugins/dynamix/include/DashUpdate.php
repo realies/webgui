@@ -222,7 +222,7 @@ function array_group($type) {
   }
 }
 function extra_group(&$disks) {
-  global $disks,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
+  global $error,$warning,$red,$orange,$fail,$smart,$full,$high;
   foreach ($disks as $disk) {
     $name = $disk['device'];
     $port = port_name($name);
