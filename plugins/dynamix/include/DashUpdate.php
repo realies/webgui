@@ -240,8 +240,8 @@ function extra_group(&$disks) {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = parse_ini_file('state/var.ini') ?: [];
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -251,8 +251,8 @@ case 'array':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'cache':
-  $var = parse_ini_file('state/var.ini') ?: [];
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -261,8 +261,8 @@ case 'cache':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'extra':
-  $var = parse_ini_file('state/var.ini') ?: [];
-  $devs = parse_ini_file('state/devs.ini',true) ?: [];
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $devs = @parse_ini_file('state/devs.ini',true) ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
