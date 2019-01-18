@@ -153,11 +153,14 @@ syslinux/*
 !syslinux/syslinux.cfg
 !syslinux/syslinux.cfg-
 
-# Whitelist entire config directory except for selected files
+# Whitelist entire config directory
 !config/
+#  except for selected files
 config/drift
-config/random-seed
 config/plugins/unRAIDServer.plg
+config/random-seed
+config/shadow
+config/smbpasswd
 ');
 }
 

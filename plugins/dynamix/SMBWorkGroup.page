@@ -17,12 +17,12 @@ Cond="($var['shareSMBEnabled']=='yes')"
 ?>
 <form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame">
 Workgroup:
-: <input type="text" name="WORKGROUP" maxlength="40" value="<?=htmlspecialchars($var['WORKGROUP'])?>" class="narrow">
+: <input type="text" name="WORKGROUP" maxlength="40" value="<?=htmlspecialchars($var['WORKGROUP'])?>" class="narrow" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
 
 > Enter your local network Workgroup name. Usually this is "WORKGROUP".
 
 Local master:
-: <select name="localMaster">
+: <select name="localMaster" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
   <?=mk_option($var['localMaster'], "no", "No");?>
   <?=mk_option($var['localMaster'], "yes", "Yes");?>
   </select>
@@ -31,5 +31,5 @@ Local master:
 > of other servers, will usually become the local Master Browser.
 
 &nbsp;
-: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()"><?if ($var['fsState']=="Started"):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
 </form>
