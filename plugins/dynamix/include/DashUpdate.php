@@ -221,9 +221,9 @@ function array_group($type) {
     echo "<td></td></tr>";
   }
 }
-function extra_group(&$disks) {
-  global $disks,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
-  foreach ($disks as $disk) {
+function extra_group() {
+  global $devs,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
+  foreach ($devs as $disk) {
     $name = $disk['device'];
     $port = port_name($name);
     $smart = "state/smart/$name";
@@ -240,8 +240,8 @@ function extra_group(&$disks) {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = parse_ini_file('state/var.ini') ?: [];
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -251,8 +251,8 @@ case 'array':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'cache':
-  $var = parse_ini_file('state/var.ini');
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -261,13 +261,13 @@ case 'cache':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'extra':
-  $var = parse_ini_file('state/var.ini');
-  $devs = parse_ini_file('state/devs.ini',true);
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $devs = @parse_ini_file('state/devs.ini',true) ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
-  extra_group($devs);
+  extra_group();
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'sys':

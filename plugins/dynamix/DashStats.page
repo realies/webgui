@@ -407,7 +407,7 @@ foreach ($users as $user) {
 <tr><td></td><td colspan='5' id='parity'></td><td></td></tr>
 <tr><td></td><td colspan='5' id='program'></td><td></td></tr>
 </tbody>
-<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> not started<?endif;?><i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
+<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> (not started)<?endif;?><i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
 <?if ($started):?><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr style='display:none'><td></td><td id='array_info' colspan='5'></td><td></td></tr>
@@ -415,7 +415,7 @@ foreach ($users as $user) {
 </thead>
 <tbody class='array_view' id='array_list' style='display:none'></tbody>
 <?if (isset($disks['cache'])):?>
-<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> not started<?endif;?><i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
+<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> (not started)<?endif;?><i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
 <?if ($started):?><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr style='display:none'><td></td><td id='cache_info' colspan='5'></td><td></td></tr>
@@ -424,7 +424,7 @@ foreach ($users as $user) {
 <tbody class='cache_view' id='cache_list' style='display:none'></tbody>
 <?endif;?>
 <?if ($devs):?>
-<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Unassigned<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
 <tr id='extra_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
