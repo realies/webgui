@@ -34,10 +34,10 @@ $(function(){
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
 Samba extra configuration:
-: <textarea spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" name="text" style="resize:none;font-family:bitstream;width:65.5%"><?=htmlspecialchars($text)?></textarea>
+: <textarea spellcheck="false" cols="80" rows="<?=substr_count($text,"\n")+1?>" maxlength="2048" name="text" style="resize:none;font-family:bitstream;width:65.5%" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>><?=htmlspecialchars($text)?></textarea>
 
 &nbsp;
-: <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+: <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()"><?if ($var['fsState']=="Started"):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
 
 > Click the **Apply** button to commit the current edits.  Click **Reset** to
 > undo any changes you make (before Saving). Click **Done** to exit this page.
