@@ -597,7 +597,7 @@ function update30() {
 <?if ($devs):?>
       $.post('<?=$url?>',{cmd:'extra',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
         var data = d.split('\0');
-        var info = moreInfo(data,'Extra');
+        var info = moreInfo(data,'Unassigned');
         $('#extra_list').html(data[0]);
         $('#extra_info').parent().css('display',info?'':'none');
         $('#extra_info').html(info);
