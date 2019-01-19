@@ -97,7 +97,7 @@ foreach ($containers as $ct) {
   }
   echo "</span></td><td class='updatecolumn'>";
   if ($updateStatus=='false') {
-    echo "<div class='advanced'><span class='orange-text' style='white-space:nowrap;'><i class='fa fa-flash fa-fw'></i> update required</span></div>";
+    echo "<div class='advanced'><span class='orange-text' style='white-space:nowrap;'><i class='fa fa-flash fa-fw'></i> updated</span></div>";
     echo "<a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download fa-fw'></i> update ready</span></a>";
   } elseif ($updateStatus=='true') {
     echo "<span class='green-text' style='white-space:nowrap;'><i class='fa fa-check fa-fw'></i> up-to-date</span>";
