@@ -43,6 +43,7 @@ function cache_devices($disk) {
 
 $dockerd = pgrep('dockerd');
 $libvirtd = pgrep('libvirtd');
+$apcupsd = file_exists('/var/run/apcupsd.pid');
 $started = $var['fsState']=='Started';
 $array_size = $array_used = 0;
 $cache_size = $cache_used = 0;
@@ -148,6 +149,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 <?endif;?>
 span.outer{float:left}
 span.inner{width:124px}
+span.ups{width:124px;display:inline-block}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
@@ -241,15 +243,28 @@ foreach ($ports as $port) {
 }
 ?>
 </tbody>
-<?if ($fans>0) {
-  echo "<tbody>";
-  echo "<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: $fans</span><br><br></div><i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron(\"fan_view\",0)'></i></td><td></td></tr>";
-  for ($f=0; $f<$fans; $f+=2) {
-    if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
-    else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
-  }
-  echo "</tbody>";
+<?if ($apcupsd):?>
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-ups'></i><div class='section'>Power<br>
+<span>UPS Load: <span id='ups_loadpct'></span></span><br><br></div><i class='fa blue-text chevron' id='ups_view' onclick='toggleChevron("ups_view",0)'></i></td><td></td></tr>
+<tr class='ups_view' style='display:none'><td></td><td colspan='3'>
+<span class='ups'>UPS status:</span><span id='ups_status'></span><br>
+<span class='ups'>Battery charge:</span><span id='ups_bcharge'></span><br>
+<span class='ups'>Runtime left:</span><span id='ups_timeleft'></span><br>
+<span class='ups'>Nominal power:</span><span id='ups_nompower'></span><br>
+</td><td></td></tr>
+</tbody>
+<?endif;?>
+<?if ($fans>0):?>
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: <?=$fans?></span><br><br></div>
+<i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron("fan_view",0)'></i></td><td></td></tr>
+<?for ($f=0; $f<$fans; $f+=2) {
+  if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
+  else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
 }?>
+</tbody>
+<?endif;?>
 </table>
 
 <table class='share_status dashboard box3'>
@@ -567,6 +582,16 @@ function update15() {
     $.each(data.split('\0'),function(k,v) {$('#share'+(k+1)).html(v);});
   });
 <?endif;?>
+<?if ($apcupsd):?>
+  $.get('/plugins/dynamix.apcupsd/include/UPSstatus.php',{all:'false'},function(d) {
+    var data = d.replace(/<\/?tr>/,'').replace(/<td/g,'<span').replace(/td>/g,'span>;').split(';');
+    $('#ups_status').html(data[0]);
+    $('#ups_bcharge').html(data[1]);
+    $('#ups_timeleft').html(data[2]);
+    $('#ups_nompower').html(data[3]);
+    $('#ups_loadpct').html(data[5]+(data[5].search('-')==-1 ? '%':'')+(data[4].search('-')==-1 ? ' ('+data[4].replace(' Watts','W')+')':''));
+  });
+<?endif;?>
   $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
   $.post('<?=$url?>',{cmd:'parity',time:'<?=$display['date'].($display['date']!='%c'?", {$display['time']}":"")?>'},function(d) {
     var data = d.split('\0');
@@ -751,6 +776,9 @@ $(function() {
   toggleView('port_view',true);
 <?if ($fans>0):?>
   toggleView('fan_view',true);
+<?endif;?>
+<?if ($apcupsd):?>
+  toggleView('ups_view',true);
 <?endif;?>
 <?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
   toggleView('docker_view',true);
