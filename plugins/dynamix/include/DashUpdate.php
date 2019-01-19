@@ -222,8 +222,8 @@ function array_group($type) {
   }
 }
 function extra_group() {
-  global $devs,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
-  foreach ($devs as $disk) {
+  global $disks,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
+  foreach ($disks as $disk) {
     $name = $disk['device'];
     $port = port_name($name);
     $disk['color'] = exec("hdparm -C /dev/$port|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
@@ -261,9 +261,10 @@ case 'cache':
   break;
 case 'extra':
   $var = @parse_ini_file('state/var.ini') ?: [];
-  $devs = @parse_ini_file('state/devs.ini',true) ?: [];
+  $disks = @parse_ini_file('state/devs.ini',true) ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
-  require_once "$docroot/webGui/include/CustomMerge.php";
+  $smartALL = '/boot/config/smart-all.cfg';
+  if (file_exists($smartALL)) $var = array_merge($var, parse_ini_file($smartALL));
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
   extra_group();
