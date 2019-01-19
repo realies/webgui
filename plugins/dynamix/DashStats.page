@@ -98,11 +98,11 @@ $mycase = file_exists("$boot/$myfile") ? file_get_contents("$boot/$myfile") : fa
 
 $board  = dmidecode('Base Board Information','2',0);
 $serial = "s/n: {$board['Serial Number']}";
-$board  = "{$board['Manufacturer']} {$board['Product Name']} - v{$board['Version']}";
+$board  = "{$board['Manufacturer']} {$board['Product Name']}".($board['Version'] ? ", Version {$board['Version']}" : "");
 
 $bios = dmidecode('BIOS Information','0',0);
 $biosdate = "BIOS dated: ".my_time(strtotime($bios['Release Date']),$display['date']);
-$bios = "{$bios['Vendor']} - v{$bios['Version']}";
+$bios = $bios['Vendor'].($bios['Version'] ? ", Version {$bios['Version']}" : "");
 
 $cpu = dmidecode('Processor Information','4',0);
 $cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu['Version']);
