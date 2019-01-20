@@ -204,9 +204,9 @@ function device_usage(&$disk, $array, &$full, &$high) {
     } else $class = false;
   } else $used = false;
   if ($used) {
-    return $text%10==0 ? $used : "<span class='load'>$used</span><div class='usage-disk sys'><span style='width:$used'".($class?" class='$class'":"")."></span></div>";
+    return $text%10==0 ? $used : "<span class='load'>$used</span><div class='usage-disk sys'><span style='width:$used'".($class?" class='$class'":"")."></span><span></span></div>";
   } else {
-    return $text%10==0 ? "-" : "<span class='load'>-</span><div class='usage-disk sys none'></div>";
+    return $text%10==0 ? "-" : "<span class='load'>-</span><div class='usage-disk sys none'><span></span></div>";
   }
 }
 function array_group($type) {
