@@ -107,7 +107,7 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 .usage-disk{position:relative;height:2.2rem;line-height:2.2rem;background-color:#eceaec;margin:0}
 .usage-disk>span:first-child{position:absolute;left:0;margin:0!important;height:3px;line-height:3px;background-color:#606e7f}
 .usage-disk>span:last-child{position:relative;padding-right:4px;z-index:1}
-.usage-disk.sys{line-height:normal;background-color:transparent;margin:-16px 20px 0 44px}
+.usage-disk.sys{line-height:normal;background-color:transparent;margin:-15px 20px 0 44px}
 .usage-disk.sys>span{line-height:normal;height:12px;padding:0}
 .usage-disk.mm{height:3px;line-height:normal;background-color:transparent;margin:5px 20px 0 0}
 .usage-disk.mm>span:first-child{height:3px;line-height:normal}
