@@ -156,7 +156,7 @@ span.ups{width:124px;display:inline-block}
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/vmmanager.js')?>"></script>
 
-<div style='float:left;margin:14px 0 50px 0'>
+<div style='float:left;margin:14px 0 36px 0'>
 <table class='share_status dashboard box1'>
 <thead><tr><td></td><td colspan='3'><?=$var['NAME']?><i class='fa blue-text chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i></td><td></td></tr></thead>
 <tbody class='sys_view' style='display:none'>
@@ -449,6 +449,7 @@ foreach ($users as $user) {
 </table>
 </div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch"></div>
+&nbsp;
 <script>
 var timer30 = null;
 var orange = 70;
