@@ -48,7 +48,7 @@ textarea{resize:none}
 #header{position:fixed;top:0;left:0;width:100%;height:90px;z-index:100;margin:0;background-color:#edeaef;background-size:100% 90px;background-repeat:no-repeat;border-bottom:1px solid #9794a0}
 #header .logo{float:left;margin-left:75px;color:#e22828;width:160px;text-align:center}
 #header .logo svg{width:160px;display:block;margin:25px 50px 8px 0}
-#header .block{margin:0;float:right;text-align:right;background-color:rgba(237,234,239,0.7);padding:10px 12px}
+#header .block{margin:0;float:right;text-align:right;background-color:rgba(237,234,239,0.2);padding:10px 12px}
 #header .text-left{float:left;text-align:right;padding-right:5px;border-right:solid medium #f15a2c}
 #header .text-right{float:right;text-align:left;padding-left:5px}
 #header .text-right a{color:#606e7f}
@@ -102,13 +102,15 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 .blue-orb{color:#0099ff}
 .yellow-orb{color:#ff9900}
 .red-orb{color:#ff3300}
-.usage-bar{position:fixed;top:60px;right:450px;height:2.2rem;line-height:2.2rem;width:14rem;background-color:rgba(228,226,228,0.4)}
-.usage-bar>span{display:block;height:5px;text-align:right;color:#606e7f;background-color:#606e7f}
-.usage-disk{height:2rem;line-height:2rem;background-color:#eceaec;vertical-align:top;padding:0 2px 4px 0}
-.usage-disk>span{margin:0!important;display:block;height:3px;background-color:#606e7f}
-.usage-disk.sys{background-color:transparent;margin:-14px 20px 0 44px}
-.usage-disk.sys>span{height:12px}
-.usage-disk.mm{margin:4px 20px 0 0}
+.usage-bar{position:fixed;top:61px;right:450px;height:2.2rem;line-height:2.2rem;width:14rem;background-color:#606060}
+.usage-bar>span{display:block;height:3px;color:#ffffff;background-color:#606e7f}
+.usage-disk{position:relative;height:2.2rem;line-height:2.2rem;background-color:#eceaec;margin:0}
+.usage-disk>span:first-child{position:absolute;left:0;margin:0!important;height:3px;background-color:#606e7f}
+.usage-disk>span:last-child{position:relative;padding-right:4px;z-index:1}
+.usage-disk.sys{line-height:normal;background-color:transparent;margin:-15px 20px 0 44px}
+.usage-disk.sys>span{line-height:normal;height:12px;padding:0}
+.usage-disk.mm{height:3px;line-height:normal;background-color:transparent;margin:5px 20px 0 0}
+.usage-disk.mm>span:first-child{height:3px;line-height:normal}
 .notice{background:#fff6bf url(../images/notice.png) no-repeat;background-position:60px 50%;font-size:1.4rem;text-align:left;padding:15px 0 15px 130px;display:block;height:7rem;line-height:7rem;vertical-align:middle;border-top:1px solid #ffd324;border-bottom:1px solid #ffd324}
 .greenbar{background:-webkit-radial-gradient(#127a05,#17bf0b);background:linear-gradient(#127a05,#17bf0b)}
 .orangebar{background:-webkit-radial-gradient(#ce7c10,#f0b400);background:linear-gradient(#ce7c10,#f0b400)}
