@@ -586,12 +586,12 @@ function update15() {
 <?endif;?>
 <?if ($apcupsd):?>
   $.get('/plugins/dynamix.apcupsd/include/UPSstatus.php',{all:'false'},function(d) {
-    var data = d.replace(/<\/?tr>/,'').replace(/<td/g,'<span').replace(/td>/g,'span>;').split(';');
+    var data = d.replace(/<\/?tr>/g,'').replace(/<td/g,'<span').replace(/td>/g,'span>;').split(';');
     $('#ups_status').html(data[0]);
     $('#ups_bcharge').html(data[1]);
     $('#ups_timeleft').html(data[2]);
     $('#ups_nompower').html(data[3]);
-    $('#ups_loadpct').html(data[5]+(data[5].search('-')==-1 ? '%':'')+(data[4].search('-')==-1 ? ' ('+data[4].replace(' Watts','W')+')':''));
+    $('#ups_loadpct').html(data[5].replace('Percent','%')+' ('+data[4].replace('Watts','W')+')');
   });
 <?endif;?>
   $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
