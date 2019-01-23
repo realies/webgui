@@ -66,13 +66,13 @@ echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 <div><span class="key">M/B:</span>
 <?
 $board = dmidecode('Base Board Information','2',0);
-echo "{$board['Manufacturer']} {$board['Product Name']} - v{$board['Version']} - s/n: {$board['Serial Number']}";
+echo "{$board['Manufacturer']} {$board['Product Name']} Version {$board['Version']} - s/n: {$board['Serial Number']}";
 ?>
 </div>
 <div><span class="key">BIOS:</span>
 <?
 $bios = dmidecode('BIOS Information','0',0);
-echo "{$bios['Vendor']} - v{$bios['Version']}. Dated: {$bios['Release Date']}";
+echo "{$bios['Vendor']} Version {$bios['Version']}. Dated: {$bios['Release Date']}";
 ?>
 </div>
 <div><span class="key">CPU:</span>
