@@ -227,9 +227,10 @@
       ############
       {0}
       ############
+      set -x
 
       if [ ! -f /usr/local/bin/jq ]; then
-        curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq;
+        curl -L -s https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq;
         chmod +x /usr/local/bin/jq;
         mkdir -p /boot/config/telegram;
         cp /usr/local/bin/jq /boot/config/telegram;
@@ -237,7 +238,7 @@
         [ $? -eq 1 ] && echo "cp /boot/config/telegram/jq /usr/local/bin" >> /boot/config/go;
       fi
 
-      $STORED_TOKEN=$(cat /boot/config/telegram/token) || "";
+      STORED_TOKEN=$(< /boot/config/telegram/token) || "";
       if [[ ! -f /boot/config/telegram/token || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
         mkdir -p /boot/config/telegram;
         echo $BOT_TOKEN > /boot/config/telegram/token;
@@ -245,13 +246,13 @@
 
       if [[ ! -f /boot/config/telegram/chatid || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
         mkdir -p /boot/config/telegram;
-        LASTCHATID=$(curl https://api.telegram.org/bot$BOT_TOKEN/getUpdates | jq ".result | last .message .chat .id");
-        [[ $LASTCHATID =~ ^[0-9]+$ ]] && echo $LASTCHATID > /boot/config/telegram/chatid;
+        LASTCHATID=$(curl -s https://api.telegram.org/bot$BOT_TOKEN/getUpdates | jq ".result | last .message .chat .id");
+        [[ $LASTCHATID =~ ^[0-9]+$ ]] && echo $LASTCHATID > /boot/config/telegram/chatid || exit 1
       fi
 
-      CHATID=$(cat /boot/config/telegram/chatid);
+      CHATID=$(< /boot/config/telegram/chatid);
       MESSAGE=$(echo -e "$(hostname): $TITLE\n$MESSAGE");
-      curl -G -v "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$MESSAGE" 2>&1;
+      curl -G -s "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$MESSAGE" 2>&1;
       ]]>
     </Script>
   </Agent>
