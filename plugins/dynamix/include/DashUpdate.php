@@ -239,9 +239,9 @@ function extra_group() {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
@@ -250,9 +250,9 @@ case 'array':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'cache':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
@@ -260,9 +260,9 @@ case 'cache':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'extra':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @parse_ini_file('state/devs.ini',true) ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)parse_ini_file('state/devs.ini',true);
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   $smartALL = '/boot/config/smart-all.cfg';
   if (file_exists($smartALL)) $var = array_merge($var, parse_ini_file($smartALL));
   require_once "$docroot/webGui/include/Preselect.php";
