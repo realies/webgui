@@ -149,7 +149,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 .switch-button-background{top:12px}
 <?endif;?>
 span.outer{float:left}
-span.inner{width:124px}
+span.inner{width:134px}
 span.ups{width:124px;display:inline-block}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
