@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -55,7 +55,7 @@ html{font-size:<?=$font?>}
 .inline_help{display:none}
 .upgrade_notice{position:fixed;top:1px;left:0;width:100%;height:40px;line-height:40px;color:#e68a00;background:#feefb3;border-bottom:#e68a00 1px solid;text-align:center;font-size:1.4rem;z-index:999}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
-.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:2.5rem}
+.back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:2.5rem;z-index:999}
 <?
 $safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
 $tasks = find_pages('Tasks');
@@ -426,7 +426,7 @@ foreach ($pages as $page) {
         if (substr($icon,0,3)!='fa-') $icon = "fa-$icon";
         $icon = "<i class='fa $icon PanelIcon'></i>";
       }
-      echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\">$icon<div class=\"PanelText\">$title</div></a></div>";
+      echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\"><span>$icon</span><div class=\"PanelText\">$title</div></a></div>";
     }
   }
   empty($page['Markdown']) || $page['Markdown']=='true' ? eval('?>'.Markdown($page['text'])) : eval('?>'.$page['text']);
@@ -451,7 +451,7 @@ default:
   echo "<span class='green strong'><i class='fa fa-play-circle'></i> Array Started</span>$progress"; break;
 }
 echo "</span></span><span id='countdown'></span><span id='user-notice' class='red-text'></span>";
-echo "<span id='copyright'>Unraid&reg; webGui &copy;2018, Lime Technology, Inc.";
+echo "<span id='copyright'>Unraid&reg; webGui &copy;2019, Lime Technology, Inc.";
 echo " <a href='http://lime-technology.com/wiki/index.php/Official_Documentation' target='_blank' title='Online manual'><i class='fa fa-book'></i> manual</a>";
 echo "</span></div>";
 ?>

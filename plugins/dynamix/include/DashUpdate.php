@@ -126,9 +126,9 @@ function device_name(&$disk, $array) {
     return "<i class='icon-disk'></i> {$disk['device']}";
   }
 }
-function device_status(&$disk, &$error, &$warning) {
+function device_status(&$disk, $array, &$error, &$warning) {
   global $var;
-  if ($var['fsState']=='Stopped') {
+  if ($array && $var['fsState']=='Stopped') {
     $color = 'green'; $text = 'off-line';
   } else switch ($disk['color']) {
     case 'green-on'    : $color = 'green';  $text = 'active';     break;
@@ -204,9 +204,9 @@ function device_usage(&$disk, $array, &$full, &$high) {
     } else $class = false;
   } else $used = false;
   if ($used) {
-    return $text%10==0 ? $used : "<span class='load'>$used</span><div class='usage-disk sys'><span style='width:$used'".($class?" class='$class'":"")."></span></div>";
+    return $text%10==0 ? $used : "<span class='load'>$used</span><div class='usage-disk sys'><span style='width:$used'".($class?" class='$class'":"")."></span><span></span></div>";
   } else {
-    return $text%10==0 ? "-" : "<span class='load'>-</span><div class='usage-disk sys none'></div>";
+    return $text%10==0 ? "-" : "<span class='load'>-</span><div class='usage-disk sys none'><span></span></div>";
   }
 }
 function array_group($type) {
@@ -214,24 +214,23 @@ function array_group($type) {
   foreach ($disks as $disk) if ($disk['type']==$type && strpos($disk['status'],'DISK_NP')===false) {
     echo "<tr><td></td>";
     echo "<td>".device_name($disk,true)."</td>";
-    echo "<td>".device_status($disk,$error,$warning)."</td>";
+    echo "<td>".device_status($disk,true,$error,$warning)."</td>";
     echo "<td>".device_temp($disk,$red,$orange)."</td>";
     echo "<td>".device_smart($disk,false,$fail,$smart)."</td>";
     echo "<td>".device_usage($disk,true,$full,$high)."</td>";
     echo "<td></td></tr>";
   }
 }
-function extra_group(&$disks) {
+function extra_group() {
   global $disks,$error,$warning,$red,$orange,$fail,$smart,$full,$high;
   foreach ($disks as $disk) {
     $name = $disk['device'];
     $port = port_name($name);
-    $smart = "state/smart/$name";
     $disk['color'] = exec("hdparm -C /dev/$port|grep -Po 'active|unknown'") ? 'blue-on' : 'blue-blink';
-    $disk['temp'] = file_exists($smart) ? exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=\$4;exit} END{if(t!=\"*\")print t; else print s}' $smart") : '*';
+    $disk['temp'] = exec("awk 'BEGIN{s=t=\"*\"}\$1==190{s=\$10};\$1==194{t=\$10;exit};\$1==\"Temperature:\"{t=\$2;exit};/^Current Drive Temperature:/{t=\$4;exit} END{if(t!=\"*\")print t; else print s}' state/smart/$name 2>/dev/null");
     echo "<tr><td></td>";
     echo "<td>".device_name($disk,false)."</td>";
-    echo "<td>".device_status($disk,$error,$warning)."</td>";
+    echo "<td>".device_status($disk,false,$error,$warning)."</td>";
     echo "<td>".device_temp($disk,$red,$orange)."</td>";
     echo "<td>".device_smart($disk,$name,$fail,$smart)."</td>";
     echo "<td>".device_usage($disk,false,$full,$high)."</td>";
@@ -240,8 +239,8 @@ function extra_group(&$disks) {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = parse_ini_file('state/var.ini') ?: [];
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -251,8 +250,8 @@ case 'array':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'cache':
-  $var = parse_ini_file('state/var.ini');
-  $disks = array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
@@ -261,13 +260,14 @@ case 'cache':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'extra':
-  $var = parse_ini_file('state/var.ini');
-  $devs = parse_ini_file('state/devs.ini',true);
+  $var = @parse_ini_file('state/var.ini') ?: [];
+  $disks = @parse_ini_file('state/devs.ini',true) ?: [];
   $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
-  require_once "$docroot/webGui/include/CustomMerge.php";
+  $smartALL = '/boot/config/smart-all.cfg';
+  if (file_exists($smartALL)) $var = array_merge($var, parse_ini_file($smartALL));
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
-  extra_group($devs);
+  extra_group();
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'sys':

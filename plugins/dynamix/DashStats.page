@@ -43,7 +43,9 @@ function cache_devices($disk) {
 
 $dockerd = pgrep('dockerd');
 $libvirtd = pgrep('libvirtd');
+$apcupsd = file_exists('/var/run/apcupsd.pid');
 $started = $var['fsState']=='Started';
+$cache_pool = $var['cacheSbNumDisks'];
 $array_size = $array_used = 0;
 $cache_size = $cache_used = 0;
 $extra_size = $extra_used = 0;
@@ -96,11 +98,11 @@ $mycase = file_exists("$boot/$myfile") ? file_get_contents("$boot/$myfile") : fa
 
 $board  = dmidecode('Base Board Information','2',0);
 $serial = "s/n: {$board['Serial Number']}";
-$board  = "{$board['Manufacturer']} {$board['Product Name']} - v{$board['Version']}";
+$board  = "{$board['Manufacturer']} {$board['Product Name']}".($board['Version'] ? ", Version {$board['Version']}" : "");
 
 $bios = dmidecode('BIOS Information','0',0);
 $biosdate = "BIOS dated: ".my_time(strtotime($bios['Release Date']),$display['date']);
-$bios = "{$bios['Vendor']} - v{$bios['Version']}";
+$bios = $bios['Vendor'].($bios['Version'] ? ", Version {$bios['Version']}" : "");
 
 $cpu = dmidecode('Processor Information','4',0);
 $cpumodel = str_ireplace(["Processor","(C)","(R)","(TM)"],["","&#169;","&#174;","&#8482;"],$cpu['Version']);
@@ -148,6 +150,7 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 <?endif;?>
 span.outer{float:left}
 span.inner{width:124px}
+span.ups{width:124px;display:inline-block}
 </style>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.docker.manager/javascript/docker.js')?>"></script>
@@ -184,15 +187,15 @@ span.inner{width:124px}
 <tr class='cpu_view' style='display:none'><td></td><td colspan='3'><?=$cpumodel?><br>
 <a onclick='toggleCPU()' title='Click to toggle details' class='cpu_close' style='cursor:pointer'>Show details</a></td><td></td></tr>
 <tr class='cpu_open' style='display:none'><td></td><td>Overall Load:</td>
-<td colspan='2'><span class='cpu load'>0%</span><div class='usage-disk sys'><span id='cpu' style='width:0'></span></div></td><td></td></tr>
+<td colspan='2'><span class='cpu load'>0%</span><div class='usage-disk sys'><span id='cpu' style='width:0'></span><span></span></div></td><td></td></tr>
 <?
 foreach ($cpus as $pair) {
   list($cpu1, $cpu2) = preg_split('/[,-]/',$pair);
   echo "<tr class='cpu_open' style='display:none'><td></td>";
   if ($cpu2)
-    echo "<td>CPU $cpu1 - HT $cpu2</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td><td><span class='cpu$cpu2 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu2' style='width:0'></span></div></td>";
+    echo "<td>CPU $cpu1 - HT $cpu2</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span><span></span></div></td><td><span class='cpu$cpu2 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu2' style='width:0'></span><span></span></div></td>";
   else
-    echo "<td>CPU $cpu1</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span></div></td><td></td>";
+    echo "<td>CPU $cpu1</td><td><span class='cpu$cpu1 load'>0%</span><div class='usage-disk sys'><span id='cpu$cpu1' style='width:0'></span><span></span></div></td><td></td>";
   echo "<td></td></tr>";
 }
 ?>
@@ -200,10 +203,10 @@ foreach ($cpus as $pair) {
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-ram'></i><div class='section'>Memory<br><span><?="$memory_installed $unit $memory_type $ecc"?><span style='margin-left:20px'>Utilization: <span class='sys0'>0%</span></span><br><br></div>
 <i class='fa blue-text chevron' id='mem_view' onclick='toggleChevron("mem_view",0)'></i></td><td></td></tr>
-<tr class='mem_view' style='display:none'><td></td><td>Maximum size: <?="$memory_maximum $unit"?><?=$low?'*':''?></td><td><i class='mm'>RAM</i><span class='sys0 load'>0%</span><div class='usage-disk sys'><span id='sys0' style='width:0'></span></div></td>
-<td><i class='mm'>Flash</i><span class='sys1 load'>0%</span><div class='usage-disk sys'><span id='sys1' style='width:0'></span></div></td><td></td></tr>
-<tr class='mem_view' style='display:none'><td></td><td>Usable size: <?=my_scale($total,$unit,1,null,1024)." $unit"?></td><td><i class='mm'>Log</i><span class='sys2 load'>0%</span><div class='usage-disk sys'><span id='sys2' style='width:0'></span></div></td>
-<td><?if (exec("df /var/lib/docker|grep -om1 '^/'")):?><i class='mm'>Docker</i><span class='sys3 load'>0%</span><div class='usage-disk sys'><span id='sys3' style='width:0'></span></div><?endif;?></td><td></td></tr>
+<tr class='mem_view' style='display:none'><td></td><td>Maximum size: <?="$memory_maximum $unit"?><?=$low?'*':''?></td><td><i class='mm'>RAM</i><span class='sys0 load'>0%</span><div class='usage-disk sys'><span id='sys0' style='width:0'></span><span></span></div></td>
+<td><i class='mm'>Flash</i><span class='sys1 load'>0%</span><div class='usage-disk sys'><span id='sys1' style='width:0'></span><span></span></div></td><td></td></tr>
+<tr class='mem_view' style='display:none'><td></td><td>Usable size: <?=my_scale($total,$unit,1,null,1024)." $unit"?></td><td><i class='mm'>Log</i><span class='sys2 load'>0%</span><div class='usage-disk sys'><span id='sys2' style='width:0'></span><span></span></div></td>
+<td><?if (exec("df /var/lib/docker|grep -om1 '^/'")):?><i class='mm'>Docker</i><span class='sys3 load'>0%</span><div class='usage-disk sys'><span id='sys3' style='width:0'></span><span></span></div><?endif;?></td><td></td></tr>
 </tbody>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-ethernet'></i><div class='section'>Interface<br>
@@ -241,15 +244,28 @@ foreach ($ports as $port) {
 }
 ?>
 </tbody>
-<?if ($fans>0) {
-  echo "<tbody>";
-  echo "<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: $fans</span><br><br></div><i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron(\"fan_view\",0)'></i></td><td></td></tr>";
-  for ($f=0; $f<$fans; $f+=2) {
-    if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
-    else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
-  }
-  echo "</tbody>";
+<?if ($apcupsd):?>
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-ups'></i><div class='section'>Power<br>
+<span>UPS Load: <span id='ups_loadpct'></span></span><br><br></div><i class='fa blue-text chevron' id='ups_view' onclick='toggleChevron("ups_view",0)'></i></td><td></td></tr>
+<tr class='ups_view' style='display:none'><td></td><td colspan='3'>
+<span class='ups'>UPS status:</span><span id='ups_status'></span><br>
+<span class='ups'>Battery charge:</span><span id='ups_bcharge'></span><br>
+<span class='ups'>Runtime left:</span><span id='ups_timeleft'></span><br>
+<span class='ups'>Nominal power:</span><span id='ups_nompower'></span><br>
+</td><td></td></tr>
+</tbody>
+<?endif;?>
+<?if ($fans):?>
+<tbody>
+<tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: <?=$fans?></span><br><br></div>
+<i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron("fan_view",0)'></i></td><td></td></tr>
+<?for ($f=0; $f<$fans; $f+=2) {
+  if ($f+1<$fans) echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
+  else echo "<tr class='fan_view' style='display:none'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
 }?>
+</tbody>
+<?endif;?>
 </table>
 
 <table class='share_status dashboard box3'>
@@ -407,15 +423,15 @@ foreach ($users as $user) {
 <tr><td></td><td colspan='5' id='parity'></td><td></td></tr>
 <tr><td></td><td colspan='5' id='program'></td><td></td></tr>
 </tbody>
-<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> not started<?endif;?><i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
+<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> (stopped)<?endif;?><i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
 <?if ($started):?><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr style='display:none'><td></td><td id='array_info' colspan='5'></td><td></td></tr>
 <tr id='array_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
 <tbody class='array_view' id='array_list' style='display:none'></tbody>
-<?if (isset($disks['cache'])):?>
-<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> not started<?endif;?><i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
+<?if ($cache_pool):?>
+<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> (stopped)<?endif;?><i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
 <?if ($started):?><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr style='display:none'><td></td><td id='cache_info' colspan='5'></td><td></td></tr>
@@ -424,7 +440,7 @@ foreach ($users as $user) {
 <tbody class='cache_view' id='cache_list' style='display:none'></tbody>
 <?endif;?>
 <?if ($devs):?>
-<thead><tr><td></td><td colspan='5' class='next'>Extra<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Unassigned<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
 <tr style='display:none'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
 <tr id='extra_view_on' style='display:none'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
@@ -433,6 +449,7 @@ foreach ($users as $user) {
 </table>
 </div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch"></div>
+&nbsp;
 <script>
 var timer30 = null;
 var orange = 70;
@@ -545,7 +562,7 @@ function moreInfo(data,table) {
   return info.length ? "<div style='padding-bottom:12px'><i class='icon-u-triangle failed'></i><span class='failed'>"+table+" has "+info.join('. ')+".</span></div>" : "";
 }
 function update5() {
-<?if ($fans>0):?>
+<?if ($fans):?>
   $.post('<?=$url?>',{cmd:'fan'},function(data) {
     $.each(data.split('\0'),function(k,v) {$('#fan'+k).html(v);});
   });
@@ -565,6 +582,16 @@ function update15() {
   var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
   $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=addslashes(htmlspecialchars($names))?>'},function(data) {
     $.each(data.split('\0'),function(k,v) {$('#share'+(k+1)).html(v);});
+  });
+<?endif;?>
+<?if ($apcupsd):?>
+  $.get('/plugins/dynamix.apcupsd/include/UPSstatus.php',{all:'false'},function(d) {
+    var data = d.replace(/<\/?tr>/g,'').replace(/<td/g,'<span').replace(/td>/g,'span>;').split(';');
+    $('#ups_status').html(data[0]);
+    $('#ups_bcharge').html(data[1]);
+    $('#ups_timeleft').html(data[2]);
+    $('#ups_nompower').html(data[3]);
+    $('#ups_loadpct').html(data[5].replace('Percent','%')+' ('+data[4].replace('Watts','W')+')');
   });
 <?endif;?>
   $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
@@ -597,7 +624,7 @@ function update30() {
 <?if ($devs):?>
       $.post('<?=$url?>',{cmd:'extra',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
         var data = d.split('\0');
-        var info = moreInfo(data,'Extra');
+        var info = moreInfo(data,'Unassigned');
         $('#extra_list').html(data[0]);
         $('#extra_info').parent().css('display',info?'':'none');
         $('#extra_info').html(info);
@@ -749,8 +776,11 @@ $(function() {
   toggleView('cpu_view',true);
   toggleView('mem_view',true);
   toggleView('port_view',true);
-<?if ($fans>0):?>
+<?if ($fans):?>
   toggleView('fan_view',true);
+<?endif;?>
+<?if ($apcupsd):?>
+  toggleView('ups_view',true);
 <?endif;?>
 <?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
   toggleView('docker_view',true);
@@ -760,7 +790,9 @@ $(function() {
 <?endif;?>
   toggleView('parity_view',true);
   toggleView('array_view',true);
+<?if ($cache_pool):?>
   toggleView('cache_view',true);
+<?endif;?>
 <?if ($devs):?>
   toggleView('extra_view',true);
 <?endif;?>

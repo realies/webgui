@@ -97,7 +97,7 @@ foreach ($containers as $ct) {
   }
   echo "</span></td><td class='updatecolumn'>";
   if ($updateStatus=='false') {
-    echo "<div class='advanced'><span class='orange-text' style='white-space:nowrap;'><i class='fa fa-flash fa-fw'></i> update required</span></div>";
+    echo "<div class='advanced'><span class='orange-text' style='white-space:nowrap;'><i class='fa fa-flash fa-fw'></i> updated</span></div>";
     echo "<a class='exec' onclick=\"updateContainer('".addslashes(htmlspecialchars($name))."');\"><span style='white-space:nowrap;'><i class='fa fa-cloud-download fa-fw'></i> update ready</span></a>";
   } elseif ($updateStatus=='true') {
     echo "<span class='green-text' style='white-space:nowrap;'><i class='fa fa-check fa-fw'></i> up-to-date</span>";
@@ -110,8 +110,8 @@ foreach ($containers as $ct) {
   echo "<td>{$ct['NetworkMode']}</td>";
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
-  echo "<td class='advanced'><span class='cpu-$id'>0%</span><div class='usage-disk mm'><span id='cpu-$id' style='width:0'></span></div></td>";
-  echo "<td class='advanced'><span class='mem-$id'>0%</span><div class='usage-disk mm'><span id='mem-$id' style='width:0'></span></div></td>";
+  echo "<td class='advanced'><span class='cpu-$id'>0%</span><div class='usage-disk mm'><span id='cpu-$id' style='width:0'></span><span></span></div></td>";
+  echo "<td class='advanced'><span class='mem-$id'>0%</span><div class='usage-disk mm'><span id='mem-$id' style='width:0'></span><span></span></div></td>";
   echo "<td><input type='checkbox' id='$id-auto' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'').">";
   echo "<span id='$id-wait' style='float:right;display:none'>wait<input class='wait' container='".htmlspecialchars($name)."' type='number' value='$wait' placeholder='0' title='seconds'></span></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";

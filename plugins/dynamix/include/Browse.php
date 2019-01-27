@@ -88,7 +88,7 @@ foreach ($list as $row) {
     $tag = strpos($row['disk'],',')===false ? '' : 'warning';
     echo "<tr>";
     echo "<td data='{$row['fext']}'><div class='icon-file icon-{$row['fext']}'></div></td>";
-    echo "<td><a href=\"".htmlspecialchars(trim_slash($dir.'/'.$row['name']))."\" class=\"".($tag?:'none')."\">".htmlspecialchars($row['name'])."</a></td>";
+    echo "<td><a href=\"".htmlspecialchars(trim_slash($dir.'/'.$row['name']))."\" download target=\"_blank\" class=\"".($tag?:'none')."\">".htmlspecialchars($row['name'])."</a></td>";
     echo "<td data='{$row['size']}' class='$tag'>".my_scale($row['size'],$unit)." $unit</td>";
     echo "<td data='{$row['time']}' class='$tag'>".my_time($row['time'],"%F {$display['time']}")."</td>";
     echo "<td class='loc $tag'>{$row['disk']}</td>";
