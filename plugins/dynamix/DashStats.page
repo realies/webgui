@@ -360,7 +360,7 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <tbody class='smb user user1' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  $list = "<a href=\"$path/UserEdit?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -380,7 +380,7 @@ foreach ($users as $user) {
 <tbody class='afp user user2' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  $list = "<a href=\"$path/UserEdit?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -400,7 +400,7 @@ foreach ($users as $user) {
 <tbody class='nfs user user3' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  $list = "<a href=\"$path/UserEdit?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   $write = '-'; $read = '-';
   if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
@@ -412,7 +412,7 @@ foreach ($users as $user) {
 <tbody><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  $list = "<a href=\"$path/UserEdit?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
   echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
