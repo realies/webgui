@@ -305,12 +305,12 @@ foreach ($ports as $port) {
 $i = 0;
 foreach ($shares as $name => $share) {
   $i++;
-  $list = truncate($name,20);
-  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
-  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  if ($share['luksStatus']>0) $list = str_replace('blue-text','green-text',$list);
+  elseif ($share['useCache']=='only') $list = str_replace('blue-text','orange-text',$list);
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td id='share{$i}'>0</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td id='share{$i}'>0</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -318,12 +318,12 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <?if ($var['shareAFPEnabled']=='yes'):?>
 <tbody class='afp share share2' style='display:none'><?
 foreach ($shares as $name => $share) {
-  $list = truncate($name,20);
-  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
-  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  if ($share['luksStatus']>0) $list = str_replace('blue-text','green-text',$list);
+  elseif ($share['useCache']=='only') $list = str_replace('blue-text','orange-text',$list);
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareAFPEnabled'], $sec_afp[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -331,12 +331,12 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <?if ($var['shareNFSEnabled']=='yes'):?>
 <tbody class='nfs share share3' style='display:none'><?
 foreach ($shares as $name => $share) {
-  $list = truncate($name,20);
-  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
-  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  if ($share['luksStatus']>0) $list = str_replace('blue-text','green-text',$list);
+  elseif ($share['useCache']=='only') $list = str_replace('blue-text','orange-text',$list);
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -344,11 +344,11 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <?if (!$group):?>
 <tbody><?
 foreach ($shares as $name => $share) {
-  $list = truncate($name,20);
-  if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
-  elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
+  if ($share['luksStatus']>0) $list = str_replace('blue-text','green-text',$list);
+  elseif ($share['useCache']=='only') $list = str_replace('blue-text','orange-text',$list);
   $comment = truncate($share['comment'],40);
-  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -360,7 +360,7 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <tbody class='smb user user1' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = truncate($name,20);
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -371,8 +371,8 @@ foreach ($users as $user) {
       if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
     }
   }
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
@@ -380,7 +380,7 @@ foreach ($users as $user) {
 <tbody class='afp user user2' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = truncate($name,20);
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -391,8 +391,8 @@ foreach ($users as $user) {
       if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
     }
   }
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
@@ -400,11 +400,11 @@ foreach ($users as $user) {
 <tbody class='nfs user user3' style='display:none'><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = truncate($name,20);
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
   $write = '-'; $read = '-';
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
@@ -412,10 +412,10 @@ foreach ($users as $user) {
 <tbody><?
 foreach ($users as $user) {
   $name = $user['name'];
-  $list = truncate($name,20);
+  $list = "<a href=\"$path/Share?name=".urlencode($name)."\" class=\"blue-text\" title=\"$name settings\">".truncate($name,20)."</a>";
   $desc = truncate($user['desc'],40);
-  if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
+  if ($user['passwd']!='yes') $list = str_replace('blue-text','orange-text',$list);
+  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>

@@ -91,11 +91,11 @@ span.tub span[id^='txt-tub']{margin-top:7px}
 .green{color:#4f8a10;padding-left:5px;padding-right:5px}
 .red{color:#f0000c;padding-left:5px;padding-right:5px}
 .orange{color:#e68a00;padding-left:5px;padding-right:5px}
-.blue{color:#3b5998;padding-left:5px;padding-right:5px}
+.blue{color:#486dba;padding-left:5px;padding-right:5px}
 .green-text,.passed{color:#4f8a10}
 .red-text,.failed{color:#f0000c}
 .orange-text,.warning{color:#e68a00}
-.blue-text{color:#3b5998}
+.blue-text{color:#486dba}
 .grey-text{color:#606060}
 .green-orb{color:#33cc33}
 .grey-orb{color:#c0c0c0}
