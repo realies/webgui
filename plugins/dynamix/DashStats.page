@@ -310,7 +310,7 @@ foreach ($shares as $name => $share) {
   elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td id='share{$i}'>0</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td id='share{$i}'>0</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -323,7 +323,7 @@ foreach ($shares as $name => $share) {
   elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareAFPEnabled'], $sec_afp[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -336,7 +336,7 @@ foreach ($shares as $name => $share) {
   elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
   $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
-  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>$security</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -348,7 +348,7 @@ foreach ($shares as $name => $share) {
   if ($share['luksStatus']>0) $list = "<span class='green-text'>$list</span>";
   elseif ($share['useCache']=='only') $list = "<span class='orange-text'>$list</span>";
   $comment = truncate($share['comment'],40);
-  echo "<tr><td></td><td><i class='icon-folder'></i>$list</td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-folder'></i><a href=\"$path/Share?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$comment</td><td>-</td><td>-</td><td></td></tr>";
 }
 if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center;padding-top:12px'>No shares present</td><td></td></tr>";
 ?></tbody>
@@ -359,7 +359,8 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' style='text-align:center
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb user user1' style='display:none'><?
 foreach ($users as $user) {
-  $list = truncate($user['name'],20);
+  $name = $user['name'];
+  $list = truncate($name,20);
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -371,14 +372,15 @@ foreach ($users as $user) {
     }
   }
   if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
 <?if ($var['shareAFPEnabled']=='yes'):?>
 <tbody class='afp user user2' style='display:none'><?
 foreach ($users as $user) {
-  $list = truncate($user['name'],20);
+  $name = $user['name'];
+  $list = truncate($name,20);
   $desc = truncate($user['desc'],40);
   if ($list=='root') {
     $write = '-'; $read = '-';
@@ -390,28 +392,30 @@ foreach ($users as $user) {
     }
   }
   if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
 <?if ($var['shareNFSEnabled']=='yes'):?>
 <tbody class='nfs user user3' style='display:none'><?
 foreach ($users as $user) {
-  $list = truncate($user['name'],20);
+  $name = $user['name'];
+  $list = truncate($name,20);
   $desc = truncate($user['desc'],40);
   $write = '-'; $read = '-';
   if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>$write</td><td>$read</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
 <?if (!$group):?>
 <tbody><?
 foreach ($users as $user) {
-  $list = truncate($user['name'],20);
+  $name = $user['name'];
+  $list = truncate($name,20);
   $desc = truncate($user['desc'],40);
   if ($user['passwd']=='yes') $list = "<span class='green-text'>$list</span>";
-  echo "<tr><td></td><td><i class='icon-user'></i>$list</td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
+  echo "<tr><td></td><td><i class='icon-user'></i><a href=\"$path/UserEdit?name=".urlencode($name)."\" style=\"color:inherit\" title=\"$name settings\">$list</a></td><td>$desc</td><td>-</td><td>-</td><td></td></tr>";
 }
 ?></tbody>
 <?endif;?>
@@ -591,7 +595,7 @@ function update15() {
     $('#ups_bcharge').html(data[1]);
     $('#ups_timeleft').html(data[2]);
     $('#ups_nompower').html(data[3]);
-    $('#ups_loadpct').html(data[5].replace('Percent','%')+' ('+data[4].replace('Watts','W')+')');
+    $('#ups_loadpct').html(data[5].replace('Percent','%')+data[4].replace(/>/,'> (').replace(/Watts|-/,'W)'));
   });
 <?endif;?>
   $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
@@ -607,14 +611,14 @@ function update30() {
   $.post('<?=$url?>',{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},function(data) {
     $.each(data.split('\0'),function(k,v) {$('#'+tag+k).html(v);});
   });
-  $.post('<?=$url?>',{cmd:'array',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+  $.post('<?=$url?>',{cmd:'array',path:'<?=$path?>',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
     var data = d.split('\0');
     var info = moreInfo(data,'Array');
     $('#array_list').html(data[0]);
     $('#array_info').parent().css('display',info?'':'none');
     $('#array_info').html(info);
     smartMenu('#array_list');
-    $.post('<?=$url?>',{cmd:'cache',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+    $.post('<?=$url?>',{cmd:'cache',path:'<?=$path?>',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
       var data = d.split('\0');
       var info = moreInfo(data,'Cache');
       $('#cache_list').html(data[0]);
@@ -622,7 +626,7 @@ function update30() {
       $('#cache_info').html(info);
       smartMenu('#cache_list');
 <?if ($devs):?>
-      $.post('<?=$url?>',{cmd:'extra',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
+      $.post('<?=$url?>',{cmd:'extra',path:'<?=$path?>',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>',text:<?=$display['text']?>,critical:'<?=$display['critical']?>',warning:'<?=$display['warning']?>'},function(d) {
         var data = d.split('\0');
         var info = moreInfo(data,'Unassigned');
         $('#extra_list').html(data[0]);
