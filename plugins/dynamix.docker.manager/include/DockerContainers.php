@@ -24,7 +24,7 @@ $user_prefs      = $dockerManPaths['user-prefs'];
 $autostart_file  = $dockerManPaths['autostart-file'];
 
 if (!$containers && !$images) {
-  echo "<tr><td colspan='8' style='text-align:center;padding-top:12px'>No Docker containers installed</td></tr>";
+  echo "<tr><td colspan='7' style='text-align:center;padding-top:12px'>No Docker containers installed</td></tr>";
   return;
 }
 
@@ -110,8 +110,8 @@ foreach ($containers as $ct) {
   echo "<td>{$ct['NetworkMode']}</td>";
   echo "<td style='white-space:nowrap'><span class='docker_readmore'>".implode('<br>',$ports)."</span></td>";
   echo "<td style='word-break:break-all'><span class='docker_readmore'>".implode('<br>',$paths)."</span></td>";
-  echo "<td class='advanced'><span class='cpu-$id'>0%</span><div class='usage-disk mm'><span id='cpu-$id' style='width:0'></span><span></span></div></td>";
-  echo "<td class='advanced'><span class='mem-$id'>0%</span><div class='usage-disk mm'><span id='mem-$id' style='width:0'></span><span></span></div></td>";
+  echo "<td class='advanced'><span class='cpu-$id'>0%</span><div class='usage-disk mm'><span id='cpu-$id' style='width:0'></span><span></span></div>";
+  echo "<br><span class='mem-$id'>0%</span><div class='usage-disk mm'><span id='mem-$id' style='width:0'></span><span></span></div></td>";
   echo "<td><input type='checkbox' id='$id-auto' class='autostart' container='".htmlspecialchars($name)."'".($info['autostart'] ? ' checked':'').">";
   echo "<span id='$id-wait' style='float:right;display:none'>wait<input class='wait' container='".htmlspecialchars($name)."' type='number' value='$wait' placeholder='0' title='seconds'></span></td>";
   echo "<td><a class='log' onclick=\"containerLogs('".addslashes(htmlspecialchars($name))."','$id',false,false)\"><img class='basic' src='/plugins/dynamix/icons/log.png'><div class='advanced'>";
@@ -123,7 +123,7 @@ foreach ($images as $image) {
   $menu[] = sprintf("addDockerImageContext('%s','%s');", $id, implode(',',$image['Tags']));
   echo "<tr class='advanced'><td style='width:220px;padding:8px'>";
   echo "<span class='outer apps'><span id='$id' class='hand'><img src='/webGui/images/disk.png' class='img'></span><span class='inner'>(orphan image)<br><i class='fa fa-square stopped grey-text'></i><span class='state'>stopped</span></span></span>";
-  echo "</td><td colspan='7'>Image ID: $id<br>";
+  echo "</td><td colspan='5'>Image ID: $id<br>";
   echo implode(', ',array_map('htmlspecialchars',$image['Tags']));
   echo "</td><td>Created ".htmlspecialchars($image['Created'])."</td></tr>";
 }

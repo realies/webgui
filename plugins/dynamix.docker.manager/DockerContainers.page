@@ -34,15 +34,15 @@ tbody>tr.sortable:hover{cursor:move}
 table#docker_containers{text-align:left}
 th.five{width:5%}
 th.nine{width:9%}
-th.load{width:100px}
+th.load{width:130px}
 input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
 table tbody td{line-height:normal}
 </style>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
 <table id="docker_containers" class="tablesorter shift">
-<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px;display:inline-block;width:32px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU load</th><th class="load advanced">Memory load</th><th class="nine">Autostart</th><th class="five">Log</th></tr></thead>
-<tbody id="docker_list"><tr><td class="advanced"></td><td colspan='8'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px;display:inline-block;width:32px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU/Memory load</th><th class="nine">Autostart</th><th class="five">Log</th></tr></thead>
+<tbody id="docker_list"><tr><td class="advanced"></td><td colspan='7'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
 <input type="button" onclick="startAll()" value="Start All" style="display:none">
