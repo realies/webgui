@@ -15,11 +15,11 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/Helpers.php";
 
 $path  = $_POST['path'];
-$var   = parse_ini_file('state/var.ini');
-$devs  = parse_ini_file('state/devs.ini',true);
-$disks = parse_ini_file('state/disks.ini',true);
-$sec   = parse_ini_file('state/sec.ini',true);
-$diskio= @parse_ini_file('state/diskload.ini');
+$var   = (array)parse_ini_file('state/var.ini');
+$devs  = (array)parse_ini_file('state/devs.ini',true);
+$disks = (array)parse_ini_file('state/disks.ini',true);
+$sec   = (array)parse_ini_file('state/sec.ini',true);
+$diskio= @(array)parse_ini_file('state/diskload.ini');
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'ioReads'=>0, 'ioWrites'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
 

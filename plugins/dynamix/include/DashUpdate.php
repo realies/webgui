@@ -114,16 +114,18 @@ function stage($i) {
   return $t;
 }
 function device_name(&$disk, $array) {
+  global $path;
   if ($array) {
     switch ($disk['type']) {
-      case 'Flash' : $type = 'usb'; break;
       case 'Parity': $type = $disk['rotational'] ? 'disk' : 'nvme'; break;
       case 'Data'  :
       case 'Cache' : $type = $disk['rotational'] ? ($disk['luksState'] ? 'disk-encrypted' : 'disk') : 'nvme'; break;
     }
-    return "<i class='icon-$type'></i> ".my_disk($disk['name']);
+    $name = my_disk($disk['name']);
+    return "<i class='icon-$type'></i> <a href=\"".htmlspecialchars("$path/Device?name={$disk['name']}")."\" title=\"$name settings\">$name</a>";
   } else {
-    return "<i class='icon-disk'></i> {$disk['device']}";
+    $name = $disk['device'];
+    return "<i class='icon-disk'></i> <a href=\"".htmlspecialchars("$path/New?name=$name")."\" title=\"$name settings\">$name</a>";
   }
 }
 function device_status(&$disk, $array, &$error, &$warning) {
@@ -239,9 +241,10 @@ function extra_group() {
 }
 switch ($_POST['cmd']) {
 case 'array':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $path = $_POST['path'];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
@@ -250,9 +253,10 @@ case 'array':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'cache':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @array_filter(parse_ini_file('state/disks.ini',true),'active_disks') ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $path = $_POST['path'];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)array_filter(parse_ini_file('state/disks.ini',true),'active_disks');
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   require_once "$docroot/webGui/include/CustomMerge.php";
   require_once "$docroot/webGui/include/Preselect.php";
   $error = $warning = $red = $orange = $fail = $smart = $full = $high = 0;
@@ -260,9 +264,10 @@ case 'cache':
   echo "\0".($error+$warning)."\0".($red+$orange)."\0".($fail+$smart)."\0".($full+$high);
   break;
 case 'extra':
-  $var = @parse_ini_file('state/var.ini') ?: [];
-  $disks = @parse_ini_file('state/devs.ini',true) ?: [];
-  $saved = @parse_ini_file('state/monitor.ini',true) ?: [];
+  $path = $_POST['path'];
+  $var = (array)parse_ini_file('state/var.ini');
+  $disks = (array)parse_ini_file('state/devs.ini',true);
+  $saved = @(array)parse_ini_file('state/monitor.ini',true);
   $smartALL = '/boot/config/smart-all.cfg';
   if (file_exists($smartALL)) $var = array_merge($var, parse_ini_file($smartALL));
   require_once "$docroot/webGui/include/Preselect.php";
