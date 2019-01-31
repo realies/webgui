@@ -120,7 +120,7 @@ foreach ($memory_devices as $device) {
   list($size, $unit) = explode(' ',$device['Size']);
   $base = array_search($unit,$sizes);
   if ($base!==false) $memory_installed += $size*pow(1024,$base);
-  if (!$memory_type) $memory_type = $device['Type'];
+  if (!$memory_type && $device['Type']!='Unknown') $memory_type = $device['Type'];
 }
 $memory_array = dmidecode('Physical Memory Array','16');
 foreach ($memory_array as $device) {
