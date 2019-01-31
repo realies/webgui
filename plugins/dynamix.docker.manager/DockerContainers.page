@@ -34,14 +34,14 @@ tbody>tr.sortable:hover{cursor:move}
 table#docker_containers{text-align:left}
 th.five{width:5%}
 th.nine{width:9%}
-th.load{width:130px}
+th.load{width:140px}
 input.wait{width:24px;margin:0 4px;padding:0 5px;border:none;box-shadow:none;background-color:transparent}
 table tbody td{line-height:normal}
 </style>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top:<?=$width?>px"><span><input type="checkbox" class="advancedview"></span></span>
 <table id="docker_containers" class="tablesorter shift">
-<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px;display:inline-block;width:32px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU/Memory load</th><th class="nine">Autostart</th><th class="five">Log</th></tr></thead>
+<thead><tr><th><a href="#" style="cursor:hand;margin-left:12px;display:inline-block;width:32px" onclick="resetSorting()" title="Reset sorting"><i class="fa fa-th-list"></i></a>Application</th><th>Version</th><th>Network</th><th>Port Mappings <small>(App to Host)</small></th><th>Volume Mappings <small>(App to Host)</small></th><th class="load advanced">CPU & Memory load</th><th class="nine">Autostart</th><th class="five">Log</th></tr></thead>
 <tbody id="docker_list"><tr><td class="advanced"></td><td colspan='7'><div class="spinner"></div></td><td class="advanced"></td></tr></tbody>
 </table>
 <input type="button" onclick="addContainer()" value="Add Container" style="display:none">
@@ -145,13 +145,11 @@ var watchDocker = new NchanSubscriber('/sub/dockerload', /^((?!chrome|android).)
 watchDocker.on('message', function(data){
   data = data.split('\n');
   for (var i=0,row; row=data[i]; i++) {
-    var id = row.split(' ');
+    var id = row.split(';');
     var w1 = Math.round(Math.min(id[1].slice(0,-1)/<?=count($cpus)*count(preg_split('/[,-]/',$cpus[0]))?>,100)*100)/100+'%';
-    var w2 = Math.round(Math.min(id[2].slice(0,-1),100)*100)/100+'%';
     $('.cpu-'+id[0]).text(w1.replace('.','<?=$display['number'][0]?>'));
-    $('.mem-'+id[0]).text(w2.replace('.','<?=$display['number'][0]?>'));
+    $('.mem-'+id[0]).text(id[2]);
     $('#cpu-'+id[0]).css('width',w1);
-    $('#mem-'+id[0]).css('width',w2);
   }
 });
 $(function() {
