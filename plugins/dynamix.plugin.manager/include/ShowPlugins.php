@@ -64,18 +64,20 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   }
 //link/icon
   $launch = plugin('launch',$plugin_file);
-  if ( $icon = plugin("icon",$plugin_file) ) {
-    $iconDisplay = substr($icon,0,5) == "icon-" ? "<i class='$icon list'></i>" : "<i class='fa fa-$icon list'></i>";
-    if ( $launch )      
-      $link = "<a href='/$launch' class='list'>$iconDisplay</a>";
-    else
-      $link = $iconDisplay;
+  if ($icon = plugin('icon',$plugin_file)) {
+    if (substr($icon,-4)=='.png') {
+      $icon = icon($name);
+      $icon = "<img src='/$icon' class='list'>";
+    } elseif (substr($icon,0,5)=='icon-') {
+      $icon = "<i class='$icon list'></i>";
+    } else {
+      if (substr($icon,0,3)!='fa-') $icon = "fa-$icon";
+      $icon = "<i class='fa $icon list'></i>";
+    }
+    $link = $launch ? "<a href='/$launch' class='list'>$icon</a>" : $icon;
   } else {
     $icon = icon($name);
-    if ( $launch )
-      $link = "<a href='/$launch' class='list'><img src='/$icon' class='list'></a>";
-    else
-      $link = "<img src='/$icon' class='list'>";
+    $link = $launch ? "<a href='/$launch' class='list'><img src='/$icon' class='list'></a>" : "<img src='/$icon' class='list'>";
   }
 //description
   $readme = "plugins/{$name}/README.md";
