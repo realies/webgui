@@ -116,11 +116,11 @@ $memory_type = $ecc = '';
 $memory_installed = $memory_maximum = 0;
 $memory_devices = dmidecode('Memory Device','17');
 foreach ($memory_devices as $device) {
-  if ($device['Type']=='Unknown') continue;
+  if (!is_numeric($device['Size'][0])) continue;
   list($size, $unit) = explode(' ',$device['Size']);
   $base = array_search($unit,$sizes);
   if ($base!==false) $memory_installed += $size*pow(1024,$base);
-  if (!$memory_type) $memory_type = $device['Type'];
+  if (!$memory_type && $device['Type']!='Unknown') $memory_type = $device['Type'];
 }
 $memory_array = dmidecode('Physical Memory Array','16');
 foreach ($memory_array as $device) {
