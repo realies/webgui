@@ -85,6 +85,6 @@ $(function() {
 });
 </script>
 <table class='tablesorter plugins shift' id='plugin_table'>
-<thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th>Uninstall</th></tr></thead>
+<thead><tr><th style='width:48px'></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th>Uninstall</th></tr></thead>
 <tbody id="plugin_list"><tr><td colspan="6"><div class="spinner"></div></td><tr></tbody>
 </table>
