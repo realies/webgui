@@ -69,7 +69,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
       if (file_exists("plugins/$name/images/$icon")) {
         $icon = "plugins/$name/images/$icon";
       } elseif (file_exists("plugins/$name/$icon")) {
-        $icon= "plugins/$name/$icon";
+        $icon = "plugins/$name/$icon";
       } else {
         $icon = "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
       }
