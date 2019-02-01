@@ -66,10 +66,12 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   $launch = plugin('launch',$plugin_file);
   if ($icon = plugin('icon',$plugin_file)) {
     if (substr($icon,-4)=='.png') {
-      $icon= "plugins/$name/images/$icon";
-      if (!file_exists($icon)) {
+      if (file_exists("plugins/$name/images/$icon")) {
+        $icon = "plugins/$name/images/$icon";
+      } elseif (file_exists("plugins/$name/$icon")) {
         $icon= "plugins/$name/$icon";
-        if (!file_exists($icon)) $icon = "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
+      } else {
+        $icon = "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
       }
       $icon = "<img src='/$icon' class='list'>";
     } elseif (substr($icon,0,5)=='icon-') {
