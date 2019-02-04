@@ -1,6 +1,6 @@
 Menu="NetworkServices"
 Title="Syslog Server"
-Icon="file-text-o"
+Icon="icon-eula"
 Tag="file-text-o"
 ---
 <?PHP
