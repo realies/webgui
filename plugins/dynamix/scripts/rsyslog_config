@@ -1,0 +1,57 @@
+#!/bin/bash
+
+CONF=/boot/config/rsyslog.conf
+ETC=/etc/rsyslog.conf
+
+# read settings
+source /boot/config/rsyslog.cfg
+
+# create local ruleset
+if ! grep -q '^\$RuleSet local$' $ETC; then
+  sed -ri '/^# limetech - everything goes to syslog.$/a $RuleSet local' $ETC
+  sed -ri '/^#?news.notice.*$/a $DefaultRuleset local' $ETC
+fi
+
+# local syslog server
+if [[ -n $local_server ]]; then
+  if [[ $server_protocol == tcp || $server_protocol == both ]]; then
+    sed -ri "s/^#?(\\\$ModLoad imtcp)/\1/;s/^#?(\\\$InputTCPServerRun) [0-9]+/\1 ${server_port:-514}/" $ETC
+    [[ $server_protocol == tcp ]] && sed -ri 's/^\$(ModLoad imudp|UDPServerRun)/#\$\1/' $ETC
+  fi
+  if [[ $server_protocol == udp || $server_protocol == both ]]; then
+    sed -ri "s/^#?(\\\$ModLoad imudp)/\1/;s/^#?(\\\$UDPServerRun) [0-9]+/\1 ${server_port:-514}/" $ETC
+    [[ $server_protocol == udp ]] && sed -ri 's/^\$(ModLoad imtcp|InputTCPServerRun)/#\$\1/' $ETC
+  fi
+  if grep -q '^\$template remote,' $ETC; then
+    sed -ri '/^\$RuleSet remote$/d;/^\*\.\* \?remote$/d;/^\$template remote,".*"$/d' $ETC
+  fi
+  sed -ri "/^#?\\\$UDPServerRun [0-9]+.*$/a \\\$template remote,\"${server_folder:-/mnt/user/system}/syslog-%FROMHOST-IP%\"" $ETC
+  sed -ri '/^# #+ Remote Logging/i $RuleSet remote\n*.* ?remote' $ETC
+else
+  sed -ri 's/^#?\$(ModLoad imtcp|InputTCPServerRun|ModLoad imudp|UDPServerRun)/#\$\1/' $ETC
+  sed -ri '/^\$RuleSet remote$/d;/^\*\.\* \?remote$/d;/^\$template remote,".*"$/d' $ETC
+fi
+
+# remote syslog server
+if [[ -n $remote_server ]]; then
+  [[ $remote_protocol == udp ]] && com='@' || com='@@'
+  sed -ri "s/^#?(\*\.\*) @@?.*:[0-9]+$/\1 $com$remote_server:${remote_port:-514}/" $ETC
+else
+  sed -ri 's/^#?(\*\.\* @@?.*:[0-9]+)$/#\1/' $ETC
+fi
+
+# mirror syslog to flash
+if [[ -n $syslog_flash ]]; then
+  if ! grep -q '^\$template flash,' $ETC; then
+    sed -ri '/^#?\$UDPServerRun [0-9]+.*$/a $template flash,"/boot/logs/syslog"' $ETC
+    sed -ri '/^\*\.debug .*syslog$/a *.debug ?flash' $ETC
+  fi
+else
+  sed -ri '/^\$template flash,"\/boot\/logs\/syslog"$/d;/^\*\.debug \?flash/d' $ETC
+fi
+
+# copy conf to flash (read settings on reboot)
+cp -f $ETC $CONF
+
+# update syslog daemon
+/etc/rc.d/rc.rsyslogd restart &> /dev/null
