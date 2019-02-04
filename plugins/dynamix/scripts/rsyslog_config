@@ -43,7 +43,7 @@ fi
 # mirror syslog to flash
 if [[ -n $syslog_flash ]]; then
   if ! grep -q '^\$template flash,' $ETC; then
-    sed -ri '/^#?\$UDPServerRun [0-9]+.*$/a$template flash,"/boot/logs/syslog"' $ETC
+    sed -ri '/^#\$UDPServerRun [0-9]+.*$/a$template flash,"/boot/logs/syslog"' $ETC
     sed -ri '/^\*\.debug .*syslog$/a*.debug ?flash' $ETC
   fi
 else
