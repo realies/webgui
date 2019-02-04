@@ -51,7 +51,7 @@ else
 fi
 
 # copy conf to flash (read settings on reboot)
-cp -f $ETC $CONF
+todos <$ETC >$CONF
 
 # update syslog daemon
 /etc/rc.d/rc.rsyslogd restart &> /dev/null
