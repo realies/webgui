@@ -61,7 +61,7 @@ todos <$ETC >$CONF
 
 # keep local logging disabled at startup
 # disk mount and disk unmount events are used to start/stop logging
-sed -ri 's/^(\*\.\* \?remote)$/#\1/' $CONF
+sed -ri 's/^(\*\.\* \?remote)/#\1/' $CONF
 
 # update syslog daemon
 /etc/rc.d/rc.rsyslogd restart &> /dev/null
