@@ -1,3 +1,6 @@
 #!/bin/bash
-sed -ri 's/^#(\*\.\* \?remote)$/\1/' /etc/rsyslog.conf
-/etc/rc.d/rc.rsyslogd restart &> /dev/null
+ETC=/etc/rsyslog.conf
+if grep '/^#\*\.\* \?remote$' $ETC; then
+  sed -ri 's/^#(\*\.\* \?remote)$/\1/' $ETC
+  /etc/rc.d/rc.rsyslogd restart &> /dev/null
+fi
