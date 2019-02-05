@@ -19,7 +19,7 @@ fi
 # local syslog server
 if [[ -n $local_server ]]; then
   if ! grep -q '^\$RuleSet remote$' $ETC; then
-    sed -ri "\$a\\\$RuleSet remote\n*.* ?remote" $ETC
+    sed -ri '$a\$RuleSet remote\n*.* ?remote' $ETC
   fi
   # enable/disable local logging
   sed -ri "s/^#?(\*\.\* \?remote)$/$h\1/" $ETC
