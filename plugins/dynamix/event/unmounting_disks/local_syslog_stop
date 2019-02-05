@@ -1,0 +1,2 @@
+#!/bin/bash
+sed -ri 's/^#?(\*\.\* \?remote)$/#\1/' /etc/rsyslog.conf

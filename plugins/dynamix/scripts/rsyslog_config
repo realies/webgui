@@ -6,6 +6,10 @@ ETC=/etc/rsyslog.conf
 # read settings
 source /boot/config/rsyslog.cfg
 
+# read $var
+source /var/local/emhttp/var.ini
+[[ $fsState == Started ]] || h='#'
+
 # create local ruleset
 if ! grep -q '^\$RuleSet local$' $ETC; then
   sed -ri '/^# limetech - everything goes to syslog.$/a$RuleSet local' $ETC
@@ -15,8 +19,10 @@ fi
 # local syslog server
 if [[ -n $local_server ]]; then
   if ! grep -q '^\$RuleSet remote$' $ETC; then
-    sed -ri '$a\$RuleSet remote\n*.* ?remote' $ETC
+    sed -ri "\$a\\\$RuleSet remote\n*.* ?remote" $ETC
   fi
+  # enable/disable local logging
+  sed -ri "s/^#?(\*\.\* \?remote)$/$h\1/" $ETC
   if [[ $server_protocol == tcp || $server_protocol == both ]]; then
     sed -ri '/^\$InputTCPServerBindRuleset remote$/d;/^\$InputTCPServerRun [0-9]+$/d;s/^#?(\$ModLoad imtcp)/\1/' $ETC
     sed -ri "\$a\\\$InputTCPServerBindRuleset remote\n\\\$InputTCPServerRun ${server_port:-514}" $ETC
@@ -52,6 +58,10 @@ fi
 
 # copy conf to flash (read settings on reboot)
 todos <$ETC >$CONF
+
+# keep local logging disabled at startup
+# disk mount and disk unmount events are used to start/stop logging
+sed -ri 's/^(\*\.\* \?remote)$/#\1/' $CONF
 
 # update syslog daemon
 /etc/rc.d/rc.rsyslogd restart &> /dev/null
