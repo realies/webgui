@@ -159,7 +159,7 @@ function parityStatus() {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
     timers.parityStatus = setTimeout(parityStatus,3000);
     if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel') {
-      $('#cancelButton').val('Done').unbind().bind({click:function(){refresh();}});
+      $('#cancelButton').val('Done').prop('onclick',null).off('click').click(function(){refresh();});
       $('#cancelText').html('');
       $('#line4').html('completed');
     }
@@ -181,6 +181,16 @@ function stopParity(form,text) {
   form.submit();
 <?endif;?>
 }
+function pauseParity(form) {
+  $(form).append('<input type="hidden" name="cmdNoCheck" value="Pause">');
+  $('#pauseButton').val('Resume').prop('onclick',null).off('click').click(function(){resumeParity(form);});
+  form.submit();
+}
+function resumeParity(form) {
+  $(form).append('<input type="hidden" name="cmdCheck" value="Resume">');
+  $('#pauseButton').val('Pause').prop('onclick',null).off('click').click(function(){pauseParity(form);});
+  form.submit();
+}
 function shutdown_now(form,cmd) {
   $(form).append('<input type="hidden" name="cmd" value="'+cmd+'">');
 <?if ($confirm['down']):?>
@@ -196,7 +206,7 @@ parityStatus();
 <?if ($tabbed):?>
 $('.tabs').append(ctrl);
 if ($.cookie('tab')=='tab0') $('i.toggle').hide();
-$('#tab'+$('input[name$="tabs"]').length).bind({click:function() {tab0(); $('i.toggle').hide('slow');}});
+$('#tab'+$('input[name$="tabs"]').length).click(function(){tab0(); $('i.toggle').hide('slow');});
 <?else:?>
 $('div[id=title]:not(":last, .disable_diskio")').each(function(){$(this).append(ctrl);});
 <?endif;?>
@@ -230,7 +240,7 @@ $(function(){
 <input type="hidden" name="startState" value="<?=htmlspecialchars($var['mdState'])?>">
 <input type="hidden" name="file" value="">
 <table class="array_status">
-<?$parity = $var['mdResync']>0 ? '<br><small>Disabled -- Parity operation is running</small>' : '';
+<?$parity = $var['mdResync'] ? '<br><small>Disabled -- Parity operation is running</small>' : '';
   $mover = file_exists('/var/run/mover.pid') ? '<br><small>Disabled -- Mover is running</small>' : '';
   $btrfs = exec('pgrep -cf /sbin/btrfs') ? '<br><small>Disabled -- BTRFS operation is running</small>' : '';
   switch ($var['fsState']):
@@ -248,7 +258,7 @@ $(function(){
       <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i></small><span><b>All data is permanently lost !!!<br>This is not used to recover data</b><br><i>Format is never part of a rebuild</i></span></a>
       </td></tr>
 <?  endif;
-    if (!$parity):
+    if (!$var['mdResyncPos']):
       if (strstr($var['mdResyncAction'],"recon")):?>
         <tr><td></td><td><input type="submit" name="cmdCheck" value="Sync"></td><td><strong>Sync</strong> will start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
@@ -291,17 +301,25 @@ $(function(){
       endif;
     else:
       if ($var['mdResyncAction']=="check"):?>
-        <tr><td>Read-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Read-Check')"></td>
+        <tr><td>Read-Check in progress.</td><td>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Read-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Read-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"check")):?>
-        <tr><td>Parity-Check in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Check')"></td>
+        <tr><td>Parity-Check in progress.</td><td>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Parity-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"recon")):?>
-        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Sync/Data-Rebuild')"></td>
+        <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Sync/Data-Rebuild')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Parity-Sync/Data-Rebuild.
         <br>WARNING: canceling may leave the array unprotected!</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
-        <tr><td>Clearing in progress.</td><td><input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
+        <tr><td>Clearing in progress.</td><td>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
       <tr><td></td><td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity/Read-Check History',600,900,false)"></td><td>Current operation started on <strong><?=my_time($var['sbUpdated'])?></strong></td></tr>
