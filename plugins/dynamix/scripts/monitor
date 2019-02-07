@@ -287,7 +287,7 @@ if ($warn>0) {
 // process parity check, parity sync and data-rebuild notifications
 $name = 'parity';
 $last = $saved[$item][$name] ?? '';
-if ($var['mdResync']>0) {
+if ($var['mdResyncPos']) {
   if (!$last) {
     if (strstr($var['mdResyncAction'],"recon")) {
       $last = 'Parity sync / Data rebuild';
