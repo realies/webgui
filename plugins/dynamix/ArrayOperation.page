@@ -258,7 +258,7 @@ $(function(){
       <small>Yes I want to do this&nbsp;<i class="fa fa-asterisk red-text" ></i></small><span><b>All data is permanently lost !!!<br>This is not used to recover data</b><br><i>Format is never part of a rebuild</i></span></a>
       </td></tr>
 <?  endif;
-    if (!$var['mdResync'] && !$var['mdResyncPos']):
+    if (!$var['mdResyncPos']):
       if (strstr($var['mdResyncAction'],"recon")):?>
         <tr><td></td><td><input type="submit" name="cmdCheck" value="Sync"></td><td><strong>Sync</strong> will start <strong>Parity-Sync</strong> and/or <strong>Data-Rebuild</strong>.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
