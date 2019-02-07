@@ -302,23 +302,23 @@ $(function(){
     else:
       if ($var['mdResyncAction']=="check"):?>
         <tr><td>Read-Check in progress.</td><td>
-        <input type="button" id="pauseButton"<?if ($var['mdResync'] && $var['mdResyncPos']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
         <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Read-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Read-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"check")):?>
         <tr><td>Parity-Check in progress.</td><td>
-        <input type="button" id="pauseButton"<?if ($var['mdResync'] && $var['mdResyncPos']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
         <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Check')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop the Parity-Check.</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"recon")):?>
         <tr><td>Parity-Sync/Data-Rebuild in progress.</td><td>
-        <input type="button" id="pauseButton"<?if ($var['mdResync'] && $var['mdResyncPos']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
         <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Parity-Sync/Data-Rebuild')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Parity-Sync/Data-Rebuild.
         <br>WARNING: canceling may leave the array unprotected!</td></tr>
 <?    elseif (strstr($var['mdResyncAction'],"clear")):?>
         <tr><td>Clearing in progress.</td><td>
-        <input type="button" id="pauseButton"<?if ($var['mdResync'] && $var['mdResyncPos']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
+        <input type="button" id="pauseButton"<?if ($var['mdResync']):?> value="Pause" onclick="pauseParity(this.form)"<?else:?> value="Resume" onclick="resumeParity(this.form)"<?endif;?>>
         <input type="button" id="cancelButton" value="Cancel" onclick="stopParity(this.form,'Clearing')"></td>
         <td id="cancelText"><strong>Cancel</strong> will stop Clearing.</td></tr>
 <?    endif;?>
