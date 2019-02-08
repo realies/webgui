@@ -19,8 +19,7 @@ Tag="file-text-o"
 $syslog = @(array)parse_ini_file('/boot/config/rsyslog.cfg');
 ?>
 <style>
-select.m130{margin-left:135px}
-select.m30{margin-left:35px}
+span.span{display:inline-block;width:224px}
 </style>
 <script>
 function localFolder(state) {
@@ -36,11 +35,11 @@ $(function(){
 <input type="hidden" name="#command" value="/webGui/scripts/rsyslog_config">
 
 Local syslog server:
-: <select name="local_server" class="narrow" size="1" onchange="localFolder(this.value)">
+: <span class="span"><select name="local_server" class="narrow" size="1" onchange="localFolder(this.value)">
   <?=mk_option($syslog['local_server'], "", "Disabled")?>
   <?=mk_option($syslog['local_server'], "1", "Enabled")?>
-  </select>
-  <select name="server_protocol" class="narrow m130" size="1">
+  </select></span>
+  <select name="server_protocol" class="narrow" size="1">
   <?=mk_option($syslog['server_protocol'], "udp", "UDP")?>
   <?=mk_option($syslog['server_protocol'], "tcp", "TCP")?>
   <?=mk_option($syslog['server_protocol'], "both", "Both")?>
@@ -64,8 +63,8 @@ Local syslog folder:
 </div>
 
 Remote syslog server:
-: <input type="text" name="remote_server" class="narrow" value="<?=$syslog['remote_server']?>" maxlength="23" placeholder="name or ip address">
-  <select name="remote_protocol" class="narrow m30" size="1">
+: <span class="span"><input type="text" name="remote_server" class="narrow" value="<?=$syslog['remote_server']?>" maxlength="23" placeholder="name or ip address"></span>
+  <select name="remote_protocol" class="narrow" size="1">
   <?=mk_option($syslog['remote_protocol'], "udp", "UDP")?>
   <?=mk_option($syslog['remote_protocol'], "tcp", "TCP")?>
   </select>
