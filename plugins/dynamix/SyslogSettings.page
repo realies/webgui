@@ -53,12 +53,12 @@ Local syslog server:
 
 <div markdown="1" id="local_folder" style="display:none">
 Local syslog folder:
-: <input type="text" name="server_folder" value="<?=$syslog['server_folder']?>" placeholder="/mnt/user/system">
+: <select name="server_folder" class="narrow" size="1">
+  <?foreach ($shares as $share){echo mk_option($syslog['server_folder'], '/mnt/user/'.$share['name'], $share['name']);}?>
+  </select>
 
-> Enter the name of the local folder to store syslog information.
-> By default this is set to /mnt/user/system
->
-> *Important: make sure the folder EXIST when changing this field*
+> Select the share folder where the syslogs will be stored.
+> It is recommended that you use a share located on the cache drive to prevent array disk spinups.
 
 </div>
 
