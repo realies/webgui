@@ -227,17 +227,6 @@
       ############
       {0}
       ############
-      set -x
-
-      if [ ! -f /usr/local/bin/jq ]; then
-        curl -L -s https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq;
-        chmod +x /usr/local/bin/jq;
-        mkdir -p /boot/config/telegram;
-        cp /usr/local/bin/jq /boot/config/telegram;
-        grep -q "/jq" /boot/config/go;
-        [ $? -eq 1 ] && echo "cp /boot/config/telegram/jq /usr/local/bin" >> /boot/config/go;
-      fi
-
       STORED_TOKEN=$(< /boot/config/telegram/token) || "";
       if [[ ! -f /boot/config/telegram/token || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
         mkdir -p /boot/config/telegram;

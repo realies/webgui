@@ -177,7 +177,7 @@ Partition size:
 Partition format:
 : <?=$disk['format']?>
 
-<?if ($var['spinupGroups']=="yes" && $disk['type']=="Data"):?>
+<?if ($var['spinupGroups']=="yes" && ($disk['type']=="Data" || $disk['type']=="Parity")):?>
 Spinup group(s):
 : <input type="text" name="diskSpinupGroup.<?=$disk['idx'];?>" maxlength="256" value="<?=$disk['spinupGroup']?>">
 
