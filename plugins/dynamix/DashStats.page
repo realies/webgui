@@ -596,7 +596,7 @@ function update15() {
     $('#ups_bcharge').html(data[1]);
     $('#ups_timeleft').html(data[2]);
     $('#ups_nompower').html(data[3]);
-    $('#ups_loadpct').html(data[5].replace('Percent','%')+data[4].replace(/>/,'> (').replace(/Watts|-/,'W)'));
+    $('#ups_loadpct').html(data[5].replace('Percent','%')+data[4].replace(/>/,'> - '));
   });
 <?endif;?>
   $.post('<?=$url?>',{cmd:'status',number:'<?=$display['number']?>'},function(data) {$('span.info.title').html(data);});
