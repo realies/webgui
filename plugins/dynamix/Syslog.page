@@ -17,6 +17,17 @@ Tag="list"
 ?>
 <?
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
+$cfg = '/boot/config/rsyslog.cfg';
+$select  = '';
+if (file_exists($cfg)) {
+  $syslog = parse_ini_file($cfg);
+  if ($syslog['local_server'] && $logs = glob($syslog['server_folder'].'/syslog-*.log',GLOB_NOSORT)) {
+    $select = "<select onchange='showLog(this.value)'>";
+    $select .= mk_option(1,'/var/log/syslog*','syslog');
+    foreach ($logs as $log) $select .= mk_option(1,$log,basename($log));
+    $select .= "</select>";
+  }
+}
 ?>
 <script>
 function cleanUp() {
@@ -55,30 +66,28 @@ function toggle(checked) {
   highlight(checked,'L');
   $('span.label input[type=checkbox]').not('.ctrl').prop('checked',checked);
 }
-<?if ($display['resize']):?>
 function resize() {
   $('pre.up').height(Math.max(window.innerHeight-320,330)).show();
 }
-$(function() {
-  resize();
-  $(window).bind('resize',function(){resize();});
-});
+function showLog(log) {
+  $.post('/webGui/include/Syslog.php',{log:log},function(data){
+    $('pre.up').html(data);
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize();});
 <?endif;?>
-$('.tabs').append("<span class='status'><span class='lite label'><label>Text<input type='checkbox' class='ctrl' onclick='highlight(!this.checked,\"N\")' checked></label></span><span class='error label'><label>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></label></span><span class='warn label'><label>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></label></span><span class='system label'><label>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></label></span><span class='array label'><label>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></label></span><span class='login label'><label>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></label></span><span class='lite label'><input type='checkbox' class='ctrl' onclick='toggle(this.checked)' checked></span></span>");
-</script>
-<?
-require_once "$docroot/webGui/include/ColorCoding.php";
-
-echo $display['resize'] ? "<pre class='up' style='display:none'>" : "<pre class='up'>";
-$logs = glob('/var/log/syslog*',GLOB_NOSORT);
-usort($logs, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
-foreach ($logs as $log) {
-  foreach (file($log) as $line) {
-    $span = "span class='text'";
-    foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
-    echo "<$span>".htmlspecialchars($line)."</span>";
-  }
+  });
 }
-echo "</pre>";
-?>
+$(function() {
+  $.post('/webGui/include/Syslog.php',{log:'/var/log/syslog*'},function(data){
+    $('pre.up').html(data);
+<?if ($display['resize']):?>
+    resize();
+    $(window).bind('resize',function(){resize();});
+<?endif;?>
+  });
+});
+$('.tabs').append("<span class='status'><?=$select?><span class='lite label'><label>Text<input type='checkbox' class='ctrl' onclick='highlight(!this.checked,\"N\")' checked></label></span><span class='error label'><label>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></label></span><span class='warn label'><label>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></label></span><span class='system label'><label>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></label></span><span class='array label'><label>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></label></span><span class='login label'><label>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></label></span><span class='lite label'><input type='checkbox' class='ctrl' onclick='toggle(this.checked)' checked></span></span>");
+</script>
+<pre class='up'></pre>
 <input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
