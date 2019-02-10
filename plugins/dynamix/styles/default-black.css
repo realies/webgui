@@ -211,8 +211,8 @@ table.share_status.dashboard.box3 tr td:nth-child(5){min-width:11%}
 table.share_status.dashboard.box3 tr td[colspan="4"]{min-width:93%}
 @media (max-width:1680px){
  table.share_status.dashboard.box1{width:44%}
- table.share_status.dashboard.box2{width:52%}
- table.share_status.dashboard.box3{width:52%}
+ table.share_status.dashboard.box2{width:52%;float:right}
+ table.share_status.dashboard.box3{width:52%;float:right}
 }
 @media (min-width:1681px){
  table.share_status.dashboard.box1{width:28%}
