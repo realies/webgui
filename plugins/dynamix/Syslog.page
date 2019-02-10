@@ -70,12 +70,12 @@ function resize() {
   $('pre.up').height(Math.max(window.innerHeight-320,330));
 }
 function showLog(log) {
+  $('span.label input[type=checkbox]').prop('checked',true);
+  $('span.label').each(function(){
+    var type = $(this).attr('class').replace('label','').replace(/-/g,'');
+    $(this).removeClass().addClass(type+' label');
+  });
   $.post('/webGui/include/Syslog.php',{log:log},function(data){
-    $('span.label input[type=checkbox]').prop('checked',true);
-    $('span.label').each(function(){
-      var type = $(this).attr('class').replace('label','').replace(/-/g,'');
-      $(this).removeClass().addClass(type+' label');
-    });
     $('pre.up').html(data);
 <?if ($display['resize']):?>
     resize();
