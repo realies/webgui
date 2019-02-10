@@ -17,20 +17,21 @@ Tag="list"
 ?>
 <?
 $zip = htmlspecialchars(str_replace(' ','_',strtolower($var['NAME'])));
+$log = '/var/log/syslog';
 $cfg = '/boot/config/rsyslog.cfg';
 $select  = '';
 if (file_exists($cfg)) {
   $syslog = parse_ini_file($cfg);
   if ($syslog['local_server'] && $logs = glob($syslog['server_folder'].'/syslog-*.log',GLOB_NOSORT)) {
     $select = "<select onchange='showLog(this.value)'>";
-    $select .= mk_option(1,'/var/log/syslog*','syslog');
-    foreach ($logs as $log) $select .= mk_option(1,$log,basename($log));
+    $select .= mk_option(1,$log,'syslog');
+    foreach ($logs as $file) $select .= mk_option(1,$file,basename($file));
     $select .= "</select>";
   }
 }
 ?>
 <script>
-var logfile = '/var/log/syslog';
+var logfile = '<?=$log?>';
 
 function zipfile(){
   var d = new Date();
@@ -76,7 +77,7 @@ function resize() {
   $('pre.up').height(Math.max(window.innerHeight-320,330));
 }
 function showLog(log) {
-  logfile = log.replace('*','');
+  logfile = log;
   $('span.label input[type=checkbox]').prop('checked',true);
   $('span.label').each(function(){
     var type = $(this).attr('class').replace('label','').replace(/-/g,'');
@@ -90,7 +91,7 @@ function showLog(log) {
   });
 }
 $(function() {
-  $.post('/webGui/include/Syslog.php',{log:'/var/log/syslog*'},function(data){
+  $.post('/webGui/include/Syslog.php',{log:'<?=$log?>'},function(data){
     $('pre.up').html(data);
 <?if ($display['resize']):?>
     resize();

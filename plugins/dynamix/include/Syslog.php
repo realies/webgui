@@ -14,7 +14,7 @@
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 require_once "$docroot/webGui/include/ColorCoding.php";
 
-$logs = glob($_POST['log'],GLOB_NOSORT);
+$logs = glob($_POST['log'].'*',GLOB_NOSORT);
 usort($logs, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
 foreach ($logs as $log) {
   foreach (file($log) as $line) {
