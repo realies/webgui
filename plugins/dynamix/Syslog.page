@@ -41,7 +41,7 @@ function cleanUp(file) {
     $('input[value="Downloading..."]').val('Download').prop('disabled',false);
     $.post('/webGui/include/Download.php',{cmd:'delete',file:file});
   } else {
-    setTimeout(function(){cleanUp(file);},4000);
+    setTimeout(function(){cleanUp(file);},2000);
   }
 }
 function syslog(file) {
