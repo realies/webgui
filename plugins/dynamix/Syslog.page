@@ -74,7 +74,6 @@ function showLog(log) {
     $('pre.up').html(data);
 <?if ($display['resize']):?>
     resize();
-    $(window).bind('resize',function(){resize();});
 <?endif;?>
   });
 }
