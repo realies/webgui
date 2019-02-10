@@ -67,7 +67,7 @@ function toggle(checked) {
   $('span.label input[type=checkbox]').not('.ctrl').prop('checked',checked);
 }
 function resize() {
-  $('pre.up').height(Math.max(window.innerHeight-320,330)).show();
+  $('pre.up').height(Math.max(window.innerHeight-320,330));
 }
 function showLog(log) {
   $.post('/webGui/include/Syslog.php',{log:log},function(data){
