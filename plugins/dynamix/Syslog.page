@@ -16,7 +16,7 @@ Tag="list"
  */
 ?>
 <?
-$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
+$zip = htmlspecialchars(str_replace(' ','_',strtolower($var['NAME'])));
 $cfg = '/boot/config/rsyslog.cfg';
 $select  = '';
 if (file_exists($cfg)) {
@@ -30,19 +30,25 @@ if (file_exists($cfg)) {
 }
 ?>
 <script>
-function cleanUp() {
+var logfile = '/var/log/syslog';
+
+function zipfile(){
+  var d = new Date();
+  return '<?=$zip?>-'+logfile.split('/').reverse()[0].replace('.log','')+'-'+d.toISOString().substr(0,16).replace(/[-:]/g,'').replace('T','-')+'.zip';
+}
+function cleanUp(file) {
   if (document.hasFocus()) {
     $('input[value="Downloading..."]').val('Download').prop('disabled',false);
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=addslashes(htmlspecialchars($zip))?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:file});
   } else {
-    setTimeout(cleanUp,4000);
+    setTimeout(function(){cleanUp(file);},4000);
   }
 }
-function syslog() {
+function syslog(file) {
   $('input[value="Download"]').val('Downloading...').prop('disabled',true);
-  $.post('/webGui/include/Download.php',{cmd:'save',source:'/var/log/syslog',file:'<?=addslashes(htmlspecialchars($zip))?>'},function(zip) {
+  $.post('/webGui/include/Download.php',{cmd:'save',source:logfile,file:file},function(zip) {
     location = zip;
-    setTimeout(cleanUp,4000);
+    setTimeout(function(){cleanUp(file);},4000);
   });
 }
 function highlight(checked,line) {
@@ -70,6 +76,7 @@ function resize() {
   $('pre.up').height(Math.max(window.innerHeight-320,330));
 }
 function showLog(log) {
+  logfile = log.replace('*','');
   $('span.label input[type=checkbox]').prop('checked',true);
   $('span.label').each(function(){
     var type = $(this).attr('class').replace('label','').replace(/-/g,'');
@@ -94,4 +101,4 @@ $(function() {
 $('.tabs').append("<span class='status'><?=$select?><span class='lite label'><label>Text<input type='checkbox' class='ctrl' onclick='highlight(!this.checked,\"N\")' checked></label></span><span class='error label'><label>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></label></span><span class='warn label'><label>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></label></span><span class='system label'><label>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></label></span><span class='array label'><label>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></label></span><span class='login label'><label>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></label></span><span class='lite label'><input type='checkbox' class='ctrl' onclick='toggle(this.checked)' checked></span></span>");
 </script>
 <pre class='up'></pre>
-<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
+<input type="button" value="Download" onclick="syslog(zipfile())"><input type="button" value="Done" onclick="done()">
