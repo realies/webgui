@@ -407,20 +407,18 @@ foreach ($pages as $page) {
   }
   if (isset($page['Type']) && $page['Type']=='menu') {
     $pgs = find_pages($page['name']);
-    $legacy = $display['legacy'];
     foreach ($pgs as $pg) {
       @eval("\$title=\"".htmlspecialchars($pg['Title'])."\";");
       $link = "$path/{$pg['name']}";
       $icon = $pg['Icon'] ?? "<i class='icon-app PanelIcon'></i>";
-      if ($legacy || substr($icon,-4)=='.png') {
+      if (substr($icon,-4)=='.png') {
         $root = $pg['root'];
-        if ($legacy) $icon = ($root=='webGui' ? strtolower(preg_replace('/([a-z])([A-Z])/','$1-$2',$pg['name'])) : basename($root)).".png";
         if (file_exists("$docroot/$root/images/$icon")) {
           $icon = "<img src='/$root/images/$icon' class='PanelImg'>";
         } elseif (file_exists("$docroot/$root/$icon")) {
           $icon = "<img src='/$root/$icon' class='PanelImg'>";
         } else {
-          $icon = ($legacy ? "<img src='/webGui/images/default.png' class='PanelImg'>" : "<i class='icon-app PanelIcon'></i>");
+          $icon = "<i class='icon-app PanelIcon'></i>";
         }
       } elseif (substr($icon,0,5)=='icon-') {
         $icon = "<i class='$icon PanelIcon'></i>";

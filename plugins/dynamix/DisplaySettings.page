@@ -257,12 +257,6 @@ Dynamix color theme:
   <?endforeach;?>
   </select>
 
-Icons display:
-: <select name="legacy" size="1">
-  <?=mk_option($display['legacy'], "0", "Modern")?>
-  <?=mk_option($display['legacy'], "1", "Legacy")?>
-  </select>
-
 Used / Free columns:
 : <select name="text" size="1">
   <?=mk_option($display['text'], "0", "Text")?>

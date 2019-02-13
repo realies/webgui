@@ -44,7 +44,7 @@ function resize(bind) {
 }
 <?endif;?>
 function loadlist(id) {
-  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id,check:<?=$check?>,legacy:<?=$display['legacy']?>},function(d) {
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{audit:id,check:<?=$check?>},function(d) {
     var data = d.split(/\0/);
     var list = $('#plugin_list');
     if (id) {

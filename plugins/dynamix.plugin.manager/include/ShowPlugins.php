@@ -19,7 +19,6 @@ $system  = $_GET['system'] ?? false;
 $branch  = $_GET['branch'] ?? false;
 $audit   = $_GET['audit'] ?? false;
 $check   = $_GET['check'] ?? false;
-$legacy  = $_GET['legacy'] ?? false;
 $empty   = true;
 $updates = 0;
 $builtin = ['unRAIDServer'];
@@ -65,7 +64,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   }
 //link/icon
   $launch = plugin('launch',$plugin_file);
-  if (!$legacy && $icon = plugin('icon',$plugin_file)) {
+  if ($icon = plugin('icon',$plugin_file)) {
     if (substr($icon,-4)=='.png') {
       if (file_exists("plugins/$name/images/$icon")) {
         $icon = "plugins/$name/images/$icon";
