@@ -52,6 +52,10 @@ $cache_size = $cache_used = 0;
 $extra_size = $extra_used = 0;
 $cache_type = 'disk';
 
+$parity = $var['mdResync'];
+$mover = file_exists('/var/run/mover.pid');
+$btrfs = exec('pgrep -cf /sbin/btrfs');
+
 foreach ($disks as $disk) {
   switch ($disk['type']) {
   case 'Data':
@@ -149,6 +153,7 @@ div.last{padding-bottom:12px}
 span.outer{float:left}
 span.inner{width:134px}
 span.ups{width:124px;display:inline-block}
+span.busy{opacity:0.5}
 span#inbound{width:70px;display:inline-block}
 span#load{width:80px;display:inline-block}
 span#util{margin-left:20px}
@@ -176,7 +181,11 @@ form[name=boot]{display:none}
 <div class='frame'>
 <table class='share_status dashboard box1'>
 <thead><tr><td></td><td colspan='2'><?=$var['NAME']?></td><td>
+<?if ($parity||$mover||$btrfs):?>
+<span class='fa fa-fw fa-<?=$started?'stop':'play'?>-circle busy' title='<?=$started?'Stop':'Start'?> the array'></span>
+<?else:?>
 <span class='fa fa-fw fa-<?=$started?'stop':'play'?>-circle hand' title='<?=$started?'Stop':'Start'?> the array' onclick='<?=$started?'Stop':'Start'?>Array()'></span>
+<?endif;?>
 <?if($sleep):?><span class='fa fa-fw fa-moon-o hand' title='Put system to sleep' onclick='Sleep()'></span><?endif;?>
 <span class='fa fa-fw fa-refresh hand' title='Reboot the system' onclick='Reboot()'></span>
 <span class='fa fa-fw fa-power-off hand' title='Shutdown the system' onclick='Shutdown()'></span>
@@ -780,7 +789,7 @@ function StopArray() {
 <?endif;?>
 }
 function StopArrayNow() {
-  $('span.hand').prop('onclick',null).off('click').css('cursor','default');
+  $('span.hand').prop('onclick',null).off('click').addClass('busy').css('cursor','default');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop',csrf_token:'<?=$var['csrf_token']?>'},function(){refresh();});
 }
 function StartArray() {
@@ -791,7 +800,7 @@ function StartArray() {
 <?endif;?>
 }
 function StartArrayNow() {
-  $('span.hand').prop('onclick',null).off('click').css('cursor','default');
+  $('span.hand').prop('onclick',null).off('click').addClass('busy').css('cursor','default');
   $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start',csrf_token:'<?=$var['csrf_token']?>'},function(){refresh();});
 }
 function Reboot() {
