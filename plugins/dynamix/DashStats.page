@@ -45,6 +45,7 @@ $dockerd = pgrep('dockerd');
 $libvirtd = pgrep('libvirtd');
 $apcupsd = file_exists('/var/run/apcupsd.pid');
 $started = $var['fsState']=='Started';
+$sleep = isset($display['sleep']);
 $cache_pool = $var['cacheSbNumDisks'];
 $array_size = $array_used = 0;
 $cache_size = $cache_used = 0;
@@ -153,13 +154,14 @@ span#load{width:80px;display:inline-block}
 span#util{margin-left:20px}
 span[id^=cpu],span[id^=sys]{width:0}
 i.heat{margin-left:8px}
-a.cpu_close{cursor:pointer}
+a.cpu_close,span.hand{cursor:pointer}
 td.top.center{text-align:center}
 td.none{text-align:center;padding-top:12px}
 input[value=Edit]{margin:12px 0 0 0;padding:5px 10px}
 .sys_view,.mb_view,.cpu_view,.cpu_open,.mem_view,.port_view,.ups_view,.fan_view,.docker_view,.vm_view,.parity_view,.array_view,.cache_view,.my_view,.extra_view{display:none}
 .share1,.share2,.share3,.view1,.view2,.view3,.user1,.user2,.user3{display:none}
 #shares_view_on,#users_view_on,#array_view_on,#cache_view_on,#extra_view_on{display:none}
+form[name=boot]{display:none}
 <?if ($themes2):?>
 .switch-button-background{top:16px}
 .switch-button-label{margin-top:0}
@@ -173,7 +175,12 @@ input[value=Edit]{margin:12px 0 0 0;padding:5px 10px}
 
 <div class='frame'>
 <table class='share_status dashboard box1'>
-<thead><tr><td></td><td colspan='3'><?=$var['NAME']?><i class='fa blue-text chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='2'><?=$var['NAME']?></td><td>
+<span class='fa fa-fw fa-<?=$started?'stop':'play'?>-circle hand' title='<?=$started?'Stop':'Start'?> the array' onclick='<?=$started?'Stop':'Start'?>Array()'></span>
+<?if($sleep):?><span class='fa fa-fw fa-moon-o hand' title='Put system to sleep' onclick='Sleep()'></span><?endif;?>
+<span class='fa fa-fw fa-refresh hand' title='Reboot the system' onclick='Reboot()'></span>
+<span class='fa fa-fw fa-power-off hand' title='Shutdown the system' onclick='Shutdown()'></span>
+<i class='fa blue-text chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i></td><td></td></tr></thead>
 <tbody class='sys_view'>
 <tr><td></td><td colspan='2' class='top'>
 <span class='header'>Description</span><br>
@@ -467,6 +474,10 @@ foreach ($users as $user) {
 <?endif;?>
 </table>
 </div>
+<form name='boot' method='POST' action='/webGui/include/Boot.php'>
+<input type='hidden' name='csrf_token' value='<?=$var['csrf_token']?>'>
+<input type='hidden' name='cmd' value=''>
+</form>
 <div id="iframe-popup"></div>
 &nbsp;
 <script>
@@ -761,6 +772,65 @@ function toggleView(field,init,view) {
     $('#'+field).addClass(chevron);
   }
 }
+function StopArray() {
+<?if ($confirm['stop']):?>
+  swal({title:'Proceed?',text:'This will stop the array',type:'warning',showCancelButton:true},function(){StopArrayNow();});
+<?else:?>
+   StopArrayNow();
+<?endif;?>
+}
+function StopArrayNow() {
+  $('span.hand').prop('onclick',null).off('click').css('cursor','default');
+  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStop:'Stop',csrf_token:'<?=$var['csrf_token']?>'},function(){refresh();});
+}
+function StartArray() {
+<?if ($confirm['stop']):?>
+  swal({title:'Proceed?',text:'This will start the array',type:'warning',showCancelButton:true},function(){StartArrayNow();});
+<?else:?>
+  StartArrayNow();
+<?endif;?>
+}
+function StartArrayNow() {
+  $('span.hand').prop('onclick',null).off('click').css('cursor','default');
+  $.post('/update.htm',{startState:'<?=$var['mdState']?>',cmdStart:'Start',csrf_token:'<?=$var['csrf_token']?>'},function(){refresh();});
+}
+function Reboot() {
+<?if ($confirm['down']):?>
+  swal({title:'Proceed?',text:'This will reboot the system',type:'warning',showCancelButton:true},function(){RebootNow();});
+<?else:?>
+  RebootNow();
+<?endif;?>
+}
+function RebootNow() {
+  document.boot.cmd.value = 'reboot';
+  document.boot.submit();
+}
+function Shutdown() {
+<?if ($confirm['down']):?>
+  swal({title:'Proceed?',text:'This will shutdown the system',type:'warning',showCancelButton:true},function(){ShutdownNow();});
+<?else:?>
+  ShutdownNow();
+<?endif;?>
+}
+function ShutdownNow() {
+  document.boot.cmd.value = 'shutdown';
+  document.boot.submit();
+}
+
+<?if ($sleep):?>
+function Sleep() {
+<?if ($confirm['sleep']):?>
+  swal({title:'Proceed?',text:'This will put the system to sleep',type:'warning',showCancelButton:true},function(){SleepNow();});
+<?else:?>
+  SleepNow();
+<?endif;?>
+}
+function SleepNow() {
+  $('#statusraid').append('&nbsp;&bullet;&nbsp;<span class="warning" style="font-weight:bold">System in sleep mode</span>');
+  $.get('/plugins/dynamix.s3.sleep/include/SleepMode.php',function(){refresh();});
+}
+<?endif;?>
+
 var cpuload = new NchanSubscriber('/sub/cpuload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 cpuload.on('message',function(data) {
 /*
