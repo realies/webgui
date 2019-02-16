@@ -1,5 +1,6 @@
-Menu="Identification"
+Menu="OtherSettings"
 Title="Management Access"
+Icon="icon-key"
 Tag="expeditedssl"
 ---
 <?PHP

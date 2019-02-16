@@ -64,18 +64,26 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   }
 //link/icon
   $launch = plugin('launch',$plugin_file);
-  if ( $icon = plugin("icon",$plugin_file) ) {
-    $iconDisplay = substr($icon,0,5) == "icon-" ? "<i class='$icon list'></i>" : "<i class='fa fa-$icon list'></i>";
-    if ( $launch )      
-      $link = "<a href='/$launch' class='list'>$iconDisplay</a>";
-    else
-      $link = $iconDisplay;
+  if ($icon = plugin('icon',$plugin_file)) {
+    if (substr($icon,-4)=='.png') {
+      if (file_exists("plugins/$name/images/$icon")) {
+        $icon = "plugins/$name/images/$icon";
+      } elseif (file_exists("plugins/$name/$icon")) {
+        $icon = "plugins/$name/$icon";
+      } else {
+        $icon = "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
+      }
+      $icon = "<img src='/$icon' class='list'>";
+    } elseif (substr($icon,0,5)=='icon-') {
+      $icon = "<i class='$icon list'></i>";
+    } else {
+      if (substr($icon,0,3)!='fa-') $icon = "fa-$icon";
+      $icon = "<i class='fa $icon list'></i>";
+    }
+    $link = $launch ? "<a href='/$launch' class='list'>$icon</a>" : $icon;
   } else {
     $icon = icon($name);
-    if ( $launch )
-      $link = "<a href='/$launch' class='list'><img src='/$icon' class='list'></a>";
-    else
-      $link = "<img src='/$icon' class='list'>";
+    $link = $launch ? "<a href='/$launch' class='list'><img src='/$icon' class='list'></a>" : "<img src='/$icon' class='list'>";
   }
 //description
   $readme = "plugins/{$name}/README.md";
@@ -130,7 +138,7 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
 //write plugin information
   $empty = false;
   echo "<tr id=\"".str_replace(['.',' ','_'],'',basename($plugin_file,'.plg'))."\">";
-  echo "<td style='vertical-align:top;width:64px'><p style='text-align:center'>$link</p></td>";
+  echo "<td>$link</td>";
   echo "<td><span class='desc_readmore' style='display:block'>$desc</span> $support</td>";
   echo "<td>$author</td>";
   echo "<td data='$date'>$version</td>";

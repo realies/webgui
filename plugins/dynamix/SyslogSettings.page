@@ -1,0 +1,89 @@
+Menu="NetworkServices"
+Title="Syslog Server"
+Icon="icon-eula"
+Tag="file-text-o"
+---
+<?PHP
+/* Copyright 2005-2018, Lime Technology
+ * Copyright 2012-2018, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$syslog = @(array)parse_ini_file('/boot/config/rsyslog.cfg');
+?>
+<style>
+span.span{display:inline-block;width:224px}
+</style>
+<script>
+function localFolder(state) {
+  if (state) $('#local_folder').show(); else $('#local_folder').hide();
+}
+$(function(){
+  localFolder(document.syslog.local_server.value);
+});
+</script>
+
+<form markdown="1" name="syslog" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="/boot/config/rsyslog.cfg">
+<input type="hidden" name="#command" value="/webGui/scripts/rsyslog_config">
+
+Local syslog server:
+: <span class="span"><select name="local_server" class="narrow" size="1" onchange="localFolder(this.value)">
+  <?=mk_option($syslog['local_server'], "", "Disabled")?>
+  <?=mk_option($syslog['local_server'], "1", "Enabled")?>
+  </select></span>
+  <select name="server_protocol" class="narrow" size="1">
+  <?=mk_option($syslog['server_protocol'], "udp", "UDP")?>
+  <?=mk_option($syslog['server_protocol'], "tcp", "TCP")?>
+  <?=mk_option($syslog['server_protocol'], "both", "Both")?>
+  </select>
+  <input type="text" name="server_port" class="trim" value="<?=$syslog['server_port']?>" maxlength="4" placeholder="514">
+
+> Let the server act as a central syslog server and collect syslog messages from other systems.
+> The server can listen on UDP, TCP or both with a selectable port number.
+>
+> Syslog information is stored per IP address. That is every system gets its own syslog file.
+
+<div markdown="1" id="local_folder" style="display:none">
+Local syslog folder:
+: <select name="server_folder" class="narrow" size="1">
+  <?foreach ($shares as $share){echo mk_option($syslog['server_folder'], '/mnt/user/'.$share['name'], $share['name']);}?>
+  </select>
+
+> Select the share folder where the syslogs will be stored.
+> It is recommended that you use a share located on the cache drive to prevent array disk spinups.
+
+</div>
+
+Remote syslog server:
+: <span class="span"><input type="text" name="remote_server" class="narrow" value="<?=$syslog['remote_server']?>" maxlength="23" placeholder="name or ip address"></span>
+  <select name="remote_protocol" class="narrow" size="1">
+  <?=mk_option($syslog['remote_protocol'], "udp", "UDP")?>
+  <?=mk_option($syslog['remote_protocol'], "tcp", "TCP")?>
+  </select>
+  <input type="text" name="remote_port" class="trim" value="<?=$syslog['remote_port']?>" maxlength="4" placeholder="514">
+
+> Enter a name or IP address of a remote syslog server.
+> This will send a copy of the syslog messages to the designated server.
+
+Mirror syslog to flash:
+: <select name="syslog_flash" class="narrow" size="1">
+  <?=mk_option($syslog['syslog_flash'], "", "No")?>
+  <?=mk_option($syslog['syslog_flash'], "1", "Yes")?>
+  </select>
+
+> This setting is OFF by default and must be used with care to avoid unnecessary wear and tear of the USB device.
+>
+> Change this setting to YES when troubleshooting is required and it is not possible to get the regular diagnostics information.
+> A mirror of the syslog file is stored in the **logs** folder of the flash device.
+
+&nbsp;
+: <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+</form>

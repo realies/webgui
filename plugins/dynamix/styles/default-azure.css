@@ -221,13 +221,13 @@ table.share_status.dashboard.box3 tr td:nth-child(5){min-width:11%}
 table.share_status.dashboard.box3 tr td[colspan="4"]{min-width:93%}
 @media (max-width:1680px){
  table.share_status.dashboard.box1{width:44%}
- table.share_status.dashboard.box2{width:52%}
- table.share_status.dashboard.box3{width:52%}
+ table.share_status.dashboard.box2{width:52%;float:right}
+ table.share_status.dashboard.box3{width:52%;float:right}
 }
 @media (min-width:1681px){
  table.share_status.dashboard.box1{width:28%}
- table.share_status.dashboard.box2{width:34%}
- table.share_status.dashboard.box3{width:34%}
+ table.share_status.dashboard.box2{width:34%;float:right}
+ table.share_status.dashboard.box3{width:34%;margin-left:20px}
 }
 tr.alert{color:#f0000c;background-color:#ff9e9e}
 tr.warn{color:#e68a00;background-color:#feefb3}
@@ -272,9 +272,9 @@ i.orb{font-size:1.1rem;margin:0 8px 0 3px}
 i.mm{display:block;margin-left:45px;margin-bottom:-7px}
 img.img,i.img{width:32px;height:32px;margin-right:10px}
 img.icon{margin:-3px 4px 0 0}
-img.list{width:auto;max-width:48px;height:48px}
-i.list{font-size:4rem;color:#606e7f}
-a.list{text-decoration:none;color:#606e7f}
+img.list{width:auto;max-width:32px;height:32px}
+i.list{font-size:32px}
+a.list{text-decoration:none;color:inherit}
 div.content{position:absolute;top:0;left:0;width:100%;padding-bottom:30px;z-index:-1;clear:both}
 div.content.shift{margin-top:1px}
 label+.content{margin-top:64px}

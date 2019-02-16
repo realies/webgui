@@ -60,7 +60,7 @@ table.tablesorter.four tbody tr:nth-child(4n-1){background-color:#ededed}
 table.tablesorter tbody tr.tr_last{background-color:#ededed;border-top:1px solid #e3e3e3;border-bottom:1px solid #e3e3e3}
 table.tablesorter tbody tr.tr_last td{padding:8px 20px 8px 6px}
 table.tablesorter tbody tr td{padding:4px 20px 4px 6px;vertical-align:middle;text-align:justify}
-table.tablesorter.plugins td:first-child{width:64px;text-align:center}
+table.tablesorter.plugins td:first-child{width:48px;text-align:center}
 table.tablesorter.plugins tr>td+td+td{width:9%;white-space:nowrap}
 table.tablesorter.plugins td:last-child{width:9.6rem;padding:0}
 table.tablesorter .desc_readmore strong,table.tablesorter .desc_readmore h4{font-size:1.3rem}
