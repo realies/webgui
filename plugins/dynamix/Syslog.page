@@ -25,6 +25,7 @@ if (file_exists($cfg)) {
   if ($syslog['local_server'] && $logs = glob($syslog['server_folder'].'/syslog-*.log',GLOB_NOSORT)) {
     $select = "<select onchange='showLog(this.value)'>";
     $select .= mk_option(1,$log,'syslog');
+    natsort($logs);
     foreach ($logs as $file) $select .= mk_option(1,$file,basename($file));
     $select .= "</select>";
   }
