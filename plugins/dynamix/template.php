@@ -21,14 +21,14 @@ require_once "$docroot/webGui/include/PageBuilder.php";
 extract(parse_plugin_cfg('dynamix',true));
 
 // Read emhttp status
-$var     = parse_ini_file('state/var.ini');
-$sec     = parse_ini_file('state/sec.ini',true);
-$devs    = parse_ini_file('state/devs.ini',true);
-$disks   = parse_ini_file('state/disks.ini',true);
-$users   = parse_ini_file('state/users.ini',true);
-$shares  = parse_ini_file('state/shares.ini',true);
-$sec_nfs = parse_ini_file('state/sec_nfs.ini',true);
-$sec_afp = parse_ini_file('state/sec_afp.ini',true);
+$var     = (array)parse_ini_file('state/var.ini');
+$sec     = (array)parse_ini_file('state/sec.ini',true);
+$devs    = (array)parse_ini_file('state/devs.ini',true);
+$disks   = (array)parse_ini_file('state/disks.ini',true);
+$users   = (array)parse_ini_file('state/users.ini',true);
+$shares  = (array)parse_ini_file('state/shares.ini',true);
+$sec_nfs = (array)parse_ini_file('state/sec_nfs.ini',true);
+$sec_afp = (array)parse_ini_file('state/sec_afp.ini',true);
 
 // Read network settings
 extract(parse_ini_file('state/network.ini',true));
