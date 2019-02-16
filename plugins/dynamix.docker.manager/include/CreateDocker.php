@@ -17,6 +17,8 @@ require_once "$docroot/plugins/dynamix.docker.manager/include/DockerClient.php";
 require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
 require_once "$docroot/webGui/include/Helpers.php";
 
+libxml_use_internal_errors(false); # Enable xml errors
+
 $var = parse_ini_file('state/var.ini');
 $cfg = parse_ini_file('boot/config/docker.cfg');
 ignore_user_abort(true);
