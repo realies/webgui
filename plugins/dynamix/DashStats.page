@@ -203,7 +203,7 @@ form[name=boot]{display:none}
 <?else:?>
 <i id='mycase' class='fa fa-wpexplorer'></i><br>
 <?endif;?>
-<input type='button' value='Edit' onclick='openBox("/webGui/include/SelectCase.php?file=<?=$myfile?>&csrf=<?=$var['csrf_token']?>","Select Case Model",600,900,true,"setCase");return false'>
+<input type='button' value='Edit' onclick='openBox("/webGui/include/SelectCase.php?file=<?=$myfile?>&csrf=<?=$var['csrf_token']?>","Select Case Model",600,980,true,"setCase");return false'>
 </td><td></td></tr>
 </tbody>
 <tbody>
