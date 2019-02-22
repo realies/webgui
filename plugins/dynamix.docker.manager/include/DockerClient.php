@@ -13,6 +13,7 @@
 ?>
 <?
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+libxml_use_internal_errors(true); # Suppress any warnings from xml errors. 
 
 require_once "$docroot/plugins/dynamix.docker.manager/include/Helpers.php";
 
