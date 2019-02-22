@@ -79,7 +79,7 @@ Mirror syslog to flash:
   <?=mk_option($syslog['syslog_flash'], "1", "Yes")?>
   </select>
 
-> This setting is OFF by default and must be used with care to avoid unnecessary wear and tear of the USB device.
+> This setting is NO by default and must be used with care to avoid unnecessary wear and tear of the USB device.
 >
 > Change this setting to YES when troubleshooting is required and it is not possible to get the regular diagnostics information.
 > A mirror of the syslog file is stored in the **logs** folder of the flash device.
