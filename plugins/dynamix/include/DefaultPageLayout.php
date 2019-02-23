@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$font    = $display['font'];
+$display['font'] = $_COOKIE['fontSize'];
 $theme   = $display['theme'];
 $header  = $display['header'];
 $backgnd = $display['background'];
@@ -37,8 +37,8 @@ $themes2 = in_array($theme,['gray','azure']);
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
-<?if ($font):?>
-html{font-size:<?=$font?>}
+<?if ($display['font']):?>
+html{font-size:<?=$display['font']?>}
 <?endif;?>
 <?if ($header):?>
 #header,#header .logo,#header .text-right a{color:#<?=$header?>}
