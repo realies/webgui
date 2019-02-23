@@ -54,6 +54,7 @@ Local syslog server:
 <div markdown="1" id="local_folder" style="display:none">
 Local syslog folder:
 : <select name="server_folder" class="narrow" size="1">
+  <?=mk_option(0,'','&lt;custom&gt;','disabled')?>
   <?foreach ($shares as $share){echo mk_option($syslog['server_folder'], '/mnt/user/'.$share['name'], $share['name']);}?>
   </select>
 
