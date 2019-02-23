@@ -61,7 +61,7 @@ function presetPassive(index) {
 }
 
 function saveFontSize() {
-	$.cookie('fontSize',$('#font option:selected').val(),{path:'/',expires:3650});
+  $.cookie('fontSize',$('#font option:selected').val(),{path:'/',expires:3650});
 }
 
 $(function() {
@@ -133,11 +133,11 @@ Font size:
   <?=mk_option($display['font'], "", "Normal")?>
   <?=mk_option($display['font'], "68.75%", "Large")?>
   <?=mk_option($display['font'], "75%", "Very large")?>
-	<?=mk_option($display['font'],"80%","Huge")?>
+  <?=mk_option($display['font'],"80%","Huge")?>
   </select>
 
 > This is a per device setting
-	
+  
 Date format:
 : <select name="date" size="1" onchange="presetTime(this.form)">
   <?=mk_option($display['date'], "%c", "System Setting")?>
