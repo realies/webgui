@@ -66,8 +66,9 @@ todos <$ETC >$CFG
 sed -ri 's/^(\*\.\* \?remote)/#\1/' $CFG
 
 # update syslog rotation
-if [[ -n $local_server && -n $log_rotation ]]; then
-  cat <<- EOF > $LOG
+if [[ -n $local_server ]]; then
+  if [[ -n $log_rotation ]]; then
+    cat <<- EOF > $LOG
 $server_folder/*.log {
   su nobody users
   missingok
@@ -80,12 +81,13 @@ $server_folder/*.log {
   endscript
 }
 EOF
-  chmod 644 $LOG
-  # keep copy on flash
-  cp -f $LOG $USB
-else
-  # clean up
-  rm -f $LOG $USB
+    chmod 644 $LOG
+    # keep copy on flash
+    cp -f $LOG $USB
+  else
+    # clean up
+    rm -f $LOG $USB
+  fi
 fi
 
 # update syslog daemon
