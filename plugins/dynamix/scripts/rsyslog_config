@@ -1,7 +1,9 @@
 #!/bin/bash
 
-CONF=/boot/config/rsyslog.conf
+CFG=/boot/config/rsyslog.conf
 ETC=/etc/rsyslog.conf
+USB=/boot/config/rsyslog.local
+LOG=/etc/logrotate.d/rsyslog.local
 
 # read settings
 source /boot/config/rsyslog.cfg
@@ -57,11 +59,34 @@ else
 fi
 
 # copy conf to flash (read settings on reboot)
-todos <$ETC >$CONF
+todos <$ETC >$CFG
 
 # keep local logging disabled at startup
 # disk mount and disk unmount events are used to start/stop logging
-sed -ri 's/^(\*\.\* \?remote)/#\1/' $CONF
+sed -ri 's/^(\*\.\* \?remote)/#\1/' $CFG
+
+# update syslog rotation
+if [[ -n $local_server && -n $log_rotation ]]; then
+  cat <<- EOF > $LOG
+$server_folder/*.log {
+  su nobody users
+  missingok
+  create 0666 nobody users
+  size $log_size
+  rotate $log_files
+  sharedscripts
+  postrotate
+    /bin/kill -HUP \$(cat /var/run/rsyslogd.pid 2>/dev/null) 2>/dev/null || true
+  endscript
+}
+EOF
+  chmod 644 $LOG
+  # keep copy on flash
+  cp -f $LOG $USB
+else
+  # clean up
+  rm -f $LOG $USB
+fi
 
 # update syslog daemon
 /etc/rc.d/rc.rsyslogd restart &> /dev/null
