@@ -66,7 +66,7 @@ Local syslog folder:
 > Select the share folder where the syslogs will be stored.
 > It is recommended that you use a share located on the cache drive to prevent array disk spinups.
 
-Syslog LOG rotation:
+Local syslog rotation:
 : <select name="log_rotation" class="narrow" onchange="logOptions(this.value,'slow')">
   <?=mk_option($syslog['log_rotation'], "", "Disabled")?>
   <?=mk_option($syslog['log_rotation'], "1", "Enabled")?>
@@ -77,7 +77,7 @@ Syslog LOG rotation:
 > Enable LOG rotation to limit the size of the LOG file and specify the number of files to keep in the rotation scheme.
 
 <div markdown="1" id="log_options" style="display:none">
-Syslog LOG maximum file size:
+Local syslog maximum file size:
 : <select name="log_size" class="narrow">
   <?=mk_option($syslog['log_size'], '1M', '1 MB')?>
   <?=mk_option($syslog['log_size'], '2M', '2 MB')?>
@@ -92,7 +92,7 @@ Syslog LOG maximum file size:
 
 > Specifies the maximum LOG size. When exceeded LOG rotation will occur.
 
-Syslog LOG number of files:
+Local syslog number of files:
 : <select name="log_files" class="narrow">
   <?=mk_option($syslog['log_files'], '1', '1')?>
   <?=mk_option($syslog['log_files'], '2', '2')?>
