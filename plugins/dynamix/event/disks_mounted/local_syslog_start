@@ -6,8 +6,8 @@ LOG=/etc/logrotate.d/rsyslog.local
 if grep -qP '^#\*\.\* \?remote$' $ETC; then
   sed -ri 's/^#(\*\.\* \?remote)$/\1/' $ETC
   /etc/rc.d/rc.rsyslogd restart &> /dev/null
-fi
-if [[ -f $USB ]]; then
-  cp -f $USB $LOG
-  chmod 644 $LOG
+  if [[ -f $USB ]]; then
+    cp -f $USB $LOG
+    chmod 644 $LOG
+  fi
 fi
