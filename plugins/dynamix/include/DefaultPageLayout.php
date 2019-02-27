@@ -11,7 +11,7 @@
  */
 ?>
 <?
-$font    = $display['font'];
+$display['font'] = $_COOKIE['fontSize'] ?? $display['font'];
 $theme   = $display['theme'];
 $header  = $display['header'];
 $backgnd = $display['background'];
@@ -37,8 +37,8 @@ $themes2 = in_array($theme,['gray','azure']);
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
-<?if ($font):?>
-html{font-size:<?=$font?>}
+<?if ($display['font']):?>
+html{font-size:<?=$display['font']?>}
 <?endif;?>
 <?if ($header):?>
 #header,#header .logo,#header .text-right a{color:#<?=$header?>}
@@ -329,7 +329,7 @@ $.ajaxPrefilter(function(s, orig, xhr){
   <div class="upgrade_notice" style="display:none"></div>
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="https://unraid.net"><?readfile("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
+   <a href="https://unraid.net" target="_blank"><?readfile("$docroot/webGui/images/UN-logotype-gradient.svg")?></a>
    Version: <?=$var['version']?><?=$notes?>
    </div>
    <div class="block">
