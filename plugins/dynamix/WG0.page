@@ -1,0 +1,186 @@
+Menu="VPNmanager:100"
+Title="Interface wg0"
+Tag="compass"
+---
+<?PHP
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$active_wg0 = strpos(exec('wg show interfaces'),'wg0')!==false;
+$validIP4 = '((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
+$validIP6 = '((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}';
+$conf_wg0 = '/etc/wireguard/wg0.conf';
+$peer_wg0 = $wg0 = [];
+
+// read current configuration
+if (file_exists($conf_wg0)) {
+  $entries = array_filter(array_map('trim',preg_split('/\[(Interface|Peer)\]/',file_get_contents($conf_wg0))));
+  foreach($entries as $key => $entry) {
+    $index = $key-1;
+    if ($index) $peer_wg0[] = $index; elseif ($active_wg0) $wg0['PublicKey:0'] = exec('wg show wg0 public-key');
+    // preset fields
+    foreach (explode("\n",$entry) as $row) {
+      list($id,$data) = array_map('trim',explode('=',$row,2));
+      if ($id != 'Endpoint') {
+        $wg0["$id:$index"] = $data;
+      } else {
+        list($ip,$port) = explode(':',$data);
+        $wg0["Endpoint:$index"] = $ip;
+        $wg0["ListenPort:$index"] = $port;
+      }
+    }
+  }
+}
+// at least one peer
+if (!$peer_wg0) $peer_wg0[] = 1;
+?>
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
+<style>
+span.pin{float:right;margin:8px 12px 0 0}
+span.pin i{font-size:2rem;cursor:pointer}
+div.shade-white{background-color:#ededed}
+div.shade-black{background-color:#212121}
+div.shade-azure{background-color:#edeaef}
+div.shade-gray{background-color:#121510}
+input.wide{width:360px}
+input.bitstream{font-family:bitstream}
+</style>
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<script>
+function prepareSettings(form) {
+  var port = $(form).find('input[name="ListenPort:0"]');
+  if (!port.val()) port.val('51820');
+  $(form).find('input[name^="Endpoint:"]').each(function(n) {
+    var port = $(form).find('input[name="ListenPort:'+(n+1)+'"]');
+    if (!port.val()) port.val('51820');
+    var full = $(this).val()+':'+port.val();
+    $(this).val(full);
+    port.prop('disabled',true);
+  });
+  $(form).find('input[name="#wg"]').val($.cookie('my_wg0'));
+  var public_wg0 = $(form).find('input[name="PublicKey:0"]');
+  $.cookie('public_wg0',public_wg0.val(),{expires:3650});
+  public_wg0.prop('disabled',true);
+}
+function keypair(wg) {
+  $.post('/webGui/include/update.wireguard.php',{'#case':'keypair'},function(keys){
+    var key = keys.split('\0');
+    $('#private_'+wg).val(key[0]);
+    $('#public_'+wg).val(key[1]).trigger('change');
+  });
+}
+function addPeer(port) {
+  var index = 1;
+  while ($('#index-'+port+'-'+index).length) index++;
+  var template = $($('<div/>').loadTemplate($('#peer-template-'+port)).html().replace(/INDEX/g,index));
+  var element = $('[id^="index-'+port+'-"]').last();
+  $(element).after(template);
+  $(element).find('input').first().trigger('change');
+}
+function deletePeer(element) {
+  var id = $(element).attr('id').split('-');
+  $(element).remove();
+  $('#index-'+id[1]+'-1').find('input').first().trigger('change');
+}
+$(function(){
+  var ctrl = "<span class='status vhshift'><input type='checkbox' id='toggle_wg0'></span>";
+<?if ($tabbed):?>
+  $('.tabs').append(ctrl);
+<?else:?>
+  $('div[id=title]').append(ctrl);
+<?endif;?>
+<?if ($active_wg0):?>
+  $.cookie('my_wg0','active',{expires:3650});
+<?else:?>
+  $.removeCookie('my_wg0');
+<?endif;?>
+  $('#toggle_wg0').switchButton({labels_placement:'left', off_label:'Inactive', on_label:'Active', checked:$.cookie('my_wg0')=='active'});
+  $('#toggle_wg0').change(function(){
+    if ($('#toggle_wg0').is(':checked')) {
+      $.post('/webGui/include/update.wireguard.php',{'#case':'toggle','#wg':'start','#port':'wg0'});
+      $.cookie('my_wg0','active',{expires:3650});
+    } else {
+      $.post('/webGui/include/update.wireguard.php',{'#case':'toggle','#wg':'stop','#port':'wg0'});
+      $.removeCookie('my_wg0');
+    }
+  });
+  var public_wg0 = $('form[name="wg0_settings"]').find('input[name="PublicKey:0"]');
+  if (!public_wg0.val()) public_wg0.val($.cookie('public_wg0'));
+});
+</script>
+
+<form markdown="1" name="wg0_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareSettings(this)">
+<input type="hidden" name="#include" value="/webGui/include/update.wireguard.php">
+<input type="hidden" name="#file" value="/etc/wireguard/wg0.conf">
+<input type="hidden" name="#case" value="update">
+<input type="hidden" name="#port" value="wg0">
+<input type="hidden" name="#wg" value="">
+Local private key:
+: <input type="text" name="PrivateKey:0" class="wide bitstream" id="private_wg0" maxlength="64" value="<?=$wg0['PrivateKey:0']?>" required>
+
+Local public key:
+: <input type="text" name="PublicKey:0" class="wide bitstream" id="public_wg0" maxlength="64" value="<?=$wg0['PublicKey:0']?>">
+
+&nbsp;
+: <input type="button" value="Generate keypair" onclick="keypair('wg0')">
+
+Local tunnel address:
+: <input type="text" name="Address:0" class="narrow" maxlength="15" value="<?=$wg0['Address:0']?>" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D" required>
+
+Local listen port:
+: <input type="number" name="ListenPort:0" class="narrow" min="1024" max="65535" value="<?=$wg0['ListenPort:0']?>" placeholder="51820">
+
+MTU:
+: <input type="number" name="MTU:0" class="narrow" min="68" max="9198" value="<?=$wg0['MTU:0']?>" placeholder="(automatic)">
+
+DNS servers:
+: <input type="text" name="DNS:0" class="wide" value="<?=$wg0['DNS:0']?>" placeholder="(optional)" disabled>*incompatible with Unraid*
+
+<?foreach ($peer_wg0 as $i):?>
+<div markdown="1" id="index-wg0-<?=$i?>" class="access-wg0 shade-<?=$display['theme']?>">
+Peer public key:
+: <input type="text" name="PublicKey:<?=$i?>" class="wide bitstream" maxlength="64" value="<?=$wg0["PublicKey:$i"]?>" required><?if ($i==1):?>
+  <span class="access-wg0 pin" onclick="addPeer('wg0')">add peer<i class="fa fa-plus-circle fa-fw green"></i></span>
+  <?else:?>
+  <span class="access-wg0 pin" onclick="deletePeer($('#index-wg0-<?=$i?>'))">remove peer<i class="fa fa-minus-circle fa-fw red"></i></span>
+  <?endif;?>
+
+Peer endpoint:
+: <input type="text" name="Endpoint:<?=$i?>" class="narrow" maxlength="15" value="<?=$wg0["Endpoint:$i"]?>" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D" required><input type="number" name="ListenPort:<?=$i?>" class="trim" min="1024" max="65535" value="<?=$wg0["ListenPort:$i"]?>" placeholder="51820">
+
+Peer allowed subnets:
+: <input type="text" name="AllowedIPs:<?=$i?>" class="wide" value="<?=$wg0["AllowedIPs:$i"]?>" required>
+
+Persistent keepalive:
+: <input type="number" name="PersistentKeepalive:<?=$i?>" class="trim" min="0" max="600" value="<?=$wg0["PersistentKeepalive:$i"]?>" placeholder="(disabled)">seconds
+</div>
+<?endforeach;?>
+
+<script type="text/html" id="peer-template-wg0" markdown="1">
+<div markdown="1" id="index-wg0-INDEX" class="access-wg0 shade-<?=$display['theme']?>">
+Peer public key:
+: <input type="text" name="PublicKey:INDEX" class="wide bitstream" maxlength="64" value="<?=$wg0['PublicKey:INDEX']?>" required><span class="access-wg0 pin" onclick="deletePeer($('#index-wg0-INDEX'))">remove peer<i class="fa fa-minus-circle fa-fw red"></i></span>
+
+Peer endpoint:
+: <input type="text" name="Endpoint:INDEX" class="narrow" maxlength="15" value="<?=$wg0['Endpoint:INDEX']?>" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D" required><input type="number" name="ListenPort:INDEX" class="trim" min="1024" max="65535" value="<?=$wg0['ListenPort:INDEX']?>" placeholder="51820">
+
+Peer allowed subnets:
+: <input type="text" name="AllowedIPs:INDEX" class="wide" value="<?=$wg0['AllowedIPs:INDEX']?>" required>
+
+Persistent keepalive:
+: <input type="number" name="PersistentKeepalive:INDEX" class="trim" min="0" max="600" value="<?=$wg0['PersistentKeepalive:INDEX']?>" placeholder="(disabled)">seconds
+</div>
+</script>
+
+&nbsp;
+: <input type="submit" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+</form>
