@@ -11,9 +11,6 @@
  */
 ?>
 <?
-$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
-require_once "$docroot/webGui/include/Helpers.php";
-
 switch ($_POST['#case']) {
 case 'keypair':
   $private = '/var/tmp/privatekey';
@@ -44,22 +41,6 @@ case 'toggle':
   $port = $_POST['#port'];
   if ($wg=='stop') exec("wg-quick down $port 2>/dev/null");
   if ($wg=='start') exec("wg-quick up $port 2>/dev/null");
-  break;
-case 'stats':
-  $port = $_POST['#port'];
-  $now = time(); $i = 0;
-  exec('wg show all latest-handshakes',$shake);
-  exec('wg show all transfer',$data);
-  $reply = $span = [];
-  foreach ($shake as $row) {
-    list($wg,$id,$time) = preg_split('/\s+/',$row);
-    if ($wg == $port) $span[] = $time ? $now - $time : 0;
-  }
-  foreach ($data as $row) {
-    list($wg,$id,$tx,$rx) = preg_split('/\s+/',$row);
-    if ($wg == $port) $reply[] = $span[$i++].';'.my_scale($rx,$unit,null,-1)." $unit;".my_scale($tx,$unit,null,-1)." $unit";
-  }
-  echo implode("\0",$reply);
   break;
 }
 ?>

@@ -46,7 +46,6 @@ if (!$peer_wg0) $peer_wg0[] = 1;
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <style>
 span.pin{float:right;margin:8px 12px 0 0}
-span.pad{float:right;margin-right:24px;padding-bottom:12px}
 span.pin i{font-size:2rem;cursor:pointer}
 div.shade-white{background-color:#ededed}
 div.shade-black{background-color:#212121}
@@ -92,31 +91,6 @@ function deletePeer(element) {
   $(element).remove();
   $('#index-'+id[1]+'-1').find('input').first().trigger('change');
 }
-function statistics(port) {
-  $.post('/webGui/include/update.wireguard.php',{'#case':'stats','#port':port},function(data){
-    if (data) {
-      var row = data.split('\0');
-      for (var i=1; i < row.length+1; i++) {
-        var info = row[i-1].split(';');
-        if (info[0] > 0) {
-          var hr = parseInt(info[0]/3600);
-          var mn = parseInt(info[0]/60%60);
-          var sc = parseInt(info[0]%60);
-          $('#hs_'+i).text(plus(hr,'hour',false)+plus(mn,'minute',false)+plus(sc,'second',true)+' ago');
-        } else {
-          $('#hs_'+i).text('not received');
-        }
-        $('#tx_'+i).text(info[1]);
-        $('#rx_'+i).text(info[2]);
-      }
-    } else {
-      $('span[id^="hs_"]').each(function(){$(this).text('interface down');});
-      $('span[id^="tx_"]').each(function(){$(this).text('---');});
-      $('span[id^="rx_"]').each(function(){$(this).text('---');});
-    }
-    setTimeout(function(){statistics(port);},1000);
-  });
-}
 $(function(){
   var ctrl = "<span class='status vhshift'><input type='checkbox' id='toggle_wg0'></span>";
 <?if ($tabbed):?>
@@ -141,7 +115,6 @@ $(function(){
   });
   var public_wg0 = $('form[name="wg0_settings"]').find('input[name="PublicKey:0"]');
   if (!public_wg0.val()) public_wg0.val($.cookie('public_wg0'));
-  statistics('wg0');
 });
 </script>
 
@@ -183,15 +156,12 @@ Peer public key:
 
 Peer endpoint:
 : <input type="text" name="Endpoint:<?=$i?>" class="narrow" maxlength="15" value="<?=$wg0["Endpoint:$i"]?>" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D" required><input type="number" name="ListenPort:<?=$i?>" class="trim" min="1024" max="65535" value="<?=$wg0["ListenPort:$i"]?>" placeholder="51820">
-  <span class="pad">Data sent: <span id="tx_<?=$i?>">0 B</span></span>
 
 Peer allowed subnets:
 : <input type="text" name="AllowedIPs:<?=$i?>" class="wide" value="<?=$wg0["AllowedIPs:$i"]?>" required>
-  <span class="pad">Data received: <span id="rx_<?=$i?>">0 B</span></span>
 
 Persistent keepalive:
 : <input type="number" name="PersistentKeepalive:<?=$i?>" class="trim" min="0" max="600" value="<?=$wg0["PersistentKeepalive:$i"]?>" placeholder="(disabled)">seconds
-  <span class="pad">Last handshake: <span id="hs_<?=$i?>">unknown</span></span>
 </div>
 <?endforeach;?>
 
@@ -202,15 +172,12 @@ Peer public key:
 
 Peer endpoint:
 : <input type="text" name="Endpoint:INDEX" class="narrow" maxlength="15" value="<?=$wg0['Endpoint:INDEX']?>" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D" required><input type="number" name="ListenPort:INDEX" class="trim" min="1024" max="65535" value="<?=$wg0['ListenPort:INDEX']?>" placeholder="51820">
-  <span class="pad">Data received: <span id="rx_INDEX">0 B</span></span>
 
 Peer allowed subnets:
 : <input type="text" name="AllowedIPs:INDEX" class="wide" value="<?=$wg0['AllowedIPs:INDEX']?>" required>
-  <span class="pad">Data sent: <span id="tx_INDEX">0 B</span></span>
 
 Persistent keepalive:
 : <input type="number" name="PersistentKeepalive:INDEX" class="trim" min="0" max="600" value="<?=$wg0['PersistentKeepalive:INDEX']?>" placeholder="(disabled)">seconds
-  <span class="pad">Last handshake: <span id="hs_INDEX">unknown</span></span>
 </div>
 </script>
 
