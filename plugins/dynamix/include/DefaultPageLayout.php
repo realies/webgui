@@ -612,9 +612,9 @@ $(function() {
             node = node.prev();
             name = node.prop('nodeName').toLowerCase();
           }
-          node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');});
+          node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');}).hover(function(){delay=setTimeout(function(){$('#helpinfo'+i).show('slow');},1000);},function(){clearTimeout(delay);$('#helpinfo'+i).hide('slow');});
         } else {
-          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');});
+          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');}).hover(function(){delay=setTimeout(function(){$('#helpinfo'+i).show('slow');},1000);},function(){clearTimeout(delay);$('#helpinfo'+i).hide('slow');});
         }
       });
     });
