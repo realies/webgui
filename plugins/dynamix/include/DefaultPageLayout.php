@@ -626,7 +626,7 @@ $(function() {
           }
           node.css('cursor','help').click(function(){clickHelp(i);}).hover(function(){hoverOnHelp(i);},function(){hoverOffHelp(i);});
         } else {
-          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){clickHelp(i);}).hover(function(){hoverOnHelp(i);},function(){hoveOffHelp(i);});
+          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){clickHelp(i);}).hover(function(){hoverOnHelp(i);},function(){hoverOffHelp(i);});
         }
       });
     });
