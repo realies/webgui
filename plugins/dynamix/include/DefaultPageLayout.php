@@ -85,6 +85,7 @@ var before = new Date();
 
 // page timer events
 var timers = {};
+var delay = null;
 
 function pauseEvents(id){
   $.each(timers, function(i, timer) {
@@ -459,6 +460,17 @@ echo "</span></div>";
 // Firefox specific workaround
 if (typeof InstallTrigger!=='undefined') $('#nav-block').addClass('mozilla');
 
+function clickHelp(i) {
+  clearTimeout(delay);
+  $('#helpinfo'+i).toggle('slow');
+  delay = (delay==-1 ? null : -1);
+}
+function hoverOnHelp(i) {
+  if (delay!=-1) {delay=setTimeout(function(){$('#helpinfo'+i).show('slow');},1250);}
+}
+function hoverOffHelp(i) {
+  if (delay!=-1) {clearTimeout(delay); $('#helpinfo'+i).hide('slow');}
+}
 function parseINI(data){
   var regex = {
     section: /^\s*\[\s*\"*([^\]]*)\s*\"*\]\s*$/,
@@ -612,9 +624,9 @@ $(function() {
             node = node.prev();
             name = node.prop('nodeName').toLowerCase();
           }
-          node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');});
+          node.css('cursor','help').click(function(){clickHelp(i);}).hover(function(){hoverOnHelp(i);},function(){hoverOffHelp(i);});
         } else {
-          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){$('#helpinfo'+i).toggle('slow');});
+          if (node.html() && (name!='tr' || node.children('td:first').html())) node.css('cursor','help').click(function(){clickHelp(i);}).hover(function(){hoverOnHelp(i);},function(){hoverOffHelp(i);});
         }
       });
     });
