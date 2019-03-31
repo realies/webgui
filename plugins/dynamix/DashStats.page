@@ -40,7 +40,6 @@ function data_devices($disk) {
 function cache_devices($disk) {
   return $disk['type']=='Cache';
 }
-
 $dockerd = pgrep('dockerd');
 $libvirtd = pgrep('libvirtd');
 $apcupsd = file_exists('/var/run/apcupsd.pid');
@@ -189,7 +188,9 @@ form[name=boot]{display:none}
 <?if($sleep):?><span class='fa fa-fw fa-moon-o hand' title='Put system to sleep' onclick='Sleep()'></span><?endif;?>
 <span class='fa fa-fw fa-refresh hand' title='Reboot the system' onclick='Reboot()'></span>
 <span class='fa fa-fw fa-power-off hand' title='Shutdown the system' onclick='Shutdown()'></span>
-<i class='fa blue-text chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i></td><td></td></tr></thead>
+<i class='fa fa-fw chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i>
+<a href='/Dashboard/Identification' title='Go to identification settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+</td><td></td></tr></thead>
 <tbody class='sys_view'>
 <tr><td></td><td colspan='2' class='top'>
 <span class='header'>Description</span><br>
@@ -208,13 +209,17 @@ form[name=boot]{display:none}
 </tbody>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-motherboard'></i><div class='section'>Motherboard<br><span id='mb-temp'></span><br><br></div>
-<i class='fa blue-text chevron' id='mb_view' onclick='toggleChevron("mb_view",0)'></i></td><td></td></tr>
+<i class='fa fa-fw chevron' id='mb_view' onclick='toggleChevron("mb_view",0)'></i>
+<a href='/Dashboard/ManagementAccess' title='Go to access settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <tr class='mb_view'><td></td><td colspan='3'><?=$board?><br><?=$bios?><br><?=$biosdate?></td><td></td></tr>
 </tbody>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-cpu'></i><div class='section'>Processor<br>
 <span id='load'>Load: <span class='cpu'>0%</span></span><span id='cpu-temp'></span><br><br></div>
-<i class='fa blue-text chevron' id='cpu_view' onclick='toggleChevron("cpu_view",1)'></i></td><td></td></tr>
+<i class='fa fa-fw chevron' id='cpu_view' onclick='toggleChevron("cpu_view",1)'></i>
+<a href='/Dashboard/CPUset' title='Go to CPU pinning settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <tr class='cpu_view'><td></td><td colspan='3'><?=$cpumodel?><br>
 <a onclick='toggleCPU()' title='Click to toggle details' class='cpu_close'>Show details</a></td><td></td></tr>
 <tr class='cpu_open'><td></td><td>Overall Load:</td>
@@ -233,7 +238,9 @@ foreach ($cpus as $pair) {
 </tbody>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-ram'></i><div class='section'>Memory<br><span><?="$memory_installed $unit $memory_type $ecc"?><span id='util'>Utilization: <span class='sys0'>0%</span></span><br><br></div>
-<i class='fa blue-text chevron' id='mem_view' onclick='toggleChevron("mem_view",0)'></i></td><td></td></tr>
+<i class='fa fa-fw chevron' id='mem_view' onclick='toggleChevron("mem_view",0)'></i>
+<a href='/Dashboard/DiskSettings' title='Go to disk settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <tr class='mem_view'><td></td><td>Maximum size: <?="$memory_maximum $unit"?><?=$low?'*':''?></td><td><i class='mm'>RAM</i><span class='sys0 load'>0%</span><div class='usage-disk sys'><span id='sys0'></span><span></span></div></td>
 <td><i class='mm'>Flash</i><span class='sys1 load'>0%</span><div class='usage-disk sys'><span id='sys1'></span><span></span></div></td><td></td></tr>
 <tr class='mem_view'><td></td><td>Usable size: <?=my_scale($total,$unit,1,null,1024)." $unit"?></td><td><i class='mm'>Log</i><span class='sys2 load'>0%</span><div class='usage-disk sys'><span id='sys2'></span><span></span></div></td>
@@ -247,7 +254,9 @@ foreach ($cpus as $pair) {
 <?endforeach;?>
 </select>
 <span>Inbound: <span id='inbound'>---</span>Outbound: <span id='outbound'>---</span></span><br><br></div>
-<i class='fa blue-text chevron' id='port_view' onclick='toggleChevron("port_view",2)'></i></td><td></td></tr>
+<i class='fa fa-fw chevron' id='port_view' onclick='toggleChevron("port_view",2)'></i>
+<a href='/Dashboard/NetworkSettings' title='Go to network settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <tr class='port_view'><td></td>
 <td><select class='port_view' name="enter_view" size="1" onchange="changeView(this.value)">
 <?=mk_option("", "0", "General info")?>
@@ -278,7 +287,10 @@ foreach ($ports as $port) {
 <?if ($apcupsd):?>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-ups'></i><div class='section'>Power<br>
-<span>UPS Load: <span id='ups_loadpct'></span></span><br><br></div><i class='fa blue-text chevron' id='ups_view' onclick='toggleChevron("ups_view",0)'></i></td><td></td></tr>
+<span>UPS Load: <span id='ups_loadpct'></span></span><br><br></div>
+<i class='fa fa-fw chevron' id='ups_view' onclick='toggleChevron("ups_view",0)'></i>
+<a href='/Dashboard/UPSsettings' title='Go to UPS settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <tr class='ups_view'><td></td><td colspan='3'>
 <span class='ups'>UPS status:</span><span id='ups_status'></span><br>
 <span class='ups'>Battery charge:</span><span id='ups_bcharge'></span><br>
@@ -290,7 +302,9 @@ foreach ($ports as $port) {
 <?if ($fans):?>
 <tbody>
 <tr><td></td><td colspan='3' class='next'><i class='icon-fan'></i><div class='section'>Airflow<br><span>Fan count: <?=$fans?></span><br><br></div>
-<i class='fa blue-text chevron' id='fan_view' onclick='toggleChevron("fan_view",0)'></i></td><td></td></tr>
+<i class='fa fa-fw chevron' id='fan_view' onclick='toggleChevron("fan_view",0)'></i>
+<a href='/Dashboard/FanSettings' title='Go to fan settings'><i class='fa fa-fw fa-cog chevron'></i></a>
+</td><td></td></tr>
 <?for ($f=0; $f<$fans; $f+=2) {
   if ($f+1<$fans) echo "<tr class='fan_view'><td></td><td>FAN ".($f)." - FAN ".($f+1)."</td><td id='fan{$f}'>"."</td><td id='fan".($f+1)."'></td><td></td></tr>";
   else echo "<tr class='fan_view'><td></td><td>FAN ".($f)."</td><td colspan='2' id='fan{$f}'></td><td></td></tr>";
@@ -302,18 +316,23 @@ foreach ($ports as $port) {
 <table class='share_status dashboard box3'>
 <?if ($display['dashapps']!='none'):?>
 <?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
-<thead><tr><td></td><td colspan='4'>Docker Containers<i class='fa blue-text chevron mt0' id='docker_view' onclick='toggleChevron("docker_view",0)'></i><span class='info apps'><input type='checkbox' id='apps'></span></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='4'>Docker Containers<i class='fa fa-fw chevron mt0' id='docker_view' onclick='toggleChevron("docker_view",0)'></i>
+<a href='/Dashboard/DockerSettings' title='Go to Docker settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='info apps'><input type='checkbox' id='apps'></span></td><td></td></tr></thead>
 <tbody class='docker_view'>
 </tbody>
 <?endif;?>
 <?if ($libvirtd && ($display['dashapps']=='icons' || $display['dashapps']=='vms')):?>
-<thead><tr><td></td><td colspan='4' class='next'>Virtual Machines<i class='fa blue-text chevron mt0' id='vm_view' onclick='toggleChevron("vm_view",0)'></i><span class='info vms'><input type='checkbox' id='vms'></span></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='4' class='next'>Virtual Machines<i class='fa fa-fw chevron mt0' id='vm_view' onclick='toggleChevron("vm_view",0)'></i>
+<a href='/Dashboard/VMSettings' title='Go to VM settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='info vms'><input type='checkbox' id='vms'></span></td><td></td></tr></thead>
 <tbody class='vm_view'>
 </tbody>
 <?endif;?>
 <tbody class='split'><tr><td colspan='6'></td></tr></tbody>
 <?endif;?>
-<thead><tr><td></td><td colspan='4' class='next'>Shares<i class='fa blue-text chevron mt0' id='shares_view' onclick='toggleChevron("shares_view",4)'></i>
+<thead><tr><td></td><td colspan='4' class='next'>Shares<i class='fa fa-fw chevron mt0' id='shares_view' onclick='toggleChevron("shares_view",4)'></i>
+<a href='/Shares' title='Go to Share settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
 <span class='info'>Share count: <?=count($shares)?> with <?=$cache_only?> cache only and <?=$encrypted?> encrypted</span>
 <?if ($group):?>
 <select name="enter_share" size="1" onchange="changeMode(this.value)">
@@ -385,7 +404,9 @@ if (!count($shares)) echo "<tr><td></td><td colspan='4' class='none'>No shares p
 ?></tbody>
 <?endif;?>
 <tbody class='split'><tr><td colspan='6'></td></tr></tbody>
-<thead><tr><td></td><td colspan='4'>Users<i class='fa blue-text chevron mt0' id='users_view' onclick='toggleChevron("users_view",3)'></i><span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
+<thead><tr><td></td><td colspan='4'>Users<i class='fa fa-fw chevron mt0' id='users_view' onclick='toggleChevron("users_view",3)'></i>
+<a href='/Users' title='Go to User settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='info'>User count: <?=count($users)?> with <?=$nopass?> unprotected</span>
 </td><td></td></tr><tr id='users_view_on'><td></td><td>Name</td><td>Description</td><td>Write</td><td>Read</td><td></td></tr></thead>
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb user user1'><?
@@ -453,12 +474,15 @@ foreach ($users as $user) {
 </table>
 
 <table class='share_status dashboard box2'>
-<thead><tr><td></td><td colspan='5'>Parity<i class='fa blue-text chevron mt0' id='parity_view' onclick='toggleChevron("parity_view",0)'></i><span class='info title'></span></td><td></td></tr></thead>
+<thead><tr><td></td><td colspan='5'>Parity<i class='fa fa-fw chevron mt0' id='parity_view' onclick='toggleChevron("parity_view",0)'></i>
+<a href='/Dashboard/Scheduler' title='Go to scheduler settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='info title'></span></td><td></td></tr></thead>
 <tbody class='parity_view'>
 <tr><td></td><td colspan='5' id='parity'></td><td></td></tr>
 <tr><td></td><td colspan='5' id='program'></td><td></td></tr>
 </tbody>
-<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> (stopped)<?endif;?><i class='fa blue-text chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
+<thead><tr><td></td><td colspan='5' class='next'>Array<?if (!$started):?> (stopped)<?endif;?><i class='fa fa-fw chevron mt0' id='array_view' onclick='toggleChevron("array_view",0)'></i>
+<a href='/Dashboard/Device?name=disk1' title='Go to disk settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
 <?if ($started):?><span class='info'><?=my_scale($array_used*1024,$unit)." $unit"?> used of <?=my_scale($array_size*1024,$unit,-1,-1)." $unit"?> (<?=$array_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr class='my_view'><td></td><td id='array_info' colspan='5'></td><td></td></tr>
@@ -466,7 +490,8 @@ foreach ($users as $user) {
 </thead>
 <tbody class='array_view' id='array_list'></tbody>
 <?if ($cache_pool):?>
-<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> (stopped)<?endif;?><i class='fa blue-text chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
+<thead><tr><td></td><td colspan='5' class='next'>Cache<?if (!$started):?> (stopped)<?endif;?><i class='fa fa-fw chevron mt0' id='cache_view' onclick='toggleChevron("cache_view",0)'></i>
+<a href='/Dashboard/Device?name=cache' title='Go to cache settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
 <?if ($started):?><span class='info'><?=my_scale($cache_used*1024,$unit)." $unit"?> used of <?=my_scale($cache_size*1024,$unit,-1,-1)." $unit"?> (<?=$cache_percent?> %)</span><?endif;?>
 </td><td></td></tr>
 <tr class='my_view'><td></td><td id='cache_info' colspan='5'></td><td></td></tr>
@@ -475,7 +500,7 @@ foreach ($users as $user) {
 <tbody class='cache_view' id='cache_list'></tbody>
 <?endif;?>
 <?if ($devs):?>
-<thead><tr><td></td><td colspan='5' class='next'>Unassigned<i class='fa blue-text chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
+<thead><tr><td></td><td colspan='5' class='next'>Unassigned<i class='fa fa-fw chevron mt0' id='extra_view' onclick='toggleChevron("extra_view",0)'></i><span class='info'></span></td><td></td></tr>
 <tr class='my_view'><td></td><td id='extra_info' colspan='5'></td><td></td></tr>
 <tr id='extra_view_on'><td></td><td>Device</td><td>Status</td><td>Temp</td><td>SMART</td><td>Utilization</td><td></td></tr>
 </thead>
