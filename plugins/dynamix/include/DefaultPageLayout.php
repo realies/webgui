@@ -506,14 +506,15 @@ watchdog.on('message', function(data) {
   } else {
     status = "<span class='orange strong'><i class='fa fa-pause-circle'></i> Array "+state+"</span>";
   }
-  if (ini['mdResync']>0) {
+  if (ini['mdResyncPos']>0) {
     var action;
     if (ini['mdResyncAction'].indexOf("recon")>=0) action = "Parity-Sync / Data-Rebuild";
     else if (ini['mdResyncAction'].indexOf("clear")>=0) action = "Clearing";
     else if (ini['mdResyncAction']=="check") action = "Read-Check";
     else if (ini['mdResyncAction'].indexOf("check")>=0) action = "Parity-Check";
-    action += " "+(ini['mdResyncPos']/(ini['mdResync']/100+1)).toFixed(1)+" %";
+    action += " "+(ini['mdResyncPos']/(ini['mdResyncSize']/100+1)).toFixed(1)+" %";
     status += "&bullet;<span class='orange strong'>"+action.replace('.','<?=$display['number'][0]?>')+"</span>";
+    if (ini['mdResync']==0) status += "(Paused)";
   }
   if (progress) status += "&bullet;<span class='blue strong'>"+progress+"</span>";
   $('#statusbar').html(status);
