@@ -25,7 +25,8 @@ $DockerTemplates = new DockerTemplates();
 foreach ($argv as $arg) {
   switch ($arg) {
   case '-v'   : $DockerTemplates->verbose = true; break;
-  case 'check': $check = true; break;}
+  case 'check': $check = true; break;
+  case 'nonotify': $nonotify = true; break;}
 }
 
 if (!isset($check)) {
@@ -50,8 +51,9 @@ if (!isset($check)) {
       $updateStatus = (is_file($dockerManPaths['update-status'])) ? json_decode(file_get_contents($dockerManPaths['update-status']), TRUE) : [];
       $new = str_replace('sha256:', '', $updateStatus[$image]['remote']);
       $new = substr($new, 0, 4).'..'.substr($new, -4, 4);
-
-      exec("$notify -e ".escapeshellarg("Docker - $name [$new]")." -s ".escapeshellarg("Notice [$server] - Docker update $new")." -d ".escapeshellarg("A new version of $name is available")." -i ".escapeshellarg("normal $output")." -x");
+      if ( ! isset($nonotify) ) {
+        exec("$notify -e ".escapeshellarg("Docker - $name [$new]")." -s ".escapeshellarg("Notice [$server] - Docker update $new")." -d ".escapeshellarg("A new version of $name is available")." -i ".escapeshellarg("normal $output")." -x");
+      }
     }
   }
 }
