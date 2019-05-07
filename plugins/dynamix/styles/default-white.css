@@ -196,6 +196,7 @@ table.share_status.dashboard.box1 tr.last>td{padding-bottom:20px}
 table.share_status.dashboard.box1 td i[class^="icon-"]{font-size:32px;vertical-align:top}
 table.share_status.dashboard.box1 td i[class^="fa "]{font-size:1rem;vertical-align:super}
 table.share_status.dashboard.box1 td span.header{font-size:1.1rem!important;text-transform:uppercase;letter-spacing:1px}
+table.share_status.dashboard.box1 td span.text{white-space:normal}
 table.share_status.dashboard.box2 thead tr:nth-child(3)>td{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
 table.share_status.dashboard.box2 tr td:nth-child(2){min-width:20%}
 table.share_status.dashboard.box2 tr td:nth-child(3){min-width:18%}
