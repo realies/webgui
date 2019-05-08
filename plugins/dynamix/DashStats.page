@@ -193,9 +193,9 @@ form[name=boot]{display:none}
 </td><td></td></tr></thead>
 <tbody class='sys_view'>
 <tr><td></td><td colspan='2' class='top'>
-<span class='header'>Description</span><br>
+<span class='header'>Description</span><span class='text'><br>
 <?=$var['COMMENT']?><br>
-<?=$var['SYS_MODEL']?><br><br>
+<?=$var['SYS_MODEL']?><br><br></span>
 <span class='header'>Registration</span><br>Unraid OS <b><em><?=$var['regTy']?></em></b><br><br>
 <span class='header'>Uptime</span><br><span class='uptime'></span>
 </td><td class='top center'>
