@@ -19,19 +19,18 @@ $file  = $_GET['file'] ?? $_POST['file'];
 $model = $_POST['model'] ?? false;
 $exist = file_exists("$boot/$file");
 
-if ($_POST['mode']=='set') {
+switch ($_POST['mode']) {
+case 'set':
   if ($model) file_put_contents("$boot/$file",$model); elseif ($exist) unlink("$boot/$file");
   exit;
-}
-if ($_POST['mode']=='get') {
+case 'get':
   if ($exist) echo file_get_contents("$boot/$file");
   exit;
-}
-if ($_POST['mode']=='file') {
+case 'file':
   $name = 'case-model.png';
   file_put_contents("$boot/$file",$name);
   file_put_contents("$boot/$name",base64_decode(str_replace('data:image/png;base64,','',$_POST['data'])));
-  symlink("$boot/$name","/usr/local/emhttp/webGui/images/$name");
+  symlink("$boot/$name","$docroot/webGui/images/$name");
   exit;
 }
 $casemodel = $exist ? file_get_contents("$boot/$file") : '';
