@@ -170,8 +170,12 @@ table.share_status.dashboard tr>td:first-child{width:3.5%}
 table.share_status.dashboard tr>td:last-child{width:3.5%}
 table.share_status.dashboard tr>td{padding-left:4px}
 table.share_status.dashboard td.top{vertical-align:middle}
+table.share_status.dashboard td.vpn{font-size:1.1rem;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
+table.share_status.dashboard td.left{font-size:1.1rem;padding-left:24px}
+table.share_status.dashboard td.right{font-size:1.1rem;text-align:right;padding-right:10px}
 table.share_status.dashboard td i[class^="icon-"]{font-size:1.6rem;margin-right:8px}
 table.share_status.dashboard td i[class^="icon-u-"]{font-size:inherit}
+table.share_status.dashboard td i.vpn{font-size:inherit!important;cursor:pointer}
 table.share_status.dashboard td span[class^="fa "]{font-size:1.6rem;margin-right:8px}
 table.share_status.dashboard td i#mycase[class^="case-"]{font-size:128px}
 table.share_status.dashboard td i#mycase[class^="fa "]{font-size:96px}
