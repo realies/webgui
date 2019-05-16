@@ -200,7 +200,7 @@ form[name=boot]{display:none}
 
 <?$N=0?>
 <div class='frame'>
-<table id='box1' class='share_status dashboard box1'>
+<table id='db-box1' class='share_status dashboard box1'>
 <thead sort='<?=$N?>' class='sortable'><tr><td></td><td colspan='2' class='next'><?=$var['NAME']?><td class='next'>
 <?if ($parity||$mover||$btrfs):?>
 <span class='fa fa-fw fa-<?=$started?'stop':'play'?>-circle busy' title='<?=$started?'Stop':'Start'?> the array'></span>
@@ -364,7 +364,7 @@ foreach ($ports as $port) {
 </table>
 
 <?$N=0?>
-<table id='box3' class='share_status dashboard box3'>
+<table id='db-box3' class='share_status dashboard box3'>
 <?if ($display['dashapps']!='none'):?>
 <?if ($dockerd && ($display['dashapps']=='icons' || $display['dashapps']=='docker')):?>
 <thead sort='<?=$N?>' class='sortable'><tr><td></td><td colspan='4' class='next'>Docker Containers<i class='fa fa-fw chevron mt0' id='docker_view' onclick='toggleChevron("docker_view",0)'></i>
@@ -521,7 +521,7 @@ foreach ($users as $user) {
 </table>
 
 <?$N=0?>
-<table id='box2' class='share_status dashboard box2'>
+<table id='db-box2' class='share_status dashboard box2'>
 <thead sort='<?=$N?>' class='sortable'><tr><td></td><td colspan='5' class='next'>Parity<i class='fa fa-fw chevron mt0' id='parity_view' onclick='toggleChevron("parity_view",0)'></i>
 <a href='/Dashboard/Scheduler' title='Go to scheduler settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
 <span class='info title'></span></td><td></td></tr></thead>
@@ -1034,7 +1034,7 @@ $(function() {
     for (var x = 0; x < index.length-1; x++) {
       if (index[x+1]-index[x]!=1) {sorted=false; break;}
     }
-    sorted ? $.removeCookie('db-'+table.prop('id')) : $.cookie('db-'+table.prop('id'),index.join(';'),{expires:3650});
+    sorted ? $.removeCookie(table.prop('id')) : $.cookie(table.prop('id'),index.join(';'),{expires:3650});
   }});
 <?if ($group):?>
   dropdown('enter_share');
@@ -1080,8 +1080,8 @@ $(function() {
   portMenu();
   loadlist(true);
   cpuload.start();
-  sortTable($('table#box1'),$.cookie('db-box1'));
-  sortTable($('table#box2'),$.cookie('db-box2'));
-  sortTable($('table#box3'),$.cookie('db-box3'));
+  sortTable($('#db-box1'),$.cookie('db-box1'));
+  sortTable($('#db-box2'),$.cookie('db-box2'));
+  sortTable($('#db-box3'),$.cookie('db-box3'));
 });
 </script>
