@@ -229,7 +229,7 @@ form[name=boot]{display:none}
 <img id='mycase' src='<?=autov("/webGui/images/$mycase")?>'><br>
 <?endif;?>
 <?else:?>
-<i id='mycase' class='fa fa-wpexplorer'></i><br>
+<i id='mycase' class='fa fa-hdd-o'></i><br>
 <?endif;?>
 </span>
 <input type='button' value='Edit' onclick='openBox("/webGui/include/SelectCase.php?file=<?=$myfile?>&csrf=<?=$var['csrf_token']?>","Select Case Model",600,980,true,"setCase");return false'>
@@ -625,8 +625,9 @@ function loadlist(init) {
 }
 function setCase() {
   $.post('/webGui/include/SelectCase.php',{mode:'get',file:'<?=$myfile?>'},function(model){
-    if (!model) return;
-    if (model.indexOf('.png')<0) {
+    if (!model) {
+      $('#casing').html("<i id='mycase' class='fa fa-hdd-o'></i><br>");
+    } else if (model.indexOf('.png')<0) {
       $('#casing').html("<i id='mycase' class='case-"+model+"'></i><br>");
     } else {
       var now = new Date();

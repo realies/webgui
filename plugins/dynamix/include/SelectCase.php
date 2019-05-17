@@ -21,10 +21,13 @@ $exist = file_exists("$boot/$file");
 
 switch ($_POST['mode']) {
 case 'set':
-  if ($model) file_put_contents("$boot/$file",$model); elseif ($exist) unlink("$boot/$file");
+  file_put_contents("$boot/$file",$model);
   exit;
 case 'get':
   if ($exist) echo file_get_contents("$boot/$file");
+  exit;
+case 'del':
+  if ($exist) unlink("$boot/$file");
   exit;
 case 'file':
   $name = 'case-model.png';
@@ -57,6 +60,9 @@ function importFile(file) {
 function setCase(model) {
   $.post('/webGui/include/SelectCase.php',{mode:'set',file:'<?=$file?>',model:model,csrf_token:'<?=$_GET['csrf']?>'},function(){top.Shadowbox.close();});
 }
+function deleteCase() {
+  $.post('/webGui/include/SelectCase.php',{mode:'del',file:'<?=$file?>',csrf_token:'<?=$_GET['csrf']?>'},function(){top.Shadowbox.close();});
+}
 </script>
 <div style='margin:20px 0 0 50px'>
 <?
@@ -70,7 +76,8 @@ foreach ($models as $model) {
   echo "<a style='text-decoration:none;cursor:pointer;$select' onclick='setCase(\"$name\")'><div class='case-list' id='$name'><i class='$model'></i><div class='case-name'>$name</div></div></a>";
 }
 $select = substr($casemodel,-4)=='.png' ? 'color:#e68a00' : '';
-echo "<a style='text-decoration:none;cursor:pointer;$select' onclick='$(\"input#file\").trigger(\"click\")'><div class='case-list' id='Custom'><i class='fa fa-file-image-o'></i><div class='case-name'>custom image</div></div></a>";
 ?>
+<a style='text-decoration:none;cursor:pointer;<?=$select?>' onclick='$("input#file").trigger("click")'><div class='case-list' id='Custom'><i class='fa fa-file-image-o'></i><div class='case-name'>custom image</div></div></a>
+<a style='text-decoration:none;cursor:pointer' onclick='deleteCase()'><div class='case-list'><i class='fa fa-hdd-o'></i><div class='case-name'>default image</div></div></a>
 <input type='file' id='file' accept='.png' onchange='importFile(this.files[0])' style='display:none'>
 </div>
