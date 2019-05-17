@@ -168,6 +168,9 @@ if ($low) $memory_maximum = pow(2,ceil(log($memory_installed)/log(2)));
 div.frame{float:left;margin:14px 0 36px 0}
 div#iframe-popup{display:none;-webkit-overflow-scrolling:touch}
 div.last{padding-bottom:12px}
+div.left{float:left;width:66%;margin-top:-12px}
+div.right{float:right;margin:-12px 20px 0 0;text-align:center}
+span.ctrl{float:right;margin-right:10px}
 span.outer{float:left}
 span.inner{width:134px}
 span.ups{width:124px;display:inline-block}
@@ -179,7 +182,6 @@ span[id^=cpu],span[id^=sys]{width:0}
 i.heat{margin-left:8px}
 a.cpu_close,span.hand{cursor:pointer}
 tr.hidden{display:none;height:0;lineheight:0}
-td.top.center{text-align:center}
 td.none{text-align:center;padding-top:12px}
 input[value=Edit]{margin:12px 0 0 0;padding:5px 10px}
 .sys_view,.mb_view,.cpu_view,.cpu_open,.mem_view,.port_view,.ups_view,.fan_view,.docker_view,.vm_view,.parity_view,.array_view,.cache_view,.my_view,.extra_view{display:none}
@@ -201,7 +203,10 @@ form[name=boot]{display:none}
 <?$N=0?>
 <div class='frame'>
 <table id='db-box1' class='share_status dashboard box1'>
-<thead sort='<?=$N?>' class='sortable'><tr><td></td><td colspan='2' class='next'><?=$var['NAME']?><td class='next'>
+<thead sort='<?=$N?>' class='sortable'><tr><td></td><td colspan='3' class='next'><?=$var['NAME']?>
+<i class='fa fa-fw chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i>
+<a href='/Dashboard/Identification' title='Go to identification settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='ctrl'>
 <?if ($parity||$mover||$btrfs):?>
 <span class='fa fa-fw fa-<?=$started?'stop':'play'?>-circle busy' title='<?=$started?'Stop':'Start'?> the array'></span>
 <?else:?>
@@ -209,18 +214,18 @@ form[name=boot]{display:none}
 <?endif;?>
 <?if($sleep):?><span class='fa fa-fw fa-moon-o hand' title='Put system to sleep' onclick='Sleep()'></span><?endif;?>
 <span class='fa fa-fw fa-refresh hand' title='Reboot the system' onclick='Reboot()'></span>
-<span class='fa fa-fw fa-power-off hand' title='Shutdown the system' onclick='Shutdown()'></span>
-<i class='fa fa-fw chevron mt0' id='sys_view' onclick='toggleChevron("sys_view",0)'></i>
-<a href='/Dashboard/Identification' title='Go to identification settings'><i class='fa fa-fw fa-cog chevron mt0'></i></a>
+<span class='fa fa-fw fa-power-off hand' title='Shutdown the system' onclick='Shutdown()'></span></span>
 </td><td></td></tr></thead>
 <tbody sort='<?=$N?>' class='sys_view sortable'>
-<tr><td></td><td colspan='2' class='top'>
+<tr><td></td><td colspan='3'>
+<div class='left'>
 <span class='header'>Description</span><span class='text'><br>
 <?=$var['COMMENT']?><br>
 <?=$var['SYS_MODEL']?><br><br></span>
 <span class='header'>Registration</span><br>Unraid OS <b><em><?=$var['regTy']?></em></b><br><br>
 <span class='header'>Uptime</span><br><span class='uptime'></span>
-</td><td class='top center'>
+</div>
+<div class='right'>
 <span id='casing'>
 <?if ($mycase):?>
 <?if (substr($mycase,-4)!='.png'):?>
@@ -233,6 +238,7 @@ form[name=boot]{display:none}
 <?endif;?>
 </span>
 <input type='button' value='Edit' onclick='openBox("/webGui/include/SelectCase.php?file=<?=$myfile?>&csrf=<?=$var['csrf_token']?>","Select Case Model",600,980,true,"setCase");return false'>
+</div>
 </td><td></td></tr>
 </tbody>
 <thead sort='<?=++$N?>'><tr class='hidden'><td></td><td colspan='3'></td><td></td></tr></thead>
