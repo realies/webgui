@@ -1013,7 +1013,7 @@ var sortableHelper = function(e,ui){
   return ui;
 };
 $(function() {
-  $('table').sortable({helper:sortableHelper,items:'.sortable',axis:'y',containment:'parent',delay:100,opacity:0.5,
+  $('table').sortable({helper:sortableHelper,items:'.sortable',cursor:'move',axis:'y',containment:'parent',delay:100,opacity:0.5,zIndex:9999,
   update:function(e,ui){
     var table = ui.item.parent();
     var index = [], prev = -1;
