@@ -53,7 +53,7 @@ textarea{resize:none}
 #header .text-right{float:right;text-align:left;padding-left:5px}
 #header .text-right a{color:#606e7f}
 #header .text-right #licensetype{font-weight:bold;font-style:italic;margin-right:4px}
-#menu{position:fixed;top:0;left:0;bottom:12px;width:65px;padding:0;margin:0;background-color:#383a34;z-index:100;box-shadow:inset -1px 0 2px #edeaef}
+#menu{position:fixed;top:0;left:0;bottom:12px;width:65px;padding:0;margin:0;background-color:#383a34;z-index:2000;box-shadow:inset -1px 0 2px #edeaef}
 #nav-block{position:absolute;top:0;bottom:12px;color:#ffdfb9;white-space:nowrap;float:left;overflow-y:scroll;direction:rtl;letter-spacing:1.8px}
 #nav-block::-webkit-scrollbar{display:none}
 #nav-block{-ms-overflow-style:none;overflow:-moz-scrollbars-none}
