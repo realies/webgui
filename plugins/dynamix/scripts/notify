@@ -27,6 +27,7 @@ notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"
   use -i to specify the severity
   use -m to specify a message (long description)
   use -x to create a single notification ticket
+  use -r to specify recipients and not use default
   use -t to force send email only (for testing)
   all options are optional
 
@@ -46,11 +47,14 @@ EOT;
   return 1;
 }
 
-function generate_email($event, $subject, $description, $importance, $message) {
+function generate_email($event, $subject, $description, $importance, $message, $recipients) {
   global $ssmtp;
 
   $rcpt = $ssmtp['RcptTo'];
-  $to = implode(',', explode(' ', trim($rcpt)));
+  if (!$recipients)
+    $to = implode(',', explode(' ', trim($rcpt)));
+  else
+    $to = $recipients;
   if (empty($to)) return;
 
   $subj = "{$ssmtp['Subject']}$subject";
@@ -160,7 +164,7 @@ case 'add':
   $mailtest = false;
   $overrule = false;
 
-  $options = getopt("e:s:d:i:m:xt");
+  $options = getopt("e:s:d:i:m:r:xt");
   foreach ($options as $option => $value) {
     switch ($option) {
      case 'e':
@@ -179,6 +183,9 @@ case 'add':
      case 'm':
       $message = $value;
       break;
+     case 'r':
+      $recipients = $value;
+      break;
      case 'x':
       $ticket = 'ticket';
       break;
@@ -193,7 +200,7 @@ case 'add':
   $entity = $overrule===false ? $notify[$importance] : $overrule;
   if (!$mailtest) file_put_contents($archive,"timestamp=$timestamp\nevent=$event\nsubject=$subject\ndescription=$description\nimportance=$importance\n".($message ? "message=".str_replace('\n','<br>',$message)."\n" : ""));
   if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp=$timestamp\nevent=$event\nsubject=$subject\ndescription=$description\nimportance=$importance\n");
-  if (($entity & 2)==2 || $mailtest)  if (!generate_email($event, $subject, str_replace('<br>','. ',$description), $importance, $message)) exit(1);
+  if (($entity & 2)==2 || $mailtest)  if (!generate_email($event, $subject, str_replace('<br>','. ',$description), $importance, $message, $recipients)) exit(1);
   if (($entity & 4)==4 && !$mailtest) { if (is_array($agents)) {foreach ($agents as $agent) {exec("TIMESTAMP='$timestamp' EVENT=".escapeshellarg($event)." SUBJECT=".escapeshellarg($subject)." DESCRIPTION=".escapeshellarg($description)." IMPORTANCE=".escapeshellarg($importance)." CONTENT=".escapeshellarg($message)." ".$agent);};}};
   break;
 
