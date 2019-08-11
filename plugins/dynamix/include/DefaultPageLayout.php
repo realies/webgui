@@ -37,6 +37,7 @@ $themes2 = in_array($theme,['gray','azure']);
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
+
 <?if ($display['font']):?>
 html{font-size:<?=$display['font']?>}
 <?endif;?>
@@ -210,18 +211,94 @@ function showFooter(data, id) {
 function showNotice(data) {
   $('#user-notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='/Plugins'>$1</a>"));
 }
-function showUpgrade(data) {
-  if ($.cookie('os_upgrade')==null)
-    $('.upgrade_notice').html(data.replace(/<a>(.*)<\/a>/,"<a href='#' onclick='hideUpgrade();openUpgrade()'>$1</a>")+"<i class='fa fa-close' title='Close' onclick='hideUpgrade(true)'></i>").show();
+
+
+	var bannerWarnings = [];
+	var currentBannerWarning = 0;
+	var bannerWarningInterval = false;
+	var osUpgradeWarning = false;
+
+
+	function addBannerWarning(text,warning=true,noDismiss=false) {
+		var cookieText = text.replace(/[^a-z0-9]/gi,'');
+		if ( $.cookie(cookieText) == "true" ) { return false; }
+		
+		if ( warning ) {
+			text = "<i class='fa fa-warning' style='float:initial;'></i> "+text;
+		}
+		var arrayEntry = bannerWarnings.push("placeholder") - 1;
+		if ( ! noDismiss ) {
+			text = text + "<a class='bannerDismiss' onclick='dismissBannerWarning("+arrayEntry+",&quot;"+cookieText+"&quot;)'></a>";
+		}
+		console.log(text);
+		bannerWarnings[arrayEntry] = text;
+		if ( ! bannerWarningInterval ) {
+			showBannerWarnings();
+ 			bannerWarningInterval = setInterval(function() {
+				showBannerWarnings()
+			},10000);
+		}
+		return arrayEntry;
+	}
+
+	function dismissBannerWarning(entry,cookieText) {
+		$.cookie(cookieText,"true");
+		removeBannerWarning(entry);
+	}
+
+	function removeBannerWarning(entry) {
+		bannerWarnings[entry] = false;
+		showBannerWarnings();
+	}
+
+	function bannerFilterArray(array) {
+		var newArray = [];
+		array.filter(function(value,index,arr) {
+			if ( value ) {
+				newArray.push(value);
+			}
+		});	
+		return newArray;
+	}
+
+	function showBannerWarnings() {
+		var allWarnings = bannerFilterArray(Object.values(bannerWarnings));
+		if ( allWarnings.length == 0 ) {
+			$(".upgrade_notice").hide();
+			clearInterval(bannerWarningInterval);
+			bannerWarningInterval = false;
+			return;
+		}
+		if ( currentBannerWarning >= allWarnings.length ) {
+			currentBannerWarning = 0;
+		}
+		$(".upgrade_notice").show().html(allWarnings[currentBannerWarning]);
+		currentBannerWarning++;
+	}
+
+
+
+
+
+
+
+
+function showUpgrade(data,noDismiss=false) {
+  if ($.cookie('os_upgrade')==null) {
+		if (osUpgradeWarning)
+			removeBannerWarning(osUpgradeWarning);
+		osUpgradeWarning = addBannerWarning(data.replace(/<a>(.*)<\/a>/,"<a href='#' onclick='hideUpgrade();openUpgrade();'>$1</a>"),false,noDismiss);
+	}
 }
 function hideUpgrade(set) {
-  $('.upgrade_notice').hide();
+  removeBannerWarning(osUpgradeWarning);
   if (set)
     $.cookie('os_upgrade','true',{path:'/'});
   else
     $.removeCookie('os_upgrade',{path:'/'});
 }
 function openUpgrade() {
+	console.log("got here");
   swal({title:'Update Unraid OS',text:'Do you want to update to the new version?',type:'warning',showCancelButton:true},function(){
     openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=update&arg2=unRAIDServer.plg','Update Unraid OS',600,900,true);
   });
@@ -561,13 +638,14 @@ $(function() {
 <?else:?>
 <?$readme = @file_get_contents("$docroot/plugins/unRAIDServer/README.md",false,null,0,20);?>
 <?if (strpos($readme,'REBOOT REQUIRED')!==false):?>
-  showUpgrade('<b>Reboot required</b> to apply Unraid OS update');
+  showUpgrade('<b>Reboot required</b> to apply Unraid OS update',true);
 <?elseif (strpos($readme,'DOWNGRADE')!==false):?>
-  showUpgrade('<b>Reboot required</b> to downgrade Unraid OS');
+  showUpgrade('<b>Reboot required</b> to downgrade Unraid OS',true);
 <?elseif ($version = plugin_update_available('unRAIDServer',true)):?>
   showUpgrade('Unraid OS v<?=$version?> is available. <a>Update Now</a>');
-<?elseif (!$notify['system']):?>
-  $('.upgrade_notice').html('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.').show();
+<?endif;?>
+<?if (!$notify['system']):?>
+  addBannerWarning('System notifications are <b>disabled</b>. Click <a href="/Settings/Notifications" style="cursor:pointer">here</a> to change notification settings.',true,true);
 <?endif;?>
 <?endif;?>
 <?if ($notify['display']):?>

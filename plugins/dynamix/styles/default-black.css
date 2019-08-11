@@ -2,7 +2,7 @@ html{font-family:clear-sans;font-size:62.5%;height:100%}
 body{font-size:1.3rem;color:#f2f2f2;background-color:#1c1b1b;padding:0;margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 @media (max-width:1280px){#template{min-width:1260px;max-width:1260px;margin:0}}
 @media (min-width:1281px){#template{min-width:1260px;margin:0 10px}}
-@media (min-width:1921px){#template{min-width:1260px;max-width:1920px;margin:0 auto}}
+@media (min-width:1921px){#template{min-width:1260px;margin:0 auto}}
 img{border:none;text-decoration:none;vertical-align:middle}
 p{text-align:justify}
 p.centered{text-align:left}
@@ -314,3 +314,7 @@ span.checkmark{position:absolute;top:0;left:6px;height:14px;width:14px;backgroun
 label.checkbox:hover input ~ .checkmark{background-color:#5b5b5b}
 label.checkbox input:checked ~ .checkmark{background-color:#ff8c2f}
 label.checkbox input:disabled ~ .checkmark{opacity:0.5}
+a.bannerDismiss {float:right;cursor:pointer;text-decoration:none;margin-right:1rem;}
+.bannerDismiss::before {content:"\e92f";font-family:Unraid;color:#e68a00;}
+a.bannerInfo {cursor:pointer;text-decoration:none;}
+.bannerInfo::before {content:"\f05a";font-family:fontAwesome;color:#e68a00;}
