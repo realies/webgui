@@ -220,59 +220,59 @@ var bannerWarningInterval = false;
 var osUpgradeWarning = false;
 
 function addBannerWarning(text,warning=true,noDismiss=false) {
-	var cookieText = text.replace(/[^a-z0-9]/gi,'');
-	if ( $.cookie(cookieText) == "true" ) { return false; }
-	
-	if ( warning ) {
-		text = "<i class='fa fa-warning' style='float:initial;'></i> "+text;
-	}
-	var arrayEntry = bannerWarnings.push("placeholder") - 1;
-	if ( ! noDismiss ) {
-		text = text + "<a class='bannerDismiss' onclick='dismissBannerWarning("+arrayEntry+",&quot;"+cookieText+"&quot;)'></a>";
-	}
-	bannerWarnings[arrayEntry] = text;
-	if ( ! bannerWarningInterval ) {
-		showBannerWarnings();
-		bannerWarningInterval = setInterval(function() {
-			showBannerWarnings()
-		},10000);
-	}
-	return arrayEntry;
+  var cookieText = text.replace(/[^a-z0-9]/gi,'');
+  if ( $.cookie(cookieText) == "true" ) { return false; }
+  
+  if ( warning ) {
+    text = "<i class='fa fa-warning' style='float:initial;'></i> "+text;
+  }
+  var arrayEntry = bannerWarnings.push("placeholder") - 1;
+  if ( ! noDismiss ) {
+    text = text + "<a class='bannerDismiss' onclick='dismissBannerWarning("+arrayEntry+",&quot;"+cookieText+"&quot;)'></a>";
+  }
+  bannerWarnings[arrayEntry] = text;
+  if ( ! bannerWarningInterval ) {
+    showBannerWarnings();
+    bannerWarningInterval = setInterval(function() {
+      showBannerWarnings()
+    },10000);
+  }
+  return arrayEntry;
 }
 
 function dismissBannerWarning(entry,cookieText) {
-	$.cookie(cookieText,"true");
-	removeBannerWarning(entry);
+  $.cookie(cookieText,"true");
+  removeBannerWarning(entry);
 }
 
 function removeBannerWarning(entry) {
-	bannerWarnings[entry] = false;
-	showBannerWarnings();
+  bannerWarnings[entry] = false;
+  showBannerWarnings();
 }
 
 function bannerFilterArray(array) {
-	var newArray = [];
-	array.filter(function(value,index,arr) {
-		if ( value ) {
-			newArray.push(value);
-		}
-	}); 
-	return newArray;
+  var newArray = [];
+  array.filter(function(value,index,arr) {
+    if ( value ) {
+      newArray.push(value);
+    }
+  }); 
+  return newArray;
 }
 
 function showBannerWarnings() {
-	var allWarnings = bannerFilterArray(Object.values(bannerWarnings));
-	if ( allWarnings.length == 0 ) {
-		$(".upgrade_notice").hide();
-		clearInterval(bannerWarningInterval);
-		bannerWarningInterval = false;
-		return;
-	}
-	if ( currentBannerWarning >= allWarnings.length ) {
-		currentBannerWarning = 0;
-	}
-	$(".upgrade_notice").show().html(allWarnings[currentBannerWarning]);
-	currentBannerWarning++;
+  var allWarnings = bannerFilterArray(Object.values(bannerWarnings));
+  if ( allWarnings.length == 0 ) {
+    $(".upgrade_notice").hide();
+    clearInterval(bannerWarningInterval);
+    bannerWarningInterval = false;
+    return;
+  }
+  if ( currentBannerWarning >= allWarnings.length ) {
+    currentBannerWarning = 0;
+  }
+  $(".upgrade_notice").show().html(allWarnings[currentBannerWarning]);
+  currentBannerWarning++;
 }
 
 function showUpgrade(data,noDismiss=false) {
