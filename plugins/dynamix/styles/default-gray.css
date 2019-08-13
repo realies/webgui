@@ -335,3 +335,7 @@ span.checkmark{position:absolute;top:0;left:6px;height:14px;width:14px;backgroun
 label.checkbox:hover input ~ .checkmark{background-color:#5b5d5b}
 label.checkbox input:checked ~ .checkmark{background-color:#ff8c2f}
 label.checkbox input:disabled ~ .checkmark{opacity:0.5}
+a.bannerDismiss {float:right;cursor:pointer;text-decoration:none;margin-right:1rem;}
+.bannerDismiss::before {content:"\e92f";font-family:Unraid;color:#e68a00;}
+a.bannerInfo {cursor:pointer;text-decoration:none;}
+.bannerInfo::before {content:"\f05a";font-family:fontAwesome;color:#e68a00;}
