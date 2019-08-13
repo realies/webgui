@@ -20,8 +20,9 @@ $members = parse_ini_file('state/network.ini',true);
 $build = false;
 $template = "$docroot/webGui/EthX.page";
 $ini = '/var/local/emhttp/network.ini';
-$validIP4 = '((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
-$validIP6 = '((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}';
+
+$validIP4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}";
+$validIP6 = "(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(:|([0-9a-fA-F]{1,4}:)+):(([0-9a-fA-F]{1,4}:)*[0-9a-fA-F]{1,4})?)";
 $width    = [166,300];
 
 // get available ethernet ports (excluding eth0)
@@ -35,6 +36,12 @@ function locked($source,$port) {
     if ($value['BRIDGING']=='yes' && in_array($port,explode(',',$value['BRNICS']))) return $value['BRNAME'].' '.$member;
   }
   return false;
+}
+function vlanID($cfg) {
+  return array_filter($cfg,function($key){return strpos($key,'VLANID:')===0;},ARRAY_FILTER_USE_KEY);
+}
+function index($key) {
+  return filter_var($key,FILTER_SANITIZE_NUMBER_INT);
 }
 // remove non-existing ethernet ports
 foreach (glob("$docroot/webGui/Eth[1-9]*.page",GLOB_NOSORT) as $port) {
@@ -65,22 +72,23 @@ $service .= exec("pgrep docker") ? ($service ? ' and ' : '').'Docker service' : 
 $no_eth0 = exec("ip link show eth0|grep -Pom1 '(NO-CARRIER|state DOWN)'");
 
 // get VLAN interfaces
-$vlan_id = 'VLANID:';
-$vlan_eth0 = [0];
-if (isset($eth0)) foreach ($eth0 as $key => $val) if (strpos($key,$vlan_id)===0) $vlan_eth0[] = substr($key,strlen($vlan_id));
+$vlan_eth0 = $sort_eth0 = [];
+if (isset($eth0)) foreach (vlanID($eth0) as $key => $val) {$vlan_eth0[] = index($key); $sort_eth0[] = (int)$val;}
+array_multisort($sort_eth0,$vlan_eth0);
 ?>
 <style>
-span.pin i{font-size:2rem;cursor:pointer}
 span.red{color:#E68A00}
 span.blue{color:#00529B}
 span.green{color:#4F8A10}
+span.vshift{margin-top:0!important}
 input.gap{margin-right:6px}
-div.shade-white{background-color:#ededed}
-div.shade-black{background-color:#212121}
-div.shade-azure{background-color:#edeaef}
-div.shade-gray{background-color:#121510}
-select.slim{min-width:45px}
-input.slim{width:32px}
+input.form{font-size:1rem;padding:5px 10px;margin-left:10px}
+div.shade-white{background-color:#ededed;margin-top:10px;padding:8px 0 3px 0}
+div.shade-black{background-color:#212121;margin-top:10px;padding:8px 0 3px 0}
+div.shade-azure{background-color:#edeaef;margin-top:10px;padding:8px 0 3px 0}
+div.shade-gray{background-color:#121510;margin-top:10px;padding:8px 0 3px 0}
+select.slim{min-width:47px;margin-left:4px}
+input.slim{width:32px;margin-left:8px}
 </style>
 <script>
 <?if ($build):?>
@@ -332,14 +340,13 @@ function addVLAN(port) {
   while ($('#index-'+port+'-'+index).length) index++;
   var template = $($('<div/>').loadTemplate($('#network-template-'+port)).html().replace(/INDEX/g,index));
   var element = $('[id^="index-'+port+'-"]').last();
-  $(element).after(template);
+  $(element).after(template).find('input').first().trigger('change');
   selectProtocol($('form[name="'+$(element).parent().attr('name')+'"]'),port,index);
-  $(element).find('input').first().trigger('change');
 }
 function removeVLAN(element) {
   var id = $(element).attr('id').split('-');
   $(element).remove();
-  $('#index-'+id[1]+'-0').find('select').first().trigger('change');
+  $('#view-'+id[1]).find('select').first().trigger('change');
 }
 function disableForm(form) {
   $(form).find('input,select').not('input[value="Done"]').prop('disabled',true);
@@ -366,6 +373,18 @@ function portcheck_eth0() {
 function portToggle(port,cmd) {
   $.post('/webGui/include/PortToggle.php',{port:port,cmd:cmd},function(){refresh();});
 }
+function viewToggle(eth,vlan) {
+  var tag = vlan ? '#tag-'+eth+'-'+vlan : '#tag-'+eth;
+  var view = vlan ? '#view-'+eth+'-'+vlan : '#view-'+eth;
+  if ($(view).is(':visible')) {
+    $(tag).removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    $.cookie(view,'hide',{expires:3650});
+  } else {
+    $(tag).removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    $.removeCookie(view);
+  }
+  $(view).toggle('slow');
+}
 var watchDHCP = new NchanSubscriber('/sub/dhcp', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
 watchDHCP.on('message', function(data) {
   data = data.split(' ');
@@ -380,7 +399,7 @@ watchDHCP.on('message', function(data) {
   }
 });
 $(function() {
-  var ctrl = "<span id='wait_eth0' class='status red' style='display:none;font-size:1.2rem;font-style:italic'>Please wait... configuring interfaces</span>";
+  var ctrl = "<span id='wait_eth0' class='status vshift red-text' style='display:none;font-size:1.2rem;font-style:italic'><i class='fa fa-spinner fa-spin'></i> Please wait... configuring interface</span>";
   var form = document.eth0_settings;
 <?if ($tabbed && !$service):?>
   $('#tab1').bind({click:function(){
@@ -388,6 +407,10 @@ $(function() {
     $('#bridge-eth0').dropdownchecklist('destroy').dropdownchecklist({emptyText:'None', width:<?=$width[0]?>});
   }});
 <?endif;?>
+  if (!$.cookie('#view-eth0')) {$('#view-eth0').show(); $('#tag-eth0').removeClass('fa-chevron-down').addClass('fa-chevron-up');}
+<?foreach ($vlan_eth0 as $i):?>
+  if (!$.cookie('#view-eth0-<?=$i?>')) {$('#view-eth0-<?=$i?>').show(); $('#tag-eth0-<?=$i?>').removeClass('fa-chevron-down').addClass('fa-chevron-up');}
+<?endforeach;?>
   $('#bond-eth0').dropdownchecklist({emptyText:'None', width:<?=$width[0]?>});
   $('#bridge-eth0').dropdownchecklist({emptyText:'None', width:<?=$width[0]?>});
   checkBondingSettings(form,0,'eth0');
@@ -408,9 +431,9 @@ $(function() {
   checkDNSSettings6(form);
 <?endif;?>
 <?if ($tabbed):?>
-  $('.tabs').append(ctrl);
+  $('.tabs').append(ctrl.replace('vshift',''));
 <?else:?>
-  $('div[id=title]').append(ctrl);
+  $('div#title').eq(0).find('span.left').append(ctrl);
 <?endif;?>
   portcheck_eth0();
   watchDHCP.start();
@@ -427,11 +450,15 @@ $(function() {
 <input type="hidden" name="BRNAME" value="br0">
 <input type="hidden" name="BRSTP" value="no">
 <input type="hidden" name="BRFD" value="0">
-<?foreach ($vlan_eth0 as $i):?>
-<div id="index-eth0-<?=$i?>" markdown="1">
-<?if ($i==0):?>
+Interface description:
+: <span class="status vshift"><i id="tag-eth0" class="fa fa-fw fa-chevron-down" style="cursor:pointer" onclick="viewToggle('eth0')"></i></span>
+  <input type="text" name="DESCRIPTION:0" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:0"])?>" onchange="exitCode(this.form,true)">
+
+> Use this optional field to provide addditional information about the purpose of the connection.
+
+<div markdown="1" id="view-eth0" style="display:none">
 MAC address:
-: <span class='big'><?=strtoupper(exec("ip link show eth0|grep -Pom1 'ether \K\S+'"))?></span>
+: <?=strtoupper(exec("ip link show eth0|grep -Pom1 'ether \K\S+'"))?>
 
 > This is the hardware address of the interface.
 > When tagging is enabled all VLANs on this interface will share the same hardware address.
@@ -446,7 +473,7 @@ Enable bonding:
 > This can be used to improve the connection redundancy and/or throughput of the system.
 > Different bonding modes are supported (see below), but some modes require proper switch support.
 
-<div id="bond-members-eth0" style="display:none" markdown="1">
+<div markdown="1" id="bond-members-eth0" style="display:none">
 Bonding mode:
 : <select name="BONDING_MODE" size="1" onchange="checkBondingSettings(this.form,-1,'eth0')">
   <?=mk_option($eth0['BONDING_MODE'], "0", "balance-rr (0)");?>
@@ -516,7 +543,7 @@ Enable bridging:
 > Bridging is a feature which creates a virtual bridge and allows VMs to communicate directly with the physical Ethernet port.
 > Both bonding and bridging can be combined to let VMs communicate over a *bonded* interface.
 
-<div id="bridge-members-eth0" style="display:none" markdown="1">
+<div markdown="1" id="bridge-members-eth0" style="display:none">
 Bridging members of br0:
 : <select id="bridge-eth0" name="BRNICS" size="1" multiple="multiple" style="display:none">
   <?=mk_option($eth0['BRNICS'],'eth0','eth0','selected disabled')?>
@@ -528,23 +555,21 @@ Bridging members of br0:
 > Select which interfaces are member of the *bridged* interface. By default eth0 is a member, while other interfaces are optional.
 
 </div>
-Interface description:
-: <input type="text" name="DESCRIPTION:<?=$i?>" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:$i"])?>" onchange="exitCode(this.form,true)">
-
-> Use this optional field to provide addditional information about the purpose of the connection.
-
 Network protocol:
-: <select name="PROTOCOL:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
-  <?=mk_option($eth0["PROTOCOL:$i"], 'ipv4', 'IPv4 only');?>
-  <?=mk_option($eth0["PROTOCOL:$i"], 'ipv6', 'IPv6 only');?>
-  <?=mk_option($eth0["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
+: <select name="PROTOCOL:0" size="1" onchange="selectProtocol(this.form,'eth0',0)">
+  <?=mk_option($eth0["PROTOCOL:0"], 'ipv4', 'IPv4 only');?>
+  <?=mk_option($eth0["PROTOCOL:0"], 'ipv6', 'IPv6 only');?>
+  <?=mk_option($eth0["PROTOCOL:0"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-<div class="ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+> Select which protocol(s) are used. By default IPv4 only is used.<br>
+> When both IPv4 and IPv6 is selected, each protocol can be configured independently.
+
+<div markdown="1" class="ipv4-eth0-0" style="display:none">
 IPv4 address assignment:
-: <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
-  <?=mk_option($eth0["USE_DHCP:$i"], 'yes', 'Automatic');?>
-  <?=mk_option($eth0["USE_DHCP:$i"], 'no', 'Static');?>
+: <select name="USE_DHCP:0" size="1" onchange="selectProtocol(this.form,'eth0',0)">
+  <?=mk_option($eth0["USE_DHCP:0"], 'yes', 'Automatic');?>
+  <?=mk_option($eth0["USE_DHCP:0"], 'no', 'Static');?>
   </select>
 
 > The following settings are possible:
@@ -553,32 +578,32 @@ IPv4 address assignment:
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
-<div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv4-eth0-0" style="display:none">
 IPv4 address:
-: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
-  <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.192.0", "18");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.224.0", "19");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.240.0", "20");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.248.0", "21");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.252.0", "22");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.254.0", "23");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.0", "24", $eth0["IPADDR:$i"]?"":"selected");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.128", "25");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.192", "26");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.224", "27");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.240", "28");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.248", "29");?>
-  <?=mk_option($eth0["NETMASK:$i"], "255.255.255.252", "30");?>
+: <input type="text" name="IPADDR:0" maxlength="15" value="<?=$eth0["IPADDR:0"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/<select name="NETMASK:0" size="1" class="slim">
+  <?=mk_option($eth0["NETMASK:0"], "255.0.0.0", "8");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.0.0", "16");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.128.0", "17");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.192.0", "18");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.224.0", "19");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.240.0", "20");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.248.0", "21");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.252.0", "22");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.254.0", "23");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.0", "24", $eth0["IPADDR:0"]?"":"selected");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.128", "25");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.192", "26");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.224", "27");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.240", "28");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.248", "29");?>
+  <?=mk_option($eth0["NETMASK:0"], "255.255.255.252", "30");?>
   </select>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address and mask of the system.
 
 IPv4 default gateway:
-: <input type="text" name="GATEWAY:<?=$i?>" maxlength="15" value="<?=$eth0["GATEWAY:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
-  <input type="text" name="METRIC:<?=$i?>" min="1" max="9999" value="<?=$eth0["METRIC:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
+: <input type="text" name="GATEWAY:0" maxlength="15" value="<?=$eth0["GATEWAY:0"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
+  <input type="text" name="METRIC:0" min="1" max="9999" value="<?=$eth0["METRIC:0"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
 
@@ -601,14 +626,14 @@ IPv4 DNS server:
 >
 > Note: for *Active Directory* you **must** ensure this is set to the IP address of your AD Domain server.
 
-<div id="dnsserver2" style="display:none" markdown="1">
+<div markdown="1" id="dnsserver2" style="display:none">
 IPv4 DNS server 2:
 : <input type="text" name="DNS_SERVER2" maxlength="15" value="<?=$eth0['DNS_SERVER2'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
 > This is the IPv4 DNS server to use when IPv4 DNS server 1 is down.
 
 </div>
-<div id="dnsserver3" style="display:none" markdown="1">
+<div markdown="1" id="dnsserver3" style="display:none">
 IPv4 DNS server 3:
 : <input type="text" name="DNS_SERVER3" maxlength="15" value="<?=$eth0['DNS_SERVER3'];?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
 
@@ -616,11 +641,11 @@ IPv4 DNS server 3:
 
 </div>
 </div>
-<div class="ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="ipv6-eth0-0" style="display:none">
 IPv6 address assignment:
-: <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
-  <?=mk_option($eth0["USE_DHCP6:$i"], 'yes', 'Automatic');?>
-  <?=mk_option($eth0["USE_DHCP6:$i"], 'no', 'Static');?>
+: <select name="USE_DHCP6:0" size="1" onchange="selectProtocol(this.form,'eth0',0)">
+  <?=mk_option($eth0["USE_DHCP6:0"], 'yes', 'Automatic');?>
+  <?=mk_option($eth0["USE_DHCP6:0"], 'no', 'Static');?>
   </select>
 
 > The following settings are possible:
@@ -629,28 +654,28 @@ IPv6 address assignment:
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface (only available for VLANs)
 
-<div class="more-ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv6-eth0-0" style="display:none">
 IPv6 address:
-: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
+: <input type="text" name="IPADDR6:0" maxlength="39" value="<?=$eth0["IPADDR6:0"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/<input type="number" name="NETMASK6:0" min="1" max="128" value="<?=$eth0["NETMASK6:0"]?>" class="slim">
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of the system.
 
 IPv6 default gateway:
-: <input type="text" name="GATEWAY6:<?=$i?>" maxlength="39" value="<?=$eth0["GATEWAY6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
-  <input type="text" name="METRIC6:<?=$i?>" min="1" max="9999" value="<?=$eth0["METRIC6:$i"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
+: <input type="text" name="GATEWAY6:0" maxlength="39" value="<?=$eth0["GATEWAY6:0"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
+  <input type="text" name="METRIC6:0" min="1" max="9999" value="<?=$eth0["METRIC6:0"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
 IPv6 privacy extensions:
-: <select name="PRIVACY6:<?=$i?>" size="1">
-  <?=mk_option($eth0["PRIVACY6:$i"], "0", "Disabled");?>
-  <?=mk_option($eth0["PRIVACY6:$i"], "2", "Enabled");?>
+: <select name="PRIVACY6:0" size="1">
+  <?=mk_option($eth0["PRIVACY6:0"], "0", "Disabled");?>
+  <?=mk_option($eth0["PRIVACY6:0"], "2", "Enabled");?>
   </select>
 
 > Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
 
 </div>
-<div id="dns6server1" style="display:none" markdown="1">
+<div markdown="1" id="dns6server1" style="display:none">
 IPv6 DNS server assignment:
 : <select name="DHCP6_KEEPRESOLV" size="1" onchange="checkDNSSettings6(this.form)">
   <?=mk_option($eth0['DHCP6_KEEPRESOLV'], "no", "Automatic");?>
@@ -666,14 +691,14 @@ IPv6 DNS server:
 > This is the primary IPv6 DNS server to use. Enter a IPv6 address.
 
 </div>
-<div id="dns6server2" style="display:none" markdown="1">
+<div markdown="1" id="dns6server2" style="display:none">
 IPv6 DNS server 2:
 : <input type="text" name="DNS6_SERVER2" maxlength="39" value="<?=$eth0['DNS6_SERVER2'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
 > This is the IPv6 DNS server to use when IPv6 DNS server 1 is down.
 
 </div>
-<div id="dns6server3" style="display:none" markdown="1">
+<div markdown="1" id="dns6server3" style="display:none">
 IPv6 DNS server 3:
 : <input type="text" name="DNS6_SERVER3" maxlength="39" value="<?=$eth0['DNS6_SERVER3'];?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
 
@@ -682,7 +707,7 @@ IPv6 DNS server 3:
 </div>
 </div>
 Desired MTU:
-: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow" placeholder="<?=exec("ip link show dev eth0|grep -Pom1 'mtu \K\d+'")?>">
+: <input type="number" name="MTU" min="68" max="9198" value="<?=$eth0['MTU']?>" class="narrow" placeholder="1500">
 
 > This is the MTU size to use on the physical Ethernet interface.
 > If left blank, the MTU will automatically be determined (by default 1500 bytes).
@@ -691,19 +716,29 @@ Enable VLANs:
 : <select name="TYPE" size="1" onchange="checkNetworkAccess(this.form,'eth0')">
   <?=mk_option($eth0['TYPE'], 'access', 'No');?>
   <?=mk_option($eth0['TYPE'], 'trunk', 'Yes');?>
-  </select><?if (!$service):?><span class="access-eth0 pin" style="display:none" onclick="addVLAN('eth0')"><i class="fa fa-plus-circle green"></i><em>add VLAN</em></span><?endif;?>
-<?else:?>
-<div class="access-eth0 shade-<?=$display['theme']?>" style="display:none" markdown="1">
-VLAN number:
-: <input type="number" name="VLANID:<?=$i?>" min="1" max="4095" value="<?=$eth0["VLANID:$i"]?>" class="narrow gap" required>
-  <?if (!$service):?><span class="pin" onclick="removeVLAN($('#index-eth0-<?=$i?>'))"><i class="fa fa-minus-circle red"></i><em>remove VLAN</em></span><?endif;?>
+  </select>
 
-> Give each VLAN a unique identifier. Numbers range from 1 to 4095.
+> By default no VLANs are configured.<br>
+> Enabling VLANs extends the number of logical connections over the same physical connection.
+>
+> Note: your router and switch must support VLANs too when this feature is used.
 
+</div>
+<div id='index-eth0-0'></div>
+<?foreach ($vlan_eth0 as $i):?>
+<div markdown="1" id="index-eth0-<?=$i?>" class="access-eth0 shade-<?=$display['theme']?>" style="display:none">
 Interface description:
-: <input type="text" name="DESCRIPTION:<?=$i?>" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:$i"])?>" onchange="exitCode(this.form,true)">
+: <span class="status vshift"><i id="tag-eth0-<?=$i?>" class="fa fa-fw fa-chevron-down" style="cursor:pointer" onclick="viewToggle('eth0','<?=$i?>')"></i></span>
+  <input type="text" name="DESCRIPTION:<?=$i?>" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:$i"])?>" onchange="exitCode(this.form,true)">
 
 > Use this optional field to provide addditional information about the purpose of the connection.
+
+<div markdown="1" id="view-eth0-<?=$i?>" style="display:none">
+VLAN number:
+: <input type="number" name="VLANID:<?=$i?>" min="1" max="4095" value="<?=$eth0["VLANID:$i"]?>" class="narrow gap" required>
+  <?if (!$service):?><input type="button" class="form" value="Delete VLAN" onclick="removeVLAN($('#index-eth0-<?=$i?>'))"><?endif;?>
+
+> Give each VLAN a unique identifier. Numbers range from 1 to 4095.
 
 Network protocol:
 : <select name="PROTOCOL:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
@@ -712,7 +747,10 @@ Network protocol:
   <?=mk_option($eth0["PROTOCOL:$i"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-<div class="ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+> Select which protocol(s) are used. By default IPv4 only is used.<br>
+> When both IPv4 and IPv6 is selected, each protocol can be configured independently.
+
+<div markdown="1" class="ipv4-eth0-<?=$i?>" style="display:none">
 IPv4 address assignment:
 : <select name="USE_DHCP:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
   <?=mk_option($eth0["USE_DHCP:$i"], 'yes', 'Automatic');?>
@@ -728,9 +766,9 @@ IPv4 address assignment:
 > *Static* - the IPv4 address is manually set for this interface<br>
 > *None* - no IPv4 address is assigned to the interface (only available for VLANs)
 
-<div class="more-ipv4-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv4-eth0-<?=$i?>" style="display:none">
 IPv4 address:
-: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:<?=$i?>" size="1" class="slim">
+: <input type="text" name="IPADDR:<?=$i?>" maxlength="15" value="<?=$eth0["IPADDR:$i"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/<select name="NETMASK:<?=$i?>" size="1" class="slim">
   <?=mk_option($eth0["NETMASK:$i"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:$i"], "255.255.128.0", "17");?>
@@ -759,7 +797,7 @@ IPv4 default gateway:
 
 </div>
 </div>
-<div class="ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="ipv6-eth0-<?=$i?>" style="display:none">
 IPv6 address assignment:
 : <select name="USE_DHCP6:<?=$i?>" size="1" onchange="selectProtocol(this.form,'eth0',<?=$i?>)">
   <?=mk_option($eth0["USE_DHCP6:$i"], 'yes', 'Automatic');?>
@@ -775,9 +813,9 @@ IPv6 address assignment:
 > *Static* - the IPv6 address is manually set for this interface<br>
 > *None* - no IPv6 address is assigned to the interface (only available for VLANs)
 
-<div class="more-ipv6-eth0-<?=$i?>" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv6-eth0-<?=$i?>" style="display:none">
 IPv6 address:
-: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
+: <input type="text" name="IPADDR6:<?=$i?>" maxlength="39" value="<?=$eth0["IPADDR6:$i"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/<input type="number" name="NETMASK6:<?=$i?>" min="1" max="128" value="<?=$eth0["NETMASK6:$i"]?>" class="slim">
 
 > Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address and prefix of the system.
 
@@ -798,22 +836,26 @@ IPv6 privacy extensions:
 </div>
 </div>
 </div>
-<?endif;?>
 </div>
 <?endforeach;?>
 
-<script type="text/html" id="network-template-eth0" markdown="1">
-<div id="index-eth0-INDEX" class="access-eth0 shade-<?=$display['theme']?>" markdown="1">
+&nbsp;
+: <input type="submit" value="Apply" onclick="$('#wait_eth0').show()" disabled><input type="button" value="Done" onclick="done()">
+<?if (!$service):?>
+<input type="button" class="access-eth0" value="Add VLAN" onclick="addVLAN('eth0')" style="display:none">
+<?else:?><?=$service?> must be <span class='strong big'>Stopped</span> to change (see [Settings](/Settings))<?endif;?>
+</form>
+
+<script markdown="1" type="text/html" id="network-template-eth0">
+<div markdown="1" id="index-eth0-INDEX" class="access-eth0 shade-<?=$display['theme']?>">
+Interface description:
+: <span class="status vshift"><i id="tag-eth0-INDEX" class="fa fa-fw fa-chevron-up" style="cursor:pointer" onclick="viewToggle('eth0','INDEX')"></i></span>
+  <input type="text" name="DESCRIPTION:INDEX" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:INDEX"])?>" onchange="exitCode(this.form,true)">
+
+<div markdown="1" id="view-eth0-INDEX">
 VLAN number:
 : <input type="number" name="VLANID:INDEX" min="1" max="4095" value="<?=$eth0["VLANID:INDEX"]?>" class="narrow gap" required>
-  <span class="pin" onclick="removeVLAN($('#index-eth0-INDEX'),false)"><i class="fa fa-minus-circle red"></i><em>remove VLAN</em></span>
-
-> Give each VLAN a unique identifier. Numbers range from 1 to 4095.
-
-Interface description:
-: <input type="text" name="DESCRIPTION:INDEX" maxlength="80" value="<?=htmlspecialchars($eth0["DESCRIPTION:INDEX"])?>" onchange="exitCode(this.form,true)">
-
-> Use this optional field to provide addditional information about the purpose of the connection.
+  <input type="button" class="form" value="Delete VLAN" onclick="removeVLAN($('#index-eth0-INDEX'))">
 
 Network protocol:
 : <select name="PROTOCOL:INDEX" size="1" onchange="selectProtocol(this.form,'eth0',INDEX)">
@@ -822,7 +864,7 @@ Network protocol:
   <?=mk_option($eth0["PROTOCOL:INDEX"], 'ipv4+ipv6', 'IPv4 + IPv6');?>
   </select>
 
-<div class="ipv4-eth0-INDEX" style="display:none" markdown="1">
+<div markdown="1" class="ipv4-eth0-INDEX" style="display:none">
 IPv4 address assignment:
 : <select name="USE_DHCP:INDEX" size="1" onchange="selectProtocol(this.form,'eth0',INDEX)">
   <?=mk_option($eth0["USE_DHCP:INDEX"], 'yes', 'Automatic');?>
@@ -830,15 +872,9 @@ IPv4 address assignment:
   <?=mk_option($eth0["USE_DHCP:INDEX"], '', 'None');?>
   </select>
 
-> The following settings are possible:
->
-> *Automatic* - the server will attempt to obtain a IPv4 address from the local DHCP server<br>
-> *Static* - the IPv4 address is manually set for this interface<br>
-> *None* - no IPv4 address is assigned to the interface (only available for VLANs)
-
-<div class="more-ipv4-eth0-INDEX" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv4-eth0-INDEX" style="display:none">
 IPv4 address:
-: <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$eth0["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/ <select name="NETMASK:INDEX" size="1" class="slim">
+: <input type="text" name="IPADDR:INDEX" maxlength="15" value="<?=$eth0["IPADDR:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">/<select name="NETMASK:INDEX" size="1" class="slim">
   <?=mk_option($eth0["NETMASK:INDEX"], "255.0.0.0", "8");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.0.0", "16");?>
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.128.0", "17");?>
@@ -857,17 +893,13 @@ IPv4 address:
   <?=mk_option($eth0["NETMASK:INDEX"], "255.255.255.252", "30");?>
   </select>
 
-> Greyed out when using automatic IP assignment or NONE assignment. Otherwise specify here the IPv4 address and mask of the system.
-
 IPv4 default gateway:
 : <input type="text" name="GATEWAY:INDEX" maxlength="15" value="<?=$eth0["GATEWAY:INDEX"]?>" class="narrow" pattern="<?=$validIP4?>" title="IPv4 address A.B.C.D">
   <input type="text" name="METRIC:INDEX" min="1" max="9999" value="<?=$eth0["METRIC:INDEX"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
 
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv4 address of your router.
-
 </div>
 </div>
-<div class="ipv6-eth0-INDEX" style="display:none" markdown="1">
+<div markdown="1" class="ipv6-eth0-INDEX" style="display:none">
 IPv6 address assignment:
 : <select name="USE_DHCP6:INDEX" size="1" onchange="selectProtocol(this.form,'eth0',INDEX)">
   <?=mk_option($eth0["USE_DHCP6:INDEX"], 'yes', 'Automatic');?>
@@ -875,23 +907,13 @@ IPv6 address assignment:
   <?=mk_option($eth0["USE_DHCP6:INDEX"], '', 'None');?>
   </select>
 
-> The following settings are possible:
->
-> *Automatic* - the server will attempt to obtain a IPv6 address from the local DHCP server or Router Advertisement (RA)<br>
-> *Static* - the IPv6 address is manually set for this interface<br>
-> *None* - no IPv6 address is assigned to the interface (only available for VLANs)
-
-<div class="more-ipv6-eth0-INDEX" style="display:none" markdown="1">
+<div markdown="1" class="more-ipv6-eth0-INDEX" style="display:none">
 IPv6 address:
-: <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$eth0["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/ <input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$eth0["NETMASK6:INDEX"]?>" class="slim">
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address and prefix of the system.
+: <input type="text" name="IPADDR6:INDEX" maxlength="39" value="<?=$eth0["IPADDR6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">/<input type="number" name="NETMASK6:INDEX" min="1" max="128" value="<?=$eth0["NETMASK6:INDEX"]?>" class="slim">
 
 IPv6 default gateway:
 : <input type="text" name="GATEWAY6:INDEX" maxlength="39" value="<?=$eth0["GATEWAY6:INDEX"]?>" pattern="<?=$validIP6?>" title="IPv6 address nnnn:xxxx::yyyy">
   <input type="text" name="METRIC6:INDEX" min="1" max="9999" value="<?=$eth0["METRIC6:INDEX"]?>" class="slim"><i class="fa fa-sort-numeric-asc"></i> <em>optional metric (lowest is preferred)</em>
-
-> Greyed out when using automatic IP assignment. Otherwise specify here the IPv6 address of your router.
 
 IPv6 privacy extensions:
 : <select name="PRIVACY6:INDEX" size="1">
@@ -899,13 +921,8 @@ IPv6 privacy extensions:
   <?=mk_option($eth0['PRIVACY6:INDEX'], "2", "Enabled");?>
   </select>
 
-> Enable or disable the generation of a random IPv6 interface identifier according to RFC4941. This is similar to the temporary IPv6 address generation on Windows machines.
-
+</div>
 </div>
 </div>
 </div>
 </script>
-
-&nbsp;
-: <input type="submit" value="Apply" onclick="$('#wait_eth0').show()" disabled><input type="button" value="Done" onclick="done()"><?=$service ? "$service must be <span class='strong big'>Stopped</span> to change (see Settings)" : ""?>
-</form>
