@@ -56,7 +56,7 @@ function vpn_peers($file) {
 $dockerd = pgrep('dockerd');
 $libvirtd = pgrep('libvirtd');
 $apcupsd = file_exists('/var/run/apcupsd.pid');
-$wireguard = is_executable('/usr/bin/wg');
+$wireguard = is_executable('/usr/bin/wg') && file_exists('/var/log/plugins/dynamix.wireguatd.plg');
 $started = $var['fsState']=='Started';
 $sleep = isset($display['sleep']);
 $cache_pool = $var['cacheSbNumDisks'];
