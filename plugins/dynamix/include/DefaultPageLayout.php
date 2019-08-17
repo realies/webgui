@@ -559,7 +559,7 @@ function parseINI(data){
 // unraid animated logo
 var unraid_logo = '<?readfile("$docroot/webGui/images/animated-logo.svg")?>';
 
-var watchdog = new NchanSubscriber('/sub/var', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
+var watchdog = new NchanSubscriber('/sub/var');
 watchdog.on('message', function(data) {
   var ini = parseINI(data);
   var state = ini['fsState'];
