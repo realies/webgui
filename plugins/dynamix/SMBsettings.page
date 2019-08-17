@@ -50,6 +50,39 @@ Enhanced macOS interoperability:
 > Finder browsing, and ability to export Time Machine shares.  This may cause some issues with Windows clients, however.
 > Please also refer to the [VFS_FRUIT MAN PAGE](https://www.mankier.com/8/vfs_fruit).
 
+Use NETBIOS [experimental]:
+: <select name="USE_NETBIOS" size="1" class="narrow">
+  <?=mk_option($var['USE_NETBIOS'], "no", "No")?>
+  <?=mk_option($var['USE_NETBIOS'], "yes", "Yes")?>
+  </select>
+
+> Select 'Yes' to enable NETBIOS.
+
+Use WSD [experimental]:
+: <select name="USE_WSD" size="1" class="narrow" onchange="checkWSDSettings()">
+  <?=mk_option($var['USE_WSD'], "no", "No")?>
+  <?=mk_option($var['USE_WSD'], "yes", "Yes")?>
+  </select>
+
+> Select 'Yes' to enable WSD (WS-Discovery).
+
+WSD options [experimental]:
+: <input type="text" name="WSD_OPT" maxlength="80" value="<?=htmlspecialchars($var['WSD_OPT'])?>">
+
+> WSD daemon options.
+
 &nbsp;
 : <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()"><?if ($var['fsState']=="Started"):?>Array must be <span class="strong big">Stopped</span> to change<?endif;?>
 </form>
+
+<script>
+function checkWSDSettings() {
+  form=document.SMBEnable;
+  if (form.USE_WSD.value=="yes") {
+    form.WSD_OPT.disabled=false;
+  } else {
+    form.WSD_OPT.disabled=true;
+  }
+}
+$(checkWSDSettings);
+</script>
