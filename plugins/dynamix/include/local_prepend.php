@@ -15,14 +15,15 @@
  * auto_prepend_file="/usr/local/emhttp/webGui/include/local_prepend.php"
  */
 function csrf_terminate($reason) {
-    shell_exec("logger error: {$_SERVER['REQUEST_URI']}: $reason csrf_token");
+    shell_exec("logger error: {$_SERVER['REQUEST_URI']}: $reason csrf_token " . json_encode($_POST));
+    error_log(print_r($_SERVER, true));
     exit;
 }
 putenv('PATH=.:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin');
 chdir('/usr/local/emhttp');
 setlocale(LC_ALL,'en_US.UTF-8');
 date_default_timezone_set(substr(readlink('/etc/localtime-copied-from'),20));
-if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['SCRIPT_NAME'] != '/auth_request.php' && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($var)) $var = parse_ini_file('state/var.ini');
     if (!isset($var['csrf_token'])) csrf_terminate("uninitialized");
     if (!isset($_POST['csrf_token'])) csrf_terminate("missing");
