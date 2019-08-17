@@ -15,8 +15,7 @@
  * auto_prepend_file="/usr/local/emhttp/webGui/include/local_prepend.php"
  */
 function csrf_terminate($reason) {
-    shell_exec("logger error: {$_SERVER['REQUEST_URI']}: $reason csrf_token " . json_encode($_POST));
-    error_log(print_r($_SERVER, true));
+    shell_exec("logger error: {$_SERVER['REQUEST_URI']}: $reason csrf_token");
     exit;
 }
 putenv('PATH=.:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin');
