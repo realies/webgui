@@ -108,6 +108,23 @@ Excluded disk(s):
 > **Note:** Each separate User Share also includes its own set of Included and Excluded
 > disks which represent a subset of the Included/Excluded disks defined here.
 
+Tunable (support Hard Links):
+: <select name="fuse_useino" size="1" <?=$disabled?>>
+  <?=mk_option($var['fuse_useino'], "no", "No")?>
+  <?=mk_option($var['fuse_useino'], "yes", "Yes")?>
+  </select>
+
+> If set to Yes then support the link() operation.
+>
+> If set to No then hard links are not supported.
+>
+> Notes:
+>
+> * Setting to Yes may cause problems for older media and dvd/bluray players accessing shares
+> using NFS.
+> * No matter how this is set, the **mover** will still properly handle any detected
+> hard links.
+
 Tunable (enable Direct IO):
 : <select name="fuse_directio" size="1" <?=$disabled?>>
   <?=mk_option($var['fuse_directio'], "auto", "Auto")?>
