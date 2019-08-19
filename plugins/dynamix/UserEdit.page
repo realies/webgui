@@ -3,8 +3,8 @@ Title="Edit User"
 Tag="user"
 ---
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -121,7 +121,7 @@ $(function(){
   });
 });
 </script>
-
+<div class="spinner fixed"></div>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="upload(<?=$name=="root" ? 'false' : 'this.confirmDelete.checked'?>)">
 <input type="hidden" name="userName" value="<?=htmlspecialchars($name)?>">
 User name:
@@ -164,3 +164,98 @@ Retype password:
 &nbsp;
 : <input type="submit" name="cmdUserEdit" value="Change" disabled><input type="button" value="Done" onclick="done('UserEdit')">
 </form>
+
+<?if ($name != 'root' && $var['shareSMBEnabled'] != 'no'):?>
+<script>
+var users = {};
+var security = {};
+var readList = {};
+var writeList = {};
+<?
+$rw = 'read-write';
+$ro = 'read-only';
+$no = 'no-access';
+foreach ($users as $user) {
+  $idx = $user['idx'];
+  if ($idx) echo "users[\"{$user['name']}\"]='$idx';\n";
+}
+foreach ($shares as $share => $data) {
+  echo "security[\"$share\"]=\"{$sec[$share]['security']}\";\n";
+  echo "readList[\"$share\"]=\"{$sec[$share]['readList']},\";\n";
+  echo "writeList[\"$share\"]=\"{$sec[$share]['writeList']},\";\n";
+}
+?>
+function updateAccess(form,data,n,i) {
+  var name = "<?=$name?>,";
+  if (data) {
+    if (n<i) {
+      $.post('/update.htm',data[n], function(){setTimeout(function(){updateAccess(form,data,++n,i);},1000);});
+    } else {
+      $('div.spinner').html(unraid_logo).hide();
+      $('input[value="Reset"]').val('Done').prop('disabled',false).prop('onclick',null).off('click').click(function(){done('UserEdit');});
+    }
+  } else {
+    var data = [];
+    var i = 0;
+    $(form).find('select').each(function(){
+      if ($(this).prop('id')) {
+        var share = decodeURI($(this).prop('id'));
+        var access = '';
+        data[i] = {};
+        data[i]['userAccess.0'] = '<?=$no?>';
+        for (var user in users) {
+          var idx = users[user];
+          switch (security[share]) {
+          case 'public':
+            access = '<?=$rw?>';
+            break;
+          case 'secure':
+            if (user+',' == name) access = $(this).val();
+            else access = writeList[share].indexOf(name)!==-1 ? '<?=$rw?>' : '<?=$ro?>';
+            break;
+          case 'private':
+            if (user+',' == name) access = $(this).val();
+            else access = writeList[share].indexOf(name)!==-1 ? '<?=$rw?>' : (readList[share].indexOf(name)!==-1 ? '<?=$ro?>' : '<?=$no?>');
+            break;
+          }
+          data[i]['userAccess.'+idx] = access;
+        }
+        data[i]['shareName'] = share;
+        data[i]['changeShareAccess'] = 'Apply';
+        i++;
+      }
+    });
+    $(form).find('input').prop('disabled',true);
+    $('div.spinner').html(unraid_logo).show();
+    updateAccess(form,data,0,i);
+  }
+}
+</script>
+<form markdown="1" method="POST">
+<?
+echo "<table class='share_status' style='margin-top:20px'>";
+echo "<thead><tr><td>Share</td><td>Security</td><td>User Access</td></tr></thead>";
+echo "<tbody>";
+foreach ($shares as $share => $data) {
+  if ($sec[$share]['export']=='-') continue;
+  $security = $sec[$share]['security'];
+  $read = in_array($name,explode(',',$sec[$share]['readList']));
+  $write = in_array($name,explode(',',$sec[$share]['writeList']));
+  switch ($security) {
+  case 'public' : $access = $rw; break;
+  case 'secure' : $access = $write ? $rw : $ro; break;
+  case 'private': $access = $write ? $rw : ($read ? $ro : $no); break;}
+  echo "<tr><td>$share</td><td>$security</td><td><select onchange='$(this).prop(\"id\",\"".rawurlencode($share)."\")'>";
+  echo mk_option($access,$rw,'Read/Write');
+  if ($security!='public') echo mk_option($access,$ro,'Read-only');
+  if ($security=='private') echo mk_option($access,$no,'No Access');
+  echo "</select></td></tr>";
+}
+echo "</tbody>";
+echo "</table>";
+?>
+
+&nbsp;
+: <input type="button" value="Apply" onclick="updateAccess(this.form)" disabled><input type="button" value="Done" onclick="done('UserEdit')">
+</form>
+<?endif;?>
