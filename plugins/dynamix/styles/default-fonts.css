@@ -7,15 +7,6 @@ src:url('clear-sans-italic.eot?20190313');src:url('clear-sans-italic.eot?2019031
 @font-face{font-family:clear-sans;font-weight:bold;font-style:italic;
 src:url('clear-sans-bold-italic.eot?20190313');src:url('clear-sans-bold-italic.eot?20190313?#iefix') format('embedded-opentype'),url('clear-sans-bold-italic.woff?20190313') format('woff'),url('clear-sans-bold-italic.ttf?20190313') format('truetype'),url('clear-sans-bold-italic.svg?20190313#clear-sans-bold-italic') format('svg')}
 
-@font-face{font-family:arimo;font-weight:normal;font-style:normal;
-src:url('arimo.eot?20190313');src:url('arimo.eot?20190313?#iefix') format('embedded-opentype'),url('arimo.woff?20190313') format('woff'),url('arimo.ttf?20190313') format('truetype'),url('arimo.svg?20190313#arimo') format('svg')}
-@font-face{font-family:arimo;font-weight:bold;font-style:normal;
-src:url('arimo-bold.eot?20190313');src:url('arimo-bold.eot?20190313?#iefix') format('embedded-opentype'),url('arimo-bold.woff?20190313') format('woff'),url('arimo-bold.ttf?20190313') format('truetype'),url('arimo-bold.svg?20190313#arimo-bold') format('svg')}
-@font-face{font-family:arimo;font-weight:normal;font-style:italic;
-src:url('arimo-italic.eot?20190313');src:url('arimo-italic.eot?20190313?#iefix') format('embedded-opentype'),url('arimo-italic.woff?20190313') format('woff'),url('arimo-italic.ttf?20190313') format('truetype'),url('arimo-italic.svg?20190313#arimo-italic') format('svg')}
-@font-face{font-family:arimo;font-weight:bold;font-style:italic;
-src:url('arimo-bold-italic.eot?20190313');src:url('arimo-bold-italic.eot?20190313?#iefix') format('embedded-opentype'),url('arimo-bold-italic.woff?20190313') format('woff'),url('arimo-bold-italic.ttf?20190313') format('truetype'),url('arimo-bold-italic.svg?20190313#arimo-bold-italic') format('svg')}
-
 @font-face{font-family:bitstream;font-weight:normal;font-style:normal;
 src:url('bitstream.eot?20190313');src:url('bitstream.eot?20190313?#iefix') format('embedded-opentype'),url('bitstream.woff?20190313') format('woff'),url('bitstream.ttf?20190313') format('truetype'),url('bitstream.svg?20190313#bitstream') format('svg')}
 
