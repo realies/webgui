@@ -37,6 +37,15 @@ case 'file':
 }
 $casemodel = $exist ? file_get_contents("$boot/$file") : '';
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Select Case Model</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="viewport" content="width=1440">
+<meta name="robots" content="noindex, nofollow">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-fonts.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-popup.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-cases.css")?>">
@@ -47,7 +56,7 @@ div.case-list i{width:auto;max-width:72px;height:72px;font-size:72px;}
 div.case-list i.fa{padding-top:16px;margin-bottom:-16px;max-width:48px;font-size:48px;}
 div.case-list:hover{color:#f0000c;transform:scale(1.4,1.4);-webkit-transform:scale(1.4,1.4)}
 div.case-list:hover .case-name{margin-top:-5px;font-size:1rem}
-div.case-name{margin-top:8px;font-family:clear-sans}
+div.case-name{margin-top:8px;font-family:clear-sans!important}
 </style>
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
 <script>
@@ -63,6 +72,8 @@ function deleteCase() {
   $.post('/webGui/include/SelectCase.php',{mode:'del',file:'<?=$file?>',csrf_token:'<?=$_GET['csrf']?>'},function(){top.Shadowbox.close();});
 }
 </script>
+</head>
+<body>
 <div style='margin:20px 0 0 50px'>
 <?
 $models = [];
@@ -71,8 +82,9 @@ foreach ($cases as $case) if (substr($case,0,6)=='.case-') $models[] = substr($c
 sort($models);
 foreach ($models as $model) {
   $name = substr($model,5);
+  $title = str_replace('3u-md1510','avs-10/4',$name);
   $select = $name==$casemodel ? 'color:#e68a00' : '';
-  echo "<a style='text-decoration:none;cursor:pointer;$select' onclick='setCase(\"$name\")'><div class='case-list' id='$name'><i class='$model'></i><div class='case-name'>$name</div></div></a>";
+  echo "<a style='text-decoration:none;cursor:pointer;$select' onclick='setCase(\"$name\")'><div class='case-list' id='$name'><i class='$model'></i><div class='case-name'>$title</div></div></a>";
 }
 $select = substr($casemodel,-4)=='.png' ? 'color:#e68a00' : '';
 ?>
@@ -80,3 +92,5 @@ $select = substr($casemodel,-4)=='.png' ? 'color:#e68a00' : '';
 <a style='text-decoration:none;cursor:pointer' onclick='deleteCase()'><div class='case-list'><i class='fa fa-hdd-o'></i><div class='case-name'>default image</div></div></a>
 <input type='file' id='file' accept='.png' onchange='importFile(this.files[0])' style='display:none'>
 </div>
+</body>
+</html>
