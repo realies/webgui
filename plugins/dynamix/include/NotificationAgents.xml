@@ -227,19 +227,25 @@
       ############
       {0}
       ############
-      STORED_TOKEN=$(< /boot/config/telegram/token) || "";
-      if [[ ! -f /boot/config/telegram/token || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
-        mkdir -p /boot/config/telegram;
-        echo $BOT_TOKEN > /boot/config/telegram/token;
+      LEGACY=/boot/config/telegram
+      TELEGRAM=/boot/config/plugins/dynamix/telegram
+      STORED_TOKEN=$(< $TELEGRAM/token) || "";
+
+      # move legacy folder (if existing)
+      [[ -d $LEGACY && ! -d $TELEGRAM ]] && mv $LEGACY $TELEGRAM
+
+      if [[ ! -f $TELEGRAM/token || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
+        mkdir -p $TELEGRAM;
+        echo $BOT_TOKEN > $TELEGRAM/token;
       fi
 
-      if [[ ! -f /boot/config/telegram/chatid || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
-        mkdir -p /boot/config/telegram;
+      if [[ ! -f $TELEGRAM/chatid || "$STORED_TOKEN" != "$BOT_TOKEN" ]]; then
+        mkdir -p $TELEGRAM;
         LASTCHATID=$(curl -s https://api.telegram.org/bot$BOT_TOKEN/getUpdates | jq ".result | last .message .chat .id");
-        [[ $LASTCHATID =~ ^[0-9]+$ ]] && echo $LASTCHATID > /boot/config/telegram/chatid || exit 1
+        [[ $LASTCHATID =~ ^[0-9]+$ ]] && echo $LASTCHATID > $TELEGRAM/chatid || exit 1
       fi
 
-      CHATID=$(< /boot/config/telegram/chatid);
+      CHATID=$(< $TELEGRAM/chatid);
       MESSAGE=$(echo -e "$(hostname): $TITLE\n$MESSAGE");
       curl -G -s "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$MESSAGE" 2>&1;
       ]]>
