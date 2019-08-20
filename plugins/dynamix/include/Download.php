@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,18 +17,19 @@ switch ($_POST['cmd']) {
 case 'save':
   if (is_file("$docroot/$file") && strpos(realpath("$docroot/$file"), $docroot.'/') !== 0) exit;
   $source = $_POST['source'];
-  if (pathinfo($source, PATHINFO_EXTENSION) == 'txt') {
-    exec("zip -qlj ".escapeshellarg("$docroot/$file")." ".escapeshellarg($source));
+  $opts = $_POST['opts'] ?? 'qlj';
+  if (in_array(pathinfo($source, PATHINFO_EXTENSION),['txt','conf','png'])) {
+    exec("zip -$opts ".escapeshellarg("$docroot/$file")." ".escapeshellarg($source));
   } else {
     $tmp = "/var/tmp/".basename($source).".txt";
     copy($source, $tmp);
-    exec("zip -qlj ".escapeshellarg("$docroot/$file")." ".escapeshellarg($tmp));
+    exec("zip -$opts ".escapeshellarg("$docroot/$file")." ".escapeshellarg($tmp));
     @unlink($tmp);
   }
   echo "/$file";
   break;
 case 'delete':
-  if (strpos(realpath("$docroot/$file"), $docroot.'/') === 0) @unlink("$docroot/$file");
+  if (strpos(realpath("$docroot/$file"), $docroot.'/')===0) @unlink("$docroot/$file");
   break;
 case 'diag':
   if (is_file("$docroot/$file") && strpos(realpath("$docroot/$file"), $docroot.'/') !== 0) exit;
@@ -43,5 +44,5 @@ case 'unlink':
 case 'backup':
   echo exec("$docroot/webGui/scripts/flash_backup");
   break;
-}  
+}
 ?>
