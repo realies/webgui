@@ -33,7 +33,6 @@ case 'file':
   $name = 'case-model.png';
   file_put_contents("$boot/$file",$name);
   file_put_contents("$boot/$name",base64_decode(str_replace('data:image/png;base64,','',$_POST['data'])));
-  symlink("$boot/$name","$docroot/webGui/images/$name");
   exit;
 }
 $casemodel = $exist ? file_get_contents("$boot/$file") : '';

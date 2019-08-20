@@ -141,7 +141,7 @@ function loadlist() {
 function sizes() {
   openBox('/plugins/dynamix.docker.manager/include/ContainerSize.php','Container Size',600,600);
 }
-var watchDocker = new NchanSubscriber('/sub/dockerload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
+var watchDocker = new NchanSubscriber('/sub/dockerload');
 watchDocker.on('message', function(data){
   data = data.split('\n');
   for (var i=0,row; row=data[i]; i++) {

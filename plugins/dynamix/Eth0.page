@@ -385,7 +385,7 @@ function viewToggle(eth,vlan) {
   }
   $(view).toggle('slow');
 }
-var watchDHCP = new NchanSubscriber('/sub/dhcp', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
+var watchDHCP = new NchanSubscriber('/sub/dhcp');
 watchDHCP.on('message', function(data) {
   data = data.split(' ');
   for (var i=0,row; row=data[i]; i++) {

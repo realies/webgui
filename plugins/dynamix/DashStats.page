@@ -231,10 +231,6 @@ form[name=boot]{display:none}
 <?if (substr($mycase,-4)!='.png'):?>
 <i id='mycase' class='case-<?=$mycase?>'></i><br>
 <?else:?>
-<?
-if ( ! is_link("/usr/local/emhttp/webGui/images/case-model.png") && is_file("/boot/config/plugins/dynamix/case-model.png") )
-  symlink("/boot/config/plugins/dynamix/case-model.png","/usr/local/emhttp/webGui/images/case-model.png");
-?>
 <img id='mycase' src='<?=autov("/webGui/images/$mycase")?>'><br>
 <?endif;?>
 <?else:?>
@@ -982,7 +978,7 @@ function sortTable(table,index) {
   }
 }
 
-var cpuload = new NchanSubscriber('/sub/cpuload', /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? {subscriber:'longpoll'} : {});
+var cpuload = new NchanSubscriber('/sub/cpuload');
 cpuload.on('message',function(data) {
 /*
 message should be something like: {"cpuload": {"cpu":[0,0],"cpu0":[0,0],"cpu1":[0,0],"cpu2":[0,0],"cpu3":[0,0]}}
