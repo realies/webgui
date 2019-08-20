@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  * Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
  *
  * This program is free software; you can redistribute it and/or
@@ -104,7 +104,7 @@ $agents_dir = "/boot/config/plugins/dynamix/notifications/agents";
 if (is_dir($agents_dir)) {
   $agents = [];
   foreach (array_diff(scandir($agents_dir), ['.','..']) as $p) {
-    if (is_executable("${agents_dir}/${p}")) $agents[] = "${agents_dir}/${p}";
+    if (file_exists("${agents_dir}/${p}")) $agents[] = "${agents_dir}/${p}";
   }
 } else {
   $agents = NULL;
@@ -201,7 +201,7 @@ case 'add':
   if (!$mailtest) file_put_contents($archive,"timestamp=$timestamp\nevent=$event\nsubject=$subject\ndescription=$description\nimportance=$importance\n".($message ? "message=".str_replace('\n','<br>',$message)."\n" : ""));
   if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp=$timestamp\nevent=$event\nsubject=$subject\ndescription=$description\nimportance=$importance\n");
   if (($entity & 2)==2 || $mailtest)  if (!generate_email($event, $subject, str_replace('<br>','. ',$description), $importance, $message, $recipients)) exit(1);
-  if (($entity & 4)==4 && !$mailtest) { if (is_array($agents)) {foreach ($agents as $agent) {exec("TIMESTAMP='$timestamp' EVENT=".escapeshellarg($event)." SUBJECT=".escapeshellarg($subject)." DESCRIPTION=".escapeshellarg($description)." IMPORTANCE=".escapeshellarg($importance)." CONTENT=".escapeshellarg($message)." ".$agent);};}};
+  if (($entity & 4)==4 && !$mailtest) { if (is_array($agents)) {foreach ($agents as $agent) {exec("TIMESTAMP='$timestamp' EVENT=".escapeshellarg($event)." SUBJECT=".escapeshellarg($subject)." DESCRIPTION=".escapeshellarg($description)." IMPORTANCE=".escapeshellarg($importance)." CONTENT=".escapeshellarg($message)." bash ".$agent);};}};
   break;
 
 case 'get':
