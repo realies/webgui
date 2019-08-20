@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -92,7 +92,9 @@ foreach ($shares as $name => $share) {
   echo "<td>".user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";
   echo "<td>".user_share_settings($var['shareAFPEnabled'], $sec_afp[$name])."</td>";
   $cmd="/webGui/scripts/share_size"."&arg1=".urlencode($name)."&arg2=ssz1";
+  $cache = ucfirst($share['useCache']);
   if (array_key_exists($name, $ssz1)) {
+    echo "<td>$cache</td>";
     echo "<td>".my_scale($ssz1[$name]['disk.total']*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";
@@ -107,12 +109,14 @@ foreach ($shares as $name => $share) {
       echo "<td></td>";
       echo "<td></td>";
       echo "<td></td>";
+      echo "<td></td>";
       echo "<td class='share-$row-1'>".my_scale($disksize*1024, $unit)." $unit</td>";
       echo "<td class='share-$row-2'>".my_scale($disks[$diskname]['fsFree']*1024, $unit)." $unit</td>";
       echo "<td><a href='/update.htm?cmd=$cmd&csrf_token={$var['csrf_token']}' target='progressFrame' title='Recompute...' onclick='$.cookie(\"ssz\",\"ssz\",{path:\"/\"});$(\".share-$row-1\").html(\"Please wait...\");$(\".share-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
       echo "</tr>";
     }
   } else {
+    echo "<td>$cache</td>";
     echo "<td><a href='/update.htm?cmd=$cmd&csrf_token={$var['csrf_token']}' target='progressFrame' onclick=\"$.cookie('ssz','ssz',{path:'/'});$(this).text('Please wait...')\">Compute...</a></td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";
@@ -120,5 +124,5 @@ foreach ($shares as $name => $share) {
   }
 }
 if ($row==0) {
-  echo "<tr><td colspan='8' style='text-align:center;padding-top:12px'><i class='fa fa-folder-open-o icon'></i>There are no exportable user shares</td></tr>";
+  echo "<tr><td colspan='9' style='text-align:center;padding-top:12px'><i class='fa fa-folder-open-o icon'></i>There are no exportable user shares</td></tr>";
 }
