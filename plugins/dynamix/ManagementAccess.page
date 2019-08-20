@@ -4,8 +4,8 @@ Icon="icon-key"
 Tag="expeditedssl"
 ---
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -47,7 +47,6 @@ $disabled_updatedns = $keyfile!==false && $isLEcert ? '' : 'disabled';
 $internalip = $eth0['IPADDR:0'];
 $tasks = find_tasks();
 ?>
-<style>input.trim{width:65px}</style>
 <script>
 function provisionSSL(button) {
   var oldlabel = $.trim($(button).text());
@@ -136,7 +135,7 @@ $(function(){
 <form markdown="1" name="SSLSettings" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="changePorts" value="apply">
 Start page:
-: <select name="START_PAGE" size="1" class="narrow">
+: <select name="START_PAGE" size="1">
 <?foreach ($tasks as $task) echo mk_option($var['START_PAGE']??'Main', $task, $task);?>
   </select>
 
@@ -155,7 +154,7 @@ Restrict access:
 -->
 
 Use TELNET:
-: <select name="USE_TELNET" size="1" class="narrow" onchange="updateTELNET(this.form)">
+: <select name="USE_TELNET" size="1" onchange="updateTELNET(this.form)">
   <?=mk_option($var['USE_TELNET'], "no", "No")?>
   <?=mk_option($var['USE_TELNET'], "yes", "Yes")?>
   </select>
@@ -164,12 +163,12 @@ Use TELNET:
 > and it is highly recommended to use SSH access instead and disable TELNET access.
 
 TELNET port:
-: <input type="number" name="PORTTELNET" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTTELNET']??23)?>">
+: <input type="number" name="PORTTELNET" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTTELNET']??23)?>">
 
 > Enter the TELNET port, default port is 23.
 
 Use SSH:
-: <select name="USE_SSH" size="1" class="narrow" onchange="updateSSH(this.form)">
+: <select name="USE_SSH" size="1" onchange="updateSSH(this.form)">
   <?=mk_option($var['USE_SSH'], "no", "No")?>
   <?=mk_option($var['USE_SSH'], "yes", "Yes")?>
   </select>
@@ -178,12 +177,12 @@ Use SSH:
 > if not yet existing, and stored on the flash device in the folder */config/ssh*.
 
 SSH port:
-: <input type="number" name="PORTSSH" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSH']??22)?>">
+: <input type="number" name="PORTSSH" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSH']??22)?>">
 
 > Enter the SSH port, default port is 22.
 
 Use SSL/TLS:
-: <select name="USE_SSL" size="1" class="narrow" onchange="updateSSL(this.form)">
+: <select name="USE_SSL" size="1" onchange="updateSSL(this.form)">
   <?=mk_option($var['USE_SSL'], "auto", "Auto")?>
   <?=mk_option($var['USE_SSL'], "no", "No")?>
   <?=mk_option($var['USE_SSL'], "yes", "Yes")?>
@@ -232,17 +231,17 @@ Use SSL/TLS:
 > `config/ssl/certs/<server-name>_unraid_bundle.pem` => No
 
 HTTP port:
-: <input type="number" name="PORT" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORT']??80)?>">
+: <input type="number" name="PORT" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORT']??80)?>">
 
 > Enter the HTTP port, default port is 80.
 
 HTTPS port:
-: <input type="number" name="PORTSSL" class="trim" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSL']??443)?>">
+: <input type="number" name="PORTSSL" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSL']??443)?>">
 
 > Enter the HTTPS port, default port is 443.
 
 Local TLD:
-: <input type="text" name="LOCAL_TLD" value="<?=htmlspecialchars($var['LOCAL_TLD'])?>" class="narrow">
+: <input type="text" name="LOCAL_TLD" class="narrow" value="<?=htmlspecialchars($var['LOCAL_TLD'])?>">
 
 > Enter your local Top Level Domain. May be blank.
 
