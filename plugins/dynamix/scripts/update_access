@@ -15,6 +15,7 @@ fi
 [[ -z $USE_TELNET ]] && USE_TELNET=yes
 [[ -z $PORTTELNET ]] && PORTTELNET=23
 [[ -z $USE_SSH ]] && USE_SSH=yes
+[[ -z $USE_UPNP ]] && USE_UPNP=yes
 [[ -z $PORTSSH ]] && PORTSSH=22
 
 # get management IP addresses
@@ -55,6 +56,13 @@ if [[ $USE_SSH == yes ]]; then
   fi
 else
   /etc/rc.d/rc.sshd stop >/dev/null
+fi
+
+# enable/disable UPnP function
+if [[ $USE_UPNP == yes ]]; then
+  [[ ! -x /usr/bin/upnpc ]] && chmod +x /usr/bin/upnpc
+else
+  [[ -x /usr/bin/upnpc ]] && chmod -x /usr/bin/upnpc
 fi
 
 # update TELNET listening port
