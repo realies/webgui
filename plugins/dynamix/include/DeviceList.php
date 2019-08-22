@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -50,7 +50,7 @@ function device_info(&$disk,$online) {
   if ($var['fsState']=='Started' && $type!='Flash' && strpos($disk['status'],'_NP')===false) {
     $ctrl = "<i id='dev-$name' class='fa fa-sort-$action fa-fw' style='cursor:pointer' title='Click to spin $action device' onclick=\"toggle_state('$type','$name','$action')\"></i>";
   } else
-    $ctrl = '';
+    $ctrl = "<i class='fa fa-sort-down fa-fw' style='visibility:hidden'></i>";
   switch ($disk['color']) {
     case 'green-on': $orb = 'circle'; $color = 'green'; $help = 'Normal operation, device is active'; break;
     case 'green-blink': $orb = 'circle'; $color = 'grey'; $help = 'Device is in standby mode (spun-down)'; break;
