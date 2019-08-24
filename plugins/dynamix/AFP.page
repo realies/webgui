@@ -15,7 +15,7 @@ Tag="apple"
  * all copies or substantial portions of the Software.
  */
 ?>
-<div class='notice' style='margin-bottom:24px'>Please note that AFP is decrecated and users are encouraged to use SMB instead</div>
+<div class='notice' style='margin-bottom:24px'>Please note that AFP is <strong>deprecated</strong>, please use SMB instead.</div>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 Enable AFP:

@@ -54,8 +54,8 @@ function icon($name) {
   if (file_exists($icon)) return $icon;
   $icon = "plugins/$name/$image.png";
   if (file_exists($icon)) return $icon;
-// last resort - plugin manager icon
-  return "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
+// last resort - default plugin icon
+  return "webGui/images/plg.png";
 }
 function mk_options($select,$value) {
   return "<option value='$value'".($select==$value?" selected":"").">".ucfirst($value)."</option>";
