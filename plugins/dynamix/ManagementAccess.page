@@ -1,4 +1,5 @@
 Menu="OtherSettings"
+Type="xmenu"
 Title="Management Access"
 Icon="icon-key"
 Tag="expeditedssl"
