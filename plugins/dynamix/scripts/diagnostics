@@ -174,9 +174,6 @@ if (file_exists($docker)) {
     exert("truncate -s '<$max' ".escapeshellarg("$log.txt"));
   }
 }
-// copy docker XML config files
-exert("cp /boot/config/plugins/dockerMan/templates-user/my-*.xml ".escapeshellarg("/$diag/xml")." 2>/dev/null");
-
 // create SMART reports (suppress errors)
 $disks = file_exists("$get/disks.ini") ? parse_ini_file("$get/disks.ini", true) : [];
 include_once "$docroot/webGui/include/CustomMerge.php";
@@ -235,6 +232,8 @@ if ($qemu) {
 }
 // copy VM XML config files
 exert("cp /etc/libvirt/qemu/*.xml ".escapeshellarg("/$diag/xml")." 2>/dev/null");
+// anonymize MAC OSK info
+exert("sed -ri 's/(,osk=).+/\\1.../' ".escapeshellarg("/$diag/xml/*.xml")." 2>/dev/null");
 
 // copy syslog information (anonymize if applicable)
 $max = 2*1024*1024; //=2MB
