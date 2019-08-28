@@ -191,7 +191,6 @@ Use UPnP:
 > Enable (default) or disable the UPnP function on the server. This function allows automatic forwarding of ports on the router, only applicable when UPnP is enabled on the router itself.
 
 <?endif;?>
-
 Use SSL/TLS:
 : <select name="USE_SSL" size="1" onchange="updateSSL(this.form)">
   <?=mk_option($var['USE_SSL'], "auto", "Auto")?>
