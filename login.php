@@ -328,6 +328,14 @@ $theme_dark = in_array($display['theme'],['black','gray']);
                         <input name="csrf_token" type="hidden" value="<?=$var['csrf_token']?>">
                     </p>
                     <? if ($error) echo '<p class="error">'.$error.'</p>'; ?>
+                    <script type="text/javascript">
+                        document.cookie = "cookietest=1";
+                        cookieEnabled = document.cookie.indexOf("cookietest=")!=-1;
+                        document.cookie = "cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT";
+                        if (!cookieEnabled) {
+                            document.write('<p class="error">Browser cookie support required for login</p>');
+                        }
+                    </script>
                     <p>
                         <button type="submit" class="button button--small">Login</button>
                     </p>
