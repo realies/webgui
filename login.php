@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_URI'] == '/logout') {
         list($user,$pwhash) = explode(':', trim($strCredentials));
 
         // Validate credentials
-        if (($_POST['username'] == $user || ($_POST['username'] == 'admin' && $user == 'root')) && password_verify($_POST['password'], $pwhash)) {
+        if ($_POST['username'] == $user && password_verify($_POST['password'], $pwhash)) {
             // Successful login
             $_SESSION["unraid_login"] = time();
             $_SESSION["unraid_user"] = $_POST['username'];
@@ -323,7 +323,7 @@ $theme_dark = in_array($display['theme'],['black','gray']);
 
                 <form action="/login" method="POST">
                     <p>
-                        <input name="username" type="text" placeholder="Username" value="admin" required>
+                        <input name="username" type="text" placeholder="Username" required>
                         <input name="password" type="password" placeholder="Password" required>
                         <input name="csrf_token" type="hidden" value="<?=$var['csrf_token']?>">
                     </p>
