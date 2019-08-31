@@ -1,0 +1,2 @@
+#!/bin/bash
+[[ -f /root/keyfile && -z $(grep -Po '^keyfile="\K[^"]+' /boot/config/plugins/dynamix/dynamix.cfg 2>/dev/null) ]] && rm -f /root/keyfile

@@ -4,8 +4,8 @@ Icon="icon-disks"
 Tag="icon-disk"
 ---
 <?PHP
-/* Copyright 2005-2018, Lime Technology
- * Copyright 2012-2018, Bergware International.
+/* Copyright 2005-2019, Lime Technology
+ * Copyright 2012-2019, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -36,7 +36,7 @@ function doDispatch(form) {
 <?endif;?>
   fields['#cfg'] = "/boot/config/plugins/dynamix/dynamix.cfg";
   fields['#cleanup'] = true;
-  $(form).find('input[name^="display_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
+  $(form).find('input[name^="display_"],select[name^="display_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
   $.post('/webGui/include/Dispatcher.php',fields);
 }
 function prepareDiskSettings(form) {
@@ -130,6 +130,17 @@ Default file system:
 > Defines the default file system type to create when an *unmountable* array device is formatted.
 >
 > The default file system type for a single or multi-device cache is always Btrfs.
+
+Cache encryption passphrase:
+: <select name="display_keyfile" size="1">
+  <?=mk_option($display['keyfile'], "", "No")?>
+  <?=mk_option($display['keyfile'], "1", "Yes")?>
+  </select>
+
+> By default the user is asked to enter the passphrase each time the array is restarted.<br>
+> Caching the passphrase allows for restarting the array without intervention once the passphrase is entered the first time
+>
+> Note: the passphrase is lost after a system reboot or system powerdown and must be re-entered
 
 Shutdown time-out:
 : <input type="text" name="shutdownTimeout" maxlength="10" value="<?=$var['shutdownTimeout']?>" class="narrow">
