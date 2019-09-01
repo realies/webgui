@@ -371,7 +371,7 @@ class DockerUpdate{
 		} else {
 			$manifestURL = sprintf( 'https://registry-1.docker.io/v2/%s/manifests/%s', $strRepo, $strTag );
 		}
-		$this->debug('Manifest URL: ' . $manifestURL);
+		//$this->debug('Manifest URL: ' . $manifestURL);
 
 		/*
 		 * Step 2: Get www-authenticate header from manifest url to generate token url
@@ -379,13 +379,13 @@ class DockerUpdate{
 		$ch = getCurlHandle($manifestURL, 'HEAD');
 		$response = curl_exec( $ch );
 		if (curl_errno($ch) !== 0) {
-			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
+			//$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
 			return null;
 		}
 
 		preg_match('@www-authenticate:\s*Bearer\s*(.*)@i', $response, $matches);
 		if (empty($matches[1])) {
-			$this->debug('Error: Www-Authenticate header is empty or missing');
+			//this->debug('Error: Www-Authenticate header is empty or missing');
 			return null;
 		}
 
@@ -400,7 +400,7 @@ class DockerUpdate{
 			return null;
 		}
 		$url = $args['realm'] . '?service=' . urlencode($args['service']) . '&scope=' . urlencode($args['scope']);
-		$this->debug('Token URL: ' . $url);
+		//$this->debug('Token URL: ' . $url);
 
 		/**
 		 * Step 3: Get token from API and authenticate via username / password if in private registry and auth data was found
@@ -411,12 +411,12 @@ class DockerUpdate{
 		}
 		$response = curl_exec( $ch );
 		if (curl_errno($ch) !== 0) {
-			$this->debug('Error: curl error getting token: ' . curl_error($ch));
+			//$this->debug('Error: curl error getting token: ' . curl_error($ch));
 			return null;
 		}
 		$response = json_decode($response, true);
 		if (!$response || empty($response['token'])) {
-			$this->debug('Error: Token response was empty or missing token');
+			//$this->debug('Error: Token response was empty or missing token');
 			return null;
 		}
 		$token = $response['token'];
@@ -432,16 +432,16 @@ class DockerUpdate{
 
 		$response = curl_exec( $ch );
 		if (curl_errno($ch) !== 0) {
-			$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
+			//$this->debug('Error: curl error getting manifest: ' . curl_error($ch));
 			return null;
 		}
 		preg_match('@Docker-Content-Digest:\s*(.*)@', $response, $matches);
 		if (empty($matches[1])) {
-			$this->debug('Error: Docker-Content-Digest header is empty or missing');
+			//$this->debug('Error: Docker-Content-Digest header is empty or missing');
 			return null;
 		}
 		$digest = trim($matches[1]);
-		$this->debug('Remote Digest: ' . $digest);
+		//$this->debug('Remote Digest: ' . $digest);
 		return $digest;
 	}
 
