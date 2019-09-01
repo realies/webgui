@@ -426,7 +426,7 @@ class DockerUpdate{
 		 */
 		$ch = getCurlHandle($manifestURL, 'HEAD');
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, [
-			'Accept: application/vnd.docker.distribution.manifest.v2+json',
+			'Accept: application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json',
 			'Authorization: Bearer ' . $token
 		]);
 
